@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:13
+    container_name: cajero-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cajero_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - cajero-data:/var/lib/postgresql/data
+
+volumes:
+  cajero-data:
