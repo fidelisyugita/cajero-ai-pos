@@ -28,3 +28,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// ⭐ Add this to set the JAR name explicitly
+tasks.named('bootJar') {
+    archiveFileName = 'cajero-spring.jar'
+}
