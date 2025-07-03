@@ -21,17 +21,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // Lombok generates constructor with required args
 public class MeasureUnitController {
 
-    private final MeasureUnitRepository repository;
+    private final MeasureUnitRepository repo;
+
+    @GetMapping
+    public ResponseEntity<List<MeasureUnit>> getAll() {
+        return ResponseEntity.ok(repo.findAll());
+    }
 
     @PostMapping
     public ResponseEntity<MeasureUnit> create(
             @Valid @RequestBody MeasureUnit measureUnit) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(repository.save(measureUnit));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<MeasureUnit>> getAll() {
-        return ResponseEntity.ok(repository.findAll());
+                .body(repo.save(measureUnit));
     }
 }
