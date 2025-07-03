@@ -37,8 +37,12 @@ public class Product {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    @JoinColumn(name = "category_code", referencedColumnName = "code")
     private ProductCategory category;
+
+    @ManyToOne
+    @JoinColumn(name = "measure_unit_code", referencedColumnName = "code")
+    private MeasureUnit measureUnit;
 
     @Column(nullable = false)
     private String name;
@@ -47,7 +51,6 @@ public class Product {
 
     // Other fields from your table
     private String imageUrl;
-    private String measureUnit;
     @Column(name = "buying_price")
     private BigDecimal buyingPrice;
     @Column(name = "selling_price")

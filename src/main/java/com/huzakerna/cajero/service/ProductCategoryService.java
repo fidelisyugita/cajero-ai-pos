@@ -1,7 +1,5 @@
 package com.huzakerna.cajero.service;
 
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +16,7 @@ public class ProductCategoryService {
         return repo.save(productCategory);
     }
 
-    public ProductCategory getProductCategoryById(UUID id) {
+    public ProductCategory getProductCategoryById(String id) {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product category not found"));
     }

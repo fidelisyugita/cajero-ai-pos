@@ -15,26 +15,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product_categories")
+@Table(name = "measure_units")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductCategory {
+public class MeasureUnit {
 
     @Id
     @Column(name = "code", length = 10)
-    private String code;  // e.g., "food", "drink", "snack"
+    private String code;  // e.g., "KG", "L", "PC"
 
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, length = 50)
+    private String name;  // e.g., "Kilogram", "Liter", "Piece"
+
     private String description;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    // @OneToMany(mappedBy = "category")
-    // private List<Product> products;
 }

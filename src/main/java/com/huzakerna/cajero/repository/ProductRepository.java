@@ -10,5 +10,5 @@ import com.huzakerna.cajero.model.Product;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     // Inherits CRUD methods like save(), findAll(), etc.
 
-    List<Product> findByCategoryId(UUID categoryId);
+    List<Product> findByCategoryCode(String categoryCode);
 }

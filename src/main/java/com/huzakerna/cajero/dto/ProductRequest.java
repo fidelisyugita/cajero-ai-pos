@@ -1,10 +1,10 @@
 package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,15 +33,16 @@ public class ProductRequest {
     @Min(value = 0, message = "Stock cannot be negative")
     private Integer stock;
 
-    @NotNull(message = "Category ID is required")
-    private UUID categoryId;
+    @NotNull(message = "Category Code is required")
+    private String categoryCode;
+
+    @NotBlank
+    @Size(max = 10)
+    private String measureUnitCode;  // Stores the measure unit code
 
     // Optional fields with validation
     @Size(max = 255, message = "Image URL too long")
     private String imageUrl;
-
-    @Size(max = 50, message = "Unit name too long")
-    private String measureUnit;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")
     private BigDecimal buyingPrice;

@@ -34,7 +34,7 @@ CREATE TABLE attendances (
 
 -- Table: product_categories
 CREATE TABLE product_categories (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code VARCHAR(10) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -52,7 +52,7 @@ CREATE TABLE measure_units (
 -- Table: products
 CREATE TABLE products (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  category_id UUID,
+  category_code VARCHAR(10),
   name VARCHAR(100) NOT NULL,
   image_url VARCHAR(255),
   measure_unit_code VARCHAR(10),
@@ -66,8 +66,8 @@ CREATE TABLE products (
   commission_by_percent BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT idx_products_category FOREIGN KEY (category_id) REFERENCES product_categories(id),
-  CONSTRAINT fk_measure_unit FOREIGN KEY (measure_unit_code) REFERENCES measure_unit(code)
+  CONSTRAINT idx_products_category FOREIGN KEY (category_code) REFERENCES product_categories(code),
+  CONSTRAINT fk_measure_unit FOREIGN KEY (measure_unit_code) REFERENCES measure_units(code)
 );
 
 -- Table: variants

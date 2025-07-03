@@ -1,7 +1,6 @@
 package com.huzakerna.cajero.controller;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,7 @@ public class ProductCategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductCategory> getProductCategoryById(@PathVariable UUID id) {
+    public ResponseEntity<ProductCategory> getProductCategoryById(@PathVariable String id) {
         return ResponseEntity.ok(service.getProductCategoryById(id));
     }
 
