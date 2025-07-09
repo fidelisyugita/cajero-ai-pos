@@ -15,20 +15,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "measure_units")
+@Table(name = "payment_methods")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeasureUnit {
+public class PaymentMethod {
 
     @Id
     @Column(name = "code", length = 10)
-    private String code;  // e.g., "KG", "L", "PC"
+    private String code;  // e.g., "qris", "debit", "cash"
 
     @Column(nullable = false, length = 50)
-    private String name;  // e.g., "Kilogram", "Liter", "Piece"
+    private String name;  // e.g., "Qris", "Debit", "Cash"
 
     private String description;
 

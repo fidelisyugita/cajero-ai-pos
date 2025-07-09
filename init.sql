@@ -24,12 +24,12 @@ CREATE TABLE users (
 -- Table: attendances
 CREATE TABLE attendances (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID,
   image_url VARCHAR(255),
   is_in BOOLEAN NOT NULL,
   created_by UUID,
   approved_by UUID,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
 -- Table: product_categories
@@ -37,6 +37,8 @@ CREATE TABLE product_categories (
   code VARCHAR(10) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   description TEXT,
+  created_by UUID,
+  updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -46,7 +48,10 @@ CREATE TABLE measure_units (
   code VARCHAR(10) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_by UUID,
+  updated_by UUID,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
 -- Table: products
@@ -64,6 +69,8 @@ CREATE TABLE products (
   sold_count INTEGER DEFAULT 0,
   commission DECIMAL(10,2) DEFAULT 0,
   commission_by_percent BOOLEAN DEFAULT FALSE,
+  created_by UUID,
+  updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT idx_products_category FOREIGN KEY (category_code) REFERENCES product_categories(code),
@@ -78,7 +85,10 @@ CREATE TABLE variants (
   is_required BOOLEAN DEFAULT FALSE,
   is_multiple BOOLEAN DEFAULT FALSE,
   options JSONB NOT NULL DEFAULT '[]'::JSONB,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_by UUID,
+  updated_by UUID,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
 -- Table: product_variants
@@ -95,7 +105,10 @@ CREATE TABLE transaction_types (
   code VARCHAR(10) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_by UUID,
+  updated_by UUID,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
 -- Table: payment_methods
@@ -103,21 +116,26 @@ CREATE TABLE payment_methods (
   code VARCHAR(10) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_by UUID,
+  updated_by UUID,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
--- Table: transaction_status
-CREATE TABLE transaction_status (
+-- Table: transaction_statuses
+CREATE TABLE transaction_statuses (
   code VARCHAR(10) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_by UUID,
+  updated_by UUID,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
 -- Table: transactions
 CREATE TABLE transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID,
   transaction_type_code VARCHAR(10),
   payment_method_code VARCHAR(10),
   total_tax DECIMAL(10,2) DEFAULT 0,
@@ -125,12 +143,14 @@ CREATE TABLE transactions (
   note TEXT,
   total_price DECIMAL(10,2) NOT NULL,
   status_code VARCHAR(10),
+  created_by UUID,
+  updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT idx_transactions_user FOREIGN KEY (user_id) REFERENCES users(id),
+  CONSTRAINT idx_transactions_user FOREIGN KEY (created_by) REFERENCES users(id),
   FOREIGN KEY (transaction_type_code) REFERENCES transaction_types(code),
   FOREIGN KEY (payment_method_code) REFERENCES payment_methods(code),
-  FOREIGN KEY (status_code) REFERENCES transaction_status(code)
+  FOREIGN KEY (status_code) REFERENCES transaction_statuses(code)
 );
 
 -- Table: transaction_items
@@ -143,8 +163,7 @@ CREATE TABLE transaction_items (
   buying_price DECIMAL(10,2) NOT NULL,
   selling_price DECIMAL(10,2) NOT NULL,
   commission DECIMAL(10,2) DEFAULT 0,
-  commission_by_percent BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  commission_by_percent INTEGER DEFAULT 0,
   CONSTRAINT idx_transaction_items_transaction FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
   CONSTRAINT idx_transaction_items_product FOREIGN KEY (product_id) REFERENCES products(id)
 );
@@ -157,11 +176,12 @@ CREATE TABLE petty_cash (
   image_url VARCHAR(255),
   description TEXT,
   created_by UUID,
+  updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 -- Foreign keys for attendances
-ALTER TABLE attendances ADD CONSTRAINT fk_attendance_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
-ALTER TABLE attendances ADD CONSTRAINT fk_attendance_created_by FOREIGN KEY (created_by) REFERENCES users(id);
+ALTER TABLE attendances ADD CONSTRAINT fk_attendance_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE attendances ADD CONSTRAINT fk_attendance_approved_by FOREIGN KEY (approved_by) REFERENCES users(id);

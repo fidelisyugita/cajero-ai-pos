@@ -1,8 +1,10 @@
 package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import jakarta.persistence.Column;
@@ -36,6 +38,35 @@ public class Product {
     @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
     private UUID id;
 
+    @Column(nullable = false)
+    private String name;
+    private String note;
+    private Integer stock;
+    @Column(name = "reject_count")
+    private Integer rejectCount;
+    @Column(name = "sold_count")
+    private Integer soldCount;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "buying_price")
+    private BigDecimal buyingPrice;
+    @Column(name = "selling_price")
+    private BigDecimal sellingPrice;
+
+    @Column(name = "commission_by_percent")
+    private Integer commissionByPercent;
+    private BigDecimal commission;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @CreationTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @ManyToOne
     @JoinColumn(name = "category_code", referencedColumnName = "code")
     private ProductCategory category;
@@ -43,20 +74,5 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "measure_unit_code", referencedColumnName = "code")
     private MeasureUnit measureUnit;
-
-    @Column(nullable = false)
-    private String name;
-    private String description;
-    private Integer stock;
-
-    // Other fields from your table
-    private String imageUrl;
-    @Column(name = "buying_price")
-    private BigDecimal buyingPrice;
-    @Column(name = "selling_price")
-    private BigDecimal sellingPrice;
-    @Column(name = "commission_by_percent")
-    private Boolean commissionByPercent;
-    private BigDecimal commission;
 
 }

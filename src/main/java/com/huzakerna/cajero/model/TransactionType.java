@@ -15,20 +15,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "measure_units")
+@Table(name = "transaction_types")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeasureUnit {
+public class TransactionType {
 
     @Id
     @Column(name = "code", length = 10)
-    private String code;  // e.g., "KG", "L", "PC"
+    private String code;  // e.g., "dine-in", "takeaway"
 
     @Column(nullable = false, length = 50)
-    private String name;  // e.g., "Kilogram", "Liter", "Piece"
+    private String name;  // e.g., "Dine in", "Takeaway"
 
     private String description;
 

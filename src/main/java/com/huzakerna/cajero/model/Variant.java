@@ -1,11 +1,14 @@
 package com.huzakerna.cajero.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -15,28 +18,33 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "measure_units")
+@Table(name = "variants")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeasureUnit {
+public class Variant {
 
     @Id
-    @Column(name = "code", length = 10)
-    private String code;  // e.g., "KG", "L", "PC"
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
+    private UUID id;
 
     @Column(nullable = false, length = 50)
     private String name;  // e.g., "Kilogram", "Liter", "Piece"
 
     private String description;
+    @Column(name = "is_required")
+    private Boolean isRequired;
+    @Column(name = "is_multiple")
+    private Boolean isMultiple;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    @CreationTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

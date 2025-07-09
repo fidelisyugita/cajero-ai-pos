@@ -35,6 +35,10 @@ public class ProductCategory {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @CreationTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     // @OneToMany(mappedBy = "category")
     // private List<Product> products;
 }
