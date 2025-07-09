@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -21,9 +20,7 @@ import lombok.Setter;
 @Builder
 public class ProductRequest {
 
-    // If @NotBlank is unavailable, use @NotEmpty + @NotNull
-    @NotNull(message = "Product name is required")
-    @NotEmpty(message = "Product name cannot be empty")
+    @NotBlank(message = "Product name cannot be empty")
     private String name;
 
     @Size(max = 500, message = "Note must be less than 500 characters")
@@ -48,10 +45,11 @@ public class ProductRequest {
     private BigDecimal buyingPrice;
 
     @NotNull(message = "Selling price is required")
-    @DecimalMin(value = "0.01", message = "Selling price must be greater than 0")
+    @DecimalMin(value = "0.1", message = "Stock cannot be negative")
     private BigDecimal sellingPrice;
 
-    private Boolean commissionByPercent;
+    @Min(value = 0, message = "Stock cannot be negative")
+    private Integer commissionByPercent;
 
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
     private BigDecimal commission;

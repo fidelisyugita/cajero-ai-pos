@@ -68,7 +68,7 @@ CREATE TABLE products (
   reject_count INTEGER DEFAULT 0,
   sold_count INTEGER DEFAULT 0,
   commission DECIMAL(10,2) DEFAULT 0,
-  commission_by_percent BOOLEAN DEFAULT FALSE,
+  commission_by_percent INTEGER DEFAULT 0,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
