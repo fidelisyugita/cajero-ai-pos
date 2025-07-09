@@ -35,7 +35,7 @@ public class ProductService {
         return repo.save(
                 Product.builder()
                         .name(product.getName())
-                        .description(product.getDescription())
+                        .note(product.getNote())
                         .buyingPrice(product.getBuyingPrice())
                         .sellingPrice(product.getSellingPrice())
                         .stock(product.getStock())

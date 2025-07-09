@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.0'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'io.freefair.lombok' version '8.4' // Lombok plugin
 }
 
 group = 'com.huzakerna'
@@ -18,15 +19,22 @@ repositories {
 }
 
 dependencies {
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// For Spring Boot 3.x + Lombok
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.hibernate:hibernate-core:6.0.2.Final' // For UUID generation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 	runtimeOnly 'org.postgresql:postgresql'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -35,7 +43,7 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-// ⭐ Add this to set the JAR name explicitly
-tasks.named('bootJar') {
-    archiveFileName = 'cajero-spring.jar'
-}
+// // ⭐ Add this to set the JAR name explicitly
+// tasks.named('bootJar') {
+//     archiveFileName = 'cajero-spring.jar'
+// }

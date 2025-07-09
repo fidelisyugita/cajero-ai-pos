@@ -29,7 +29,7 @@ CREATE TABLE attendances (
   created_by UUID,
   approved_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: product_categories
@@ -51,7 +51,7 @@ CREATE TABLE measure_units (
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: products
@@ -88,7 +88,7 @@ CREATE TABLE variants (
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: product_variants
@@ -108,7 +108,7 @@ CREATE TABLE transaction_types (
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: payment_methods
@@ -119,7 +119,7 @@ CREATE TABLE payment_methods (
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: transaction_statuses
@@ -130,7 +130,7 @@ CREATE TABLE transaction_statuses (
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: transactions

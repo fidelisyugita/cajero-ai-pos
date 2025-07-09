@@ -26,8 +26,8 @@ public class ProductRequest {
     @NotEmpty(message = "Product name cannot be empty")
     private String name;
 
-    @Size(max = 500, message = "Description must be less than 500 characters")
-    private String description;
+    @Size(max = 500, message = "Note must be less than 500 characters")
+    private String note;
 
     @NotNull(message = "Stock is required")
     @Min(value = 0, message = "Stock cannot be negative")

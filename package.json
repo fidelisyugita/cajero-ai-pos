@@ -1,0 +1,17 @@
+{
+  "name": "cajero-ai-pos",
+  "private": true,
+  "scripts": {
+    "start:dev": "concurrently \"cd backend && ./gradlew bootRun\" \"cd frontend && npm run dev\"",
+    "build:all": "npm-run-all build:backend build:frontend",
+    "build:backend": "cd backend && ./gradlew build",
+    "build:frontend": "cd frontend && npm run build",
+    "test:all": "npm-run-all test:backend test:frontend",
+    "docker:clean": "./clean-start.sh",
+    "clean:backend": "cd backend && rm -rf ~/.gradle/caches/"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1",
+    "npm-run-all": "^4.1.5"
+  }
+}

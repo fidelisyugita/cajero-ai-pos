@@ -1,37 +1,58 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
+# Global ignores
+.DS_Store
+*.swp
+*.swo
+*.log
+*.bak
+*.tmp
+*~
+.idea/
 .vscode/
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+node_modules/
+dist/
+build/
+out/
+*.min.js
+
+# Backend (Spring Boot)
+backend/.gradle/
+backend/build/
+backend/bin/
+backend/.settings/
+backend/.project
+backend/.classpath
+backend/*.iml
+backend/*.ipr
+backend/*.iws
+
+# Frontend
+frontend/.next/
+frontend/coverage/
+frontend/.cache/
+
+# AI Service
+ai-api/fastapi/__pycache__/
+ai-api/fastapi/.venv/
+ai-api/fastapi/*.pyc
+ai-api/fastapi/.pytest_cache/
+ai-api/nodejs/node_modules/
+
+# Database
+*.db
+*.sqlite
+/dbdata/
+
+# Docker
+docker-compose.override.yml
+*.dockerignore
+*.tar.gz
+
+# System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
