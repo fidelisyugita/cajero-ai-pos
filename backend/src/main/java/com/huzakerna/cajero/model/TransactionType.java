@@ -3,7 +3,7 @@ package com.huzakerna.cajero.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
-
+import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -25,10 +25,10 @@ public class TransactionType {
 
     @Id
     @Column(name = "code", length = 10)
-    private String code;  // e.g., "dine-in", "takeaway"
+    private String code; // e.g., "dine-in", "takeaway"
 
     @Column(nullable = false, length = 50)
-    private String name;  // e.g., "Dine in", "Takeaway"
+    private String name; // e.g., "Dine in", "Takeaway"
 
     private String description;
 
@@ -36,7 +36,7 @@ public class TransactionType {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }

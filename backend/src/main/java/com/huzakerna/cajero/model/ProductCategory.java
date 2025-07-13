@@ -3,7 +3,7 @@ package com.huzakerna.cajero.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
-
+import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -25,7 +25,7 @@ public class ProductCategory {
 
     @Id
     @Column(name = "code", length = 10)
-    private String code;  // e.g., "food", "drink", "snack"
+    private String code; // e.g., "food", "drink", "snack"
 
     @Column(nullable = false)
     private String name;
@@ -35,7 +35,7 @@ public class ProductCategory {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-
+import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,14 +29,13 @@ public class Variant {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
     private UUID id;
 
     @Column(nullable = false, length = 50)
-    private String name;  // e.g., "Kilogram", "Liter", "Piece"
+    private String name; // e.g., "Kilogram", "Liter", "Piece"
 
     private String description;
     @Column(name = "is_required")
@@ -47,4 +46,8 @@ public class Variant {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
