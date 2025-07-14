@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -14,6 +15,12 @@ public class UserRequest {
     @Size(max = 100)
     private String name;
 
+    @NotNull(message = "Store Id is required")
+    private UUID storeId;
+
+    @NotNull(message = "Role Code is required")
+    private String roleCode;
+
     @NotBlank
     @Email
     @Size(max = 100)
@@ -21,10 +28,6 @@ public class UserRequest {
 
     @Size(max = 20)
     private String phone;
-
-    @NotBlank
-    @Size(max = 50)
-    private String role;
 
     @NotBlank
     private String password; // Will be hashed

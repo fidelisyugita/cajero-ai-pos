@@ -15,7 +15,6 @@ import com.huzakerna.cajero.dto.ProductRequest;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.service.ProductService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

@@ -1,14 +1,19 @@
 package com.huzakerna.cajero.model;
 
-import jakarta.persistence.*;
-import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -17,15 +22,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends BaseEntity {
 
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
-    private UUID id;
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
+
+    @ManyToOne
+    @JoinColumn(name = "role_code")
+    private Role role;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -35,9 +40,6 @@ public class User {
 
     @Column(length = 20)
     private String phone;
-
-    @Column(nullable = false, length = 50)
-    private String role;
 
     @Column(name = "image_url", length = 255)
     private String imageUrl;

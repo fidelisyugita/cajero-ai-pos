@@ -1,38 +1,14 @@
 
--- Enable UUID support
+-- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Table: stores
-CREATE TABLE stores (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  phone VARCHAR(20),
-  image_url VARCHAR(255),
-  description TEXT,
-  location JSONB,
-  bank_account VARCHAR(50),
-  bank_no VARCHAR(50),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP
-);
-
--- Table: roles
-CREATE TABLE roles (
-  code VARCHAR(20) PRIMARY KEY,
-  name VARCHAR(50) NOT NULL,
-  description TEXT
-);
 
 -- Table: users
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  store_id UUID,
   name VARCHAR(100) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   phone VARCHAR(20),
-  role_code VARCHAR(20),
+  role VARCHAR(50) NOT NULL,
   image_url VARCHAR(255),
   address TEXT,
   description TEXT,
@@ -42,60 +18,45 @@ CREATE TABLE users (
   overtime_rate DECIMAL(10,2),
   password_hash VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id),
-  FOREIGN KEY (role_code) REFERENCES roles(code)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: attendances
 CREATE TABLE attendances (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  store_id UUID,
   image_url VARCHAR(255),
   is_in BOOLEAN NOT NULL,
   created_by UUID,
   approved_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (created_by) REFERENCES users(id),
-  FOREIGN KEY (approved_by) REFERENCES users(id),
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: product_categories
 CREATE TABLE product_categories (
   code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
   name VARCHAR(100) NOT NULL,
   description TEXT,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: measure_units
 CREATE TABLE measure_units (
   code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
   name VARCHAR(50) NOT NULL,
   description TEXT,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: products
 CREATE TABLE products (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  store_id UUID,
   category_code VARCHAR(10),
   name VARCHAR(100) NOT NULL,
   image_url VARCHAR(255),
@@ -107,21 +68,18 @@ CREATE TABLE products (
   reject_count INTEGER DEFAULT 0,
   sold_count INTEGER DEFAULT 0,
   commission DECIMAL(10,2) DEFAULT 0,
-  commission_by_percent BOOLEAN DEFAULT FALSE,
+  commission_by_percent INTEGER DEFAULT 0,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id),
-  FOREIGN KEY (category_code) REFERENCES product_categories(code),
-  FOREIGN KEY (measure_unit_code) REFERENCES measure_units(code)
+  CONSTRAINT idx_products_category FOREIGN KEY (category_code) REFERENCES product_categories(code),
+  CONSTRAINT fk_measure_unit FOREIGN KEY (measure_unit_code) REFERENCES measure_units(code)
 );
 
 -- Table: variants
 CREATE TABLE variants (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  store_id UUID,
   name VARCHAR(100) NOT NULL,
   description TEXT,
   is_required BOOLEAN DEFAULT FALSE,
@@ -130,9 +88,7 @@ CREATE TABLE variants (
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: product_variants
@@ -147,66 +103,54 @@ CREATE TABLE product_variants (
 -- Table: transaction_types
 CREATE TABLE transaction_types (
   code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
   name VARCHAR(50) NOT NULL,
   description TEXT,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: payment_methods
 CREATE TABLE payment_methods (
   code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
   name VARCHAR(50) NOT NULL,
   description TEXT,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: transaction_statuses
 CREATE TABLE transaction_statuses (
   code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
   name VARCHAR(50) NOT NULL,
   description TEXT,
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: transactions
 CREATE TABLE transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  store_id UUID,
-  total_tax DECIMAL(10,2) DEFAULT 0,
-  total_discount DECIMAL(10,2) DEFAULT 0,
-  description TEXT,
-  total_price DECIMAL(10,2) NOT NULL,
-  status_code VARCHAR(10),
   transaction_type_code VARCHAR(10),
   payment_method_code VARCHAR(10),
+  total_tax DECIMAL(10,2) DEFAULT 0,
+  total_discount DECIMAL(10,2) DEFAULT 0,
+  note TEXT,
+  total_price DECIMAL(10,2) NOT NULL,
+  status_code VARCHAR(10),
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id),
-  FOREIGN KEY (status_code) REFERENCES transaction_statuses(code),
+  CONSTRAINT idx_transactions_user FOREIGN KEY (created_by) REFERENCES users(id),
   FOREIGN KEY (transaction_type_code) REFERENCES transaction_types(code),
   FOREIGN KEY (payment_method_code) REFERENCES payment_methods(code),
-  FOREIGN KEY (created_by) REFERENCES users(id)
+  FOREIGN KEY (status_code) REFERENCES transaction_statuses(code)
 );
 
 -- Table: transaction_items
@@ -215,20 +159,18 @@ CREATE TABLE transaction_items (
   transaction_id UUID,
   product_id UUID,
   selected_variants JSONB,
-  note TEXT,
   quantity INTEGER NOT NULL DEFAULT 1,
   buying_price DECIMAL(10,2) NOT NULL,
   selling_price DECIMAL(10,2) NOT NULL,
   commission DECIMAL(10,2) DEFAULT 0,
-  commission_by_percent BOOLEAN DEFAULT FALSE,
-  FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
-  FOREIGN KEY (product_id) REFERENCES products(id)
+  commission_by_percent INTEGER DEFAULT 0,
+  CONSTRAINT idx_transaction_items_transaction FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+  CONSTRAINT idx_transaction_items_product FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 -- Table: petty_cash
 CREATE TABLE petty_cash (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  store_id UUID,
   amount DECIMAL(10,2) NOT NULL,
   is_income BOOLEAN NOT NULL,
   image_url VARCHAR(255),
@@ -237,15 +179,9 @@ CREATE TABLE petty_cash (
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id),
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
--- Recommended indexes
-CREATE INDEX idx_created_by ON products(created_by);
-CREATE INDEX idx_updated_by ON products(updated_by);
-CREATE INDEX idx_created_by_transactions ON transactions(created_by);
-CREATE INDEX idx_updated_by_transactions ON transactions(updated_by);
-CREATE INDEX idx_created_by_variants ON variants(created_by);
-CREATE INDEX idx_updated_by_variants ON variants(updated_by);
+-- Foreign keys for attendances
+ALTER TABLE attendances ADD CONSTRAINT fk_attendance_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE attendances ADD CONSTRAINT fk_attendance_approved_by FOREIGN KEY (approved_by) REFERENCES users(id);

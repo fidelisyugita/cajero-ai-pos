@@ -12,7 +12,8 @@ public class UserResponse {
     private String name;
     private String email;
     private String phone;
-    private String role;
+    private UUID storeId;
+    private String roleCode;
     private String imageUrl;
     private LocalDateTime createdAt;
     // Exclude sensitive fields like passwordHash

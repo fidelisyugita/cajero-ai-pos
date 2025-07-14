@@ -8,8 +8,13 @@ import com.huzakerna.cajero.dto.UserRequest;
 import com.huzakerna.cajero.dto.UserResponse;
 import com.huzakerna.cajero.exception.DuplicateEmailException;
 import com.huzakerna.cajero.exception.UserNotFoundException;
+import com.huzakerna.cajero.model.Role;
+import com.huzakerna.cajero.model.Store;
 import com.huzakerna.cajero.model.User;
+import com.huzakerna.cajero.repository.RoleRepository;
+import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,20 +22,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
 
-        private final UserRepository userRepository;
+        private final UserRepository repo;
+        private final StoreRepository sRepo;
+        private final RoleRepository rRepo;
         private final PasswordEncoder passwordEncoder; // Autowired via constructor
 
         @Transactional
         public UserResponse createUser(UserRequest request) {
-                if (userRepository.existsByEmail(request.getEmail())) {
+                if (repo.existsByEmail(request.getEmail())) {
                         throw new DuplicateEmailException(request.getEmail());
                 }
+
+                Store store = sRepo.findById(request.getStoreId())
+                        .orElseThrow(
+                                () -> new EntityNotFoundException("Store not found"));
+
+                Role role = rRepo.findById(request.getRoleCode())
+                        .orElseThrow(
+                                () -> new EntityNotFoundException("Role not found"));
+
 
                 User user = User.builder()
                         .name(request.getName())
                         .email(request.getEmail())
                         .phone(request.getPhone())
-                        .role(request.getRole())
+                        .store(store)
+                        .role(role)
                         .passwordHash(passwordEncoder.encode(request.getPassword()))
                         .imageUrl(request.getImageUrl())
                         .address(request.getAddress())
@@ -41,18 +58,18 @@ public class UserService {
                         .overtimeRate(request.getOvertimeRate())
                         .build();
 
-                User savedUser = userRepository.save(user);
+                User savedUser = repo.save(user);
                 return mapToResponse(savedUser);
         }
 
         public UserResponse getUserById(UUID id) {
-                User user = userRepository.findById(id)
+                User user = repo.findById(id)
                         .orElseThrow(() -> new UserNotFoundException(id));
                 return mapToResponse(user);
         }
 
         public List<UserResponse> getAllUsers() {
-                return userRepository.findAll().stream()
+                return repo.findAll().stream()
                         .map(this::mapToResponse)
                         .toList();
         }
@@ -63,7 +80,8 @@ public class UserService {
                         .name(user.getName())
                         .email(user.getEmail())
                         .phone(user.getPhone())
-                        .role(user.getRole())
+                        .storeId(user.getStore().getId())
+                        .roleCode(user.getRole().getCode())
                         .imageUrl(user.getImageUrl())
                         .createdAt(user.getCreatedAt())
                         .build();

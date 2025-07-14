@@ -1,7 +1,7 @@
 package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
-
+import java.util.UUID;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,8 +23,11 @@ public class ProductRequest {
     @NotBlank(message = "Product name cannot be empty")
     private String name;
 
-    @Size(max = 500, message = "Note must be less than 500 characters")
-    private String note;
+    @NotNull(message = "Store Id is required")
+    private UUID storeId;
+
+    @Size(max = 500, message = "Description must be less than 500 characters")
+    private String description;
 
     @NotNull(message = "Stock is required")
     @Min(value = 0, message = "Stock cannot be negative")
@@ -35,7 +38,7 @@ public class ProductRequest {
 
     @NotBlank
     @Size(max = 10)
-    private String measureUnitCode;  // Stores the measure unit code
+    private String measureUnitCode; // Stores the measure unit code
 
     // Optional fields with validation
     @Size(max = 255, message = "Image URL too long")

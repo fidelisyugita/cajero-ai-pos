@@ -2,15 +2,11 @@ package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -27,19 +23,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
-
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
-    private UUID id;
+public class Product extends BaseEntity {
 
     @Column(nullable = false)
     private String name;
-    private String note;
+
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
+
+    private String description;
     private Integer stock;
     @Column(name = "reject_count")
     private Integer rejectCount;
@@ -55,7 +48,7 @@ public class Product {
     private BigDecimal sellingPrice;
 
     @Column(name = "commission_by_percent")
-    private Integer commissionByPercent;
+    private boolean commissionByPercent;
     private BigDecimal commission;
 
     @CreationTimestamp
