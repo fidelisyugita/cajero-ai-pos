@@ -11,7 +11,7 @@ import com.huzakerna.cajero.repository.TransactionStatusRepository;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/payment-method")
+@RequestMapping("/api/transaction-status")
 @RequiredArgsConstructor // Lombok generates constructor with required args
 public class TransactionStatusController {
 

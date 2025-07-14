@@ -11,25 +11,25 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse createUser(@Valid @RequestBody UserRequest request) {
-        return userService.createUser(request);
+    @GetMapping
+    public List<UserResponse> getAll() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public UserResponse getUser(@PathVariable UUID id) {
+    public UserResponse getById(@PathVariable UUID id) {
         return userService.getUserById(id);
     }
 
-    @GetMapping
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse add(@Valid @RequestBody UserRequest request) {
+        return userService.addUser(request);
     }
 }

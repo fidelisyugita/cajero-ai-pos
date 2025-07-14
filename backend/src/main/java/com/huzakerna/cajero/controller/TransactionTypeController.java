@@ -11,7 +11,7 @@ import com.huzakerna.cajero.repository.TransactionTypeRepository;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/payment-method")
+@RequestMapping("/api/transaction-type")
 @RequiredArgsConstructor // Lombok generates constructor with required args
 public class TransactionTypeController {
 

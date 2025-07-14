@@ -28,12 +28,12 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Role>> getRoleById(@PathVariable String id) {
+    public ResponseEntity<Optional<Role>> getById(@PathVariable String id) {
         return ResponseEntity.ok(repo.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Role> create(
+    public ResponseEntity<Role> add(
         @Valid @RequestBody Role role) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(repo.save(role));

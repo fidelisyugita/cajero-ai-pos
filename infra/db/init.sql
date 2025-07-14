@@ -148,21 +148,21 @@ CREATE TABLE product_variants (
 CREATE TABLE transaction_types (
   code VARCHAR(20) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
-  description TEXT,
+  description TEXT
 );
 
 -- Table: payment_methods
 CREATE TABLE payment_methods (
   code VARCHAR(20) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
-  description TEXT,
+  description TEXT
 );
 
 -- Table: transaction_statuses
 CREATE TABLE transaction_statuses (
   code VARCHAR(20) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
-  description TEXT,
+  description TEXT
 );
 
 -- Table: transactions

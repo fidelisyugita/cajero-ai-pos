@@ -27,17 +27,22 @@ public class ProductController {
     private final ProductService service; // Must be final for Lombok
 
     @GetMapping
-    public List<Product> getAllProducts() {
+    public List<Product> getAll() {
         return repo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
+    public ResponseEntity<Product> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getProductById(id));
     }
 
+    @GetMapping("/store/{id}")
+    public ResponseEntity<List<Product>> getAllByStoreId(@PathVariable UUID id) {
+        return ResponseEntity.ok(repo.findByStoreId(id));
+    }
+
     @PostMapping
-    public Product addProduct(@Valid @RequestBody ProductRequest product) {
+    public Product add(@Valid @RequestBody ProductRequest product) {
         return service.addProduct(product);
     }
 }

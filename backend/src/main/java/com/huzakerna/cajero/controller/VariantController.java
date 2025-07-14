@@ -10,37 +10,37 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.huzakerna.cajero.model.ProductCategory;
-import com.huzakerna.cajero.repository.ProductCategoryRepository;
-import com.huzakerna.cajero.service.ProductCategoryService;
+import com.huzakerna.cajero.model.Variant;
+import com.huzakerna.cajero.repository.VariantRepository;
+import com.huzakerna.cajero.service.VariantService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/product-category")
+@RequestMapping("/api/variant")
 @RequiredArgsConstructor // Lombok generates constructor with required args
-public class ProductCategoryController {
+public class VariantController {
 
-    private ProductCategoryRepository repo;
-    private ProductCategoryService service;
+    private final VariantRepository repo;
+    private final VariantService service;
 
     @GetMapping
-    public List<ProductCategory> getAll() {
-        return repo.findAll();
+    public ResponseEntity<List<Variant>> getAll() {
+        return ResponseEntity.ok(repo.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<ProductCategory>> getById(
-        @PathVariable String id) {
+    public ResponseEntity<Optional<Variant>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findById(id));
     }
 
     @GetMapping("/store/{id}")
-    public ResponseEntity<List<ProductCategory>> getAllByStoreId(@PathVariable UUID id) {
+    public ResponseEntity<List<Variant>> getAllByStoreId(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findByStoreId(id));
     }
 
     @PostMapping
-    public ProductCategory add(@RequestBody ProductCategory productCategory) {
-        return service.addProductCategory(productCategory);
+    public Variant add(@Valid @RequestBody Variant variant) {
+        return service.addVariant(variant);
     }
 }

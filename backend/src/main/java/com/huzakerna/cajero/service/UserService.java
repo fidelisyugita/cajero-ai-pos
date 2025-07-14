@@ -28,7 +28,7 @@ public class UserService {
         private final PasswordEncoder passwordEncoder; // Autowired via constructor
 
         @Transactional
-        public UserResponse createUser(UserRequest request) {
+        public UserResponse addUser(UserRequest request) {
                 if (repo.existsByEmail(request.getEmail())) {
                         throw new DuplicateEmailException(request.getEmail());
                 }
