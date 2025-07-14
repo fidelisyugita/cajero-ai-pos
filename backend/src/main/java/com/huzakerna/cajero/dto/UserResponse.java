@@ -16,5 +16,6 @@ public class UserResponse {
     private String roleCode;
     private String imageUrl;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     // Exclude sensitive fields like passwordHash
 }

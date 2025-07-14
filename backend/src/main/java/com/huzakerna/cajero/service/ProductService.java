@@ -26,9 +26,6 @@ public class ProductService {
         private final MeasureUnitRepository muRepo;
 
         public Product addProduct(ProductRequest request) {
-                // return repo.save(request);
-
-
                 Store store = sRepo.findById(request.getStoreId())
                         .orElseThrow(
                                 () -> new EntityNotFoundException("Store not found"));

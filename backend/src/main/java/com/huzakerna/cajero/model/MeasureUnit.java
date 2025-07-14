@@ -38,6 +38,11 @@ public class MeasureUnit {
 
     private String description;
 
+    @Column(name = "created_By")
+    private UUID createdBy;
+    @Column(name = "updated_By")
+    private UUID updatedBy;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -45,4 +50,7 @@ public class MeasureUnit {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

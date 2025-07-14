@@ -2,11 +2,12 @@ package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -25,12 +26,20 @@ import lombok.Setter;
 @Builder
 public class Product extends BaseEntity {
 
-    @Column(nullable = false)
-    private String name;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private Store store;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_code", referencedColumnName = "code")
+    private ProductCategory category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "measure_unit_code", referencedColumnName = "code")
+    private MeasureUnit measureUnit;
+
+    @Column(nullable = false)
+    private String name;
 
     private String description;
     private Integer stock;
@@ -51,6 +60,11 @@ public class Product extends BaseEntity {
     private boolean commissionByPercent;
     private BigDecimal commission;
 
+    @Column(name = "created_By")
+    private UUID createdBy;
+    @Column(name = "updated_By")
+    private UUID updatedBy;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -59,12 +73,6 @@ public class Product extends BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "category_code", referencedColumnName = "code")
-    private ProductCategory category;
-
-    @ManyToOne
-    @JoinColumn(name = "measure_unit_code", referencedColumnName = "code")
-    private MeasureUnit measureUnit;
-
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

@@ -1,5 +1,6 @@
 package com.huzakerna.cajero.model;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Cacheable
 @Table(name = "roles")
 @Getter
 @Setter

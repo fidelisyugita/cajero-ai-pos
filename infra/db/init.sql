@@ -146,44 +146,23 @@ CREATE TABLE product_variants (
 
 -- Table: transaction_types
 CREATE TABLE transaction_types (
-  code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
+  code VARCHAR(20) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_by UUID,
-  updated_by UUID,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
 );
 
 -- Table: payment_methods
 CREATE TABLE payment_methods (
-  code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
+  code VARCHAR(20) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_by UUID,
-  updated_by UUID,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
 );
 
 -- Table: transaction_statuses
 CREATE TABLE transaction_statuses (
-  code VARCHAR(10) PRIMARY KEY,
-  store_id UUID,
+  code VARCHAR(20) PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   description TEXT,
-  created_by UUID,
-  updated_by UUID,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP,
-  FOREIGN KEY (store_id) REFERENCES stores(id)
 );
 
 -- Table: transactions
@@ -194,9 +173,9 @@ CREATE TABLE transactions (
   total_discount DECIMAL(10,2) DEFAULT 0,
   description TEXT,
   total_price DECIMAL(10,2) NOT NULL,
-  status_code VARCHAR(10),
-  transaction_type_code VARCHAR(10),
-  payment_method_code VARCHAR(10),
+  status_code VARCHAR(20),
+  transaction_type_code VARCHAR(20),
+  payment_method_code VARCHAR(20),
   created_by UUID,
   updated_by UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

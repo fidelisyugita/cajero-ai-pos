@@ -84,6 +84,7 @@ public class UserService {
                         .roleCode(user.getRole().getCode())
                         .imageUrl(user.getImageUrl())
                         .createdAt(user.getCreatedAt())
+                        .updatedAt(user.getUpdatedAt())
                         .build();
         }
 }
