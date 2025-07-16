@@ -228,3 +228,5 @@ CREATE INDEX idx_created_by_transactions ON transactions(created_by);
 CREATE INDEX idx_updated_by_transactions ON transactions(updated_by);
 CREATE INDEX idx_created_by_variants ON variants(created_by);
 CREATE INDEX idx_updated_by_variants ON variants(updated_by);
+CREATE INDEX idx_product_variants_product ON product_variants(product_id);
+CREATE INDEX idx_product_variants_variant ON product_variants(variant_id);

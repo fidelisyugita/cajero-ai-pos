@@ -4,7 +4,7 @@
   "scripts": {
     "start:dev": "concurrently \"cd backend && ./gradlew bootRun\" \"cd frontend && npm run dev\"",
     "build:all": "npm-run-all build:backend build:frontend",
-    "build:backend": "cd backend && ./gradlew build",
+    "build:backend": "cd backend && ./gradlew build -x test",
     "build:frontend": "cd frontend && npm run build",
     "test:all": "npm-run-all test:backend test:frontend",
     "docker:clean": "./clean-start.sh",

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${DATASOURCE_URL}
   jpa:
     hibernate:
       ddl-auto: update

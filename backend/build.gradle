@@ -52,6 +52,6 @@ tasks.named('test') {
 }
 
 // // ⭐ Add this to set the JAR name explicitly
-// tasks.named('bootJar') {
-//     archiveFileName = 'cajero-spring.jar'
-// }
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar'
+}
