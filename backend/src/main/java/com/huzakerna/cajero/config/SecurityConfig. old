@@ -1,32 +1,26 @@
 package com.huzakerna.cajero.config;
 
-import java.util.Collection;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.huzakerna.cajero.filter.JwtAuthFilter;
-import com.huzakerna.cajero.repository.UserRepository;
+import com.huzakerna.cajero.filter.JwtAuthenticationFilter;
+import com.huzakerna.cajero.filter.JwtAuthorizationFilter;
 import com.huzakerna.cajero.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +28,10 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-  private final UserDetailsServiceImpl userDetailsService;
+
+  private UserDetailsServiceImpl userDetailsService;
+  private JwtUtils jwtUtils;
+  private final AuthenticationConfiguration authenticationConfiguration;
 
   @Bean
   @Order(1) // Higher priority for Swagger security
@@ -56,8 +53,7 @@ public class SecurityConfig {
 
   @Bean
   @Order(2) // Lower priority for JWT security
-  public SecurityFilterChain apiFilterChain(HttpSecurity http,
-    JwtAuthFilter jwtAuthFilter) throws Exception {
+  public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
     http
       .cors(Customizer.withDefaults())
       .csrf(AbstractHttpConfigurer::disable)
@@ -66,10 +62,10 @@ public class SecurityConfig {
         .requestMatchers("/api/auth/signin").permitAll()
         .requestMatchers("/api/user/**").hasRole("OWNER")
         .anyRequest().authenticated())
-      .userDetailsService(userDetailsService) // Use your service
       .sessionManagement(session -> session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+      .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+      .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
@@ -84,41 +80,17 @@ public class SecurityConfig {
     return new InMemoryUserDetailsManager(user);
   }
 
-  // @Bean
-  // public UserDetailsService userDetailsService(UserRepository userRepository) {
-  // return email -> userRepository.findByEmail(email)
-  // .map(user -> new UserDetails() {
-  // @Override
-  // public Collection<? extends GrantedAuthority> getAuthorities() {
-  // return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRoleCode()));
-  // }
+  @Bean
+  public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtils);
+    filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
+    return filter;
+  }
 
-  // @Override
-  // public String getPassword() {
-  // return user.getPasswordHash(); // Must match DB column name
-  // }
-
-  // @Override
-  // public String getUsername() {
-  // return user.getEmail();
-  // }
-  // // ... other methods return true
-  // })
-  // .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-  // }
-
-  // @Bean
-  // public AuthenticationManager authenticationManager(
-  // HttpSecurity http,
-  // PasswordEncoder encoder,
-  // UserDetailsService userDetailsService) throws Exception {
-
-  // return http.getSharedObject(AuthenticationManagerBuilder.class)
-  // .userDetailsService(userDetailsService)
-  // .passwordEncoder(encoder)
-  // .and()
-  // .build();
-  // }
+  @Bean
+  public JwtAuthorizationFilter jwtAuthorizationFilter() {
+    return new JwtAuthorizationFilter(jwtUtils, userDetailsService);
+  }
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
@@ -130,4 +102,5 @@ public class SecurityConfig {
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
+
 }

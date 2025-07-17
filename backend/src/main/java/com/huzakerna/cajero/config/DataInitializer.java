@@ -40,8 +40,8 @@ public class DataInitializer implements CommandLineRunner {
 
       List<Role> roles = List.of(
         Role.builder().code("OWNER").name("Store Owner").build(),
-        Role.builder().code("ADMIN").name("Administrator").build(),
         Role.builder().code("MANAGER").name("Store Manager").build(),
+        Role.builder().code("ADMIN").name("Administrator").build(),
         Role.builder().code("CASHIER").name("Cashier").build(),
         Role.builder().code("STAFF").name("Staff").build());
       rRepo.saveAll(roles);

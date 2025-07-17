@@ -8,7 +8,7 @@
     "build:frontend": "cd frontend && npm run build",
     "test:all": "npm-run-all test:backend test:frontend",
     "docker:clean": "./clean-start.sh",
-    "clean:backend": "cd backend && rm -rf ~/.gradle/caches/"
+    "clean:backend": "cd backend && rm -rf ~/.gradle/caches/ && ./gradlew clean"
   },
   "devDependencies": {
     "concurrently": "^8.0.1",

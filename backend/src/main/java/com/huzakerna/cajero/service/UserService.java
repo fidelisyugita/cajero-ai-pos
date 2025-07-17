@@ -8,13 +8,9 @@ import com.huzakerna.cajero.dto.UserRequest;
 import com.huzakerna.cajero.dto.UserResponse;
 import com.huzakerna.cajero.exception.DuplicateEmailException;
 import com.huzakerna.cajero.exception.UserNotFoundException;
-import com.huzakerna.cajero.model.Role;
-import com.huzakerna.cajero.model.Store;
 import com.huzakerna.cajero.model.User;
-import com.huzakerna.cajero.repository.RoleRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,8 +20,7 @@ public class UserService {
 
         private final UserRepository repo;
         private final StoreRepository sRepo;
-        private final RoleRepository rRepo;
-        private final PasswordEncoder passwordEncoder; // Autowired via constructor
+        private final PasswordEncoder encoder; // Autowired via constructor
 
         @Transactional
         public UserResponse addUser(UserRequest request) {
@@ -33,22 +28,18 @@ public class UserService {
                         throw new DuplicateEmailException(request.getEmail());
                 }
 
-                Store store = sRepo.findById(request.getStoreId())
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Store not found"));
-
-                Role role = rRepo.findById(request.getRoleCode())
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Role not found"));
-
+                // Validate store exists
+                if (!sRepo.existsById(request.getStoreId())) {
+                        throw new IllegalArgumentException("Store not found");
+                }
 
                 User user = User.builder()
                         .name(request.getName())
                         .email(request.getEmail())
                         .phone(request.getPhone())
-                        .store(store)
-                        .role(role)
-                        .passwordHash(passwordEncoder.encode(request.getPassword()))
+                        .storeId(request.getStoreId())
+                        .roleCode(request.getRoleCode())
+                        .passwordHash(encoder.encode(request.getPassword()))
                         .imageUrl(request.getImageUrl())
                         .address(request.getAddress())
                         .description(request.getDescription())
@@ -80,8 +71,8 @@ public class UserService {
                         .name(user.getName())
                         .email(user.getEmail())
                         .phone(user.getPhone())
-                        .storeId(user.getStore().getId())
-                        .roleCode(user.getRole().getCode())
+                        .storeId(user.getStoreId())
+                        .roleCode(user.getRoleCode())
                         .imageUrl(user.getImageUrl())
                         .createdAt(user.getCreatedAt())
                         .updatedAt(user.getUpdatedAt())

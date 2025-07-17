@@ -1,6 +1,6 @@
 # Stage 1: Build the JAR
-FROM eclipse-temurin:17-jdk-jammy as builder
-# FROM gradle:8.4-jdk17 AS builder
+# FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM gradle:8.4-jdk17 AS builder
 WORKDIR /app
 COPY . .
 RUN ./gradlew build -x test  # Skip tests during Docker build
