@@ -64,25 +64,10 @@ public class AuthController {
     }
   }
 
-  @GetMapping("/verify-pass")
-  public ResponseEntity<?> verifyPassword(
-    @RequestParam String email,
-    @RequestParam String rawPassword) {
+  // @PostMapping("/signup")
+  // public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest) {
+  // userService.addUser(userRequest);
 
-    User user = userRepo.findByEmail(email)
-      .orElseThrow(() -> new RuntimeException("User not found"));
-
-    boolean matches = encoder.matches(rawPassword, user.getPasswordHash());
-
-    return ResponseEntity.ok(Map.of(
-      "storedHash", user.getPasswordHash(),
-      "inputMatches", matches));
-  }
-
-  @PostMapping("/signup")
-  public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest) {
-    userService.addUser(userRequest);
-
-    return ResponseEntity.ok("User registered successfully!");
-  }
+  // return ResponseEntity.ok("User registered successfully!");
+  // }
 }
