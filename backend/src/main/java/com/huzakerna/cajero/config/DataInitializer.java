@@ -1,32 +1,42 @@
 package com.huzakerna.cajero.config;
 
 import java.util.List;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import com.huzakerna.cajero.dto.UserRequest;
 import com.huzakerna.cajero.model.Role;
 import com.huzakerna.cajero.model.Store;
 import com.huzakerna.cajero.repository.RoleRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+import com.huzakerna.cajero.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-  private final StoreRepository storeRepository;
-  private final RoleRepository roleRepository;
+  private final StoreRepository sRepo;
+  private final RoleRepository rRepo;
+  private final UserService userService;
+
+  @Value("${admin.email}")
+  String email;
+  @Value("${admin.password}")
+  String password;
 
   @Override
   @Transactional
   public void run(String... args) throws Exception {
-    if (storeRepository.count() == 0) {
+    if (sRepo.count() == 0) {
       Store store = Store.builder()
-        .name("Main Store")
-        .email("main@store.com")
+        .name("Test Store")
+        .email("test@store.com")
         .phone("+123456789")
         .build();
-      storeRepository.save(store);
+      UUID storeId = sRepo.save(store).getId();
 
       List<Role> roles = List.of(
         Role.builder().code("OWNER").name("Store Owner").build(),
@@ -34,7 +44,17 @@ public class DataInitializer implements CommandLineRunner {
         Role.builder().code("MANAGER").name("Store Manager").build(),
         Role.builder().code("CASHIER").name("Cashier").build(),
         Role.builder().code("STAFF").name("Staff").build());
-      roleRepository.saveAll(roles);
+      rRepo.saveAll(roles);
+
+      UserRequest user = UserRequest.builder()
+        .name("Test Admin")
+        .email(email)
+        .password(password)
+        .phone("+0123456789")
+        .roleCode("ADMIN")
+        .storeId(storeId)
+        .build();
+      userService.addUser(user);
     }
   }
 }

@@ -2,14 +2,18 @@ package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,23 +30,35 @@ import lombok.Setter;
 @Builder
 public class Product extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id")
-    private Store store;
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "store_id")
+    // private Store store;
+    @Column(name = "store_id")
+    private UUID storeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_code", referencedColumnName = "code")
-    private ProductCategory category;
+    @Column(name = "category_code")
+    private String categoryCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "measure_unit_code", referencedColumnName = "code")
-    private MeasureUnit measureUnit;
+    @Column(name = "measure_unit_code")
+    private String measureUnitCode;
+
+    // @ManyToMany
+    // @JoinTable(
+    // name = "product_variants",
+    // joinColumns = @JoinColumn(name = "product_id"),
+    // inverseJoinColumns = @JoinColumn(name = "variant_id"))
+    // @Builder.Default
+    // private Set<Variant> variants = new HashSet<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<ProductVariant> productVariants = new HashSet<>();
 
     @Column(nullable = false)
     private String name;
 
     private String description;
-    private Integer stock;
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
     @Column(name = "reject_count")
     private Integer rejectCount;
     @Column(name = "sold_count")

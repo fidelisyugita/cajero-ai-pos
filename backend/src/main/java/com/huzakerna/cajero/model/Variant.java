@@ -9,11 +9,7 @@ import org.hibernate.type.SqlTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,9 +24,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Variant extends BaseEntity {
-
-    @Transient
-    private Store store;
 
     @Column(name = "store_id")
     private UUID storeId;

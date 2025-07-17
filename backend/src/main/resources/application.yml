@@ -1,9 +1,19 @@
+server:
+  port: 8080
+  address: 0.0.0.0
+
 spring:
   datasource:
     url: ${DATASOURCE_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 springdoc:
   api-docs:
@@ -15,5 +25,9 @@ springdoc:
     operations-sorter: alpha
 
 swagger:
-  username: ${SWAGGER_USERNAME:admin} # Default fallback
-  password: ${SWAGGER_PASSWORD:admin} # Default fallback
+  username: ${SWAGGER_USERNAME}
+  password: ${SWAGGER_PASSWORD}
+
+admin:
+  email: ${ADMIN_EMAIL}
+  password: ${ADMIN_PASSWORD}

@@ -1,19 +1,17 @@
 package com.huzakerna.cajero.service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.ProductRequest;
-import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.model.Product;
-import com.huzakerna.cajero.model.ProductCategory;
-import com.huzakerna.cajero.model.Store;
-import com.huzakerna.cajero.repository.MeasureUnitRepository;
-import com.huzakerna.cajero.repository.ProductCategoryRepository;
+import com.huzakerna.cajero.model.ProductVariant;
+import com.huzakerna.cajero.model.ProductVariantId;
 import com.huzakerna.cajero.repository.ProductRepository;
+import com.huzakerna.cajero.repository.ProductVariantRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,34 +20,59 @@ public class ProductService {
 
         private final StoreRepository sRepo;
         private final ProductRepository repo;
-        private final ProductCategoryRepository cRepo;
-        private final MeasureUnitRepository muRepo;
+        private final ProductVariantRepository pvRepo;
 
         public Product addProduct(ProductRequest request) {
-                Store store = sRepo.findById(request.getStoreId())
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Store not found"));
+                // Validate store exists
+                if (!sRepo.existsById(request.getStoreId())) {
+                        throw new IllegalArgumentException("Store not found");
+                } ;
+                // Store store = sRepo.findById(request.getStoreId())
+                // .orElseThrow(
+                // () -> new EntityNotFoundException("Store not found"))
 
-                ProductCategory category = cRepo.findById(request.getCategoryCode())
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Product Category not found"));
-
-                MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
-                        .orElseThrow(() -> new EntityNotFoundException("Measure Unit not found"));
-
-                return repo.save(
+                Product product = repo.save(
                         Product.builder()
                                 .name(request.getName())
-                                .store(store)
+                                .storeId(request.getStoreId())
                                 .description(request.getDescription())
                                 .buyingPrice(request.getBuyingPrice())
                                 .sellingPrice(request.getSellingPrice())
-                                .stock(request.getStock())
-                                .category(category)
-                                .measureUnit(measureUnit)
+                                .stockQuantity(request.getStockQuantity())
+                                .categoryCode(request.getCategoryCode())
+                                .measureUnitCode(request.getMeasureUnitCode())
                                 // Set other fields
                                 .build());
 
+                // Add product variants if any
+                if (request.getProductVariants() != null) {
+                        for (ProductVariant variant : request.getProductVariants()) {
+                                addVariantToProduct(product.getId(), variant.getId().getVariantId(),
+                                        variant.getPriceAdjustment(), variant.getStockQuantity());
+
+                        }
+                }
+
+                return product;
+
+        }
+
+        public void addVariantToProduct(UUID productId, UUID variantId,
+                BigDecimal priceAdjustment, Integer stockQuantity) {
+
+                ProductVariant productVariant = new ProductVariant();
+                productVariant.setId(new ProductVariantId(productId, variantId));
+                productVariant.setPriceAdjustment(priceAdjustment);
+                productVariant.setStockQuantity(stockQuantity);
+
+                pvRepo.save(productVariant);
+        }
+
+        public void removeVariantToProduct(UUID productId, UUID variantId) {
+                ProductVariant productVariant = new ProductVariant();
+                productVariant.setId(new ProductVariantId(productId, variantId));
+
+                pvRepo.delete(productVariant);
         }
 
         public Product getProductById(UUID id) {

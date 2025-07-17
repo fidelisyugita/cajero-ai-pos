@@ -1,7 +1,10 @@
 package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import com.huzakerna.cajero.model.ProductVariant;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -26,12 +29,15 @@ public class ProductRequest {
     @NotNull(message = "Store Id is required")
     private UUID storeId;
 
+    @Builder.Default
+    private Set<ProductVariant> productVariants = new HashSet<>();
+
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
 
-    @NotNull(message = "Stock is required")
-    @Min(value = 0, message = "Stock cannot be negative")
-    private Integer stock;
+    @NotNull(message = "Stock Quantity is required")
+    @Min(value = 0, message = "Stock Quantity cannot be negative")
+    private Integer stockQuantity;
 
     @NotNull(message = "Category Code is required")
     private String categoryCode;

@@ -103,7 +103,7 @@ CREATE TABLE products (
   note TEXT,
   buying_price DECIMAL(10,2) NOT NULL,
   selling_price DECIMAL(10,2) NOT NULL,
-  stock INTEGER NOT NULL DEFAULT 0,
+  stock_quantity INTEGER NOT NULL DEFAULT 0,
   reject_count INTEGER DEFAULT 0,
   sold_count INTEGER DEFAULT 0,
   commission DECIMAL(10,2) DEFAULT 0,
@@ -139,6 +139,8 @@ CREATE TABLE variants (
 CREATE TABLE product_variants (
   product_id UUID,
   variant_id UUID,
+  price_adjustment DECIMAL(10,2) DEFAULT 0.00,
+  stock_quantity INT DEFAULT 0,
   PRIMARY KEY (product_id, variant_id),
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
   FOREIGN KEY (variant_id) REFERENCES variants(id) ON DELETE CASCADE
