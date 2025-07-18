@@ -1,4 +1,4 @@
-package com.huzakerna.cajero.config;
+package com.huzakerna.cajero;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,9 +32,8 @@ public class DataInitializer implements CommandLineRunner {
   public void run(String... args) throws Exception {
     if (sRepo.count() == 0) {
       Store store = Store.builder()
-        .name("Test Store")
-        .email("test@store.com")
-        .phone("+123456789")
+        .name("Main Store")
+        .email("main@store.com")
         .build();
       UUID storeId = sRepo.save(store).getId();
 
@@ -47,10 +46,9 @@ public class DataInitializer implements CommandLineRunner {
       rRepo.saveAll(roles);
 
       UserRequest user = UserRequest.builder()
-        .name("Test Admin")
+        .name("Main Admin")
         .email(email)
         .password(password)
-        .phone("+0123456789")
         .roleCode("ADMIN")
         .storeId(storeId)
         .build();

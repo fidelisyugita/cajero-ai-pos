@@ -31,6 +31,11 @@ public class ProductController {
         return repo.findAll();
     }
 
+    @PostMapping
+    public Product add(@Valid @RequestBody ProductRequest product) {
+        return service.addProduct(product);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getProductById(id));
@@ -39,10 +44,5 @@ public class ProductController {
     @GetMapping("/store/{id}")
     public ResponseEntity<List<Product>> getAllByStoreId(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findByStoreId(id));
-    }
-
-    @PostMapping
-    public Product add(@Valid @RequestBody ProductRequest product) {
-        return service.addProduct(product);
     }
 }

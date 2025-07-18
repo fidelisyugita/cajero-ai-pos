@@ -28,6 +28,11 @@ public class ProductCategoryController {
         return repo.findAll();
     }
 
+    @PostMapping
+    public ProductCategory add(@RequestBody ProductCategory productCategory) {
+        return service.addProductCategory(productCategory);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Optional<ProductCategory>> getById(
         @PathVariable String id) {
@@ -37,10 +42,5 @@ public class ProductCategoryController {
     @GetMapping("/store/{id}")
     public ResponseEntity<List<ProductCategory>> getAllByStoreId(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findByStoreId(id));
-    }
-
-    @PostMapping
-    public ProductCategory add(@RequestBody ProductCategory productCategory) {
-        return service.addProductCategory(productCategory);
     }
 }

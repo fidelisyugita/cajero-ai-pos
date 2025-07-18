@@ -30,7 +30,7 @@ public class ProductCategory {
     @Column(name = "store_id")
     private UUID storeId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
     private String description;
 

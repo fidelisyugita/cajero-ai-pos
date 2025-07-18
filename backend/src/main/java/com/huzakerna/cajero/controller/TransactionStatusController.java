@@ -22,5 +22,4 @@ public class TransactionStatusController {
         return ResponseEntity.ok(repo.findAll());
     }
 
-
 }

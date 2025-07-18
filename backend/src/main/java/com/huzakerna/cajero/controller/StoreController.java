@@ -28,15 +28,15 @@ public class StoreController {
         return ResponseEntity.ok(repo.findAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Optional<Store>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(repo.findById(id));
-    }
-
     @PostMapping
     public ResponseEntity<Store> add(
         @Valid @RequestBody Store store) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(repo.save(store));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<Store>> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(repo.findById(id));
     }
 }

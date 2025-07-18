@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.huzakerna.cajero.filter.JwtAuthFilter;
 import com.huzakerna.cajero.security.UserDetailsServiceImpl;
+import com.huzakerna.cajero.util.JwtUtils;
 
 @Configuration
 public class FilterConfig {

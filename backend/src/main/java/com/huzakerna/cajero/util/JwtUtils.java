@@ -1,4 +1,4 @@
-package com.huzakerna.cajero.config;
+package com.huzakerna.cajero.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

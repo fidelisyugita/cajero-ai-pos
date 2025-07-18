@@ -3,6 +3,8 @@ server:
   address: 0.0.0.0
 
 spring:
+  profiles:
+    active: dev
   datasource:
     url: ${DATASOURCE_URL}
     username: ${POSTGRES_USER}

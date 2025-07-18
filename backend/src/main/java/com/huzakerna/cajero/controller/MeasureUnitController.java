@@ -29,6 +29,11 @@ public class MeasureUnitController {
         return ResponseEntity.ok(repo.findAll());
     }
 
+    @PostMapping
+    public MeasureUnit add(@Valid @RequestBody MeasureUnit measureUnit) {
+        return service.addMeasureUnit(measureUnit);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Optional<MeasureUnit>> getById(@PathVariable String id) {
         return ResponseEntity.ok(repo.findById(id));
@@ -37,10 +42,5 @@ public class MeasureUnitController {
     @GetMapping("/store/{id}")
     public ResponseEntity<List<MeasureUnit>> getAllByStoreId(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findByStoreId(id));
-    }
-
-    @PostMapping
-    public MeasureUnit add(@Valid @RequestBody MeasureUnit measureUnit) {
-        return service.addMeasureUnit(measureUnit);
     }
 }

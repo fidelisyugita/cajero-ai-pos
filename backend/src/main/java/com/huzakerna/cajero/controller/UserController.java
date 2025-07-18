@@ -22,14 +22,14 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
-    public UserResponse getById(@PathVariable UUID id) {
-        return userService.getUserById(id);
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse add(@Valid @RequestBody UserRequest request) {
         return userService.addUser(request);
+    }
+
+    @GetMapping("/{id}")
+    public UserResponse getById(@PathVariable UUID id) {
+        return userService.getUserById(id);
     }
 }

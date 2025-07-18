@@ -10,8 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.huzakerna.cajero.config.JwtUtils;
 import com.huzakerna.cajero.security.UserDetailsServiceImpl;
+import com.huzakerna.cajero.util.JwtUtils;
 import java.io.IOException;
 
 public class JwtAuthFilter extends OncePerRequestFilter {

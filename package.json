@@ -4,11 +4,12 @@
   "scripts": {
     "start:dev": "concurrently \"cd backend && ./gradlew bootRun\" \"cd frontend && npm run dev\"",
     "build:all": "npm-run-all build:backend build:frontend",
-    "build:backend": "cd backend && ./gradlew build -x test",
+    "build:backend": "cd backend && ./gradlew build -x test --refresh-dependencies",
     "build:frontend": "cd frontend && npm run build",
+    "clean:backend": "cd backend && rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ && ./gradlew clean",
+    "backend": "cd backend && ./gradlew bootRun",
     "test:all": "npm-run-all test:backend test:frontend",
-    "docker:clean": "./clean-start.sh",
-    "clean:backend": "cd backend && rm -rf ~/.gradle/caches/ && ./gradlew clean"
+    "clean:docker": "./clean-start.sh"
   },
   "devDependencies": {
     "concurrently": "^8.0.1",

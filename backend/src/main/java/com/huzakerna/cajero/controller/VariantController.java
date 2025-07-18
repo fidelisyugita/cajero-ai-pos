@@ -29,6 +29,11 @@ public class VariantController {
         return ResponseEntity.ok(repo.findAll());
     }
 
+    @PostMapping
+    public Variant add(@Valid @RequestBody Variant variant) {
+        return service.addVariant(variant);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Optional<Variant>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findById(id));
@@ -37,10 +42,5 @@ public class VariantController {
     @GetMapping("/store/{id}")
     public ResponseEntity<List<Variant>> getAllByStoreId(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findByStoreId(id));
-    }
-
-    @PostMapping
-    public Variant add(@Valid @RequestBody Variant variant) {
-        return service.addVariant(variant);
     }
 }
