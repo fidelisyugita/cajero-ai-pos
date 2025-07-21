@@ -40,7 +40,7 @@ jobs:
         run: |
           cd backend
           TAG=${{ github.ref == 'refs/heads/main' && 'latest' || 'dev' }}
-          docker build -t fidelisyugita/cajero-backend:$TAG .
+          docker build --platform=linux/amd64 -t fidelisyugita/cajero-backend:$TAG .
           docker push fidelisyugita/cajero-backend:$TAG
 
       - name: Deploy to Oracle VM
