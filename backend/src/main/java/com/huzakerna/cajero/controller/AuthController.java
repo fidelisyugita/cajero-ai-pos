@@ -30,7 +30,6 @@ public class AuthController {
   public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
     try {
       logger.info("Attempting authentication for: {}", loginRequest.email());
-      logger.info("Attempting authentication with password: {}", loginRequest.password());
 
       Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(

@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +17,7 @@ import com.huzakerna.cajero.util.JwtUtils;
 import java.io.IOException;
 
 public class JwtAuthFilter extends OncePerRequestFilter {
+  private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
   private JwtUtils jwtUtils;
   private UserDetailsServiceImpl userDetailsService;
@@ -45,11 +48,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     try {
       final String jwt = authHeader.substring(7);
       final String userEmail = jwtUtils.extractUsername(jwt);
+      logger.info("Validating token for: {}", userEmail);
 
       if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
         if (jwtUtils.isTokenValid(jwt, userDetails)) {
+          logger.info("Wait a moment...");
           UsernamePasswordAuthenticationToken authToken =
             new UsernamePasswordAuthenticationToken(
               userDetails,
@@ -58,12 +63,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
           authToken.setDetails(
             new WebAuthenticationDetailsSource().buildDetails(request));
+          logger.info("Almost there...");
 
           SecurityContextHolder.getContext().setAuthentication(authToken);
+          logger.info("Validated");
         }
       }
     } catch (Exception e) {
       // Log the error
+      logger.error("Token validation failed: {}", e.getMessage());
     }
 
     filterChain.doFilter(request, response);

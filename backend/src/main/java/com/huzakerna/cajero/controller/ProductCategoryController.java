@@ -20,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // Lombok generates constructor with required args
 public class ProductCategoryController {
 
-    private ProductCategoryRepository repo;
-    private ProductCategoryService service;
+    private final ProductCategoryRepository repo;
+    private final ProductCategoryService service;
 
     @GetMapping
     public List<ProductCategory> getAll() {

@@ -77,42 +77,6 @@ public class SecurityConfig {
     return new InMemoryUserDetailsManager(user);
   }
 
-  // @Bean
-  // public UserDetailsService userDetailsService(UserRepository userRepository) {
-  // return email -> userRepository.findByEmail(email)
-  // .map(user -> new UserDetails() {
-  // @Override
-  // public Collection<? extends GrantedAuthority> getAuthorities() {
-  // return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRoleCode()));
-  // }
-
-  // @Override
-  // public String getPassword() {
-  // return user.getPasswordHash(); // Must match DB column name
-  // }
-
-  // @Override
-  // public String getUsername() {
-  // return user.getEmail();
-  // }
-  // // ... other methods return true
-  // })
-  // .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-  // }
-
-  // @Bean
-  // public AuthenticationManager authenticationManager(
-  // HttpSecurity http,
-  // PasswordEncoder encoder,
-  // UserDetailsService userDetailsService) throws Exception {
-
-  // return http.getSharedObject(AuthenticationManagerBuilder.class)
-  // .userDetailsService(userDetailsService)
-  // .passwordEncoder(encoder)
-  // .and()
-  // .build();
-  // }
-
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
     throws Exception {
