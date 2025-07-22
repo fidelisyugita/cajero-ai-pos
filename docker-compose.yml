@@ -34,6 +34,11 @@ services:
       - ./backend:/app # Source code
       - ~/.gradle/caches:/home/gradle/.gradle/caches # Primary cache
       - ~/.m2:/root/.m2 # Optional fallback
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # # ---------- AI Service (Python) ----------
   # ai-service:
