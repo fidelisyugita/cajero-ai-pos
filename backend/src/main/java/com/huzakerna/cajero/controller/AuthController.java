@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.huzakerna.cajero.dto.JwtResponse;
 import com.huzakerna.cajero.dto.LoginRequest;
+import com.huzakerna.cajero.dto.UserResponse;
+import com.huzakerna.cajero.exception.UserNotFoundException;
+import com.huzakerna.cajero.model.User;
+import com.huzakerna.cajero.repository.UserRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class AuthController {
 
   private final AuthenticationManager authenticationManager;
   private final JwtUtils jwtUtils;
+  private final UserRepository userRepo;
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -41,7 +45,21 @@ public class AuthController {
       logger.info("Authentication successful for: {}", userDetails.getUsername());
       String jwt = jwtUtils.generateToken(userDetails);
 
-      return ResponseEntity.ok(new JwtResponse(jwt));
+      User user = userRepo.findByEmail(userDetails.getUsername())
+        .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+
+      UserResponse userResponse = UserResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .email(user.getEmail())
+        .phone(user.getPhone())
+        .storeId(user.getStoreId())
+        .roleCode(user.getRoleCode())
+        .imageUrl(user.getImageUrl())
+        .token(jwt)
+        .build();
+
+      return ResponseEntity.ok(userResponse);
 
     } catch (BadCredentialsException e) {
       logger.error("Invalid credentials for: {}", loginRequest.email());

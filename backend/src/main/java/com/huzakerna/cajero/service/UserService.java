@@ -74,8 +74,6 @@ public class UserService {
                         .storeId(user.getStoreId())
                         .roleCode(user.getRoleCode())
                         .imageUrl(user.getImageUrl())
-                        .createdAt(user.getCreatedAt())
-                        .updatedAt(user.getUpdatedAt())
                         .build();
         }
 }
