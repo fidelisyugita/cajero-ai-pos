@@ -19,6 +19,7 @@ services:
 
   # ---------- Backend ----------
   backend:
+    platform: linux/amd64
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -38,7 +39,7 @@ services:
   # ai-service:
   #   build:
   #     context: ./ai-api/fastapi
-  #     dockerfile: Dockerfile
+  #     dockerfile: Dockerfile`
   #   container_name: cajero-ai
   #   ports:
   # - "${AI_PORT}:${AI_PORT}"
