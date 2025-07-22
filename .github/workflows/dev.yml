@@ -19,22 +19,8 @@ jobs:
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Deploy container
-        run: |
-          docker run \
-            -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
-            -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-            -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-            -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-            -e JWT_EXPIRATION_MS=${{ secrets.JWT_EXPIRATION_MS }} \
-            -e SWAGGER_USERNAME=${{ secrets.SWAGGER_USERNAME }} \
-            -e SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} \
-            -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
-            -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
-            fidelisyugita/cajero-backend:dev
-
-      - name: Build Docker image
-        timeout-minutes: 720
+      # ✅ Build and push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -43,6 +29,7 @@ jobs:
           tags: fidelisyugita/cajero-backend:dev
           platforms: linux/amd64
 
+      # ✅ Deploy to Oracle VM
       - name: Deploy to Oracle VM
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -53,4 +40,21 @@ jobs:
             docker pull fidelisyugita/cajero-backend:dev
             docker stop cajero-backend || true
             docker rm cajero-backend || true
-            docker run -d --name cajero-backend -p 80:8080 fidelisyugita/cajero-backend:dev
+            docker run -d --name cajero-backend \
+              -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
+              -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+              -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e JWT_EXPIRATION_MS=${{ secrets.JWT_EXPIRATION_MS }} \
+              -e SWAGGER_USERNAME=${{ secrets.SWAGGER_USERNAME }} \
+              -e SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} \
+              -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
+              -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              -p 80:8080 fidelisyugita/cajero-backend:dev
+
+            echo "Waiting for backend to be ready..."
+            for i in {1..30}; do
+              curl --fail http://localhost:80/actuator/health && break
+              echo "Waiting for backend..."
+              sleep 10
+            done
