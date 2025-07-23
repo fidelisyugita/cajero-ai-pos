@@ -101,7 +101,6 @@ public class TransactionService {
                 int size,
                 String sortBy,
                 String sortDir,
-                String keyword,
                 String statusCode,
                 String transactionTypeCode,
                 String paymentMethodCode,
@@ -118,7 +117,7 @@ public class TransactionService {
                         endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
                 Page<Transaction> transactionPage = repo.findFiltered(
-                        storeId, statusCode, transactionTypeCode, paymentMethodCode, keyword, start,
+                        storeId, statusCode, transactionTypeCode, paymentMethodCode, start,
                         end, pageable);
 
                 return transactionPage.map(this::mapToResponse);

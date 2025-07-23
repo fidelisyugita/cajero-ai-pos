@@ -17,12 +17,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
               AND (:statusCode IS NULL OR t.statusCode = :statusCode)
               AND (:transactionTypeCode IS NULL OR t.transactionTypeCode = :transactionTypeCode)
               AND (:paymentMethodCode IS NULL OR t.paymentMethodCode = :paymentMethodCode)
-              AND (:keyword IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
               AND t.createdAt BETWEEN :start AND :end
         """)
     Page<Transaction> findFiltered(
         @Param("storeId") UUID storeId,
-        @Param("categoryCode") String categoryCode,
         @Param("statusCode") String statusCode,
         @Param("transactionTypeCode") String transactionTypeCode,
         @Param("paymentMethodCode") String paymentMethodCode,

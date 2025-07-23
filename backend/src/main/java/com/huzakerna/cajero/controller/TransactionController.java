@@ -35,7 +35,6 @@ public class TransactionController {
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "name") String sortBy,
         @RequestParam(defaultValue = "asc") String sortDir,
-        @RequestParam(defaultValue = "") String keyword,
         @RequestParam(required = false) String statusCode,
         @RequestParam(required = false) String transactionTypeCode,
         @RequestParam(required = false) String paymentMethodCode,
@@ -47,7 +46,7 @@ public class TransactionController {
         UUID storeId = user.getStoreId();
 
         return ResponseEntity.ok(service.getTransactions(
-            storeId, page, size, sortBy, sortDir, keyword, statusCode, transactionTypeCode,
+            storeId, page, size, sortBy, sortDir, statusCode, transactionTypeCode,
             paymentMethodCode, startDate, endDate));
     }
 
