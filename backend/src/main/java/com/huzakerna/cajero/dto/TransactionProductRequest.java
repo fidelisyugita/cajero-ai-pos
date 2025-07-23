@@ -21,9 +21,6 @@ import lombok.Setter;
 @Builder
 public class TransactionProductRequest {
 
-    @NotNull(message = "Transaction Id is required")
-    private UUID transactionId;
-
     @NotNull(message = "Product Id is required")
     private UUID productId;
 

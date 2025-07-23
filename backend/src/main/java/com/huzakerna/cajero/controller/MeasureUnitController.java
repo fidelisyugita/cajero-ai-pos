@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.repository.MeasureUnitRepository;
+import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.MeasureUnitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,11 @@ public class MeasureUnitController {
     private final MeasureUnitService service;
 
     @GetMapping
-    public ResponseEntity<List<MeasureUnit>> getAll() {
-        return ResponseEntity.ok(repo.findAll());
+    public ResponseEntity<List<MeasureUnit>> getAll(
+        @AuthenticationPrincipal UserDetailsImpl user) {
+        UUID storeId = user.getStoreId();
+
+        return ResponseEntity.ok(repo.findByStoreId(storeId));
     }
 
     @PostMapping
@@ -39,8 +44,4 @@ public class MeasureUnitController {
         return ResponseEntity.ok(repo.findById(id));
     }
 
-    @GetMapping("/store/{id}")
-    public ResponseEntity<List<MeasureUnit>> getAllByStoreId(@PathVariable UUID id) {
-        return ResponseEntity.ok(repo.findByStoreId(id));
-    }
 }

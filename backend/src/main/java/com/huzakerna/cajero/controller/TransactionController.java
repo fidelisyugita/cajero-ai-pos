@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.huzakerna.cajero.dto.TransactionRequest;
 import com.huzakerna.cajero.dto.TransactionResponse;
-import com.huzakerna.cajero.repository.TransactionRepository;
+import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // Lombok generates constructor with required args
 public class TransactionController {
 
-    private final TransactionRepository repo;
     private final TransactionService service; // Must be final for Lombok
 
     @GetMapping
-    public List<TransactionResponse> getAll() {
-        return service.getAllTransactions();
+    public ResponseEntity<List<TransactionResponse>> getAll(
+        @AuthenticationPrincipal UserDetailsImpl user) {
+        UUID storeId = user.getStoreId();
+
+        return ResponseEntity.ok(service.getTransactionsByStoreId(storeId));
     }
 
     @PostMapping
@@ -41,8 +44,4 @@ public class TransactionController {
         return ResponseEntity.ok(service.getTransactionById(id));
     }
 
-    @GetMapping("/store/{id}")
-    public ResponseEntity<List<TransactionResponse>> getAllByStoreId(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.getTransactionsByStoreId(id));
-    }
 }

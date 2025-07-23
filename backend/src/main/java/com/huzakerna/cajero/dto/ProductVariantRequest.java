@@ -18,9 +18,6 @@ import lombok.Setter;
 @Builder
 public class ProductVariantRequest {
 
-    @NotNull(message = "Product Id is required")
-    private UUID productId;
-
     @NotNull(message = "Variant Id is required")
     private UUID variantId;
 

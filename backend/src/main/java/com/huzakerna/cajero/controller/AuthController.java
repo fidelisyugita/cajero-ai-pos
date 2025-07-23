@@ -34,19 +34,18 @@ public class AuthController {
   public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
     try {
       logger.info("Attempting authentication for: {}", loginRequest.email());
-
       Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
           loginRequest.email(),
           loginRequest.password()));
 
-
       UserDetailsImpl userDetails = ((UserDetailsImpl) authentication.getPrincipal());
       logger.info("Authentication successful for: {}", userDetails.getUsername());
-      String jwt = jwtUtils.generateToken(userDetails);
 
       User user = userRepo.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+
+      String jwt = jwtUtils.generateToken(user);
 
       UserResponse userResponse = UserResponse.builder()
         .id(user.getId())
@@ -56,7 +55,7 @@ public class AuthController {
         .storeId(user.getStoreId())
         .roleCode(user.getRoleCode())
         .imageUrl(user.getImageUrl())
-        .token(jwt)
+        .accessToken(jwt)
         .build();
 
       return ResponseEntity.ok(userResponse);
