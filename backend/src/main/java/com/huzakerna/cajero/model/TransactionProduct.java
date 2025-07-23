@@ -1,6 +1,9 @@
 package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -37,22 +40,24 @@ public class TransactionProduct {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String selectedVariants;
+    private JsonNode selectedVariants;
 
     private String note;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(nullable = false)
+    @Column(name = "buying_price", nullable = false)
     private BigDecimal buyingPrice;
 
-    @Column(nullable = false)
+    @Column(name = "selling_price", nullable = false)
     private BigDecimal sellingPrice;
 
     private BigDecimal commission;
 
-    private boolean commissionByPercent;
+    @Column(name = "is_commission_by_percent")
+    private boolean isCommissionByPercent;
 
 }

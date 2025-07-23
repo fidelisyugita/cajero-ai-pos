@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huzakerna.cajero.dto.TransactionRequest;
-import com.huzakerna.cajero.model.Transaction;
+import com.huzakerna.cajero.dto.TransactionResponse;
 import com.huzakerna.cajero.repository.TransactionRepository;
 import com.huzakerna.cajero.service.TransactionService;
 import jakarta.validation.Valid;
@@ -27,22 +27,22 @@ public class TransactionController {
     private final TransactionService service; // Must be final for Lombok
 
     @GetMapping
-    public List<Transaction> getAll() {
-        return repo.findAll();
+    public List<TransactionResponse> getAll() {
+        return service.getAllTransactions();
     }
 
     @PostMapping
-    public Transaction add(@Valid @RequestBody TransactionRequest request) {
+    public TransactionResponse add(@Valid @RequestBody TransactionRequest request) {
         return service.addTransaction(request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getById(@PathVariable UUID id) {
+    public ResponseEntity<TransactionResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getTransactionById(id));
     }
 
     @GetMapping("/store/{id}")
-    public ResponseEntity<List<Transaction>> getAllByStoreId(@PathVariable UUID id) {
-        return ResponseEntity.ok(repo.findByStoreId(id));
+    public ResponseEntity<List<TransactionResponse>> getAllByStoreId(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getTransactionByStoreId(id));
     }
 }

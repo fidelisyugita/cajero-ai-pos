@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import com.huzakerna.cajero.model.ProductVariant;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -29,8 +28,14 @@ public class ProductRequest {
     @NotNull(message = "Store Id is required")
     private UUID storeId;
 
+    /**
+     * TODO: Will check will use set or list (in Transaction)
+     * 
+     * @see ProductVariantRequest
+     * @see TransactionProduct
+     */
     @Builder.Default
-    private Set<ProductVariant> productVariants = new HashSet<>();
+    private Set<ProductVariantRequest> productVariantRequests = new HashSet<>();
 
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
@@ -60,5 +65,5 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
     private BigDecimal commission;
 
-    private boolean commissionByPercent;
+    private boolean isCommissionByPercent;
 }

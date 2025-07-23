@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.ProductRequest;
+import com.huzakerna.cajero.dto.ProductVariantRequest;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductVariant;
 import com.huzakerna.cajero.model.ProductVariantId;
@@ -45,9 +46,9 @@ public class ProductService {
                                 .build());
 
                 // Add product variants if any
-                if (request.getProductVariants() != null) {
-                        for (ProductVariant variant : request.getProductVariants()) {
-                                addVariantToProduct(product.getId(), variant.getId().getVariantId(),
+                if (request.getProductVariantRequests() != null) {
+                        for (ProductVariantRequest variant : request.getProductVariantRequests()) {
+                                addVariantToProduct(product.getId(), variant.getVariantId(),
                                         variant.getPriceAdjustment(), variant.getStockQuantity());
 
                         }
