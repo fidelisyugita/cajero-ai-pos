@@ -10,12 +10,9 @@ import com.huzakerna.cajero.dto.TransactionProductRequest;
 import com.huzakerna.cajero.dto.TransactionProductResponse;
 import com.huzakerna.cajero.dto.TransactionRequest;
 import com.huzakerna.cajero.dto.TransactionResponse;
-import com.huzakerna.cajero.dto.UserResponse;
-import com.huzakerna.cajero.exception.UserNotFoundException;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
 import com.huzakerna.cajero.model.TransactionProductId;
-import com.huzakerna.cajero.model.User;
 import com.huzakerna.cajero.repository.TransactionRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
@@ -93,7 +90,7 @@ public class TransactionService {
                 return mapToResponse(transaction);
         }
 
-        public List<TransactionResponse> getTransactionByStoreId(UUID id) {
+        public List<TransactionResponse> getTransactionsByStoreId(UUID id) {
                 return repo.findByStoreId(id).stream()
                         .map(this::mapToResponse)
                         .toList();
@@ -121,6 +118,7 @@ public class TransactionService {
                         .updatedAt(transaction.getUpdatedAt())
                         .transactionProduct(transaction.getTransactionProducts().stream()
                                 .map(tp -> TransactionProductResponse.builder()
+                                        .productId(tp.getProduct().getId())
                                         .storeId(tp.getProduct().getStoreId())
                                         .categoryCode(tp.getProduct().getCategoryCode())
                                         .measureUnitCode(tp.getProduct().getMeasureUnitCode())

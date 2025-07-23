@@ -1,12 +1,15 @@
 package com.huzakerna.cajero.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.ProductRequest;
 import com.huzakerna.cajero.dto.ProductVariantRequest;
+import com.huzakerna.cajero.dto.ProductVariantResponse;
+import com.huzakerna.cajero.dto.ProductResponse;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductVariant;
 import com.huzakerna.cajero.model.ProductVariantId;
@@ -23,7 +26,7 @@ public class ProductService {
         private final ProductRepository repo;
         private final ProductVariantRepository pvRepo;
 
-        public Product addProduct(ProductRequest request) {
+        public ProductResponse addProduct(ProductRequest request) {
                 // Validate store exists
                 if (!sRepo.existsById(request.getStoreId())) {
                         throw new IllegalArgumentException("Store not found");
@@ -54,7 +57,7 @@ public class ProductService {
                         }
                 }
 
-                return product;
+                return mapToResponse(product);
         }
 
         public void addVariantToProduct(UUID productId, UUID variantId,
@@ -75,8 +78,57 @@ public class ProductService {
                 pvRepo.delete(productVariant);
         }
 
-        public Product getProductById(UUID id) {
-                return repo.findById(id)
+        public ProductResponse getProductById(UUID id) {
+                Product product = repo.findById(id)
                         .orElseThrow(() -> new RuntimeException("Product not found"));
+                return mapToResponse(product);
+        }
+
+        public List<ProductResponse> getProductsByStoreId(UUID id) {
+                return repo.findByStoreId(id).stream()
+                        .map(this::mapToResponse)
+                        .toList();
+        }
+
+        public List<ProductResponse> getAllProducts() {
+                return repo.findAll().stream()
+                        .map(this::mapToResponse)
+                        .toList();
+        }
+
+        private ProductResponse mapToResponse(Product product) {
+                return ProductResponse.builder()
+                        .id(product.getId())
+                        .storeId(product.getStoreId())
+                        .name(product.getName())
+                        .imageUrl(product.getImageUrl())
+                        .description(product.getDescription())
+                        .stockQuantity(product.getStockQuantity())
+                        .rejectCount(product.getRejectCount())
+                        .soldCount(product.getSoldCount())
+                        .categoryCode(product.getCategoryCode())
+                        .measureUnitCode(product.getMeasureUnitCode())
+                        .buyingPrice(product.getBuyingPrice())
+                        .sellingPrice(product.getSellingPrice())
+                        .isCommissionByPercent(product.isCommissionByPercent())
+                        .commission(product.getCommission())
+                        .createdBy(product.getCreatedBy())
+                        .updatedBy(product.getUpdatedBy())
+                        .createdAt(product.getCreatedAt())
+                        .updatedAt(product.getUpdatedAt())
+                        .productVariants(product.getProductVariants().stream()
+                                .map(pv -> ProductVariantResponse.builder()
+                                        .variantId(pv.getVariant().getId())
+                                        .storeId(pv.getProduct().getStoreId())
+                                        .name(pv.getVariant().getName())
+                                        .description(pv.getVariant().getDescription())
+                                        .isRequired(pv.getVariant().isRequired())
+                                        .isMultiple(pv.getVariant().isMultiple())
+                                        .options(pv.getVariant().getOptions())
+                                        .stockQuantity(pv.getStockQuantity())
+                                        .priceAdjustment(pv.getPriceAdjustment())
+                                        .build())
+                                .toList())
+                        .build();
         }
 }

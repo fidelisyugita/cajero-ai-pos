@@ -43,6 +43,6 @@ public class TransactionController {
 
     @GetMapping("/store/{id}")
     public ResponseEntity<List<TransactionResponse>> getAllByStoreId(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.getTransactionByStoreId(id));
+        return ResponseEntity.ok(service.getTransactionsByStoreId(id));
     }
 }

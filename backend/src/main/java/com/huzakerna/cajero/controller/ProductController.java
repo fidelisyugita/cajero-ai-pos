@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huzakerna.cajero.dto.ProductRequest;
-import com.huzakerna.cajero.model.Product;
+import com.huzakerna.cajero.dto.ProductResponse;
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.service.ProductService;
 import jakarta.validation.Valid;
@@ -27,22 +27,22 @@ public class ProductController {
     private final ProductService service; // Must be final for Lombok
 
     @GetMapping
-    public List<Product> getAll() {
-        return repo.findAll();
+    public List<ProductResponse> getAll() {
+        return service.getAllProducts();
     }
 
     @PostMapping
-    public Product add(@Valid @RequestBody ProductRequest request) {
+    public ProductResponse add(@Valid @RequestBody ProductRequest request) {
         return service.addProduct(request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable UUID id) {
+    public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getProductById(id));
     }
 
     @GetMapping("/store/{id}")
-    public ResponseEntity<List<Product>> getAllByStoreId(@PathVariable UUID id) {
-        return ResponseEntity.ok(repo.findByStoreId(id));
+    public ResponseEntity<List<ProductResponse>> getAllByStoreId(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getProductsByStoreId(id));
     }
 }
