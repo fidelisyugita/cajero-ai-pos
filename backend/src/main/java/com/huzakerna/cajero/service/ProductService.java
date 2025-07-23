@@ -1,9 +1,15 @@
 package com.huzakerna.cajero.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.ProductRequest;
@@ -84,10 +90,29 @@ public class ProductService {
                 return mapToResponse(product);
         }
 
-        public List<ProductResponse> getProductsByStoreId(UUID id) {
-                return repo.findByStoreId(id).stream()
-                        .map(this::mapToResponse)
-                        .toList();
+        public Page<ProductResponse> getProducts(UUID storeId,
+                int page,
+                int size,
+                String sortBy,
+                String sortDir,
+                String keyword,
+                String categoryCode,
+                LocalDate startDate,
+                LocalDate endDate) {
+                Pageable pageable = PageRequest.of(page, size,
+                        sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending()
+                                : Sort.by(sortBy).ascending());
+
+                // fallback to 1970 and now if null
+                LocalDateTime start = startDate != null ? startDate.atStartOfDay()
+                        : LocalDate.of(1970, 1, 1).atStartOfDay();
+                LocalDateTime end =
+                        endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+
+                Page<Product> productPage = repo.findFiltered(
+                        storeId, categoryCode, keyword, start, end, pageable);
+
+                return productPage.map(this::mapToResponse);
         }
 
         public List<ProductResponse> getAllProducts() {
@@ -119,12 +144,12 @@ public class ProductService {
                         .productVariants(product.getProductVariants().stream()
                                 .map(pv -> ProductVariantResponse.builder()
                                         .variantId(pv.getVariant().getId())
-                                        .storeId(pv.getProduct().getStoreId())
                                         .name(pv.getVariant().getName())
                                         .description(pv.getVariant().getDescription())
                                         .isRequired(pv.getVariant().isRequired())
                                         .isMultiple(pv.getVariant().isMultiple())
                                         .options(pv.getVariant().getOptions())
+
                                         .stockQuantity(pv.getStockQuantity())
                                         .priceAdjustment(pv.getPriceAdjustment())
                                         .build())

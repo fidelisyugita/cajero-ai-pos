@@ -18,7 +18,6 @@ public class TransactionProductResponse {
 
     // from Product
     private UUID productId;
-    private UUID storeId;
     private String categoryCode;
     private String measureUnitCode;
     private String name;

@@ -1,9 +1,15 @@
 package com.huzakerna.cajero.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.huzakerna.cajero.dto.TransactionProductRequest;
@@ -90,10 +96,32 @@ public class TransactionService {
                 return mapToResponse(transaction);
         }
 
-        public List<TransactionResponse> getTransactionsByStoreId(UUID id) {
-                return repo.findByStoreId(id).stream()
-                        .map(this::mapToResponse)
-                        .toList();
+        public Page<TransactionResponse> getTransactions(UUID storeId,
+                int page,
+                int size,
+                String sortBy,
+                String sortDir,
+                String keyword,
+                String statusCode,
+                String transactionTypeCode,
+                String paymentMethodCode,
+                LocalDate startDate,
+                LocalDate endDate) {
+                Pageable pageable = PageRequest.of(page, size,
+                        sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending()
+                                : Sort.by(sortBy).ascending());
+
+                // fallback to 1970 and now if null
+                LocalDateTime start = startDate != null ? startDate.atStartOfDay()
+                        : LocalDate.of(1970, 1, 1).atStartOfDay();
+                LocalDateTime end =
+                        endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+
+                Page<Transaction> transactionPage = repo.findFiltered(
+                        storeId, statusCode, transactionTypeCode, paymentMethodCode, keyword, start,
+                        end, pageable);
+
+                return transactionPage.map(this::mapToResponse);
         }
 
         public List<TransactionResponse> getAllTransactions() {
@@ -119,7 +147,6 @@ public class TransactionService {
                         .transactionProduct(transaction.getTransactionProducts().stream()
                                 .map(tp -> TransactionProductResponse.builder()
                                         .productId(tp.getProduct().getId())
-                                        .storeId(tp.getProduct().getStoreId())
                                         .categoryCode(tp.getProduct().getCategoryCode())
                                         .measureUnitCode(tp.getProduct().getMeasureUnitCode())
                                         .name(tp.getProduct().getName())

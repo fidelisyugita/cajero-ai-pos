@@ -18,7 +18,6 @@ public class ProductVariantResponse {
 
     // from Product
     private UUID variantId;
-    private UUID storeId;
     private String name;
     private String description;
     private boolean isRequired;
