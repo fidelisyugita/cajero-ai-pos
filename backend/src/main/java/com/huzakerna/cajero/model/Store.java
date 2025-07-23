@@ -1,9 +1,6 @@
 package com.huzakerna.cajero.model;
 
-import java.time.LocalDateTime;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
@@ -49,14 +46,4 @@ public class Store extends BaseEntity {
   @Column(name = "bank_no", length = 50)
   private String bankNo;
 
-  @CreationTimestamp
-  @Column(name = "created_at", updatable = false)
-  private LocalDateTime createdAt;
-
-  @UpdateTimestamp
-  @Column(name = "updated_at")
-  private LocalDateTime updatedAt;
-
-  @Column(name = "deleted_at")
-  private LocalDateTime deletedAt;
 }

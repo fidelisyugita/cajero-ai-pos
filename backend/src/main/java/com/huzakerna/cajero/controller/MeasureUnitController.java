@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/measure-unit")
-@RequiredArgsConstructor // Lombok generates constructor with required args
+@RequiredArgsConstructor
 public class MeasureUnitController {
 
     private final MeasureUnitRepository repo;

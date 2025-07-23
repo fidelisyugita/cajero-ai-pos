@@ -1,0 +1,50 @@
+package com.huzakerna.cajero.dto;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+import com.huzakerna.cajero.model.TransactionProduct;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TransactionRequest {
+
+    @NotNull(message = "Store Id is required")
+    private UUID storeId;
+
+    @DecimalMin(value = "0.0", message = "Total Tax cannot be negative")
+    private BigDecimal totalTax;
+    @DecimalMin(value = "0.0", message = "Total Discount cannot be negative")
+    private BigDecimal totalDiscount;
+    @DecimalMin(value = "0.0", message = "Total Price cannot be negative")
+    private BigDecimal totalPrice;
+
+    @Size(max = 500, message = "Description must be less than 500 characters")
+    private String description;
+
+    @NotNull(message = "Status Code is required")
+    private String statusCode;
+    @NotNull(message = "Transaction Type Code is required")
+    private String transactionTypeCode;
+    @NotNull(message = "Payment Method Code is required")
+    private String paymentMethodCode;
+
+    private List<TransactionProduct> transactionProducts;
+
+    private boolean isIn;
+
+    private UUID createdBy;
+    private UUID updatedBy;
+
+}

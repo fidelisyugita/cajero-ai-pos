@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/store")
-@RequiredArgsConstructor // Lombok generates constructor with required args
+@RequiredArgsConstructor
 public class StoreController {
 
     private final StoreRepository repo;

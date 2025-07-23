@@ -57,9 +57,8 @@ public class ProductRequest {
     @DecimalMin(value = "0.1", message = "Stock cannot be negative")
     private BigDecimal sellingPrice;
 
-    @Min(value = 0, message = "Stock cannot be negative")
-    private Integer commissionByPercent;
-
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
     private BigDecimal commission;
+
+    private boolean commissionByPercent;
 }

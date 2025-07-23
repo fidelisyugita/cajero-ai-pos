@@ -54,7 +54,6 @@ public class ProductService {
                 }
 
                 return product;
-
         }
 
         public void addVariantToProduct(UUID productId, UUID variantId,

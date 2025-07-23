@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/variant")
-@RequiredArgsConstructor // Lombok generates constructor with required args
+@RequiredArgsConstructor
 public class VariantController {
 
     private final VariantRepository repo;

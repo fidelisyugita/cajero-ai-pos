@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor // Lombok generates constructor with required args
+@RequiredArgsConstructor
 public class AuthController {
   private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 

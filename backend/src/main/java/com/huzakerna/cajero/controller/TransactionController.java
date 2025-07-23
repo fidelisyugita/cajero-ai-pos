@@ -11,38 +11,38 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.huzakerna.cajero.dto.ProductRequest;
-import com.huzakerna.cajero.model.Product;
-import com.huzakerna.cajero.repository.ProductRepository;
-import com.huzakerna.cajero.service.ProductService;
+import com.huzakerna.cajero.dto.TransactionRequest;
+import com.huzakerna.cajero.model.Transaction;
+import com.huzakerna.cajero.repository.TransactionRepository;
+import com.huzakerna.cajero.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/transaction")
 @RequiredArgsConstructor // Lombok generates constructor with required args
-public class ProductController {
+public class TransactionController {
 
-    private final ProductRepository repo;
-    private final ProductService service; // Must be final for Lombok
+    private final TransactionRepository repo;
+    private final TransactionService service; // Must be final for Lombok
 
     @GetMapping
-    public List<Product> getAll() {
+    public List<Transaction> getAll() {
         return repo.findAll();
     }
 
     @PostMapping
-    public Product add(@Valid @RequestBody ProductRequest request) {
-        return service.addProduct(request);
+    public Transaction add(@Valid @RequestBody TransactionRequest request) {
+        return service.addTransaction(request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.getProductById(id));
+    public ResponseEntity<Transaction> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getTransactionById(id));
     }
 
     @GetMapping("/store/{id}")
-    public ResponseEntity<List<Product>> getAllByStoreId(@PathVariable UUID id) {
+    public ResponseEntity<List<Transaction>> getAllByStoreId(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findByStoreId(id));
     }
 }
