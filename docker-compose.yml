@@ -9,19 +9,13 @@ services:
     container_name: cajero-backend
     env_file: .env # Load all variables
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "8080:8080"
     volumes:
       - ./backend:/app # Source code
       - ~/.gradle/caches:/home/gradle/.gradle/caches # Primary cache
       - ~/.m2:/root/.m2 # Optional fallback
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:${BACKEND_PORT}/actuator/health",
-        ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
