@@ -51,11 +51,11 @@ jobs:
               -e SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} \
               -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
               -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
-              -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
+              -p ${{secrets.BACKEND_PORT}}:${{secrets.BACKEND_PORT}} ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
 
             echo "Waiting for backend to be ready..."
             for i in {1..30}; do
-              curl --fail http://localhost:80/actuator/health && break
+              curl --fail http://localhost:${{secrets.BACKEND_PORT}}/actuator/health && break
               echo "Waiting for backend..."
               sleep 10
             done
