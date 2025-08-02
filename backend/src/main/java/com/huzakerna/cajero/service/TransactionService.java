@@ -28,142 +28,142 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransactionService {
 
-        private final StoreRepository sRepo;
-        private final TransactionRepository repo;
-        private final TransactionProductRepository tpRepo;
+    private final StoreRepository sRepo;
+    private final TransactionRepository repo;
+    private final TransactionProductRepository tpRepo;
 
-        public TransactionResponse addTransaction(TransactionRequest request) {
-                // Validate store exists
-                if (!sRepo.existsById(request.getStoreId())) {
-                        throw new IllegalArgumentException("Store not found");
-                } ;
+    public TransactionResponse addTransaction(TransactionRequest request) {
+        // Validate store exists
+        if (!sRepo.existsById(request.getStoreId())) {
+            throw new IllegalArgumentException("Store not found");
+        }
+        ;
 
-                Transaction transaction = repo.save(
-                        Transaction.builder()
-                                .storeId(request.getStoreId())
-                                .statusCode(request.getStatusCode())
-                                .paymentMethodCode(request.getPaymentMethodCode())
-                                .transactionTypeCode(request.getTransactionTypeCode())
-                                .description(request.getDescription())
-                                .isIn(request.isIn())
-                                .totalDiscount(request.getTotalDiscount())
-                                .totalPrice(request.getTotalPrice())
-                                .totalTax(request.getTotalTax())
-                                .build());
+        Transaction transaction = repo.save(
+                Transaction.builder()
+                        .storeId(request.getStoreId())
+                        .statusCode(request.getStatusCode())
+                        .paymentMethodCode(request.getPaymentMethodCode())
+                        .transactionTypeCode(request.getTransactionTypeCode())
+                        .description(request.getDescription())
+                        .isIn(request.isIn())
+                        .totalDiscount(request.getTotalDiscount())
+                        .totalPrice(request.getTotalPrice())
+                        .totalTax(request.getTotalTax())
+                        .build());
 
-                // Add transaction items if any
-                if (request.getTransactionProductRequests() != null) {
-                        for (TransactionProductRequest product : request
-                                .getTransactionProductRequests()) {
-                                addProductToTransaction(transaction.getId(),
-                                        product.getProductId(),
-                                        product.getBuyingPrice(), product.getSellingPrice(),
-                                        product.getNote(),
-                                        product.getQuantity(), product.getSelectedVariants());
+        // Add transaction items if any
+        if (request.getTransactionProductRequests() != null) {
+            for (TransactionProductRequest product : request
+                    .getTransactionProductRequests()) {
+                addProductToTransaction(transaction.getId(),
+                        product.getProductId(),
+                        product.getBuyingPrice(), product.getSellingPrice(),
+                        product.getNote(),
+                        product.getQuantity(), product.getSelectedVariants());
 
-                        }
-                }
-
-                return mapToResponse(transaction);
+            }
         }
 
-        public void addProductToTransaction(UUID transactionId, UUID productId,
-                BigDecimal buyingPrice, BigDecimal sellingPrice, String note, Integer quantity,
-                JsonNode selectedVariants) {
+        return mapToResponse(transaction);
+    }
 
-                TransactionProduct transactionVariant = new TransactionProduct();
-                transactionVariant.setId(new TransactionProductId(transactionId, productId));
-                transactionVariant.setBuyingPrice(buyingPrice);
-                transactionVariant.setSellingPrice(sellingPrice);
-                transactionVariant.setNote(note);
-                transactionVariant.setQuantity(quantity);
-                transactionVariant.setSelectedVariants(selectedVariants);
+    public void addProductToTransaction(UUID transactionId, UUID productId,
+            BigDecimal buyingPrice, BigDecimal sellingPrice, String note, Integer quantity,
+            JsonNode selectedVariants) {
 
-                tpRepo.save(transactionVariant);
-        }
+        TransactionProduct transactionVariant = new TransactionProduct();
+        transactionVariant.setId(new TransactionProductId(transactionId, productId));
+        transactionVariant.setBuyingPrice(buyingPrice);
+        transactionVariant.setSellingPrice(sellingPrice);
+        transactionVariant.setNote(note);
+        transactionVariant.setQuantity(quantity);
+        transactionVariant.setSelectedVariants(selectedVariants);
 
-        public void removeVariantToTransaction(UUID transactionId, UUID productId) {
-                TransactionProduct transactionVariant = new TransactionProduct();
-                transactionVariant.setId(new TransactionProductId(transactionId, productId));
+        tpRepo.save(transactionVariant);
+    }
 
-                tpRepo.delete(transactionVariant);
-        }
+    public void removeVariantToTransaction(UUID transactionId, UUID productId) {
+        TransactionProduct transactionVariant = new TransactionProduct();
+        transactionVariant.setId(new TransactionProductId(transactionId, productId));
 
-        public TransactionResponse getTransactionById(UUID id) {
-                Transaction transaction = repo.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        tpRepo.delete(transactionVariant);
+    }
 
-                return mapToResponse(transaction);
-        }
+    public TransactionResponse getTransactionById(UUID id) {
+        Transaction transaction = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-        public Page<TransactionResponse> getTransactions(UUID storeId,
-                int page,
-                int size,
-                String sortBy,
-                String sortDir,
-                String statusCode,
-                String transactionTypeCode,
-                String paymentMethodCode,
-                LocalDate startDate,
-                LocalDate endDate) {
-                Pageable pageable = PageRequest.of(page, size,
-                        sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending()
-                                : Sort.by(sortBy).ascending());
+        return mapToResponse(transaction);
+    }
 
-                // fallback to 1970 and now if null
-                LocalDateTime start = startDate != null ? startDate.atStartOfDay()
-                        : LocalDate.of(1970, 1, 1).atStartOfDay();
-                LocalDateTime end =
-                        endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+    public Page<TransactionResponse> getTransactions(UUID storeId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDir,
+            String statusCode,
+            String transactionTypeCode,
+            String paymentMethodCode,
+            LocalDate startDate,
+            LocalDate endDate) {
+        Pageable pageable = PageRequest.of(page, size,
+                sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending()
+                        : Sort.by(sortBy).ascending());
 
-                Page<Transaction> transactionPage = repo.findFiltered(
-                        storeId, statusCode, transactionTypeCode, paymentMethodCode, start,
-                        end, pageable);
+        // fallback to 1970 and now if null
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay()
+                : LocalDate.of(1970, 1, 1).atStartOfDay();
+        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
-                return transactionPage.map(this::mapToResponse);
-        }
+        Page<Transaction> transactionPage = repo.findFiltered(
+                storeId, statusCode, transactionTypeCode, paymentMethodCode, start,
+                end, pageable);
 
-        public List<TransactionResponse> getAllTransactions() {
-                return repo.findAll().stream()
-                        .map(this::mapToResponse)
-                        .toList();
-        }
+        return transactionPage.map(this::mapToResponse);
+    }
 
-        private TransactionResponse mapToResponse(Transaction transaction) {
-                return TransactionResponse.builder()
-                        .id(transaction.getId())
-                        .storeId(transaction.getStoreId())
-                        .statusCode(transaction.getStatusCode())
-                        .paymentMethodCode(transaction.getPaymentMethodCode())
-                        .transactionTypeCode(transaction.getTransactionTypeCode())
-                        .description(transaction.getDescription())
-                        .isIn(transaction.isIn())
-                        .totalDiscount(transaction.getTotalDiscount())
-                        .totalPrice(transaction.getTotalPrice())
-                        .totalTax(transaction.getTotalTax())
-                        .createdAt(transaction.getCreatedAt())
-                        .updatedAt(transaction.getUpdatedAt())
-                        .transactionProduct(transaction.getTransactionProducts().stream()
-                                .map(tp -> TransactionProductResponse.builder()
-                                        .productId(tp.getProduct().getId())
-                                        .categoryCode(tp.getProduct().getCategoryCode())
-                                        .measureUnitCode(tp.getProduct().getMeasureUnitCode())
-                                        .name(tp.getProduct().getName())
-                                        .description(tp.getProduct().getDescription())
-                                        .stockQuantity(tp.getProduct().getStockQuantity())
-                                        .rejectCount(tp.getProduct().getRejectCount())
-                                        .soldCount(tp.getProduct().getSoldCount())
-                                        .imageUrl(tp.getProduct().getImageUrl())
+    public List<TransactionResponse> getAllTransactions() {
+        return repo.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 
-                                        .selectedVariants(tp.getSelectedVariants())
-                                        .note(tp.getNote())
-                                        .quantity(tp.getQuantity())
-                                        .buyingPrice(tp.getBuyingPrice())
-                                        .sellingPrice(tp.getSellingPrice())
-                                        .commission(tp.getCommission())
-                                        .isCommissionByPercent(tp.isCommissionByPercent())
-                                        .build())
-                                .toList())
-                        .build();
-        }
+    private TransactionResponse mapToResponse(Transaction transaction) {
+        return TransactionResponse.builder()
+                .id(transaction.getId())
+                .storeId(transaction.getStoreId())
+                .statusCode(transaction.getStatusCode())
+                .paymentMethodCode(transaction.getPaymentMethodCode())
+                .transactionTypeCode(transaction.getTransactionTypeCode())
+                .description(transaction.getDescription())
+                .isIn(transaction.isIn())
+                .totalDiscount(transaction.getTotalDiscount())
+                .totalPrice(transaction.getTotalPrice())
+                .totalTax(transaction.getTotalTax())
+                .createdAt(transaction.getCreatedAt())
+                .updatedAt(transaction.getUpdatedAt())
+                .transactionProduct(transaction.getTransactionProducts().stream()
+                        .map(tp -> TransactionProductResponse.builder()
+                                .productId(tp.getProduct().getId())
+                                .categoryCode(tp.getProduct().getCategoryCode())
+                                .measureUnitCode(tp.getProduct().getMeasureUnitCode())
+                                .name(tp.getProduct().getName())
+                                .description(tp.getProduct().getDescription())
+                                .stockQuantity(tp.getProduct().getStockQuantity())
+                                .rejectCount(tp.getProduct().getRejectCount())
+                                .soldCount(tp.getProduct().getSoldCount())
+                                .imageUrl(tp.getProduct().getImageUrl())
+
+                                .selectedVariants(tp.getSelectedVariants())
+                                .note(tp.getNote())
+                                .quantity(tp.getQuantity())
+                                .buyingPrice(tp.getBuyingPrice())
+                                .sellingPrice(tp.getSellingPrice())
+                                .commission(tp.getCommission())
+                                .isCommissionByPercent(tp.isCommissionByPercent())
+                                .build())
+                        .toList())
+                .build();
+    }
 }

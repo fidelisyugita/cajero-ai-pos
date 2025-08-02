@@ -1,30 +1,83 @@
 server:
   port: 8080
   address: 0.0.0.0
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    diskspace:
+      enabled: true
+    db:
+      enabled: true
 
 spring:
   profiles:
     active: dev
+  application:
+    name: cajero-backend
   datasource:
-    url: ${DATASOURCE_URL}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/cajero}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 30000
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    # properties:
+    #   hibernate:
+    #     dialect: org.hibernate.dialect.PostgreSQLDialect
+    #     format_sql: true
+    #     use_sql_comments: true
+    #     jdbc:
+    #       batch_size: 20
+    #     order_inserts: true
+    #     order_updates: true
+    #     connection:
+    #       provider_disables_autocommit: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterAccess=30m
+
+logging:
+  level:
+    com.huzakerna.cajero: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level - %msg%n"
+  file:
+    name: logs/cajero.log
+    max-size: 10MB
+    max-history: 10
+
 jwt:
-  secret-key: ${JWT_SECRET_KEY}
-  expiration-ms: ${JWT_EXPIRATION_MS}
+  secret-key: ${JWT_SECRET_KEY:your-secret-key-should-be-at-least-256-bits-for-hs512}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 springdoc:
   api-docs:
@@ -34,11 +87,47 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
+    try-it-out-enabled: true
 
 swagger:
-  username: ${SWAGGER_USERNAME}
-  password: ${SWAGGER_PASSWORD}
+  username: ${SWAGGER_USERNAME:admin}
+  password: ${SWAGGER_PASSWORD:admin123}
 
 admin:
-  email: ${ADMIN_EMAIL}
-  password: ${ADMIN_PASSWORD}
+  email: ${ADMIN_EMAIL:admin@cajero.com}
+  password: ${ADMIN_PASSWORD:admin123}
+
+# Oracle Cloud Configuration
+oracle:
+  cloud:
+    configFilePath: ${ORACLE_CLOUD_CONFIG_PATH:~/.oci/config}
+    bucket:
+      name: ${ORACLE_CLOUD_BUCKET_NAME:your-bucket-name}
+    compartment:
+      id: ${ORACLE_CLOUD_COMPARTMENT_ID:your-compartment-id}
+    namespace: ${ORACLE_CLOUD_NAMESPACE:your-namespace}
+    region: ${ORACLE_CLOUD_REGION:us-ashburn-1}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+logging:
+  level:
+    com.huzakerna.cajero: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN

@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.5.0'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'io.freefair.lombok' version '8.4'
+	id 'jacoco'
 }
 
 group = 'com.huzakerna'
@@ -14,56 +15,80 @@ java {
 	}
 }
 
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
 repositories {
 	mavenCentral()
 }
 
 dependencies {
-	// Spring Boot
+	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    // Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	
+	// Database
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Oracle Cloud SDK
+	implementation 'com.oracle.oci.sdk:oci-java-sdk-common:3.31.0'
+	implementation 'com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.31.0'
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-
-	// For Spring Boot 3.x + Lombok
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	// Hibernate Types for JSONB
+	implementation 'com.vladmihalcea:hibernate-types-60:2.21.1'
 
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 	implementation 'org.hibernate:hibernate-core:6.0.2.Final' // For UUID generation
-
-	// Hibernate Types for JSONB
-	implementation 'com.vladmihalcea:hibernate-types-60:2.21.1'
 	
 	// Jackson for JSON processing
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-	// JWT Support
-	implementation("io.jsonwebtoken:jjwt-api:0.12.3")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
+	// Development tools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-	runtimeOnly 'org.postgresql:postgresql'
+	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:postgresql'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
 
-// // ⭐ Add this to set the JAR name explicitly
-tasks.named('bootJar') {
-    archiveFileName = 'app.jar'
+jacocoTestReport {
+	dependsOn test
+	reports {
+		html.required = true
+		xml.required = true
+	}
+}
+
+jar {
+	enabled = false
+}
+
+bootJar {
+	archiveFileName = 'app.jar'
 }
