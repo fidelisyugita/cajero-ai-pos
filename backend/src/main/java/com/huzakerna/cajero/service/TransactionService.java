@@ -37,7 +37,6 @@ public class TransactionService {
         if (!sRepo.existsById(request.getStoreId())) {
             throw new IllegalArgumentException("Store not found");
         }
-        ;
 
         Transaction transaction = repo.save(
                 Transaction.builder()
