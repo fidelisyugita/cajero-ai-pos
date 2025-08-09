@@ -52,9 +52,9 @@ public class TransactionService {
                         .build());
 
         // Add transaction items if any
-        if (request.getTransactionProductRequests() != null) {
+        if (request.getTransactionProducts() != null) {
             for (TransactionProductRequest product : request
-                    .getTransactionProductRequests()) {
+                    .getTransactionProducts()) {
                 addProductToTransaction(transaction.getId(),
                         product.getProductId(),
                         product.getBuyingPrice(), product.getSellingPrice(),

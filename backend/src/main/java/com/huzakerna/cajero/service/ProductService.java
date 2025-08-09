@@ -56,8 +56,8 @@ public class ProductService {
                         .build());
 
         // Add product variants if any
-        if (request.getProductVariantRequests() != null) {
-            for (ProductVariantRequest variant : request.getProductVariantRequests()) {
+        if (request.getProductVariants() != null) {
+            for (ProductVariantRequest variant : request.getProductVariants()) {
                 addVariantToProduct(product.getId(), variant.getVariantId(),
                         variant.getPriceAdjustment(), variant.getStockQuantity());
 

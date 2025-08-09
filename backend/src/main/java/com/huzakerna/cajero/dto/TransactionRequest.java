@@ -39,7 +39,7 @@ public class TransactionRequest {
     @NotNull(message = "Payment Method Code is required")
     private String paymentMethodCode;
 
-    private List<TransactionProductRequest> transactionProductRequests;
+    private List<TransactionProductRequest> transactionProducts;
 
     private boolean isIn;
 
