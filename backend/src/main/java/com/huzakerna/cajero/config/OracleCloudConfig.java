@@ -11,14 +11,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
+import java.util.Base64;
+
+import com.oracle.bmc.Region;
 
 @Configuration
 @Getter
+@Slf4j
 public class OracleCloudConfig {
 
-  @Value("${oracle.cloud.configFilePath}")
+  @Value("${oracle.cloud.configFilePath:#{null}}")
   private String configFilePath;
 
   @Value("${oracle.cloud.bucket.name}")
@@ -33,25 +37,51 @@ public class OracleCloudConfig {
   @Value("${oracle.cloud.region}")
   private String region;
 
-  @Bean
-  public ObjectStorage objectStorageClient() throws Exception {
-    final ConfigFileReader.ConfigFile configFile = ConfigFileReader.parse(configFilePath);
-    final ConfigFileAuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(configFile);
+  @Value("${oracle.cloud.tenancy}")
+  private String tenancyId;
 
-    return ObjectStorageClient.builder()
-        .build(provider);
+  @Value("${oracle.cloud.user}")
+  private String userId;
+
+  @Value("${oracle.cloud.fingerprint.base64}")
+  private String fingerprintBase64;
+
+  @Value("${oracle.cloud.privatekey.base64:#{null}}")
+  private String privateKeyBase64;
+
+  private String getDecodedFingerprint() {
+    return new String(Base64.getDecoder().decode(fingerprintBase64));
   }
 
-  // @Bean
-  // public AuthenticationDetailsProvider authenticationDetailsProvider() throws
-  // IOException {
-  // return new ConfigFileAuthenticationDetailsProvider(configFilePath);
-  // }
+  private String getDecodedPrivateKey() {
+    return new String(Base64.getDecoder().decode(privateKeyBase64));
+  }
 
-  // @Bean
-  // public ObjectStorage objectStorageClient(AuthenticationDetailsProvider
-  // authenticationDetailsProvider) {
-  // return ObjectStorageClient.builder()
-  // .build(authenticationDetailsProvider);
-  // }
+  @Bean
+  public ObjectStorage objectStorageClient() throws Exception {
+    if (configFilePath != null && new File(configFilePath).exists()) {
+      // Use config file if available
+      final ConfigFileReader.ConfigFile configFile = ConfigFileReader.parse(configFilePath);
+      final ConfigFileAuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(configFile);
+      return ObjectStorageClient.builder().build(provider);
+    } else {
+      // Use environment variables
+      final SimpleAuthenticationDetailsProvider provider = SimpleAuthenticationDetailsProvider.builder()
+          .tenantId(tenancyId)
+          .userId(userId)
+          .fingerprint(getDecodedFingerprint())
+          .privateKeySupplier(() -> {
+            try {
+              return privateKeyBase64 != null ? new ByteArrayInputStream(getDecodedPrivateKey().getBytes())
+                  : new ByteArrayInputStream(new byte[0]);
+            } catch (Exception e) {
+              throw new RuntimeException("Failed to read private key", e);
+            }
+          })
+          .region(Region.fromRegionId(region))
+          .build();
+      return ObjectStorageClient.builder().build(provider);
+    }
+  }
+
 }

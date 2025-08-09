@@ -109,5 +109,7 @@ oracle:
     region: ${ORACLE_CLOUD_REGION:us-ashburn-1}
     tenancy: ${ORACLE_CLOUD_TENANCY:your-tenancy}
     user: ${ORACLE_CLOUD_USER:your-user}
-    fingerprint: ${ORACLE_CLOUD_FINGERPRINT:your-fingerprint}
-    privatekey: ${ORACLE_CLOUD_PRIVATEKEY:your-privatekey}
+    fingerprint:
+      base64: ${ORACLE_CLOUD_FINGERPRINT_BASE64:your-fingerprint}
+    privatekey:
+      base64: ${ORACLE_CLOUD_PRIVATEKEY_BASE64:your-privatekey}
