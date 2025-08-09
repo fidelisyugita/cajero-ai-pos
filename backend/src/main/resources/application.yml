@@ -100,34 +100,14 @@ admin:
 # Oracle Cloud Configuration
 oracle:
   cloud:
-    configFilePath: ${ORACLE_CLOUD_CONFIG_PATH:~/.oci/config}
+    configFilePath: ${ORACLE_CLOUD_CONFIG_PATH:your-configFilePath}
     bucket:
       name: ${ORACLE_CLOUD_BUCKET_NAME:your-bucket-name}
     compartment:
       id: ${ORACLE_CLOUD_COMPARTMENT_ID:your-compartment-id}
     namespace: ${ORACLE_CLOUD_NAMESPACE:your-namespace}
     region: ${ORACLE_CLOUD_REGION:us-ashburn-1}
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
----
-spring:
-  config:
-    activate:
-      on-profile: prod
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: validate
-logging:
-  level:
-    com.huzakerna.cajero: INFO
-    org.springframework.security: WARN
-    org.hibernate.SQL: WARN
+    tenancy: ${ORACLE_CLOUD_TENANCY:your-tenancy}
+    user: ${ORACLE_CLOUD_USER:your-user}
+    fingerprint: ${ORACLE_CLOUD_FINGERPRINT:your-fingerprint}
+    privatekey: ${ORACLE_CLOUD_PRIVATEKEY:your-privatekey}
