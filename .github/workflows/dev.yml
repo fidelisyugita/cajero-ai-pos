@@ -51,6 +51,15 @@ jobs:
               -e SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} \
               -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
               -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              -e ORACLE_CLOUD_CONFIG_PATH=${{ secrets.ORACLE_CLOUD_CONFIG_PATH }} \
+              -e ORACLE_CLOUD_BUCKET_NAME=${{ secrets.ORACLE_CLOUD_BUCKET_NAME }} \
+              -e ORACLE_CLOUD_COMPARTMENT_ID=${{ secrets.ORACLE_CLOUD_COMPARTMENT_ID }} \
+              -e ORACLE_CLOUD_NAMESPACE=${{ secrets.ORACLE_CLOUD_NAMESPACE }} \
+              -e ORACLE_CLOUD_REGION=${{ secrets.ORACLE_CLOUD_REGION }} \
+              -e ORACLE_CLOUD_TENANCY=${{ secrets.ORACLE_CLOUD_TENANCY }} \
+              -e ORACLE_CLOUD_USER=${{ secrets.ORACLE_CLOUD_USER }} \
+              -e ORACLE_CLOUD_FINGERPRINT_BASE64=${{ secrets.ORACLE_CLOUD_FINGERPRINT_BASE64 }} \
+              -e ORACLE_CLOUD_PRIVATEKEY_BASE64=${{ secrets.ORACLE_CLOUD_PRIVATEKEY_BASE64 }} \
               -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
 
             echo "Waiting for backend to be ready..."
