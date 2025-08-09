@@ -1,10 +1,12 @@
 package com.huzakerna.cajero.config;
 
 import com.oracle.bmc.ConfigFileReader;
+import com.oracle.bmc.Region;
 import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
 import com.oracle.bmc.auth.SimpleAuthenticationDetailsProvider;
 import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Base64;
-
-import com.oracle.bmc.Region;
 
 @Configuration
 @Getter
@@ -57,6 +57,13 @@ public class OracleCloudConfig {
     return new String(Base64.getDecoder().decode(privateKeyBase64));
   }
 
+  private Region getCustomRegion() {
+    // Convert region ID to the format Region expects
+    String regionId = region.toUpperCase().replace("-", "_");
+    log.info("Using region: {}", regionId);
+    return Region.fromRegionCodeOrId(regionId);
+  }
+
   @Bean
   public ObjectStorage objectStorageClient() throws Exception {
     if (configFilePath != null && new File(configFilePath).exists()) {
@@ -78,7 +85,7 @@ public class OracleCloudConfig {
               throw new RuntimeException("Failed to read private key", e);
             }
           })
-          .region(Region.fromRegionId(region))
+          .region(getCustomRegion())
           .build();
       return ObjectStorageClient.builder().build(provider);
     }
