@@ -52,7 +52,7 @@ public class ProductRequest {
     private String measureUnitCode; // Stores the measure unit code
 
     // Optional fields with validation
-    @Size(max = 255, message = "Image URL too long")
+    // @Size(max = 255, message = "Image URL too long")
     private String imageUrl;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")
