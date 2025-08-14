@@ -41,6 +41,8 @@ services:
       dockerfile: Dockerfile
     container_name: cajero-frontend
     env_file: .env
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     # depends_on:

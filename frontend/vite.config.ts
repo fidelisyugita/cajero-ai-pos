@@ -15,6 +15,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // allow access from outside container
     proxy: {
       "/api": {
         target: process.env.VITE_API_URL,
