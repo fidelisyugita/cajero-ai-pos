@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,6 +30,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+  const { login } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,11 +54,10 @@ export default function Login() {
       }
 
       const data = await response.json();
-      // TODO: Handle successful login (store token, redirect, etc.)
-      console.log("Login successful", data);
+      login(data);
     } catch (error) {
       console.error("Login error:", error);
-      // TODO: Handle error (show error message, etc.)
+      // TODO: Add error toast notification
     }
   }
 
