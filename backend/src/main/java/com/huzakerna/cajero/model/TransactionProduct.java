@@ -41,7 +41,7 @@ public class TransactionProduct {
     private Product product;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "selected_variants", columnDefinition = "jsonb")
     private JsonNode selectedVariants;
 
     private String note;
