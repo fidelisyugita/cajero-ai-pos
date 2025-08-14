@@ -29,26 +29,26 @@ services:
   # - "${AI_PORT}:${AI_PORT}"
   #   volumes:
   # - ./ai-api/fastapi:/app
-  # - ai_models:/app/models
+  # - cajero_ai_models:/app/models
 
   #   environment:
   #     - PYTHONUNBUFFERED=1
 
-  # # ---------- Frontend ----------
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: cajero-frontend
-  # env_file:
-  #   - .env
-  # ports:
-  #   - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-  #   depends_on:
-  #     backend:
-  #       condition: service_started
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
+  # ---------- Frontend ----------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cajero-frontend
+    env_file: .env
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    # depends_on:
+    #   backend:
+    #     condition: service_started
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 # volumes:
-#   ai_models:
+#   cajero_ai_models:
+# cajero_frontend_data:
