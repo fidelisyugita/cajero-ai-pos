@@ -6,9 +6,9 @@ import { apiClient } from "@/lib/apiClient";
 export function useLoginMutation() {
   return useMutation<AuthResponse, Error, LoginFormData>({
     mutationFn: (values) =>
-      apiClient<AuthResponse>("/api/auth/signin", {
+      apiClient<AuthResponse>("/auth/signin", {
         method: "POST",
-        body: JSON.stringify(values),
+        data: values,
       }),
   });
 }

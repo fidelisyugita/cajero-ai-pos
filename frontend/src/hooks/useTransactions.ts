@@ -5,6 +5,6 @@ import type { PaginatedResponse, Transaction } from "@/types/api";
 export const useTransactions = (page: number = 0) => {
   return useQuery<PaginatedResponse<Transaction>>({
     queryKey: ["transactions", page],
-    queryFn: () => apiClient(`/api/transaction?page=${page}&size=10`),
+    queryFn: () => apiClient(`/transaction?page=${page}&size=10`),
   });
 };
