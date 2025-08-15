@@ -1,73 +1,14 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card } from "../components/ui/card";
-
-interface ProductResponse {
-  id: string;
-  name: string;
-  measureUnitCode: string;
-  sellingPrice: number;
-  stockQuantity: number;
-  createdAt: string;
-}
-
-interface TransactionResponse {
-  id: string;
-  total: number;
-  status: string;
-  transactionType: string;
-  paymentMethod: string;
-  createdAt: string;
-}
-
-interface PaginatedResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-}
+import { Card } from "@/components/ui/card";
+import { useProducts } from "@/hooks/useProducts";
+import { useTransactions } from "@/hooks/useTransactions";
 
 const Reports = () => {
   const [productPage, setProductPage] = useState(0);
   const [transactionPage, setTransactionPage] = useState(0);
-  const token = localStorage.getItem("token");
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-
-  const { data: productsData } = useQuery<PaginatedResponse<ProductResponse>>({
-    queryKey: ["products", productPage],
-    queryFn: async () => {
-      const response = await fetch(`/api/product?page=${productPage}&size=10`, {
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    },
-  });
-
-  const { data: transactionsData } = useQuery<
-    PaginatedResponse<TransactionResponse>
-  >({
-    queryKey: ["transactions", transactionPage],
-    queryFn: async () => {
-      const response = await fetch(
-        `/api/transaction?page=${transactionPage}&size=10`,
-        {
-          headers,
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    },
-  });
+  const { data: productsData } = useProducts(productPage);
+  const { data: transactionsData } = useTransactions(transactionPage);
 
   return (
     <div className="container mx-auto p-4 space-y-6">
