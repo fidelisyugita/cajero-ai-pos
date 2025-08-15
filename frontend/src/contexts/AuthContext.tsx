@@ -2,6 +2,23 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { User, AuthResponse } from "@/types/auth";
 
+// Helper to decode JWT and check expiration
+function isTokenValid(token: string | null): boolean {
+  if (!token) return false;
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return false;
+    const decoded = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    if (!decoded.exp) return false;
+    // exp is in seconds, Date.now() in ms
+    return decoded.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
@@ -28,10 +45,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing token and user data on mount
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
-    if (token && userData) {
+    if (token && userData && isTokenValid(token)) {
       setIsAuthenticated(true);
       setUser(JSON.parse(userData));
     } else {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setIsAuthenticated(false);
       setUser(null);
     }

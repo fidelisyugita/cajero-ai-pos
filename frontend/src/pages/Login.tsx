@@ -2,6 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
+import { useLoginMutation } from "@/lib/useLoginMutation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -30,7 +32,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,27 +41,21 @@ export default function Login() {
     },
   });
 
+  const loginMutation = useLoginMutation();
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const response = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-      login(data);
-    } catch (error) {
-      console.error("Login error:", error);
-      // TODO: Add error toast notification
-    }
+    loginMutation.mutate(values, {
+      onSuccess: (data) => {
+        login(data);
+      },
+      onError: (error) => {
+        // TODO: Add error toast notification
+        console.error("Login error:", error);
+      },
+    });
   }
+
+  if (isAuthenticated) return <Navigate to="/" replace />;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -103,9 +99,20 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Sign in
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? "Signing in..." : "Sign in"}
               </Button>
+              {loginMutation.isError && (
+                <div className="text-red-500 text-sm text-center">
+                  {loginMutation.error instanceof Error
+                    ? loginMutation.error.message
+                    : "Login failed"}
+                </div>
+              )}
             </form>
           </Form>
         </CardContent>
