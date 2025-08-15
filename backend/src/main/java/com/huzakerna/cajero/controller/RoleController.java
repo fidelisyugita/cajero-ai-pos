@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/role")
-@RequiredArgsConstructor // Lombok generates constructor with required args
+@RequiredArgsConstructor
 public class RoleController {
 
     private final RoleRepository repo;

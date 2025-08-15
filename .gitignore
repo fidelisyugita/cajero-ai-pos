@@ -56,3 +56,4 @@ docker-compose.override.yml
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+.DS_Store

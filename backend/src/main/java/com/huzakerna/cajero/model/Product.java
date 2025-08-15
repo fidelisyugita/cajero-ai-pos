@@ -1,12 +1,9 @@
 package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,13 +36,6 @@ public class Product extends BaseEntity {
     @Column(name = "measure_unit_code")
     private String measureUnitCode;
 
-    // @ManyToMany
-    // @JoinTable(
-    // name = "product_variants",
-    // joinColumns = @JoinColumn(name = "product_id"),
-    // inverseJoinColumns = @JoinColumn(name = "variant_id"))
-    // @Builder.Default
-    // private Set<Variant> variants = new HashSet<>();
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<ProductVariant> productVariants = new HashSet<>();
@@ -69,8 +59,8 @@ public class Product extends BaseEntity {
     @Column(name = "selling_price")
     private BigDecimal sellingPrice;
 
-    @Column(name = "commission_by_percent")
-    private boolean commissionByPercent;
+    @Column(name = "is_commission_by_percent")
+    private boolean isCommissionByPercent;
     private BigDecimal commission;
 
     @Column(name = "created_By")
@@ -78,14 +68,4 @@ public class Product extends BaseEntity {
     @Column(name = "updated_By")
     private UUID updatedBy;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

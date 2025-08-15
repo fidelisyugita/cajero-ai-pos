@@ -18,64 +18,62 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
 
-        private final UserRepository repo;
-        private final StoreRepository sRepo;
-        private final PasswordEncoder encoder; // Autowired via constructor
+    private final UserRepository repo;
+    private final StoreRepository sRepo;
+    private final PasswordEncoder encoder; // Autowired via constructor
 
-        @Transactional
-        public UserResponse addUser(UserRequest request) {
-                if (repo.existsByEmail(request.getEmail())) {
-                        throw new DuplicateEmailException(request.getEmail());
-                }
-
-                // Validate store exists
-                if (!sRepo.existsById(request.getStoreId())) {
-                        throw new IllegalArgumentException("Store not found");
-                }
-
-                User user = User.builder()
-                        .name(request.getName())
-                        .email(request.getEmail())
-                        .phone(request.getPhone())
-                        .storeId(request.getStoreId())
-                        .roleCode(request.getRoleCode())
-                        .passwordHash(encoder.encode(request.getPassword()))
-                        .imageUrl(request.getImageUrl())
-                        .address(request.getAddress())
-                        .description(request.getDescription())
-                        .bankAccount(request.getBankAccount())
-                        .bankNo(request.getBankNo())
-                        .dailySalary(request.getDailySalary())
-                        .overtimeRate(request.getOvertimeRate())
-                        .build();
-
-                User savedUser = repo.save(user);
-                return mapToResponse(savedUser);
+    @Transactional
+    public UserResponse addUser(UserRequest request) {
+        if (repo.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException(request.getEmail());
         }
 
-        public UserResponse getUserById(UUID id) {
-                User user = repo.findById(id)
-                        .orElseThrow(() -> new UserNotFoundException(id));
-                return mapToResponse(user);
+        // Validate store exists
+        if (!sRepo.existsById(request.getStoreId())) {
+            throw new IllegalArgumentException("Store not found");
         }
 
-        public List<UserResponse> getAllUsers() {
-                return repo.findAll().stream()
-                        .map(this::mapToResponse)
-                        .toList();
-        }
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .storeId(request.getStoreId())
+                .roleCode(request.getRoleCode())
+                .passwordHash(encoder.encode(request.getPassword()))
+                .imageUrl(request.getImageUrl())
+                .address(request.getAddress())
+                .description(request.getDescription())
+                .bankAccount(request.getBankAccount())
+                .bankNo(request.getBankNo())
+                .dailySalary(request.getDailySalary())
+                .overtimeRate(request.getOvertimeRate())
+                .build();
 
-        private UserResponse mapToResponse(User user) {
-                return UserResponse.builder()
-                        .id(user.getId())
-                        .name(user.getName())
-                        .email(user.getEmail())
-                        .phone(user.getPhone())
-                        .storeId(user.getStoreId())
-                        .roleCode(user.getRoleCode())
-                        .imageUrl(user.getImageUrl())
-                        .createdAt(user.getCreatedAt())
-                        .updatedAt(user.getUpdatedAt())
-                        .build();
-        }
+        User savedUser = repo.save(user);
+        return mapToResponse(savedUser);
+    }
+
+    public UserResponse getUserById(UUID id) {
+        User user = repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        return mapToResponse(user);
+    }
+
+    public List<UserResponse> getAllUsers() {
+        return repo.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private UserResponse mapToResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .storeId(user.getStoreId())
+                .roleCode(user.getRoleCode())
+                .imageUrl(user.getImageUrl())
+                .build();
+    }
 }

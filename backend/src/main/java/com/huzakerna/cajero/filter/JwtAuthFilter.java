@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.security.UserDetailsServiceImpl;
 import com.huzakerna.cajero.util.JwtUtils;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       logger.info("Validating token for: {}", userEmail);
 
       if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        UserDetailsImpl userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
         if (jwtUtils.isTokenValid(jwt, userDetails)) {
           logger.info("Wait a moment...");

@@ -2,6 +2,7 @@ package com.huzakerna.cajero.security;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,14 +15,23 @@ public class UserDetailsImpl implements UserDetails {
     this.user = user;
   }
 
+  public UUID getStoreId() {
+    return user.getStoreId();
+  }
+
+  @Override
+  public String getUsername() {
+    return user.getEmail();
+  }
+
   @Override
   public String getPassword() {
     return user.getPasswordHash();
   }
 
   @Override
-  public String getUsername() {
-    return user.getEmail();
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRoleCode()));
   }
 
   @Override
@@ -42,11 +52,6 @@ public class UserDetailsImpl implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
-  }
-
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRoleCode()));
   }
 
 }

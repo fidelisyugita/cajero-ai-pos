@@ -1,0 +1,70 @@
+name: Build and Deploy Cajero Backend
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # ✅ Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
+          platforms: linux/amd64,linux/arm64
+
+      # ✅ Deploy to Oracle VM
+      - name: Deploy to Oracle VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ${{ secrets.ORACLE_USER }}
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          script: |
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            docker pull ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
+            docker stop cajero-backend || true
+            docker rm cajero-backend || true
+            docker run -d --name cajero-backend \
+              -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
+              -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+              -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e JWT_EXPIRATION_MS=${{ secrets.JWT_EXPIRATION_MS }} \
+              -e SWAGGER_USERNAME=${{ secrets.SWAGGER_USERNAME }} \
+              -e SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} \
+              -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
+              -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              -e ORACLE_CLOUD_CONFIG_PATH=${{ secrets.ORACLE_CLOUD_CONFIG_PATH }} \
+              -e ORACLE_CLOUD_BUCKET_NAME=${{ secrets.ORACLE_CLOUD_BUCKET_NAME }} \
+              -e ORACLE_CLOUD_COMPARTMENT_ID=${{ secrets.ORACLE_CLOUD_COMPARTMENT_ID }} \
+              -e ORACLE_CLOUD_NAMESPACE=${{ secrets.ORACLE_CLOUD_NAMESPACE }} \
+              -e ORACLE_CLOUD_REGION=${{ secrets.ORACLE_CLOUD_REGION }} \
+              -e ORACLE_CLOUD_TENANCY=${{ secrets.ORACLE_CLOUD_TENANCY }} \
+              -e ORACLE_CLOUD_USER=${{ secrets.ORACLE_CLOUD_USER }} \
+              -e ORACLE_CLOUD_FINGERPRINT_BASE64=${{ secrets.ORACLE_CLOUD_FINGERPRINT_BASE64 }} \
+              -e ORACLE_CLOUD_PRIVATEKEY_BASE64=${{ secrets.ORACLE_CLOUD_PRIVATEKEY_BASE64 }} \
+              -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
+
+            echo "Waiting for backend to be ready..."
+            for i in {1..30}; do
+              curl --fail http://localhost:8080/actuator/health && break
+              echo "Waiting for backend..."
+              sleep 10
+            done

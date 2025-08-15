@@ -1,5 +1,8 @@
 package com.huzakerna.cajero.config;
 
+import com.huzakerna.cajero.filter.JwtAuthFilter;
+import com.huzakerna.cajero.security.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,72 +23,77 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.huzakerna.cajero.filter.JwtAuthFilter;
-import com.huzakerna.cajero.security.UserDetailsServiceImpl;
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
+
   private final UserDetailsServiceImpl userDetailsService;
+  private final CorsConfigurationSource corsConfigurationSource;
 
   @Bean
-  @Order(1) // Higher priority for Swagger security
+  @Order(1)
   public SecurityFilterChain swaggerFilterChain(
-    HttpSecurity http,
-    @Value("${swagger.username}") String username,
-    @Value("${swagger.password}") String password,
-    PasswordEncoder encoder) throws Exception {
+      HttpSecurity http,
+      @Value("${swagger.username}") String username,
+      @Value("${swagger.password}") String password,
+      PasswordEncoder encoder) throws Exception {
 
     http
-      .httpBasic(Customizer.withDefaults())
-      .csrf(csrf -> csrf.disable())
-      .securityMatcher("/swagger-ui/**", "/v3/api-docs/**")
-      .authorizeHttpRequests(auth -> auth.anyRequest().hasRole("SWAGGER"))
-      .userDetailsService(swaggerUsers(username, password, encoder));
-
+        .securityMatcher("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
+        .authorizeHttpRequests(auth -> auth
+            .anyRequest().hasRole("SWAGGER"))
+        .httpBasic(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .userDetailsService(swaggerUsers(username, password, encoder));
     return http.build();
   }
 
   @Bean
-  @Order(2) // Lower priority for JWT security
-  public SecurityFilterChain apiFilterChain(HttpSecurity http,
-    JwtAuthFilter jwtAuthFilter) throws Exception {
+  @Order(2)
+  public SecurityFilterChain apiFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
     http
-      .cors(Customizer.withDefaults())
-      .csrf(AbstractHttpConfigurer::disable)
-      .securityMatcher("/api/**")
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/api/auth/signin").permitAll()
-        .requestMatchers("/api/user/**").hasRole("OWNER")
-        .anyRequest().authenticated())
-      .userDetailsService(userDetailsService) // Use your service
-      .sessionManagement(session -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        .cors(cors -> cors.configurationSource(corsConfigurationSource))
+        .csrf(AbstractHttpConfigurer::disable)
+        .securityMatcher("/api/**")
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/signin").permitAll()
+            .requestMatchers("/api/public/**").permitAll()
+            .requestMatchers("/api/image/**").permitAll()
+            .requestMatchers("/actuator/health").permitAll()
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/owner/**").hasRole("OWNER")
+            .requestMatchers("/api/user/**").hasRole("OWNER")
+            .requestMatchers("/api/**").authenticated())
+        .userDetailsService(userDetailsService)
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
 
-  private UserDetailsService swaggerUsers(String username, String password,
-    PasswordEncoder encoder) {
+  private UserDetailsService swaggerUsers(String username, String password, PasswordEncoder encoder) {
     UserDetails user = User.builder()
-      .username(username)
-      .password(encoder.encode(password))
-      .roles("SWAGGER")
-      .build();
+        .username(username)
+        .password(encoder.encode(password))
+        .roles("SWAGGER")
+        .build();
     return new InMemoryUserDetailsManager(user);
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-    throws Exception {
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
   }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
+    return new BCryptPasswordEncoder(12);
   }
 }

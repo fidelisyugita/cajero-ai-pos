@@ -8,5 +8,5 @@ RUN ./gradlew build -x test  # Skip tests during Docker build
 # Stage 2: Run the JAR
 FROM eclipse-temurin:17-jre-jammy
 COPY --from=builder /app/build/libs/app.jar app.jar
-# EXPOSE 8080
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -7,7 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import com.huzakerna.cajero.security.UserDetailsImpl;
+import com.huzakerna.cajero.model.User;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
@@ -31,31 +31,16 @@ public class JwtUtils {
   }
 
 
-  public String generateToken(UserDetailsImpl userDetails) {
+  public String generateToken(User user) {
     return Jwts.builder()
-      .subject(userDetails.getUsername())
+      .subject(user.getEmail())
+      .claim("storeId", user.getStoreId())
+      .claim("role", user.getRoleCode())
       .issuedAt(new Date())
       .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
       .signWith(getSigningKey())
       .compact();
   }
-
-  // public String generateToken(UserDetailsImpl userDetails) {
-  // return generateToken(new HashMap<>(), userDetails);
-  // }
-
-  // @SuppressWarnings("deprecation")
-  // public String generateToken(
-  // Map<String, Object> extraClaims,
-  // UserDetails userDetails) {
-  // return Jwts.builder()
-  // .setClaims(extraClaims)
-  // .setSubject(userDetails.getUsername())
-  // .setIssuedAt(new Date(System.currentTimeMillis()))
-  // .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-  // .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-  // .compact();
-  // }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);

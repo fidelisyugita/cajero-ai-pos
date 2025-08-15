@@ -1,10 +1,7 @@
 package com.huzakerna.cajero.model;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
@@ -46,14 +43,4 @@ public class Variant extends BaseEntity {
     @Column(name = "updated_By")
     private UUID updatedBy;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

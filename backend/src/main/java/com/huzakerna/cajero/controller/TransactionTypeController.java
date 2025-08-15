@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/transaction-type")
-@RequiredArgsConstructor // Lombok generates constructor with required args
+@RequiredArgsConstructor
 public class TransactionTypeController {
 
     private final TransactionTypeRepository repo;
