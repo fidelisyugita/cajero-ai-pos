@@ -1,5 +1,6 @@
 import { Button } from "./ui/button";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
   Store,
@@ -11,6 +12,7 @@ import {
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,28 +28,56 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
               <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Store className="mr-2 h-5 w-5" />
-                  Point of Sale
-                </Button>
+                <Link to="/">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <Store className="mr-2 h-5 w-5" />
+                    Point of Sale
+                  </Button>
+                </Link>
               </li>
               <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  Orders
-                </Button>
+                <Link to="/orders">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/orders" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Orders
+                  </Button>
+                </Link>
               </li>
               <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <BarChart3 className="mr-2 h-5 w-5" />
-                  Reports
-                </Button>
+                <Link to="/reports">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/reports" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    Reports
+                  </Button>
+                </Link>
               </li>
               <li>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Settings className="mr-2 h-5 w-5" />
-                  Settings
-                </Button>
+                <Link to="/settings">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/settings" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <Settings className="mr-2 h-5 w-5" />
+                    Settings
+                  </Button>
+                </Link>
               </li>
             </ul>
           </nav>
