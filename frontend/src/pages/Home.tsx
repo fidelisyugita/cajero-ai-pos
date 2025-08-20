@@ -3,20 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Minus } from "lucide-react";
-
-// Dummy data
-const products = [
-  { id: 1, name: "Americano", price: 3.5, category: "Coffee" },
-  { id: 2, name: "Latte", price: 4.0, category: "Coffee" },
-  { id: 3, name: "Cappuccino", price: 4.0, category: "Coffee" },
-  { id: 4, name: "Espresso", price: 2.5, category: "Coffee" },
-  { id: 5, name: "Croissant", price: 3.0, category: "Pastry" },
-  { id: 6, name: "Chocolate Muffin", price: 2.5, category: "Pastry" },
-];
-
-const categories = ["All", "Coffee", "Pastry", "Tea", "Snacks"];
+import { useProductCategories } from "@/hooks/useProductCategories";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProducts } from "@/hooks/useProducts";
 
 export default function Home() {
+  const { data: categoriesData, isLoading: isLoadingCategories } =
+    useProductCategories();
+  const { data: productsData, isLoading: isLoadingProducts } = useProducts(0);
+
   return (
     <DashboardLayout>
       <div className="grid grid-cols-12 gap-6">
@@ -29,31 +24,37 @@ export default function Home() {
                 <Input placeholder="Search products..." className="pl-9" />
               </div>
             </div>
-            <div className="flex gap-2 mb-6">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={category === "All" ? "default" : "outline"}
-                  className="rounded-full"
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
+            {isLoadingCategories ? (
+              <div className="flex gap-2 mb-6">
+                <Skeleton className="h-9 w-[100px] rounded-full" />
+                <Skeleton className="h-9 w-[100px] rounded-full" />
+                <Skeleton className="h-9 w-[100px] rounded-full" />
+              </div>
+            ) : (
+              <div className="flex gap-2 mb-6">
+                {categoriesData?.map((category) => (
+                  <Button
+                    key={category.code}
+                    variant={category.code === "All" ? "default" : "outline"}
+                    className="rounded-full"
+                  >
+                    {category.name}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            {products.map((product) => (
+            {productsData?.content.map((product) => (
               <Card key={product.id} className="cursor-pointer hover:bg-accent">
                 <CardHeader className="p-4">
                   <CardTitle className="text-lg">{product.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
-                  <p className="text-xl font-bold">
-                    ${product.price.toFixed(2)}
-                  </p>
+                  <p className="text-xl font-bold">{product.sellingPrice}</p>
                   <p className="text-sm text-muted-foreground">
-                    {product.category}
+                    {product.stockQuantity} {product.measureUnitCode}
                   </p>
                 </CardContent>
               </Card>
@@ -71,7 +72,7 @@ export default function Home() {
               <div className="space-y-4">
                 {/* Cart items */}
                 <div className="space-y-4">
-                  {products.slice(0, 3).map((product) => (
+                  {productsData?.content.slice(0, 3).map((product) => (
                     <div
                       key={product.id}
                       className="flex items-center justify-between"
@@ -79,7 +80,7 @@ export default function Home() {
                       <div className="flex-1">
                         <p className="font-medium">{product.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          ${product.price.toFixed(2)}
+                          {product.sellingPrice}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -99,15 +100,15 @@ export default function Home() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between mb-2">
                     <span>Subtotal</span>
-                    <span>$10.50</span>
+                    <span>10.50</span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span>Tax (10%)</span>
-                    <span>$1.05</span>
+                    <span>1.05</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>$11.55</span>
+                    <span>11.55</span>
                   </div>
                 </div>
 
