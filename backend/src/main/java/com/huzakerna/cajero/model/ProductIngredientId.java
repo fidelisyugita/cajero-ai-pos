@@ -14,10 +14,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductVariantId implements Serializable {
+public class ProductIngredientId implements Serializable {
     @Column(name = "product_id")
     private UUID productId;
-    @Column(name = "variant_id")
-    private UUID variantId;
+    @Column(name = "ingredient_id")
+    private UUID ingredientId;
 
 }

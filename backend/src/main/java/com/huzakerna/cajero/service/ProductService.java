@@ -12,15 +12,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.huzakerna.cajero.dto.ProductIngredientRequest;
+import com.huzakerna.cajero.dto.ProductIngredientResponse;
 import com.huzakerna.cajero.dto.ProductRequest;
-import com.huzakerna.cajero.dto.ProductVariantRequest;
-import com.huzakerna.cajero.dto.ProductVariantResponse;
 import com.huzakerna.cajero.dto.ProductResponse;
 import com.huzakerna.cajero.model.Product;
-import com.huzakerna.cajero.model.ProductVariant;
-import com.huzakerna.cajero.model.ProductVariantId;
+import com.huzakerna.cajero.model.ProductIngredient;
+import com.huzakerna.cajero.model.ProductIngredientId;
 import com.huzakerna.cajero.repository.ProductRepository;
-import com.huzakerna.cajero.repository.ProductVariantRepository;
+import com.huzakerna.cajero.repository.ProductIngredientRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +30,7 @@ public class ProductService {
 
     private final StoreRepository sRepo;
     private final ProductRepository repo;
-    private final ProductVariantRepository pvRepo;
+    private final ProductIngredientRepository piRepo;
 
     public ProductResponse addProduct(ProductRequest request) {
         // Validate store exists
@@ -59,11 +59,11 @@ public class ProductService {
                         .tax(request.getTax())
                         .build());
 
-        // Add product variants if any
-        if (request.getProductVariants() != null) {
-            for (ProductVariantRequest variant : request.getProductVariants()) {
-                addVariantToProduct(product.getId(), variant.getVariantId(),
-                        variant.getPriceAdjustment(), variant.getStock());
+        // Add product ingredients if any
+        if (request.getProductIngredients() != null) {
+            for (ProductIngredientRequest ingredient : request.getProductIngredients()) {
+                addIngredientToProduct(product.getId(), ingredient.getIngredientId(),
+                        ingredient.getQuantityNeeded());
 
             }
         }
@@ -71,22 +71,21 @@ public class ProductService {
         return mapToResponse(product);
     }
 
-    public void addVariantToProduct(UUID productId, UUID variantId,
-            BigDecimal priceAdjustment, Integer stock) {
+    public void addIngredientToProduct(UUID productId, UUID ingredientId,
+            BigDecimal quantityNeeded) {
 
-        ProductVariant productVariant = new ProductVariant();
-        productVariant.setId(new ProductVariantId(productId, variantId));
-        productVariant.setPriceAdjustment(priceAdjustment);
-        productVariant.setStock(stock);
+        ProductIngredient productIngredient = new ProductIngredient();
+        productIngredient.setId(new ProductIngredientId(productId, ingredientId));
+        productIngredient.setQuantityNeeded(quantityNeeded);
 
-        pvRepo.save(productVariant);
+        piRepo.save(productIngredient);
     }
 
-    public void removeVariantToProduct(UUID productId, UUID variantId) {
-        ProductVariant productVariant = new ProductVariant();
-        productVariant.setId(new ProductVariantId(productId, variantId));
+    public void removeVariantToProduct(UUID productId, UUID ingredientId) {
+        ProductIngredient productIngredient = new ProductIngredient();
+        productIngredient.setId(new ProductIngredientId(productId, ingredientId));
 
-        pvRepo.delete(productVariant);
+        piRepo.delete(productIngredient);
     }
 
     public ProductResponse getProductById(UUID id) {
@@ -147,17 +146,14 @@ public class ProductService {
                 .updatedBy(product.getUpdatedBy())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
-                .productVariants(product.getProductVariants().stream()
-                        .map(pv -> ProductVariantResponse.builder()
-                                .variantId(pv.getVariant().getId())
-                                .name(pv.getVariant().getName())
-                                .description(pv.getVariant().getDescription())
-                                .isRequired(pv.getVariant().isRequired())
-                                .isMultiple(pv.getVariant().isMultiple())
-                                .options(pv.getVariant().getOptions())
-
-                                .stock(pv.getStock())
-                                .priceAdjustment(pv.getPriceAdjustment())
+                .productIngredients(product.getProductIngredients().stream()
+                        .map(pi -> ProductIngredientResponse.builder()
+                                .ingredientId(pi.getIngredient().getId())
+                                .name(pi.getIngredient().getName())
+                                .description(pi.getIngredient().getDescription())
+                                .stock(pi.getIngredient().getStock())
+                                .measureUnitCode(pi.getIngredient().getMeasureUnitCode())
+                                .quantityNeeded(pi.getQuantityNeeded())
                                 .build())
                         .toList())
                 .build();

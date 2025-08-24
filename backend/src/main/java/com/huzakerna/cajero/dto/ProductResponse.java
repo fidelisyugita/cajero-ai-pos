@@ -23,7 +23,7 @@ public class ProductResponse {
     private String name;
     private String imageUrl;
     private String description;
-    private Integer stock;
+    private BigDecimal stock;
     private Integer rejectCount;
     private Integer soldCount;
     private String categoryCode;
@@ -37,7 +37,7 @@ public class ProductResponse {
     private BigDecimal discount;
     private BigDecimal tax;
 
-    private List<ProductVariantResponse> productVariants;
+    private List<ProductIngredientResponse> productIngredients;
 
     private UUID createdBy;
     private UUID updatedBy;

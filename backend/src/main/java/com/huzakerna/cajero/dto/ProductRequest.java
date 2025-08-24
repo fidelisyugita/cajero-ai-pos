@@ -31,18 +31,18 @@ public class ProductRequest {
     /**
      * TODO: Will check will use set or list (in Transaction)
      * 
-     * @see ProductVariantRequest
+     * @see ProductIngredientRequest
      * @see TransactionProduct
      */
     @Builder.Default
-    private Set<ProductVariantRequest> productVariants = new HashSet<>();
+    private Set<ProductIngredientRequest> productIngredients = new HashSet<>();
 
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
 
     @NotNull(message = "Stock Quantity is required")
     @Min(value = 0, message = "Stock Quantity cannot be negative")
-    private Integer stock;
+    private BigDecimal stock;
 
     @NotNull(message = "Category Code is required")
     private String categoryCode;
