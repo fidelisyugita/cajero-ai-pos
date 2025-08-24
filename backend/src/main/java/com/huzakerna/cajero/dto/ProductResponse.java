@@ -32,8 +32,9 @@ public class ProductResponse {
     private BigDecimal buyingPrice;
     private BigDecimal sellingPrice;
 
-    private boolean isCommissionByPercent;
     private BigDecimal commission;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
     private List<ProductVariantResponse> productVariants;
 

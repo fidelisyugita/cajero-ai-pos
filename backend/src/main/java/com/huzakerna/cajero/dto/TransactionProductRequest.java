@@ -44,6 +44,10 @@ public class TransactionProductRequest {
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
     private BigDecimal commission;
 
-    private boolean isCommissionByPercent;
+    @DecimalMin(value = "0.0", message = "Discount cannot be negative")
+    private BigDecimal discount;
+
+    @DecimalMin(value = "0.0", message = "Tax cannot be negative")
+    private BigDecimal tax;
 
 }

@@ -8,6 +8,7 @@
     "build:frontend": "cd frontend && npm run build",
     "clean:backend": "cd backend && rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ && ./gradlew clean",
     "backend": "cd backend && ./gradlew bootRun",
+    "frontend": "cd frontend && npm run dev",
     "test:all": "npm-run-all test:backend test:frontend",
     "clean:docker": "./clean-start.sh"
   },

@@ -137,6 +137,7 @@ public class TransactionService {
                                 .transactionTypeCode(transaction.getTransactionTypeCode())
                                 .description(transaction.getDescription())
                                 .isIn(transaction.isIn())
+                                .totalCommission(transaction.getTotalCommission())
                                 .totalDiscount(transaction.getTotalDiscount())
                                 .totalPrice(transaction.getTotalPrice())
                                 .totalTax(transaction.getTotalTax())
@@ -160,7 +161,8 @@ public class TransactionService {
                                                                 .buyingPrice(tp.getBuyingPrice())
                                                                 .sellingPrice(tp.getSellingPrice())
                                                                 .commission(tp.getCommission())
-                                                                .isCommissionByPercent(tp.isCommissionByPercent())
+                                                                .discount(tp.getDiscount())
+                                                                .tax(tp.getTax())
                                                                 .build())
                                                 .toList())
                                 .build();

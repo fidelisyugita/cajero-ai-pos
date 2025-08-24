@@ -20,8 +20,9 @@ public class TransactionResponse {
     private UUID id;
     private UUID storeId;
 
-    private BigDecimal totalTax;
+    private BigDecimal totalCommission;
     private BigDecimal totalDiscount;
+    private BigDecimal totalTax;
     private BigDecimal totalPrice;
 
     private String description;

@@ -34,6 +34,7 @@ public class TransactionProductResponse {
     private BigDecimal buyingPrice;
     private BigDecimal sellingPrice;
     private BigDecimal commission;
-    private boolean isCommissionByPercent;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
 }

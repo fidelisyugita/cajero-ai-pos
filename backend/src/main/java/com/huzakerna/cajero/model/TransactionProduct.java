@@ -56,8 +56,7 @@ public class TransactionProduct {
     private BigDecimal sellingPrice;
 
     private BigDecimal commission;
-
-    @Column(name = "is_commission_by_percent")
-    private boolean isCommissionByPercent;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
 }

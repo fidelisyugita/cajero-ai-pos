@@ -59,9 +59,9 @@ public class Product extends BaseEntity {
     @Column(name = "selling_price")
     private BigDecimal sellingPrice;
 
-    @Column(name = "is_commission_by_percent")
-    private boolean isCommissionByPercent;
     private BigDecimal commission;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
     @Column(name = "created_By")
     private UUID createdBy;

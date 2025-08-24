@@ -24,6 +24,8 @@ public class TransactionRequest {
 
     @DecimalMin(value = "0.0", message = "Total Tax cannot be negative")
     private BigDecimal totalTax;
+    @DecimalMin(value = "0.0", message = "Total Commission cannot be negative")
+    private BigDecimal totalCommission;
     @DecimalMin(value = "0.0", message = "Total Discount cannot be negative")
     private BigDecimal totalDiscount;
     @DecimalMin(value = "0.0", message = "Total Price cannot be negative")
