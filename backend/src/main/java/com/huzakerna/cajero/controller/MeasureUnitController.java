@@ -28,10 +28,11 @@ public class MeasureUnitController {
 
     @GetMapping
     public ResponseEntity<List<MeasureUnit>> getAll(
-        @AuthenticationPrincipal UserDetailsImpl user) {
-        UUID storeId = user.getStoreId();
+            @AuthenticationPrincipal UserDetailsImpl user) {
+        return ResponseEntity.ok(repo.findAll());
+        // UUID storeId = user.getStoreId();
 
-        return ResponseEntity.ok(repo.findByStoreId(storeId));
+        // return ResponseEntity.ok(repo.findByStoreId(storeId));
     }
 
     @PostMapping
