@@ -54,7 +54,7 @@ export default function Home() {
                 <CardContent className="p-4 pt-0">
                   <p className="text-xl font-bold">{product.sellingPrice}</p>
                   <p className="text-sm text-muted-foreground">
-                    {product.stockQuantity} {product.measureUnitCode}
+                    {product.stock} {product.measureUnitCode}
                   </p>
                 </CardContent>
               </Card>

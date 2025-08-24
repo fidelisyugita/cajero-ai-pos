@@ -44,8 +44,8 @@ public class Product extends BaseEntity {
     private String name;
 
     private String description;
-    @Column(name = "stock_quantity")
-    private Integer stockQuantity;
+    @Column(name = "stock")
+    private Integer stock;
     @Column(name = "reject_count")
     private Integer rejectCount;
     @Column(name = "sold_count")

@@ -11,7 +11,7 @@ export interface Product {
   name: string;
   measureUnitCode: string;
   sellingPrice: number;
-  stockQuantity: number;
+  stock: number;
   createdAt: string;
 }
 

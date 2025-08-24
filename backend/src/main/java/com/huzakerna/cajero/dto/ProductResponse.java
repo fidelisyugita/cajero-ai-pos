@@ -23,7 +23,7 @@ public class ProductResponse {
     private String name;
     private String imageUrl;
     private String description;
-    private Integer stockQuantity;
+    private Integer stock;
     private Integer rejectCount;
     private Integer soldCount;
     private String categoryCode;

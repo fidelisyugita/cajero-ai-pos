@@ -49,7 +49,7 @@ public class ProductService {
                         .description(request.getDescription())
                         .buyingPrice(request.getBuyingPrice())
                         .sellingPrice(request.getSellingPrice())
-                        .stockQuantity(request.getStockQuantity())
+                        .stock(request.getStock())
                         .categoryCode(request.getCategoryCode())
                         .measureUnitCode(request.getMeasureUnitCode())
                         // Set other fields
@@ -59,7 +59,7 @@ public class ProductService {
         if (request.getProductVariants() != null) {
             for (ProductVariantRequest variant : request.getProductVariants()) {
                 addVariantToProduct(product.getId(), variant.getVariantId(),
-                        variant.getPriceAdjustment(), variant.getStockQuantity());
+                        variant.getPriceAdjustment(), variant.getStock());
 
             }
         }
@@ -68,12 +68,12 @@ public class ProductService {
     }
 
     public void addVariantToProduct(UUID productId, UUID variantId,
-            BigDecimal priceAdjustment, Integer stockQuantity) {
+            BigDecimal priceAdjustment, Integer stock) {
 
         ProductVariant productVariant = new ProductVariant();
         productVariant.setId(new ProductVariantId(productId, variantId));
         productVariant.setPriceAdjustment(priceAdjustment);
-        productVariant.setStockQuantity(stockQuantity);
+        productVariant.setStock(stock);
 
         pvRepo.save(productVariant);
     }
@@ -128,7 +128,7 @@ public class ProductService {
                 .name(product.getName())
                 .imageUrl(product.getImageUrl())
                 .description(product.getDescription())
-                .stockQuantity(product.getStockQuantity())
+                .stock(product.getStock())
                 .rejectCount(product.getRejectCount())
                 .soldCount(product.getSoldCount())
                 .categoryCode(product.getCategoryCode())
@@ -150,7 +150,7 @@ public class ProductService {
                                 .isMultiple(pv.getVariant().isMultiple())
                                 .options(pv.getVariant().getOptions())
 
-                                .stockQuantity(pv.getStockQuantity())
+                                .stock(pv.getStock())
                                 .priceAdjustment(pv.getPriceAdjustment())
                                 .build())
                         .toList())

@@ -25,7 +25,7 @@ public class ProductVariantResponse {
     private JsonNode options;
 
     // itself
-    private Integer stockQuantity;
+    private Integer stock;
     private BigDecimal priceAdjustment;
 
 }

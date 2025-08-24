@@ -22,7 +22,7 @@ public class TransactionProductResponse {
     private String measureUnitCode;
     private String name;
     private String description;
-    private Integer stockQuantity;
+    private Integer stock;
     private Integer rejectCount;
     private Integer soldCount;
     private String imageUrl;

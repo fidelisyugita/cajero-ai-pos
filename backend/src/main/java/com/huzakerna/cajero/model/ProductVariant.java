@@ -37,8 +37,8 @@ public class ProductVariant {
     @JoinColumn(name = "variant_id") // Matches DB column
     private Variant variant;
 
-    @Column(name = "stock_quantity")
-    private Integer stockQuantity;
+    @Column(name = "stock")
+    private Integer stock;
     @Column(name = "price_adjustment")
     private BigDecimal priceAdjustment;
 }

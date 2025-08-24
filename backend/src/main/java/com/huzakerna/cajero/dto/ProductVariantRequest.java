@@ -23,7 +23,7 @@ public class ProductVariantRequest {
 
     @NotNull(message = "Stock Quantity is required")
     @Min(value = 0, message = "Stock Quantity cannot be negative")
-    private Integer stockQuantity;
+    private Integer stock;
 
     @NotNull(message = "Price Adjustment is required")
     @DecimalMin(value = "0.0", message = "Stock cannot be negative")

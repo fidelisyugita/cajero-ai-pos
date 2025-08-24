@@ -42,7 +42,7 @@ public class ProductRequest {
 
     @NotNull(message = "Stock Quantity is required")
     @Min(value = 0, message = "Stock Quantity cannot be negative")
-    private Integer stockQuantity;
+    private Integer stock;
 
     @NotNull(message = "Category Code is required")
     private String categoryCode;
