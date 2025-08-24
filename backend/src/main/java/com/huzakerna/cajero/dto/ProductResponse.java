@@ -28,6 +28,7 @@ public class ProductResponse {
     private Integer soldCount;
     private String categoryCode;
     private String measureUnitCode;
+    private String barcode;
 
     private BigDecimal buyingPrice;
     private BigDecimal sellingPrice;

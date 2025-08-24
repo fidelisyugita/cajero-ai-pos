@@ -59,6 +59,7 @@ public class Product extends BaseEntity {
     @Column(name = "selling_price")
     private BigDecimal sellingPrice;
 
+    private String barcode;
     private BigDecimal commission;
     private BigDecimal discount;
     private BigDecimal tax;

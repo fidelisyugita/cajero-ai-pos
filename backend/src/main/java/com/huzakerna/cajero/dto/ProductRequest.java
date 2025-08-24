@@ -54,6 +54,7 @@ public class ProductRequest {
     // Optional fields with validation
     // @Size(max = 255, message = "Image URL too long")
     private String imageUrl;
+    private String barcode;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")
     private BigDecimal buyingPrice;

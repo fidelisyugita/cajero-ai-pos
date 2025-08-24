@@ -52,7 +52,11 @@ public class ProductService {
                         .stock(request.getStock())
                         .categoryCode(request.getCategoryCode())
                         .measureUnitCode(request.getMeasureUnitCode())
-                        // Set other fields
+                        .imageUrl(request.getImageUrl())
+                        .barcode(request.getBarcode())
+                        .commission(request.getCommission())
+                        .discount(request.getDiscount())
+                        .tax(request.getTax())
                         .build());
 
         // Add product variants if any
@@ -135,6 +139,7 @@ public class ProductService {
                 .measureUnitCode(product.getMeasureUnitCode())
                 .buyingPrice(product.getBuyingPrice())
                 .sellingPrice(product.getSellingPrice())
+                .barcode(product.getBarcode())
                 .commission(product.getCommission())
                 .discount(product.getDiscount())
                 .tax(product.getTax())
