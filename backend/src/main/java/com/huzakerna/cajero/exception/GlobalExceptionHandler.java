@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -87,6 +88,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
     log.warn("Illegal argument: {}", ex.getMessage());
     return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+  }
+
+  @ExceptionHandler(NoHandlerFoundException.class)
+  public ResponseEntity<ErrorResponse> handleNoHandlerFound(NoHandlerFoundException ex) {
+    log.warn("No handler found for {} {}", ex.getHttpMethod(), ex.getRequestURL());
+    return buildErrorResponse(HttpStatus.NOT_FOUND, "The requested resource was not found");
   }
 
   @ExceptionHandler(Exception.class)
