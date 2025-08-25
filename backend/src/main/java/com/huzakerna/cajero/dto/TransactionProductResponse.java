@@ -30,7 +30,7 @@ public class TransactionProductResponse {
     // itself
     private JsonNode selectedVariants;
     private String note;
-    private Integer quantity;
+    private BigDecimal quantity;
     private BigDecimal buyingPrice;
     private BigDecimal sellingPrice;
     private BigDecimal commission;

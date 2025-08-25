@@ -47,7 +47,7 @@ public class TransactionProduct {
     private String note;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private BigDecimal quantity;
 
     @Column(name = "buying_price", nullable = false)
     private BigDecimal buyingPrice;

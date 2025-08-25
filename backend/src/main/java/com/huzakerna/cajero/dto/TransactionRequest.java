@@ -28,6 +28,7 @@ public class TransactionRequest {
     private BigDecimal totalCommission;
     @DecimalMin(value = "0.0", message = "Total Discount cannot be negative")
     private BigDecimal totalDiscount;
+    @NotNull(message = "Total Price is required")
     @DecimalMin(value = "0.0", message = "Total Price cannot be negative")
     private BigDecimal totalPrice;
 

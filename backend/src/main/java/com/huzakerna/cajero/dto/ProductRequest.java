@@ -40,10 +40,6 @@ public class ProductRequest {
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
 
-    @NotNull(message = "Stock Quantity is required")
-    @Min(value = 0, message = "Stock Quantity cannot be negative")
-    private BigDecimal stock;
-
     @NotNull(message = "Category Code is required")
     private String categoryCode;
 
@@ -55,6 +51,10 @@ public class ProductRequest {
     // @Size(max = 255, message = "Image URL too long")
     private String imageUrl;
     private String barcode;
+
+    @NotNull(message = "Stock is required")
+    @Min(value = 0, message = "Stock cannot be negative")
+    private BigDecimal stock;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")
     private BigDecimal buyingPrice;
