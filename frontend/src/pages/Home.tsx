@@ -10,7 +10,7 @@ import { useProducts } from "@/hooks/useProducts";
 export default function Home() {
   const { data: categoriesData, isLoading: isLoadingCategories } =
     useProductCategories();
-  const { data: productsData, isLoading: isLoadingProducts } = useProducts(0);
+  const { data: productsData } = useProducts(0);
 
   return (
     <DashboardLayout>
