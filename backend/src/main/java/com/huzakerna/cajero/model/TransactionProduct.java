@@ -47,7 +47,7 @@ public class TransactionProduct {
     private String note;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private BigDecimal quantity;
 
     @Column(name = "buying_price", nullable = false)
     private BigDecimal buyingPrice;
@@ -56,8 +56,7 @@ public class TransactionProduct {
     private BigDecimal sellingPrice;
 
     private BigDecimal commission;
-
-    @Column(name = "is_commission_by_percent")
-    private boolean isCommissionByPercent;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
 }

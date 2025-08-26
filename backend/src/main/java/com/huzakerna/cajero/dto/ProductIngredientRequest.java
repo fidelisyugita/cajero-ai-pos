@@ -16,17 +16,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductVariantRequest {
+public class ProductIngredientRequest {
 
-    @NotNull(message = "Variant Id is required")
-    private UUID variantId;
-
-    @NotNull(message = "Stock Quantity is required")
-    @Min(value = 0, message = "Stock Quantity cannot be negative")
-    private Integer stockQuantity;
+    @NotNull(message = "Ingredient Id is required")
+    private UUID ingredientId;
 
     @NotNull(message = "Price Adjustment is required")
     @DecimalMin(value = "0.0", message = "Stock cannot be negative")
-    private BigDecimal priceAdjustment;
+    private BigDecimal quantityNeeded;
 
 }

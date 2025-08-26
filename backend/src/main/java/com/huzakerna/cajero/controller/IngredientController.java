@@ -11,37 +11,36 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.huzakerna.cajero.model.MeasureUnit;
-import com.huzakerna.cajero.repository.MeasureUnitRepository;
+import com.huzakerna.cajero.model.Ingredient;
+import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
-import com.huzakerna.cajero.service.MeasureUnitService;
+import com.huzakerna.cajero.service.IngredientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/measure-unit")
+@RequestMapping("/api/ingredient")
 @RequiredArgsConstructor
-public class MeasureUnitController {
+public class IngredientController {
 
-    private final MeasureUnitRepository repo;
-    private final MeasureUnitService service;
+    private final IngredientRepository repo;
+    private final IngredientService service;
 
     @GetMapping
-    public ResponseEntity<List<MeasureUnit>> getAll(
+    public ResponseEntity<List<Ingredient>> getAll(
             @AuthenticationPrincipal UserDetailsImpl user) {
-        return ResponseEntity.ok(repo.findAll());
-        // UUID storeId = user.getStoreId();
+        UUID storeId = user.getStoreId();
 
-        // return ResponseEntity.ok(repo.findByStoreId(storeId));
+        return ResponseEntity.ok(repo.findByStoreId(storeId));
     }
 
     @PostMapping
-    public MeasureUnit add(@Valid @RequestBody MeasureUnit measureUnit) {
-        return service.addMeasureUnit(measureUnit);
+    public Ingredient add(@Valid @RequestBody Ingredient ingredient) {
+        return service.addIngredient(ingredient);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<MeasureUnit>> getById(@PathVariable String id) {
+    public ResponseEntity<Optional<Ingredient>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findById(id));
     }
 

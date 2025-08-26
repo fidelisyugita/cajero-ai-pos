@@ -16,29 +16,27 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product_variants")
+@Table(name = "product_ingredients")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductVariant {
+public class ProductIngredient {
 
     @EmbeddedId
-    private ProductVariantId id;
+    private ProductIngredientId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("productId") // This matches the field name in ProductVariantId
+    @MapsId("productId") // This matches the field name in ProductIngredientId
     @JoinColumn(name = "product_id") // This matches the actual DB column
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("variantId") // Matches field name in ProductVariantId
-    @JoinColumn(name = "variant_id") // Matches DB column
-    private Variant variant;
+    @MapsId("ingredientId") // Matches field name in ProductIngredientId
+    @JoinColumn(name = "ingredient_id") // Matches DB column
+    private Ingredient ingredient;
 
-    @Column(name = "stock_quantity")
-    private Integer stockQuantity;
-    @Column(name = "price_adjustment")
-    private BigDecimal priceAdjustment;
+    @Column(name = "quantity_needed")
+    private BigDecimal quantityNeeded;
 }

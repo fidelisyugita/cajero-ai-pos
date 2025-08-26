@@ -31,18 +31,14 @@ public class ProductRequest {
     /**
      * TODO: Will check will use set or list (in Transaction)
      * 
-     * @see ProductVariantRequest
+     * @see ProductIngredientRequest
      * @see TransactionProduct
      */
     @Builder.Default
-    private Set<ProductVariantRequest> productVariants = new HashSet<>();
+    private Set<ProductIngredientRequest> productIngredients = new HashSet<>();
 
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
-
-    @NotNull(message = "Stock Quantity is required")
-    @Min(value = 0, message = "Stock Quantity cannot be negative")
-    private Integer stockQuantity;
 
     @NotNull(message = "Category Code is required")
     private String categoryCode;
@@ -54,6 +50,11 @@ public class ProductRequest {
     // Optional fields with validation
     // @Size(max = 255, message = "Image URL too long")
     private String imageUrl;
+    private String barcode;
+
+    @NotNull(message = "Stock is required")
+    @Min(value = 0, message = "Stock cannot be negative")
+    private BigDecimal stock;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")
     private BigDecimal buyingPrice;
@@ -65,5 +66,9 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
     private BigDecimal commission;
 
-    private boolean isCommissionByPercent;
+    @DecimalMin(value = "0.0", message = "Discount cannot be negative")
+    private BigDecimal discount;
+
+    @DecimalMin(value = "0.0", message = "Tax cannot be negative")
+    private BigDecimal tax;
 }

@@ -1,6 +1,5 @@
 package com.huzakerna.cajero.dto;
 
-
 import java.math.BigDecimal;
 import java.util.UUID;
 import jakarta.validation.constraints.Email;
@@ -38,11 +37,8 @@ public class UserRequest {
     private String phone;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 40,
-        message = "Password must be between 8 and 40 characters")
-    @Pattern(
-        regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-        message = "Password must contain at least one digit, one lowercase, one uppercase, and one special character")
+    @Size(min = 8, max = 40, message = "Password must be between 8 and 40 characters")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Password must contain at least one digit, one lowercase and one uppercase")
     private String password; // Will be hashed
 
     // Optional fields

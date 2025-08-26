@@ -36,6 +36,7 @@ services:
 
   # ---------- Frontend ----------
   frontend:
+    platform: linux/amd64
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -44,7 +45,7 @@ services:
     environment:
       - VITE_API_URL=${VITE_API_URL}
     ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+      - "5173:5173"
     # depends_on:
     #   backend:
     #     condition: service_started

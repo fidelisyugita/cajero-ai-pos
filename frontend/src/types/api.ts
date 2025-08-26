@@ -11,8 +11,20 @@ export interface Product {
   name: string;
   measureUnitCode: string;
   sellingPrice: number;
-  stockQuantity: number;
+  stock: number;
   createdAt: string;
+}
+
+export interface ProductCategory {
+  code: string;
+  storeId: string;
+  name: string;
+  description: string;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
 }
 
 export interface Transaction {

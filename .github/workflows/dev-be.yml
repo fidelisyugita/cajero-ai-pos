@@ -2,7 +2,7 @@ name: Build and Deploy Cajero Backend
 
 on:
   push:
-    branches: [dev]
+    branches: [dev-be]
 
 jobs:
   deploy:

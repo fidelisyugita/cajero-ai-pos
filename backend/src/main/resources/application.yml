@@ -24,6 +24,11 @@ spring:
     active: dev
   application:
     name: cajero-backend
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/cajero}
     username: ${POSTGRES_USER:postgres}
@@ -38,7 +43,8 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      # ddl-auto: validate
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     # properties:

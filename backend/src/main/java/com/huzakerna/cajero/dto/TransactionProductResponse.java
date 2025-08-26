@@ -22,7 +22,7 @@ public class TransactionProductResponse {
     private String measureUnitCode;
     private String name;
     private String description;
-    private Integer stockQuantity;
+    private BigDecimal stock;
     private Integer rejectCount;
     private Integer soldCount;
     private String imageUrl;
@@ -30,10 +30,11 @@ public class TransactionProductResponse {
     // itself
     private JsonNode selectedVariants;
     private String note;
-    private Integer quantity;
+    private BigDecimal quantity;
     private BigDecimal buyingPrice;
     private BigDecimal sellingPrice;
     private BigDecimal commission;
-    private boolean isCommissionByPercent;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
 }

@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import type { PaginatedResponse, Transaction } from "@/types/api";
 
-export const useTransactions = (page: number = 0) => {
+export const useTransactions = (page: number = 0, size: number = 20) => {
   return useQuery<PaginatedResponse<Transaction>>({
     queryKey: ["transactions", page],
-    queryFn: () => apiClient(`/transaction?page=${page}&size=10`),
+    queryFn: () => apiClient(`/transaction?page=${page}&size=${size}`),
   });
 };

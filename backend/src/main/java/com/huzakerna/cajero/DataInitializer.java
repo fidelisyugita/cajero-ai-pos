@@ -70,30 +70,48 @@ public class DataInitializer implements CommandLineRunner {
       userService.addUser(user);
 
       List<MeasureUnit> measureUnits = List.of(
-          MeasureUnit.builder().code("PCS").name("Pieces").description("Individual items").storeId(storeId).build(),
-          MeasureUnit.builder().code("G").name("Gram").description("Weight measurement").storeId(storeId).build(),
-          MeasureUnit.builder().code("ML").name("Mililiter").description("Volume measurement").storeId(storeId).build(),
-          MeasureUnit.builder().code("MM").name("Milimeter").description("Length measurement").storeId(storeId)
-              .build());
+          MeasureUnit.builder().code("PCS").name("Pieces").description("Individual items")
+              .build(),
+          MeasureUnit.builder().code("G").name("Gram").description("Weight measurement")
+              .build(),
+          MeasureUnit.builder().code("ML").name("Mililiter")
+              .description("Volume measurement").build(),
+          MeasureUnit.builder().code("MM").name("Milimeter")
+              .description("Length measurement").build());
       muRepo.saveAll(measureUnits);
 
       List<ProductCategory> productCategories = List.of(
-          ProductCategory.builder().code("FOOD").name("Food").description("Food items").storeId(storeId).build(),
-          ProductCategory.builder().code("SNACK").name("Snack").description("Snack items").storeId(storeId).build(),
-          ProductCategory.builder().code("DRINK").name("Drink").description("Drink items").storeId(storeId).build());
+          ProductCategory.builder().code("FOOD").name("Food").description("Food items")
+              .storeId(storeId)
+              .build(),
+          ProductCategory.builder().code("SNACK").name("Snack").description("Snack items")
+              .storeId(storeId)
+              .build(),
+          ProductCategory.builder().code("DRINK").name("Drink").description("Drink items")
+              .storeId(storeId)
+              .build());
       pcRepo.saveAll(productCategories);
 
       List<TransactionType> transactionTypes = List.of(
-          TransactionType.builder().code("DINEIN").name("Dine in").description("Dine in").build(),
-          TransactionType.builder().code("TAKEAWAY").name("Take away").description("Take away").build());
+          TransactionType.builder().code("DINEIN").name("Dine in").description("Dine in")
+              .build(),
+          TransactionType.builder().code("TAKEAWAY").name("Take away")
+              .description("Take away").build());
       ttRepo.saveAll(transactionTypes);
 
       List<TransactionStatus> transactionStatuses = List.of(
-          TransactionStatus.builder().code("PENDING").name("Pending").description("Transaction pending / on progess")
+          TransactionStatus.builder().code("PENDING").name("Pending")
+              .description("Transaction pending / on progess")
               .build(),
-          TransactionStatus.builder().code("COMPLETED").name("Completed").description("Transaction completed").build(),
-          TransactionStatus.builder().code("CANCELLED").name("Cancelled").description("Transaction cancelled").build(),
-          TransactionStatus.builder().code("REFUNDED").name("Refunded").description("Transaction refunded").build());
+          TransactionStatus.builder().code("COMPLETED").name("Completed")
+              .description("Transaction completed")
+              .build(),
+          TransactionStatus.builder().code("CANCELLED").name("Cancelled")
+              .description("Transaction cancelled")
+              .build(),
+          TransactionStatus.builder().code("REFUNDED").name("Refunded")
+              .description("Transaction refunded")
+              .build());
       tsRepo.saveAll(transactionStatuses);
 
       List<PaymentMethod> paymentMethods = List.of(

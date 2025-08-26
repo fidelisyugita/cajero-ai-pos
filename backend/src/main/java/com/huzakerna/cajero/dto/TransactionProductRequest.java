@@ -30,10 +30,9 @@ public class TransactionProductRequest {
     private String note;
 
     @NotNull(message = "Quantity is required")
-    @Min(value = 0, message = "Quantity cannot be negative")
-    private Integer quantity;
+    @DecimalMin(value = "1.0", message = "Quantity cannot be negative")
+    private BigDecimal quantity;
 
-    @NotNull(message = "Buying Price is required")
     @DecimalMin(value = "0.0", message = "Stock cannot be negative")
     private BigDecimal buyingPrice;
 
@@ -44,6 +43,10 @@ public class TransactionProductRequest {
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
     private BigDecimal commission;
 
-    private boolean isCommissionByPercent;
+    @DecimalMin(value = "0.0", message = "Discount cannot be negative")
+    private BigDecimal discount;
+
+    @DecimalMin(value = "0.0", message = "Tax cannot be negative")
+    private BigDecimal tax;
 
 }

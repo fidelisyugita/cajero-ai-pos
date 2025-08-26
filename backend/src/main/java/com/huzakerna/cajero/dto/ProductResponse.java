@@ -23,19 +23,21 @@ public class ProductResponse {
     private String name;
     private String imageUrl;
     private String description;
-    private Integer stockQuantity;
+    private BigDecimal stock;
     private Integer rejectCount;
     private Integer soldCount;
     private String categoryCode;
     private String measureUnitCode;
+    private String barcode;
 
     private BigDecimal buyingPrice;
     private BigDecimal sellingPrice;
 
-    private boolean isCommissionByPercent;
     private BigDecimal commission;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
-    private List<ProductVariantResponse> productVariants;
+    private List<ProductIngredientResponse> productIngredients;
 
     private UUID createdBy;
     private UUID updatedBy;

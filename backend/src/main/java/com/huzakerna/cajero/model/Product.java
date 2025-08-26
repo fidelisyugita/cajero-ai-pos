@@ -38,14 +38,14 @@ public class Product extends BaseEntity {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<ProductVariant> productVariants = new HashSet<>();
+    private Set<ProductIngredient> productIngredients = new HashSet<>();
 
     @Column(nullable = false)
     private String name;
 
     private String description;
-    @Column(name = "stock_quantity")
-    private Integer stockQuantity;
+    @Column(name = "stock")
+    private BigDecimal stock;
     @Column(name = "reject_count")
     private Integer rejectCount;
     @Column(name = "sold_count")
@@ -59,9 +59,10 @@ public class Product extends BaseEntity {
     @Column(name = "selling_price")
     private BigDecimal sellingPrice;
 
-    @Column(name = "is_commission_by_percent")
-    private boolean isCommissionByPercent;
+    private String barcode;
     private BigDecimal commission;
+    private BigDecimal discount;
+    private BigDecimal tax;
 
     @Column(name = "created_By")
     private UUID createdBy;

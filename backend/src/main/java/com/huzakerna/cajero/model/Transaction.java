@@ -39,10 +39,12 @@ public class Transaction extends BaseEntity {
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionProduct> transactionProducts;
 
-    @Column(name = "total_tax")
-    private BigDecimal totalTax;
+    @Column(name = "total_commission")
+    private BigDecimal totalCommission;
     @Column(name = "total_discount")
     private BigDecimal totalDiscount;
+    @Column(name = "total_tax")
+    private BigDecimal totalTax;
 
     private String description;
 
