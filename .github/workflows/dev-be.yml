@@ -2,7 +2,7 @@ name: Build and Deploy Cajero Backend
 
 on:
   push:
-    branches: [dev]
+    branches: [dev-be]
 
 jobs:
   deploy:
@@ -19,7 +19,7 @@ jobs:
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # ✅ Build and push Docker image: backend
+      # ✅ Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -27,16 +27,6 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
-          platforms: linux/amd64,linux/arm64
-
-      # ✅ Build and push Docker image: frontend (new)
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/cajero-frontend:dev
           platforms: linux/amd64,linux/arm64
 
       # ✅ Deploy to Oracle VM
@@ -48,7 +38,6 @@ jobs:
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            # ---- Backend ----
             docker pull ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
             docker stop cajero-backend || true
             docker rm cajero-backend || true
@@ -79,12 +68,3 @@ jobs:
               echo "Waiting for backend..."
               sleep 10
             done
-
-            # ---- Frontend ----
-            docker pull ${{ secrets.DOCKER_USERNAME }}/cajero-frontend:dev
-            docker stop cajero-frontend || true
-            docker rm cajero-frontend || true
-            docker run -d --name cajero-frontend \
-              -e VITE_API_URL=${{ secrets.VITE_API_URL }} \
-              -p 5173:5173 \
-              ${{ secrets.DOCKER_USERNAME }}/cajero-frontend:dev
