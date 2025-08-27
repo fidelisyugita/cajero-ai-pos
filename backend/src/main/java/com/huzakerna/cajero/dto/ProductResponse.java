@@ -37,7 +37,7 @@ public class ProductResponse {
     private BigDecimal discount;
     private BigDecimal tax;
 
-    private List<ProductIngredientResponse> productIngredients;
+    private List<ProductIngredientResponse> ingredients;
 
     private UUID createdBy;
     private UUID updatedBy;

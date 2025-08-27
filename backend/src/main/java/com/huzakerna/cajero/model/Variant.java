@@ -1,11 +1,16 @@
 package com.huzakerna.cajero.model;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +30,13 @@ public class Variant extends BaseEntity {
     @Column(name = "store_id")
     private UUID storeId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @Column(name = "product_id", insertable = false, updatable = false)
+    private UUID productId;
+
     @Column(nullable = false, length = 50)
     private String name; // e.g., "Sugar", "Topping", "Ice Level"
 
@@ -34,9 +46,9 @@ public class Variant extends BaseEntity {
     @Column(name = "is_multiple")
     private boolean isMultiple;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private JsonNode options;
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<VariantOption> options = new HashSet<>();
 
     @Column(name = "created_By")
     private UUID createdBy;

@@ -12,25 +12,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ingredients")
+@Table(name = "stock_movements")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Ingredient extends BaseEntity {
+public class StockMovement extends BaseEntity {
 
     @Column(name = "store_id")
     private UUID storeId;
+    @Column(name = "ingredient_id")
+    private UUID ingredientId;
+    @Column(name = "product_id")
+    private UUID productId;
 
-    @Column(nullable = false, length = 50)
-    private String name; // e.g., "Sugar", "Coffee"
+    @Column(name = "transaction_id")
+    private UUID transactionId;
 
-    private String description;
-    private BigDecimal stock;
+    @Column(name = "type")
+    private String type;
 
-    @Column(name = "measure_unit_code")
-    private String measureUnitCode;
+    @Column(name = "quantity")
+    private BigDecimal quantity;
 
     @Column(name = "created_By")
     private UUID createdBy;

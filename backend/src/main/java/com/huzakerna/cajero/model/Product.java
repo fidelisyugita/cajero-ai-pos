@@ -38,7 +38,11 @@ public class Product extends BaseEntity {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<ProductIngredient> productIngredients = new HashSet<>();
+    private Set<ProductIngredient> ingredients = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<Variant> variants = new HashSet<>();
 
     @Column(nullable = false)
     private String name;
