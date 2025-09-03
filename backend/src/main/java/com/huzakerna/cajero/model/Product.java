@@ -7,6 +7,9 @@ import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -33,8 +36,12 @@ public class Product extends BaseEntity {
     @Column(name = "category_code")
     private String categoryCode;
 
-    @Column(name = "measure_unit_code")
-    private String measureUnitCode;
+    // @Column(name = "measure_unit_code")
+    // private String measureUnitCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "measure_unit_code")
+    private MeasureUnit measureUnit;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

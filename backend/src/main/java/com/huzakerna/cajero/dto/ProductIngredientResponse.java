@@ -2,9 +2,7 @@ package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-import com.fasterxml.jackson.databind.JsonNode;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +22,7 @@ public class ProductIngredientResponse {
     private String description;
     private BigDecimal stock;
     private String measureUnitCode;
+    private String measureUnitName;
 
     // itself
     private BigDecimal quantityNeeded;

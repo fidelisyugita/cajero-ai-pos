@@ -147,7 +147,7 @@ public class TransactionService {
             .map(tp -> TransactionProductResponse.builder()
                 .productId(tp.getProduct().getId())
                 .categoryCode(tp.getProduct().getCategoryCode())
-                .measureUnitCode(tp.getProduct().getMeasureUnitCode())
+                .measureUnitCode(tp.getProduct().getMeasureUnit().getCode())
                 .name(tp.getProduct().getName())
                 .description(tp.getProduct().getDescription())
                 .stock(tp.getProduct().getStock())

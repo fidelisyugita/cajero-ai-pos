@@ -16,12 +16,16 @@ import com.huzakerna.cajero.dto.ProductIngredientRequest;
 import com.huzakerna.cajero.dto.ProductIngredientResponse;
 import com.huzakerna.cajero.dto.ProductRequest;
 import com.huzakerna.cajero.dto.ProductResponse;
+import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductIngredient;
 import com.huzakerna.cajero.model.ProductIngredientId;
 import com.huzakerna.cajero.repository.ProductRepository;
+import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import com.huzakerna.cajero.repository.ProductIngredientRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,16 +35,16 @@ public class ProductService {
   private final StoreRepository sRepo;
   private final ProductRepository repo;
   private final ProductIngredientRepository piRepo;
+  private final MeasureUnitRepository muRepo;
 
   public ProductResponse addProduct(ProductRequest request) {
     // Validate store exists
     if (!sRepo.existsById(request.getStoreId())) {
       throw new IllegalArgumentException("Store not found");
     }
-    ;
-    // Store store = sRepo.findById(request.getStoreId())
-    // .orElseThrow(
-    // () -> new EntityNotFoundException("Store not found"))
+    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Measure Unit not found"));
 
     Product product = repo.save(
         Product.builder()
@@ -51,7 +55,7 @@ public class ProductService {
             .sellingPrice(request.getSellingPrice())
             .stock(request.getStock())
             .categoryCode(request.getCategoryCode())
-            .measureUnitCode(request.getMeasureUnitCode())
+            .measureUnit(measureUnit)
             .imageUrl(request.getImageUrl())
             .barcode(request.getBarcode())
             .commission(request.getCommission())
@@ -135,7 +139,8 @@ public class ProductService {
         .rejectCount(product.getRejectCount())
         .soldCount(product.getSoldCount())
         .categoryCode(product.getCategoryCode())
-        .measureUnitCode(product.getMeasureUnitCode())
+        .measureUnitCode(product.getMeasureUnit().getCode())
+        .measureUnitName(product.getMeasureUnit().getName())
         .buyingPrice(product.getBuyingPrice())
         .sellingPrice(product.getSellingPrice())
         .barcode(product.getBarcode())
@@ -152,7 +157,8 @@ public class ProductService {
                 .name(pi.getIngredient().getName())
                 .description(pi.getIngredient().getDescription())
                 .stock(pi.getIngredient().getStock())
-                .measureUnitCode(pi.getIngredient().getMeasureUnitCode())
+                .measureUnitCode(pi.getIngredient().getMeasureUnit().getCode())
+                .measureUnitName(pi.getIngredient().getMeasureUnit().getName())
                 .quantityNeeded(pi.getQuantityNeeded())
                 .build())
             .toList())

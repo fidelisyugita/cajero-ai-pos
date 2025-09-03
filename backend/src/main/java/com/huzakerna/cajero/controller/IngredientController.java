@@ -1,7 +1,6 @@
 package com.huzakerna.cajero.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,8 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.huzakerna.cajero.model.Ingredient;
-import com.huzakerna.cajero.repository.IngredientRepository;
+
+import com.huzakerna.cajero.dto.IngredientRequest;
+import com.huzakerna.cajero.dto.IngredientResponse;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.IngredientService;
 import jakarta.validation.Valid;
@@ -23,25 +23,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class IngredientController {
 
-    private final IngredientRepository repo;
     private final IngredientService service;
 
     @GetMapping
-    public ResponseEntity<List<Ingredient>> getAll(
+    public ResponseEntity<List<IngredientResponse>> getAll(
             @AuthenticationPrincipal UserDetailsImpl user) {
         UUID storeId = user.getStoreId();
 
-        return ResponseEntity.ok(repo.findByStoreId(storeId));
+        return ResponseEntity.ok(service.getAllByStoreId(storeId));
     }
 
     @PostMapping
-    public Ingredient add(@Valid @RequestBody Ingredient ingredient) {
+    public IngredientResponse add(@Valid @RequestBody IngredientRequest ingredient) {
         return service.addIngredient(ingredient);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Ingredient>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(repo.findById(id));
+    public ResponseEntity<IngredientResponse> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.getIngredientById(id));
     }
 
 }
