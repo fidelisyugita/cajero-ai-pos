@@ -19,9 +19,6 @@ import lombok.Setter;
 @Builder
 public class IngredientRequest {
 
-    @NotNull(message = "Store Id is required")
-    private UUID storeId;
-
     @NotBlank(message = "Ingredient name cannot be empty")
     private String name;
 

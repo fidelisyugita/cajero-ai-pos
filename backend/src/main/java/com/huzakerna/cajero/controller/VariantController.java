@@ -28,15 +28,18 @@ public class VariantController {
 
     @GetMapping
     public ResponseEntity<List<Variant>> getAll(
-        @AuthenticationPrincipal UserDetailsImpl user) {
+            @AuthenticationPrincipal UserDetailsImpl user) {
         UUID storeId = user.getStoreId();
 
         return ResponseEntity.ok(repo.findByStoreId(storeId));
     }
 
     @PostMapping
-    public Variant add(@Valid @RequestBody Variant variant) {
-        return service.addVariant(variant);
+    public Variant add(@AuthenticationPrincipal UserDetailsImpl user, @Valid @RequestBody Variant variant) {
+
+        UUID storeId = user.getStoreId();
+
+        return service.addVariant(storeId, variant);
     }
 
     @GetMapping("/{id}")

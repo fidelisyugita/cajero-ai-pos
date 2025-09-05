@@ -37,9 +37,9 @@ public class ProductService {
   private final ProductIngredientRepository piRepo;
   private final MeasureUnitRepository muRepo;
 
-  public ProductResponse addProduct(ProductRequest request) {
+  public ProductResponse addProduct(UUID storeId, ProductRequest request) {
     // Validate store exists
-    if (!sRepo.existsById(request.getStoreId())) {
+    if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
     MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
@@ -49,7 +49,7 @@ public class ProductService {
     Product product = repo.save(
         Product.builder()
             .name(request.getName())
-            .storeId(request.getStoreId())
+            .storeId(storeId)
             .description(request.getDescription())
             .buyingPrice(request.getBuyingPrice())
             .sellingPrice(request.getSellingPrice())
@@ -66,9 +66,9 @@ public class ProductService {
     // Add product ingredients if any
     if (request.getIngredients() != null) {
       for (ProductIngredientRequest ingredient : request.getIngredients()) {
-        addIngredientToProduct(product.getId(), ingredient.getIngredientId(),
+        addIngredientToProduct(product.getId(),
+            ingredient.getIngredientId(),
             ingredient.getQuantityNeeded());
-
       }
     }
 
@@ -85,7 +85,7 @@ public class ProductService {
     piRepo.save(productIngredient);
   }
 
-  public void removeVariantToProduct(UUID productId, UUID ingredientId) {
+  public void removeIngredientFromProduct(UUID productId, UUID ingredientId) {
     ProductIngredient productIngredient = new ProductIngredient();
     productIngredient.setId(new ProductIngredientId(productId, ingredientId));
 

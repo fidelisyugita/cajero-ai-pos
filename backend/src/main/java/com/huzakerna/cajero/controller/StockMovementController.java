@@ -36,8 +36,11 @@ public class StockMovementController {
     }
 
     @PostMapping
-    public StockMovement add(@Valid @RequestBody StockMovement ingredient) {
-        return service.addStockMovement(ingredient);
+    public StockMovement add(@AuthenticationPrincipal UserDetailsImpl user,
+            @Valid @RequestBody StockMovement ingredient) {
+
+        UUID storeId = user.getStoreId();
+        return service.addStockMovement(storeId, ingredient);
     }
 
     @GetMapping("/{id}")

@@ -33,9 +33,6 @@ public class ProductRequest {
     @NotBlank(message = "Product name cannot be empty")
     private String name;
 
-    @NotNull(message = "Store Id is required")
-    private UUID storeId;
-
     /**
      * TODO: Will check will use set or list (in Transaction)
      * 

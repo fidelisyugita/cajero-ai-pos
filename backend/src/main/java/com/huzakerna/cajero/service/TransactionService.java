@@ -32,15 +32,15 @@ public class TransactionService {
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
 
-  public TransactionResponse addTransaction(TransactionRequest request) {
+  public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     // Validate store exists
-    if (!sRepo.existsById(request.getStoreId())) {
+    if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
     Transaction transaction = repo.save(
         Transaction.builder()
-            .storeId(request.getStoreId())
+            .storeId(storeId)
             .statusCode(request.getStatusCode())
             .paymentMethodCode(request.getPaymentMethodCode())
             .transactionTypeCode(request.getTransactionTypeCode())
@@ -51,16 +51,17 @@ public class TransactionService {
             .totalTax(request.getTotalTax())
             .build());
 
-    // Add transaction items if any
+    // Add transaction products if any
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request
           .getTransactionProducts()) {
         addProductToTransaction(transaction.getId(),
             product.getProductId(),
-            product.getBuyingPrice(), product.getSellingPrice(),
+            product.getBuyingPrice(),
+            product.getSellingPrice(),
             product.getNote(),
-            product.getQuantity(), product.getSelectedVariants());
-
+            product.getQuantity(),
+            product.getSelectedVariants());
       }
     }
 
@@ -71,22 +72,22 @@ public class TransactionService {
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
       JsonNode selectedVariants) {
 
-    TransactionProduct transactionVariant = new TransactionProduct();
-    transactionVariant.setId(new TransactionProductId(transactionId, productId));
-    transactionVariant.setBuyingPrice(buyingPrice);
-    transactionVariant.setSellingPrice(sellingPrice);
-    transactionVariant.setNote(note);
-    transactionVariant.setQuantity(quantity);
-    transactionVariant.setSelectedVariants(selectedVariants);
+    TransactionProduct transactionProduct = new TransactionProduct();
+    transactionProduct.setId(new TransactionProductId(transactionId, productId));
+    transactionProduct.setBuyingPrice(buyingPrice);
+    transactionProduct.setSellingPrice(sellingPrice);
+    transactionProduct.setNote(note);
+    transactionProduct.setQuantity(quantity);
+    transactionProduct.setSelectedVariants(selectedVariants);
 
-    tpRepo.save(transactionVariant);
+    tpRepo.save(transactionProduct);
   }
 
-  public void removeVariantToTransaction(UUID transactionId, UUID productId) {
-    TransactionProduct transactionVariant = new TransactionProduct();
-    transactionVariant.setId(new TransactionProductId(transactionId, productId));
+  public void removeProductFromTransaction(UUID transactionId, UUID productId) {
+    TransactionProduct transactionProduct = new TransactionProduct();
+    transactionProduct.setId(new TransactionProductId(transactionId, productId));
 
-    tpRepo.delete(transactionVariant);
+    tpRepo.delete(transactionProduct);
   }
 
   public TransactionResponse getTransactionById(UUID id) {

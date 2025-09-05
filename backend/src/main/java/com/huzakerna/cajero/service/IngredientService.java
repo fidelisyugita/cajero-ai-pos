@@ -7,11 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.IngredientRequest;
 import com.huzakerna.cajero.dto.IngredientResponse;
-import com.huzakerna.cajero.dto.ProductResponse;
-import com.huzakerna.cajero.dto.TransactionResponse;
 import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.model.MeasureUnit;
-import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
@@ -27,9 +24,9 @@ public class IngredientService {
   private final IngredientRepository repo;
   private final MeasureUnitRepository muRepo;
 
-  public IngredientResponse addIngredient(IngredientRequest request) {
+  public IngredientResponse addIngredient(UUID storeId, IngredientRequest request) {
     // Validate store exists
-    if (!sRepo.existsById(request.getStoreId())) {
+    if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
     MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
@@ -38,7 +35,7 @@ public class IngredientService {
 
     Ingredient ingredient = repo.save(
         Ingredient.builder()
-            .storeId(request.getStoreId())
+            .storeId(storeId)
             .name(request.getName())
             .description(request.getDescription())
             .measureUnit(measureUnit)

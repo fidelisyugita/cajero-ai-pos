@@ -1,5 +1,7 @@
 package com.huzakerna.cajero.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.model.ProductCategory;
@@ -14,15 +16,15 @@ public class ProductCategoryService {
   private final StoreRepository sRepo;
   private final ProductCategoryRepository repo;
 
-  public ProductCategory addProductCategory(ProductCategory request) {
-    if (!sRepo.existsById(request.getStoreId())) {
+  public ProductCategory addProductCategory(UUID storeId, ProductCategory request) {
+    if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
     return repo.save(
         ProductCategory.builder()
             .code(request.getCode())
-            .storeId(request.getStoreId())
+            .storeId(storeId)
             .name(request.getName())
             .description(request.getDescription())
             .build());

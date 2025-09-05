@@ -34,8 +34,11 @@ public class IngredientController {
     }
 
     @PostMapping
-    public IngredientResponse add(@Valid @RequestBody IngredientRequest ingredient) {
-        return service.addIngredient(ingredient);
+    public IngredientResponse add(@AuthenticationPrincipal UserDetailsImpl user,
+            @Valid @RequestBody IngredientRequest ingredient) {
+
+        UUID storeId = user.getStoreId();
+        return service.addIngredient(storeId, ingredient);
     }
 
     @GetMapping("/{id}")

@@ -23,13 +23,13 @@ public class UserService {
     private final PasswordEncoder encoder; // Autowired via constructor
 
     @Transactional
-    public UserResponse addUser(UserRequest request) {
+    public UserResponse addUser(UUID storeId, UserRequest request) {
         if (repo.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException(request.getEmail());
         }
 
         // Validate store exists
-        if (!sRepo.existsById(request.getStoreId())) {
+        if (!sRepo.existsById(storeId)) {
             throw new IllegalArgumentException("Store not found");
         }
 
@@ -37,7 +37,7 @@ public class UserService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
-                .storeId(request.getStoreId())
+                .storeId(storeId)
                 .roleCode(request.getRoleCode())
                 .passwordHash(encoder.encode(request.getPassword()))
                 .imageUrl(request.getImageUrl())

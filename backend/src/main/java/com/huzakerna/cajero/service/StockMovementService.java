@@ -1,5 +1,7 @@
 package com.huzakerna.cajero.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.model.StockMovement;
@@ -14,15 +16,15 @@ public class StockMovementService {
   private final StoreRepository sRepo;
   private final StockMovementRepository repo;
 
-  public StockMovement addStockMovement(StockMovement request) {
+  public StockMovement addStockMovement(UUID storeId, StockMovement request) {
     // Validate store exists
-    if (!sRepo.existsById(request.getStoreId())) {
+    if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
     return repo.save(
         StockMovement.builder()
-            .storeId(request.getStoreId())
+            .storeId(storeId)
             .ingredientId(request.getIngredientId())
             .productId(request.getProductId())
             .transactionId(request.getTransactionId())

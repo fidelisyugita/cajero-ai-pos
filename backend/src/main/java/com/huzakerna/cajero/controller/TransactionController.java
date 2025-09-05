@@ -49,8 +49,12 @@ public class TransactionController {
   }
 
   @PostMapping
-  public TransactionResponse add(@Valid @RequestBody TransactionRequest request) {
-    return service.addTransaction(request);
+  public TransactionResponse add(
+      @AuthenticationPrincipal UserDetailsImpl user, @Valid @RequestBody TransactionRequest request) {
+
+    UUID storeId = user.getStoreId();
+
+    return service.addTransaction(storeId, request);
   }
 
   @GetMapping("/{id}")

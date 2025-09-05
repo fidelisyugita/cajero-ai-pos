@@ -15,6 +15,8 @@ import com.huzakerna.cajero.model.ProductCategory;
 import com.huzakerna.cajero.repository.ProductCategoryRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.ProductCategoryService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,20 +29,23 @@ public class ProductCategoryController {
 
     @GetMapping
     public ResponseEntity<List<ProductCategory>> getAll(
-        @AuthenticationPrincipal UserDetailsImpl user) {
+            @AuthenticationPrincipal UserDetailsImpl user) {
         UUID storeId = user.getStoreId();
 
         return ResponseEntity.ok(repo.findByStoreId(storeId));
     }
 
     @PostMapping
-    public ProductCategory add(@RequestBody ProductCategory productCategory) {
-        return service.addProductCategory(productCategory);
+    public ProductCategory add(@AuthenticationPrincipal UserDetailsImpl user,
+            @Valid @RequestBody ProductCategory productCategory) {
+
+        UUID storeId = user.getStoreId();
+        return service.addProductCategory(storeId, productCategory);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Optional<ProductCategory>> getById(
-        @PathVariable String id) {
+            @PathVariable String id) {
         return ResponseEntity.ok(repo.findById(id));
     }
 

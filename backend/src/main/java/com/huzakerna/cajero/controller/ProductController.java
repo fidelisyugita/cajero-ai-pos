@@ -26,36 +26,37 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // Lombok generates constructor with required args
 public class ProductController {
 
-    private final ProductService service; // Must be final for Lombok
+  private final ProductService service; // Must be final for Lombok
 
-    @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAll(
-        @AuthenticationPrincipal UserDetailsImpl user,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(defaultValue = "name") String sortBy,
-        @RequestParam(defaultValue = "asc") String sortDir,
-        @RequestParam(defaultValue = "") String keyword,
-        @RequestParam(required = false) String categoryCode,
-        @RequestParam(required = false) @DateTimeFormat(
-            iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @RequestParam(required = false) @DateTimeFormat(
-            iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+  @GetMapping
+  public ResponseEntity<Page<ProductResponse>> getAll(
+      @AuthenticationPrincipal UserDetailsImpl user,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "name") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir,
+      @RequestParam(defaultValue = "") String keyword,
+      @RequestParam(required = false) String categoryCode,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
-        UUID storeId = user.getStoreId();
+    UUID storeId = user.getStoreId();
 
-        return ResponseEntity.ok(service.getProducts(
-            storeId, page, size, sortBy, sortDir, keyword, categoryCode, startDate, endDate));
+    return ResponseEntity.ok(service.getProducts(
+        storeId, page, size, sortBy, sortDir, keyword, categoryCode, startDate, endDate));
 
-    }
+  }
 
-    @PostMapping
-    public ProductResponse add(@Valid @RequestBody ProductRequest request) {
-        return service.addProduct(request);
-    }
+  @PostMapping
+  public ProductResponse add(@AuthenticationPrincipal UserDetailsImpl user,
+      @Valid @RequestBody ProductRequest request) {
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.getProductById(id));
-    }
+    UUID storeId = user.getStoreId();
+    return service.addProduct(storeId, request);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
+    return ResponseEntity.ok(service.getProductById(id));
+  }
 }
