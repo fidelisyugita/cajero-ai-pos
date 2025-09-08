@@ -128,6 +128,78 @@ public class ProductService {
         .toList();
   }
 
+  public ProductResponse updateProduct(UUID storeId, UUID id, ProductRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing product
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    // Verify the product belongs to the store
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
+    }
+
+    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Measure Unit not found"));
+
+    // Update product fields
+    product.setName(request.getName());
+    product.setDescription(request.getDescription());
+    product.setBuyingPrice(request.getBuyingPrice());
+    product.setSellingPrice(request.getSellingPrice());
+    product.setStock(request.getStock());
+    product.setCategoryCode(request.getCategoryCode());
+    product.setMeasureUnit(measureUnit);
+    product.setImageUrl(request.getImageUrl());
+    product.setBarcode(request.getBarcode());
+    product.setCommission(request.getCommission());
+    product.setDiscount(request.getDiscount());
+    product.setTax(request.getTax());
+
+    // Remove existing transaction products
+    piRepo.deleteByProductId(id);
+
+    // Add product ingredients if any
+    if (request.getIngredients() != null) {
+      for (ProductIngredientRequest ingredient : request.getIngredients()) {
+        addIngredientToProduct(product.getId(),
+            ingredient.getIngredientId(),
+            ingredient.getQuantityNeeded());
+      }
+    }
+
+    product = repo.save(product);
+    return mapToResponse(product);
+  }
+
+  // soft delete
+  public ProductResponse removeProduct(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing product
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    // Verify the product belongs to the store
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
+    }
+
+    // Update product fields
+    product.setDeletedAt(LocalDateTime.now());
+
+    product = repo.save(product);
+    return mapToResponse(product);
+  }
+
   private ProductResponse mapToResponse(Product product) {
     return ProductResponse.builder()
         .id(product.getId())

@@ -3,15 +3,8 @@ package com.huzakerna.cajero.dto;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
-import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.model.TransactionProduct;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

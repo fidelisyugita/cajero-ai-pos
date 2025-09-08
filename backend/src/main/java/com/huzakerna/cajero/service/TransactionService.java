@@ -97,6 +97,73 @@ public class TransactionService {
     return mapToResponse(transaction);
   }
 
+  public TransactionResponse updateTransaction(UUID storeId, UUID id, TransactionRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing transaction
+    Transaction transaction = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+    // Verify the transaction belongs to the store
+    if (!transaction.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Transaction does not belong to the store");
+    }
+
+    // Update transaction fields
+    transaction.setStatusCode(request.getStatusCode());
+    transaction.setPaymentMethodCode(request.getPaymentMethodCode());
+    transaction.setTransactionTypeCode(request.getTransactionTypeCode());
+    transaction.setDescription(request.getDescription());
+    transaction.setIn(request.isIn());
+    transaction.setTotalDiscount(request.getTotalDiscount());
+    transaction.setTotalTax(request.getTotalTax());
+
+    // Remove existing transaction products
+    tpRepo.deleteByTransactionId(id);
+
+    // Add new transaction products if any
+    if (request.getTransactionProducts() != null) {
+      for (TransactionProductRequest product : request.getTransactionProducts()) {
+        addProductToTransaction(transaction.getId(),
+            product.getProductId(),
+            product.getBuyingPrice(),
+            product.getSellingPrice(),
+            product.getNote(),
+            product.getQuantity(),
+            product.getSelectedVariants());
+      }
+    }
+
+    transaction = repo.save(transaction);
+    return mapToResponse(transaction);
+  }
+
+  // soft delete
+  public TransactionResponse removeTransaction(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing transaction
+    Transaction transaction = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+    // Verify the transaction belongs to the store
+    if (!transaction.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Transaction does not belong to the store");
+    }
+
+    // Update transaction fields
+    transaction.setDeletedAt(LocalDateTime.now());
+
+    transaction = repo.save(transaction);
+    return mapToResponse(transaction);
+  }
+
   public Page<TransactionResponse> getTransactions(UUID storeId,
       int page,
       int size,

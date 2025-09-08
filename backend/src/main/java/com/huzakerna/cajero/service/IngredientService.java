@@ -1,5 +1,6 @@
 package com.huzakerna.cajero.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,6 +61,58 @@ public class IngredientService {
   public IngredientResponse getIngredientById(UUID id) {
     Ingredient ingredient = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+    return mapToResponse(ingredient);
+  }
+
+  public IngredientResponse updateIngredient(UUID storeId, UUID id, IngredientRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing ingredient
+    Ingredient ingredient = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+
+    // Verify the ingredient belongs to the store
+    if (!ingredient.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Ingredient does not belong to the store");
+    }
+
+    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Measure Unit not found"));
+
+    // Update ingredient fields
+    ingredient.setName(request.getName());
+    ingredient.setDescription(request.getDescription());
+    // ingredient.setStock(request.getStock()); // Available through StockMovement
+    ingredient.setMeasureUnit(measureUnit);
+
+    ingredient = repo.save(ingredient);
+    return mapToResponse(ingredient);
+  }
+
+  // soft delete
+  public IngredientResponse removeIngredient(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing ingredient
+    Ingredient ingredient = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+
+    // Verify the ingredient belongs to the store
+    if (!ingredient.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Ingredient does not belong to the store");
+    }
+
+    // Update ingredient fields
+    ingredient.setDeletedAt(LocalDateTime.now());
+
+    ingredient = repo.save(ingredient);
     return mapToResponse(ingredient);
   }
 

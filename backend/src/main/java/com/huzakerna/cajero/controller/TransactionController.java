@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,6 +62,22 @@ public class TransactionController {
   @GetMapping("/{id}")
   public ResponseEntity<TransactionResponse> getById(@PathVariable UUID id) {
     return ResponseEntity.ok(service.getTransactionById(id));
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<TransactionResponse> update(
+      @AuthenticationPrincipal UserDetailsImpl user,
+      @PathVariable UUID id,
+      @Valid @RequestBody TransactionRequest request) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.updateTransaction(storeId, id, request));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<TransactionResponse> deleteById(
+      @AuthenticationPrincipal UserDetailsImpl user, @PathVariable UUID id) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.removeTransaction(storeId, id));
   }
 
 }

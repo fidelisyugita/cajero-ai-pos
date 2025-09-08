@@ -1,12 +1,32 @@
 package com.huzakerna.cajero.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.huzakerna.cajero.dto.IngredientResponse;
+import com.huzakerna.cajero.dto.TransactionProductRequest;
+import com.huzakerna.cajero.dto.TransactionResponse;
+import com.huzakerna.cajero.dto.VariantOptionRequest;
+import com.huzakerna.cajero.dto.VariantOptionResponse;
+import com.huzakerna.cajero.dto.VariantRequest;
+import com.huzakerna.cajero.dto.VariantResponse;
+import com.huzakerna.cajero.model.Ingredient;
+import com.huzakerna.cajero.model.Transaction;
+import com.huzakerna.cajero.model.TransactionProduct;
+import com.huzakerna.cajero.model.TransactionProductId;
 import com.huzakerna.cajero.model.Variant;
+import com.huzakerna.cajero.model.VariantOption;
 import com.huzakerna.cajero.repository.VariantRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+import com.huzakerna.cajero.repository.VariantOptionRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -15,14 +35,29 @@ public class VariantService {
 
   private final StoreRepository sRepo;
   private final VariantRepository repo;
+  private final VariantOptionRepository voRepo;
+  private final VariantOptionService voService;
 
-  public Variant addVariant(UUID storeId, Variant request) {
+  public List<VariantResponse> getAllByStoreId(UUID storeId) {
+    return repo.findByStoreId(storeId).stream()
+        .map(this::mapToResponse)
+        .toList();
+  }
+
+  public VariantResponse getVariantById(UUID id) {
+    Variant variant = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+    return mapToResponse(variant);
+  }
+
+  public VariantResponse addVariant(UUID storeId, VariantRequest request) {
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
-    return repo.save(
+    Variant variant = repo.save(
         Variant.builder()
             .storeId(storeId)
             .productId(request.getProductId())
@@ -32,6 +67,116 @@ public class VariantService {
             .isMultiple(request.isMultiple())
             .build());
 
+    Set<VariantOption> options = new HashSet<>();
+
+    // Add variant options if any
+    if (request.getOptions() != null) {
+      for (VariantOptionRequest option : request.getOptions()) {
+        option.setVariantId(variant.getId());
+        VariantOption variantOption = voService.addVariantOption(option);
+        options.add(variantOption);
+      }
+    }
+
+    variant.setOptions(options);
+
+    return mapToResponse(variant);
+
+  }
+
+  public VariantResponse updateVariant(UUID storeId, UUID id, VariantRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing variant
+    Variant variant = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+    // Verify the variant belongs to the store
+    if (!variant.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Variant does not belong to the store");
+    }
+
+    // Update variant fields
+    variant.setName(request.getName());
+    variant.setDescription(request.getDescription());
+    variant.setRequired(request.isRequired());
+    variant.setMultiple(request.isMultiple());
+
+    Set<VariantOption> options = new HashSet<>();
+
+    // Add variant options if any
+    if (request.getOptions() != null) {
+      for (VariantOptionRequest option : request.getOptions()) {
+        if (option.getId() != null) {
+          VariantOption optionToUpdate = voRepo.findById(option.getId())
+              .orElseThrow(() -> new RuntimeException("Variant Option not found"));
+          optionToUpdate.setName(option.getName());
+          optionToUpdate.setPriceAdjusment(option.getPriceAdjusment());
+          optionToUpdate.setStock(option.getStock());
+          VariantOption updatedOption = voRepo.save(optionToUpdate);
+          options.add(updatedOption);
+        } else {
+          option.setVariantId(variant.getId());
+          VariantOption variantOption = voService.addVariantOption(option);
+          options.add(variantOption);
+        }
+      }
+    }
+
+    variant.setOptions(options);
+
+    variant = repo.save(variant);
+    return mapToResponse(variant);
+  }
+
+  // soft delete
+  public VariantResponse removeVariant(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing variant
+    Variant variant = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+    // Verify the variant belongs to the store
+    if (!variant.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Variant does not belong to the store");
+    }
+
+    // Update variant fields
+    variant.setDeletedAt(LocalDateTime.now());
+
+    variant = repo.save(variant);
+    return mapToResponse(variant);
+  }
+
+  private VariantResponse mapToResponse(Variant variant) {
+    return VariantResponse.builder()
+        .id(variant.getId())
+        .storeId(variant.getStoreId())
+        .name(variant.getName())
+        .description(variant.getDescription())
+        .isRequired(variant.isRequired())
+        .isMultiple(variant.isMultiple())
+        .createdBy(variant.getCreatedBy())
+        .updatedBy(variant.getUpdatedBy())
+        .createdAt(variant.getCreatedAt())
+        .updatedAt(variant.getUpdatedAt())
+        .options(variant.getOptions().stream()
+            .map(vo -> VariantOption.builder()
+                .id(vo.getId())
+                .name(vo.getName())
+                .priceAdjusment(vo.getPriceAdjusment())
+                .stock(vo.getStock())
+                .variantId(vo.getVariantId())
+                .build())
+            .toList())
+        .build();
   }
 
 }
