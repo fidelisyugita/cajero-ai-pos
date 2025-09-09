@@ -36,6 +36,7 @@ public class ProductService {
   private final ProductRepository repo;
   private final ProductIngredientRepository piRepo;
   private final MeasureUnitRepository muRepo;
+  private final LogService logService;
 
   public ProductResponse addProduct(UUID storeId, ProductRequest request) {
     // Validate store exists
@@ -147,6 +148,11 @@ public class ProductService {
         .orElseThrow(
             () -> new EntityNotFoundException("Measure Unit not found"));
 
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("productId", id);
+    logDetails.put("oldValues", mapToResponse(product));
+
     // Update product fields
     product.setName(request.getName());
     product.setDescription(request.getDescription());
@@ -174,6 +180,11 @@ public class ProductService {
     }
 
     product = repo.save(product);
+
+    // Add new values to log details and create log
+    logDetails.put("newValues", mapToResponse(product));
+    logService.logAction(storeId, "product", "updated", logDetails);
+
     return mapToResponse(product);
   }
 
@@ -197,6 +208,12 @@ public class ProductService {
     product.setDeletedAt(LocalDateTime.now());
 
     product = repo.save(product);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("productId", id);
+    logService.logAction(storeId, "product", "deleted", logDetails);
+
     return mapToResponse(product);
   }
 

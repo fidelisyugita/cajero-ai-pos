@@ -28,6 +28,7 @@ public class VariantService {
   private final VariantRepository repo;
   private final VariantOptionRepository voRepo;
   private final VariantOptionService voService;
+  private final LogService logService;
 
   public List<VariantResponse> getAllByStoreId(UUID storeId) {
     return repo.findByStoreId(storeId).stream()
@@ -90,6 +91,11 @@ public class VariantService {
       throw new IllegalArgumentException("Variant does not belong to the store");
     }
 
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("variantId", id);
+    logDetails.put("oldValues", mapToResponse(variant));
+
     // Update variant fields
     variant.setName(request.getName());
     variant.setDescription(request.getDescription());
@@ -120,6 +126,11 @@ public class VariantService {
     variant.setOptions(options);
 
     variant = repo.save(variant);
+
+    // Add new values to log details and create log
+    logDetails.put("newValues", mapToResponse(variant));
+    logService.logAction(storeId, "variant", "updated", logDetails);
+
     return mapToResponse(variant);
   }
 
@@ -143,6 +154,12 @@ public class VariantService {
     variant.setDeletedAt(LocalDateTime.now());
 
     variant = repo.save(variant);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("variantId", id);
+    logService.logAction(storeId, "variant", "deleted", logDetails);
+
     return mapToResponse(variant);
   }
 

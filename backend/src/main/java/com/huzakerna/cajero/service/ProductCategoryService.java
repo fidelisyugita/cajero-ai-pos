@@ -17,6 +17,7 @@ public class ProductCategoryService {
 
   private final StoreRepository sRepo;
   private final ProductCategoryRepository repo;
+  private final LogService logService;
 
   public ProductCategory addProductCategory(UUID storeId, ProductCategory request) {
     if (!sRepo.existsById(storeId)) {
@@ -48,11 +49,21 @@ public class ProductCategoryService {
       throw new IllegalArgumentException("ProductCategory does not belong to the store");
     }
 
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("productCategoryCode", code);
+    logDetails.put("oldValues", (productCategory));
+
     // Update productCategory fields
     productCategory.setName(request.getName());
     productCategory.setDescription(request.getDescription());
 
     productCategory = repo.save(productCategory);
+
+    // Add new values to log details and create log
+    logDetails.put("newValues", (productCategory));
+    logService.logAction(storeId, "productCategory", "updated", logDetails);
+
     return (productCategory);
   }
 
@@ -76,6 +87,12 @@ public class ProductCategoryService {
     productCategory.setDeletedAt(LocalDateTime.now());
 
     productCategory = repo.save(productCategory);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("productCategoryCode", code);
+    logService.logAction(storeId, "productCategory", "deleted", logDetails);
+
     return (productCategory);
   }
 

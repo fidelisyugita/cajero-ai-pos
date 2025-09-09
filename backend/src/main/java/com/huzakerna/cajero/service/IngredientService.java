@@ -24,6 +24,7 @@ public class IngredientService {
   private final StoreRepository sRepo;
   private final IngredientRepository repo;
   private final MeasureUnitRepository muRepo;
+  private final LogService logService;
 
   public IngredientResponse addIngredient(UUID storeId, IngredientRequest request) {
     // Validate store exists
@@ -83,6 +84,11 @@ public class IngredientService {
         .orElseThrow(
             () -> new EntityNotFoundException("Measure Unit not found"));
 
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("ingredientId", id);
+    logDetails.put("oldValues", mapToResponse(ingredient));
+
     // Update ingredient fields
     ingredient.setName(request.getName());
     ingredient.setDescription(request.getDescription());
@@ -90,6 +96,11 @@ public class IngredientService {
     ingredient.setMeasureUnit(measureUnit);
 
     ingredient = repo.save(ingredient);
+
+    // Add new values to log details and create log
+    logDetails.put("newValues", mapToResponse(ingredient));
+    logService.logAction(storeId, "ingredient", "updated", logDetails);
+
     return mapToResponse(ingredient);
   }
 
@@ -113,6 +124,12 @@ public class IngredientService {
     ingredient.setDeletedAt(LocalDateTime.now());
 
     ingredient = repo.save(ingredient);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("ingredientId", id);
+    logService.logAction(storeId, "ingredient", "deleted", logDetails);
+
     return mapToResponse(ingredient);
   }
 

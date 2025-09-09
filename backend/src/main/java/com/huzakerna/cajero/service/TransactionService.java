@@ -31,6 +31,7 @@ public class TransactionService {
   private final StoreRepository sRepo;
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
+  private final LogService logService;
 
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     // Validate store exists
@@ -112,6 +113,11 @@ public class TransactionService {
       throw new IllegalArgumentException("Transaction does not belong to the store");
     }
 
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("transactionId", id);
+    logDetails.put("oldValues", mapToResponse(transaction));
+
     // Update transaction fields
     transaction.setStatusCode(request.getStatusCode());
     transaction.setPaymentMethodCode(request.getPaymentMethodCode());
@@ -138,6 +144,11 @@ public class TransactionService {
     }
 
     transaction = repo.save(transaction);
+
+    // Add new values to log details and create log
+    logDetails.put("newValues", mapToResponse(transaction));
+    logService.logAction(storeId, "transaction", "updated", logDetails);
+
     return mapToResponse(transaction);
   }
 
@@ -161,6 +172,12 @@ public class TransactionService {
     transaction.setDeletedAt(LocalDateTime.now());
 
     transaction = repo.save(transaction);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("transactionId", id);
+    logService.logAction(storeId, "transaction", "deleted", logDetails);
+
     return mapToResponse(transaction);
   }
 
