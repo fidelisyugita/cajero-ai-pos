@@ -1,6 +1,5 @@
 package com.huzakerna.cajero.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -9,18 +8,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.huzakerna.cajero.dto.IngredientResponse;
-import com.huzakerna.cajero.dto.TransactionProductRequest;
-import com.huzakerna.cajero.dto.TransactionResponse;
 import com.huzakerna.cajero.dto.VariantOptionRequest;
 import com.huzakerna.cajero.dto.VariantOptionResponse;
 import com.huzakerna.cajero.dto.VariantRequest;
 import com.huzakerna.cajero.dto.VariantResponse;
-import com.huzakerna.cajero.model.Ingredient;
-import com.huzakerna.cajero.model.Transaction;
-import com.huzakerna.cajero.model.TransactionProduct;
-import com.huzakerna.cajero.model.TransactionProductId;
 import com.huzakerna.cajero.model.Variant;
 import com.huzakerna.cajero.model.VariantOption;
 import com.huzakerna.cajero.repository.VariantRepository;
@@ -168,7 +159,7 @@ public class VariantService {
         .createdAt(variant.getCreatedAt())
         .updatedAt(variant.getUpdatedAt())
         .options(variant.getOptions().stream()
-            .map(vo -> VariantOption.builder()
+            .map(vo -> VariantOptionResponse.builder()
                 .id(vo.getId())
                 .name(vo.getName())
                 .priceAdjusment(vo.getPriceAdjusment())

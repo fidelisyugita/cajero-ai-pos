@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.huzakerna.cajero.model.VariantOption;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +27,7 @@ public class VariantResponse {
     private boolean isRequired;
     private boolean isMultiple;
 
-    private List<VariantOption> options;
+    private List<VariantOptionResponse> options;
 
     private UUID createdBy;
     private UUID updatedBy;

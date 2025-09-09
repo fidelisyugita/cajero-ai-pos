@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.huzakerna.cajero.dto.VariantRequest;
 import com.huzakerna.cajero.dto.VariantResponse;
-import com.huzakerna.cajero.repository.VariantRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.VariantService;
 import jakarta.validation.Valid;
@@ -26,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VariantController {
 
-  private final VariantRepository repo;
   private final VariantService service;
 
   @GetMapping
