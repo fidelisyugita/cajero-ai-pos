@@ -3,9 +3,11 @@ package com.huzakerna.cajero.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.huzakerna.cajero.dto.UserRequest;
 import com.huzakerna.cajero.dto.UserResponse;
+import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.UserService;
 import java.util.List;
 import java.util.UUID;
@@ -24,8 +26,10 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse add(@Valid @RequestBody UserRequest request) {
-        return userService.addUser(request);
+    public UserResponse add(@AuthenticationPrincipal UserDetailsImpl user, @Valid @RequestBody UserRequest request) {
+
+        UUID storeId = user.getStoreId();
+        return userService.addUser(storeId, request);
     }
 
     @GetMapping("/{id}")

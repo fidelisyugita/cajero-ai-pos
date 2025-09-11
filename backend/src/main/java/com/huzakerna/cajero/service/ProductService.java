@@ -16,146 +16,241 @@ import com.huzakerna.cajero.dto.ProductIngredientRequest;
 import com.huzakerna.cajero.dto.ProductIngredientResponse;
 import com.huzakerna.cajero.dto.ProductRequest;
 import com.huzakerna.cajero.dto.ProductResponse;
+import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductIngredient;
 import com.huzakerna.cajero.model.ProductIngredientId;
 import com.huzakerna.cajero.repository.ProductRepository;
+import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import com.huzakerna.cajero.repository.ProductIngredientRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor // Lombok will auto-inject the dependency
 public class ProductService {
 
-    private final StoreRepository sRepo;
-    private final ProductRepository repo;
-    private final ProductIngredientRepository piRepo;
+  private final StoreRepository sRepo;
+  private final ProductRepository repo;
+  private final ProductIngredientRepository piRepo;
+  private final MeasureUnitRepository muRepo;
+  private final LogService logService;
 
-    public ProductResponse addProduct(ProductRequest request) {
-        // Validate store exists
-        if (!sRepo.existsById(request.getStoreId())) {
-            throw new IllegalArgumentException("Store not found");
-        }
-        ;
-        // Store store = sRepo.findById(request.getStoreId())
-        // .orElseThrow(
-        // () -> new EntityNotFoundException("Store not found"))
+  public ProductResponse addProduct(UUID storeId, ProductRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Measure Unit not found"));
 
-        Product product = repo.save(
-                Product.builder()
-                        .name(request.getName())
-                        .storeId(request.getStoreId())
-                        .description(request.getDescription())
-                        .buyingPrice(request.getBuyingPrice())
-                        .sellingPrice(request.getSellingPrice())
-                        .stock(request.getStock())
-                        .categoryCode(request.getCategoryCode())
-                        .measureUnitCode(request.getMeasureUnitCode())
-                        .imageUrl(request.getImageUrl())
-                        .barcode(request.getBarcode())
-                        .commission(request.getCommission())
-                        .discount(request.getDiscount())
-                        .tax(request.getTax())
-                        .build());
+    Product product = repo.save(
+        Product.builder()
+            .name(request.getName())
+            .storeId(storeId)
+            .description(request.getDescription())
+            .buyingPrice(request.getBuyingPrice())
+            .sellingPrice(request.getSellingPrice())
+            .stock(request.getStock())
+            .categoryCode(request.getCategoryCode())
+            .measureUnit(measureUnit)
+            .imageUrl(request.getImageUrl())
+            .barcode(request.getBarcode())
+            .commission(request.getCommission())
+            .discount(request.getDiscount())
+            .tax(request.getTax())
+            .build());
 
-        // Add product ingredients if any
-        if (request.getProductIngredients() != null) {
-            for (ProductIngredientRequest ingredient : request.getProductIngredients()) {
-                addIngredientToProduct(product.getId(), ingredient.getIngredientId(),
-                        ingredient.getQuantityNeeded());
-
-            }
-        }
-
-        return mapToResponse(product);
+    // Add product ingredients if any
+    if (request.getIngredients() != null) {
+      for (ProductIngredientRequest ingredient : request.getIngredients()) {
+        addIngredientToProduct(product.getId(),
+            ingredient.getIngredientId(),
+            ingredient.getQuantityNeeded());
+      }
     }
 
-    public void addIngredientToProduct(UUID productId, UUID ingredientId,
-            BigDecimal quantityNeeded) {
+    return mapToResponse(product);
+  }
 
-        ProductIngredient productIngredient = new ProductIngredient();
-        productIngredient.setId(new ProductIngredientId(productId, ingredientId));
-        productIngredient.setQuantityNeeded(quantityNeeded);
+  public void addIngredientToProduct(UUID productId, UUID ingredientId,
+      BigDecimal quantityNeeded) {
 
-        piRepo.save(productIngredient);
+    ProductIngredient productIngredient = new ProductIngredient();
+    productIngredient.setId(new ProductIngredientId(productId, ingredientId));
+    productIngredient.setQuantityNeeded(quantityNeeded);
+
+    piRepo.save(productIngredient);
+  }
+
+  public void removeIngredientFromProduct(UUID productId, UUID ingredientId) {
+    ProductIngredient productIngredient = new ProductIngredient();
+    productIngredient.setId(new ProductIngredientId(productId, ingredientId));
+
+    piRepo.delete(productIngredient);
+  }
+
+  public ProductResponse getProductById(UUID id) {
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+    return mapToResponse(product);
+  }
+
+  public Page<ProductResponse> getProducts(UUID storeId,
+      int page,
+      int size,
+      String sortBy,
+      String sortDir,
+      String keyword,
+      String categoryCode,
+      LocalDate startDate,
+      LocalDate endDate) {
+    Pageable pageable = PageRequest.of(page, size,
+        sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending());
+
+    // fallback to 1970 and now if null
+    LocalDateTime start = startDate != null ? startDate.atStartOfDay()
+        : LocalDate.of(1970, 1, 1).atStartOfDay();
+    LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+
+    Page<Product> productPage = repo.findFiltered(
+        storeId, categoryCode, keyword, start, end, pageable);
+
+    return productPage.map(this::mapToResponse);
+  }
+
+  public List<ProductResponse> getAllProducts() {
+    return repo.findAll().stream()
+        .map(this::mapToResponse)
+        .toList();
+  }
+
+  public ProductResponse updateProduct(UUID storeId, UUID id, ProductRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
     }
 
-    public void removeVariantToProduct(UUID productId, UUID ingredientId) {
-        ProductIngredient productIngredient = new ProductIngredient();
-        productIngredient.setId(new ProductIngredientId(productId, ingredientId));
+    // Find existing product
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        piRepo.delete(productIngredient);
+    // Verify the product belongs to the store
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
     }
 
-    public ProductResponse getProductById(UUID id) {
-        Product product = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        return mapToResponse(product);
+    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
+        .orElseThrow(
+            () -> new EntityNotFoundException("Measure Unit not found"));
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("productId", id);
+    logDetails.put("oldValues", mapToResponse(product));
+
+    // Update product fields
+    product.setName(request.getName());
+    product.setDescription(request.getDescription());
+    product.setBuyingPrice(request.getBuyingPrice());
+    product.setSellingPrice(request.getSellingPrice());
+    product.setStock(request.getStock());
+    product.setCategoryCode(request.getCategoryCode());
+    product.setMeasureUnit(measureUnit);
+    product.setImageUrl(request.getImageUrl());
+    product.setBarcode(request.getBarcode());
+    product.setCommission(request.getCommission());
+    product.setDiscount(request.getDiscount());
+    product.setTax(request.getTax());
+
+    // Remove existing transaction products
+    piRepo.deleteByProductId(id);
+
+    // Add product ingredients if any
+    if (request.getIngredients() != null) {
+      for (ProductIngredientRequest ingredient : request.getIngredients()) {
+        addIngredientToProduct(product.getId(),
+            ingredient.getIngredientId(),
+            ingredient.getQuantityNeeded());
+      }
     }
 
-    public Page<ProductResponse> getProducts(UUID storeId,
-            int page,
-            int size,
-            String sortBy,
-            String sortDir,
-            String keyword,
-            String categoryCode,
-            LocalDate startDate,
-            LocalDate endDate) {
-        Pageable pageable = PageRequest.of(page, size,
-                sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending()
-                        : Sort.by(sortBy).ascending());
+    product = repo.save(product);
 
-        // fallback to 1970 and now if null
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay()
-                : LocalDate.of(1970, 1, 1).atStartOfDay();
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+    // Add new values to log details and create log
+    logDetails.put("newValues", mapToResponse(product));
+    logService.logAction(storeId, "product", "updated", logDetails);
 
-        Page<Product> productPage = repo.findFiltered(
-                storeId, categoryCode, keyword, start, end, pageable);
+    return mapToResponse(product);
+  }
 
-        return productPage.map(this::mapToResponse);
+  // soft delete
+  public ProductResponse removeProduct(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
     }
 
-    public List<ProductResponse> getAllProducts() {
-        return repo.findAll().stream()
-                .map(this::mapToResponse)
-                .toList();
+    // Find existing product
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    // Verify the product belongs to the store
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
     }
 
-    private ProductResponse mapToResponse(Product product) {
-        return ProductResponse.builder()
-                .id(product.getId())
-                .storeId(product.getStoreId())
-                .name(product.getName())
-                .imageUrl(product.getImageUrl())
-                .description(product.getDescription())
-                .stock(product.getStock())
-                .rejectCount(product.getRejectCount())
-                .soldCount(product.getSoldCount())
-                .categoryCode(product.getCategoryCode())
-                .measureUnitCode(product.getMeasureUnitCode())
-                .buyingPrice(product.getBuyingPrice())
-                .sellingPrice(product.getSellingPrice())
-                .barcode(product.getBarcode())
-                .commission(product.getCommission())
-                .discount(product.getDiscount())
-                .tax(product.getTax())
-                .createdBy(product.getCreatedBy())
-                .updatedBy(product.getUpdatedBy())
-                .createdAt(product.getCreatedAt())
-                .updatedAt(product.getUpdatedAt())
-                .productIngredients(product.getProductIngredients().stream()
-                        .map(pi -> ProductIngredientResponse.builder()
-                                .ingredientId(pi.getIngredient().getId())
-                                .name(pi.getIngredient().getName())
-                                .description(pi.getIngredient().getDescription())
-                                .stock(pi.getIngredient().getStock())
-                                .measureUnitCode(pi.getIngredient().getMeasureUnitCode())
-                                .quantityNeeded(pi.getQuantityNeeded())
-                                .build())
-                        .toList())
-                .build();
-    }
+    // Update product fields
+    product.setDeletedAt(LocalDateTime.now());
+
+    product = repo.save(product);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("productId", id);
+    logService.logAction(storeId, "product", "deleted", logDetails);
+
+    return mapToResponse(product);
+  }
+
+  private ProductResponse mapToResponse(Product product) {
+    return ProductResponse.builder()
+        .id(product.getId())
+        .storeId(product.getStoreId())
+        .name(product.getName())
+        .imageUrl(product.getImageUrl())
+        .description(product.getDescription())
+        .stock(product.getStock())
+        .rejectCount(product.getRejectCount())
+        .soldCount(product.getSoldCount())
+        .categoryCode(product.getCategoryCode())
+        .measureUnitCode(product.getMeasureUnit().getCode())
+        .measureUnitName(product.getMeasureUnit().getName())
+        .buyingPrice(product.getBuyingPrice())
+        .sellingPrice(product.getSellingPrice())
+        .barcode(product.getBarcode())
+        .commission(product.getCommission())
+        .discount(product.getDiscount())
+        .tax(product.getTax())
+        .createdBy(product.getCreatedBy())
+        .updatedBy(product.getUpdatedBy())
+        .createdAt(product.getCreatedAt())
+        .updatedAt(product.getUpdatedAt())
+        .ingredients(product.getIngredients().stream()
+            .map(pi -> ProductIngredientResponse.builder()
+                .ingredientId(pi.getIngredient().getId())
+                .name(pi.getIngredient().getName())
+                .description(pi.getIngredient().getDescription())
+                .stock(pi.getIngredient().getStock())
+                .measureUnitCode(pi.getIngredient().getMeasureUnit().getCode())
+                .measureUnitName(pi.getIngredient().getMeasureUnit().getName())
+                .quantityNeeded(pi.getQuantityNeeded())
+                .build())
+            .toList())
+        .build();
+  }
 }

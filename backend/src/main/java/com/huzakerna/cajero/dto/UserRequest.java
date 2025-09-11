@@ -21,9 +21,6 @@ public class UserRequest {
     @Size(max = 100)
     private String name;
 
-    @NotNull(message = "Store Id is required")
-    private UUID storeId;
-
     @NotNull(message = "Role Code is required")
     private String roleCode;
 

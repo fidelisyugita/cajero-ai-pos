@@ -1,7 +1,7 @@
 services:
   # ---------- Backend ----------
   backend:
-    platform: linux/amd64
+    # platform: linux/amd64
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -36,7 +36,7 @@ services:
 
   # ---------- Frontend ----------
   frontend:
-    platform: linux/amd64
+    # platform: linux/amd64
     build:
       context: ./frontend
       dockerfile: Dockerfile

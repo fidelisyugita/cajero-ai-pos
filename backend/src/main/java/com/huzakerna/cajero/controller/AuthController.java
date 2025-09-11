@@ -18,6 +18,8 @@ import com.huzakerna.cajero.model.User;
 import com.huzakerna.cajero.repository.UserRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.util.JwtUtils;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,32 +33,32 @@ public class AuthController {
   private final UserRepository userRepo;
 
   @PostMapping("/signin")
-  public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+  public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
     try {
       logger.info("Attempting authentication for: {}", loginRequest.email());
       Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-          loginRequest.email(),
-          loginRequest.password()));
+          new UsernamePasswordAuthenticationToken(
+              loginRequest.email(),
+              loginRequest.password()));
 
       UserDetailsImpl userDetails = ((UserDetailsImpl) authentication.getPrincipal());
       logger.info("Authentication successful for: {}", userDetails.getUsername());
 
       User user = userRepo.findByEmail(userDetails.getUsername())
-        .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+          .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
 
       String jwt = jwtUtils.generateToken(user);
 
       UserResponse userResponse = UserResponse.builder()
-        .id(user.getId())
-        .name(user.getName())
-        .email(user.getEmail())
-        .phone(user.getPhone())
-        .storeId(user.getStoreId())
-        .roleCode(user.getRoleCode())
-        .imageUrl(user.getImageUrl())
-        .accessToken(jwt)
-        .build();
+          .id(user.getId())
+          .name(user.getName())
+          .email(user.getEmail())
+          .phone(user.getPhone())
+          .storeId(user.getStoreId())
+          .roleCode(user.getRoleCode())
+          .imageUrl(user.getImageUrl())
+          .accessToken(jwt)
+          .build();
 
       return ResponseEntity.ok(userResponse);
 

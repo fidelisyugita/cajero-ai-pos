@@ -5,16 +5,21 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.huzakerna.cajero.model.ProductCategory;
 import com.huzakerna.cajero.repository.ProductCategoryRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.ProductCategoryService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,26 +27,45 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductCategoryController {
 
-    private final ProductCategoryRepository repo;
-    private final ProductCategoryService service;
+  private final ProductCategoryRepository repo;
+  private final ProductCategoryService service;
 
-    @GetMapping
-    public ResponseEntity<List<ProductCategory>> getAll(
-        @AuthenticationPrincipal UserDetailsImpl user) {
-        UUID storeId = user.getStoreId();
+  @GetMapping
+  public ResponseEntity<List<ProductCategory>> getAll(
+      @AuthenticationPrincipal UserDetailsImpl user) {
+    UUID storeId = user.getStoreId();
 
-        return ResponseEntity.ok(repo.findByStoreId(storeId));
-    }
+    return ResponseEntity.ok(repo.findByStoreId(storeId));
+  }
 
-    @PostMapping
-    public ProductCategory add(@RequestBody ProductCategory productCategory) {
-        return service.addProductCategory(productCategory);
-    }
+  @PostMapping
+  public ProductCategory add(@AuthenticationPrincipal UserDetailsImpl user,
+      @Valid @RequestBody ProductCategory productCategory) {
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Optional<ProductCategory>> getById(
-        @PathVariable String id) {
-        return ResponseEntity.ok(repo.findById(id));
-    }
+    UUID storeId = user.getStoreId();
+    return service.addProductCategory(storeId, productCategory);
+  }
+
+  @GetMapping("/{code}")
+  public ResponseEntity<Optional<ProductCategory>> getById(
+      @PathVariable String code) {
+    return ResponseEntity.ok(repo.findById(code));
+  }
+
+  @PutMapping("/{code}")
+  public ResponseEntity<ProductCategory> update(
+      @AuthenticationPrincipal UserDetailsImpl user,
+      @PathVariable String code,
+      @Valid @RequestBody ProductCategory request) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.updateProductCategory(storeId, code, request));
+  }
+
+  @DeleteMapping("/{code}")
+  public ResponseEntity<ProductCategory> deleteById(
+      @AuthenticationPrincipal UserDetailsImpl user, @PathVariable String code) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.removeProductCategory(storeId, code));
+  }
 
 }

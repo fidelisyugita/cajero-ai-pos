@@ -65,9 +65,8 @@ public class DataInitializer implements CommandLineRunner {
           .email(email)
           .password(password)
           .roleCode("ADMIN")
-          .storeId(storeId)
           .build();
-      userService.addUser(user);
+      userService.addUser(storeId, user);
 
       List<MeasureUnit> measureUnits = List.of(
           MeasureUnit.builder().code("PCS").name("Pieces").description("Individual items")

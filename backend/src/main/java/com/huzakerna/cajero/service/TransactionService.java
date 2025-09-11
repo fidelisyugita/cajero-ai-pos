@@ -31,16 +31,17 @@ public class TransactionService {
   private final StoreRepository sRepo;
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
+  private final LogService logService;
 
-  public TransactionResponse addTransaction(TransactionRequest request) {
+  public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     // Validate store exists
-    if (!sRepo.existsById(request.getStoreId())) {
+    if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
     Transaction transaction = repo.save(
         Transaction.builder()
-            .storeId(request.getStoreId())
+            .storeId(storeId)
             .statusCode(request.getStatusCode())
             .paymentMethodCode(request.getPaymentMethodCode())
             .transactionTypeCode(request.getTransactionTypeCode())
@@ -51,16 +52,17 @@ public class TransactionService {
             .totalTax(request.getTotalTax())
             .build());
 
-    // Add transaction items if any
+    // Add transaction products if any
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request
           .getTransactionProducts()) {
         addProductToTransaction(transaction.getId(),
             product.getProductId(),
-            product.getBuyingPrice(), product.getSellingPrice(),
+            product.getBuyingPrice(),
+            product.getSellingPrice(),
             product.getNote(),
-            product.getQuantity(), product.getSelectedVariants());
-
+            product.getQuantity(),
+            product.getSelectedVariants());
       }
     }
 
@@ -71,27 +73,110 @@ public class TransactionService {
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
       JsonNode selectedVariants) {
 
-    TransactionProduct transactionVariant = new TransactionProduct();
-    transactionVariant.setId(new TransactionProductId(transactionId, productId));
-    transactionVariant.setBuyingPrice(buyingPrice);
-    transactionVariant.setSellingPrice(sellingPrice);
-    transactionVariant.setNote(note);
-    transactionVariant.setQuantity(quantity);
-    transactionVariant.setSelectedVariants(selectedVariants);
+    TransactionProduct transactionProduct = new TransactionProduct();
+    transactionProduct.setId(new TransactionProductId(transactionId, productId));
+    transactionProduct.setBuyingPrice(buyingPrice);
+    transactionProduct.setSellingPrice(sellingPrice);
+    transactionProduct.setNote(note);
+    transactionProduct.setQuantity(quantity);
+    transactionProduct.setSelectedVariants(selectedVariants);
 
-    tpRepo.save(transactionVariant);
+    tpRepo.save(transactionProduct);
   }
 
-  public void removeVariantToTransaction(UUID transactionId, UUID productId) {
-    TransactionProduct transactionVariant = new TransactionProduct();
-    transactionVariant.setId(new TransactionProductId(transactionId, productId));
+  public void removeProductFromTransaction(UUID transactionId, UUID productId) {
+    TransactionProduct transactionProduct = new TransactionProduct();
+    transactionProduct.setId(new TransactionProductId(transactionId, productId));
 
-    tpRepo.delete(transactionVariant);
+    tpRepo.delete(transactionProduct);
   }
 
   public TransactionResponse getTransactionById(UUID id) {
     Transaction transaction = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+    return mapToResponse(transaction);
+  }
+
+  public TransactionResponse updateTransaction(UUID storeId, UUID id, TransactionRequest request) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing transaction
+    Transaction transaction = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+    // Verify the transaction belongs to the store
+    if (!transaction.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Transaction does not belong to the store");
+    }
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("transactionId", id);
+    logDetails.put("oldValues", mapToResponse(transaction));
+
+    // Update transaction fields
+    transaction.setStatusCode(request.getStatusCode());
+    transaction.setPaymentMethodCode(request.getPaymentMethodCode());
+    transaction.setTransactionTypeCode(request.getTransactionTypeCode());
+    transaction.setDescription(request.getDescription());
+    transaction.setIn(request.isIn());
+    transaction.setTotalDiscount(request.getTotalDiscount());
+    transaction.setTotalTax(request.getTotalTax());
+
+    // Remove existing transaction products
+    tpRepo.deleteByTransactionId(id);
+
+    // Add new transaction products if any
+    if (request.getTransactionProducts() != null) {
+      for (TransactionProductRequest product : request.getTransactionProducts()) {
+        addProductToTransaction(transaction.getId(),
+            product.getProductId(),
+            product.getBuyingPrice(),
+            product.getSellingPrice(),
+            product.getNote(),
+            product.getQuantity(),
+            product.getSelectedVariants());
+      }
+    }
+
+    transaction = repo.save(transaction);
+
+    // Add new values to log details and create log
+    logDetails.put("newValues", mapToResponse(transaction));
+    logService.logAction(storeId, "transaction", "updated", logDetails);
+
+    return mapToResponse(transaction);
+  }
+
+  // soft delete
+  public TransactionResponse removeTransaction(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing transaction
+    Transaction transaction = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+    // Verify the transaction belongs to the store
+    if (!transaction.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Transaction does not belong to the store");
+    }
+
+    // Update transaction fields
+    transaction.setDeletedAt(LocalDateTime.now());
+
+    transaction = repo.save(transaction);
+
+    // Create log details
+    var logDetails = new java.util.HashMap<String, Object>();
+    logDetails.put("transactionId", id);
+    logService.logAction(storeId, "transaction", "deleted", logDetails);
 
     return mapToResponse(transaction);
   }
@@ -147,7 +232,7 @@ public class TransactionService {
             .map(tp -> TransactionProductResponse.builder()
                 .productId(tp.getProduct().getId())
                 .categoryCode(tp.getProduct().getCategoryCode())
-                .measureUnitCode(tp.getProduct().getMeasureUnitCode())
+                .measureUnitCode(tp.getProduct().getMeasureUnit().getCode())
                 .name(tp.getProduct().getName())
                 .description(tp.getProduct().getDescription())
                 .stock(tp.getProduct().getStock())

@@ -3,7 +3,8 @@ package com.huzakerna.cajero.dto;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
+import com.huzakerna.cajero.model.TransactionProduct;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -25,9 +26,6 @@ public class ProductRequest {
     @NotBlank(message = "Product name cannot be empty")
     private String name;
 
-    @NotNull(message = "Store Id is required")
-    private UUID storeId;
-
     /**
      * TODO: Will check will use set or list (in Transaction)
      * 
@@ -35,7 +33,7 @@ public class ProductRequest {
      * @see TransactionProduct
      */
     @Builder.Default
-    private Set<ProductIngredientRequest> productIngredients = new HashSet<>();
+    private Set<ProductIngredientRequest> ingredients = new HashSet<>();
 
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;

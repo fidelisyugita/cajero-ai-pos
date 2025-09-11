@@ -7,10 +7,12 @@ import com.huzakerna.cajero.model.TransactionProduct;
 import com.huzakerna.cajero.model.TransactionProductId;
 
 public interface TransactionProductRepository
-    extends JpaRepository<TransactionProduct, TransactionProductId> {
+        extends JpaRepository<TransactionProduct, TransactionProductId> {
 
     List<TransactionProduct> findByTransactionId(UUID transactionId);
 
     List<TransactionProduct> findByProductId(UUID productId);
+
+    void deleteByTransactionId(UUID transactionId);
 
 }

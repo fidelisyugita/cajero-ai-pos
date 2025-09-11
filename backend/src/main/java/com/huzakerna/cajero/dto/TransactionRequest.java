@@ -19,9 +19,6 @@ import lombok.Setter;
 @Builder
 public class TransactionRequest {
 
-    @NotNull(message = "Store Id is required")
-    private UUID storeId;
-
     @DecimalMin(value = "0.0", message = "Total Tax cannot be negative")
     private BigDecimal totalTax;
     @DecimalMin(value = "0.0", message = "Total Commission cannot be negative")

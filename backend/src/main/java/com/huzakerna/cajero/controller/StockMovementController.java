@@ -2,7 +2,7 @@ package com.huzakerna.cajero.controller;
 
 import java.util.List;
 import java.util.Optional;
-
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,38 +11,40 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.huzakerna.cajero.model.MeasureUnit;
-import com.huzakerna.cajero.repository.MeasureUnitRepository;
+import com.huzakerna.cajero.model.StockMovement;
+import com.huzakerna.cajero.repository.StockMovementRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
-import com.huzakerna.cajero.service.MeasureUnitService;
+import com.huzakerna.cajero.service.StockMovementService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/measure-unit")
+@RequestMapping("/api/stock-movement")
 @RequiredArgsConstructor
-public class MeasureUnitController {
+public class StockMovementController {
 
-    private final MeasureUnitRepository repo;
-    private final MeasureUnitService service;
+    private final StockMovementRepository repo;
+    private final StockMovementService service;
 
     @GetMapping
-    public ResponseEntity<List<MeasureUnit>> getAll(
+    public ResponseEntity<List<StockMovement>> getAll(
             @AuthenticationPrincipal UserDetailsImpl user) {
-        return ResponseEntity.ok(repo.findAll());
-        // UUID storeId = user.getStoreId();
+        UUID storeId = user.getStoreId();
 
-        // return ResponseEntity.ok(repo.findByStoreId(storeId));
+        return ResponseEntity.ok(repo.findByStoreId(storeId));
     }
 
     @PostMapping
-    public MeasureUnit add(@Valid @RequestBody MeasureUnit measureUnit) {
+    public StockMovement add(@AuthenticationPrincipal UserDetailsImpl user,
+            @Valid @RequestBody StockMovement ingredient) {
 
-        return service.addMeasureUnit(measureUnit);
+        UUID storeId = user.getStoreId();
+        return service.addStockMovement(storeId, ingredient);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<MeasureUnit>> getById(@PathVariable String id) {
+    public ResponseEntity<Optional<StockMovement>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(repo.findById(id));
     }
 
