@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Reports from "./pages/Reports";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import Transactions from "./pages/Transactions";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               element={
                 <ProtectedRoute>
                   <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute>
+                  <Transactions />
                 </ProtectedRoute>
               }
             />

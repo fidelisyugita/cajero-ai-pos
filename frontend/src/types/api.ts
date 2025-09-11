@@ -35,3 +35,11 @@ export interface Transaction {
   paymentMethod: string;
   createdAt: string;
 }
+export interface Log {
+  id: string;
+  storeId: string;
+  type: string;
+  action: string;
+  details: string;
+  createdAt: string;
+}

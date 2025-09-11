@@ -41,15 +41,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
               <li>
-                <Link to="/orders">
+                <Link to="/transactions">
                   <Button
                     variant="ghost"
                     className={`w-full justify-start ${
-                      location.pathname === "/orders" ? "bg-accent" : ""
+                      location.pathname === "/transactions" ? "bg-accent" : ""
                     }`}
                   >
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    Orders
+                    Transactions
                   </Button>
                 </Link>
               </li>
