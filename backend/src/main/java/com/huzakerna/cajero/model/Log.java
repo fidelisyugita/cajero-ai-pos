@@ -29,11 +29,11 @@ public class Log {
   @Column(name = "store_id")
   private UUID storeId;
 
-  private String type;
-  private String action;
+  private String type; // 'subscription', 'payment', 'inventory', 'user'
+  private String action; // 'created', 'updated', 'deleted'
 
   @Column(columnDefinition = "jsonb")
-  private String details;
+  private String details; // flexible: {"old_status":"pending","new_status":"success"}
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;
