@@ -4,9 +4,9 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useLogs } from "@/hooks/useLogs";
 
 const Reports = () => {
-  const [reportPage, setReportPage] = useState(0);
+  const [page, setPage] = useState(0);
 
-  const { data: reportsData } = useLogs(reportPage);
+  const { data: reportsData } = useLogs(page);
 
   return (
     <DashboardLayout>
@@ -27,7 +27,7 @@ const Reports = () => {
                 </tr>
               </thead>
               <tbody>
-                {(reportsData?.content || []).map((report) => (
+                {reportsData?.content.map((report) => (
                   <tr key={report.id}>
                     <td className="border px-4 py-2">{report.id}</td>
                     <td className="border px-4 py-2">${report.type}</td>
@@ -43,18 +43,18 @@ const Reports = () => {
             {reportsData && (
               <div className="mt-4 flex justify-between items-center">
                 <button
-                  onClick={() => setReportPage((p) => Math.max(0, p - 1))}
-                  disabled={reportPage === 0}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Previous
                 </button>
                 <span>
-                  Page {reportPage + 1} of {reportsData.totalPages}
+                  Page {page + 1} of {reportsData.totalPages}
                 </span>
                 <button
-                  onClick={() => setReportPage((p) => p + 1)}
-                  disabled={reportPage >= reportsData.totalPages - 1}
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= reportsData.totalPages - 1}
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Next

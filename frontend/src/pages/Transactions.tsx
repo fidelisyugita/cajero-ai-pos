@@ -4,9 +4,9 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { DashboardLayout } from "@/components/DashboardLayout";
 
 const Transactions = () => {
-  const [transactionPage, setTransactionPage] = useState(0);
+  const [page, setPage] = useState(0);
 
-  const { data: transactionsData } = useTransactions(transactionPage);
+  const { data: transactionsData } = useTransactions(page);
 
   return (
     <DashboardLayout>
@@ -49,18 +49,18 @@ const Transactions = () => {
             {transactionsData && (
               <div className="mt-4 flex justify-between items-center">
                 <button
-                  onClick={() => setTransactionPage((p) => Math.max(0, p - 1))}
-                  disabled={transactionPage === 0}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Previous
                 </button>
                 <span>
-                  Page {transactionPage + 1} of {transactionsData.totalPages}
+                  Page {page + 1} of {transactionsData.totalPages}
                 </span>
                 <button
-                  onClick={() => setTransactionPage((p) => p + 1)}
-                  disabled={transactionPage >= transactionsData.totalPages - 1}
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= transactionsData.totalPages - 1}
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Next
