@@ -93,6 +93,14 @@ public class ProductService {
     piRepo.delete(productIngredient);
   }
 
+  public void removeIngredientFromProduct(UUID productId, List<UUID> ingredientIds) {
+    List<ProductIngredientId> productIngredients = ingredientIds.stream()
+        .map(ingredientId -> new ProductIngredientId(productId, ingredientId))
+        .toList();
+
+    piRepo.deleteAllByIdInBatch(productIngredients);
+  }
+
   public ProductResponse getProductById(UUID id) {
     Product product = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -167,15 +175,25 @@ public class ProductService {
     product.setDiscount(request.getDiscount());
     product.setTax(request.getTax());
 
-    // Remove existing transaction products
-    piRepo.deleteByProductId(id);
+    // Remove existing product ingredients
+    // piRepo.deleteByProductId(id);
+    List<UUID> removedIngredientIds = product.getIngredients().stream()
+        .filter(pi -> request.getIngredients() == null || request.getIngredients().stream()
+            .noneMatch(ri -> ri.getIngredientId().equals(pi.getIngredient().getId())))
+        .map(pi -> pi.getIngredient().getId())
+        .toList();
+
+    removeIngredientFromProduct(product.getId(), removedIngredientIds);
 
     // Add product ingredients if any
     if (request.getIngredients() != null) {
       for (ProductIngredientRequest ingredient : request.getIngredients()) {
-        addIngredientToProduct(product.getId(),
-            ingredient.getIngredientId(),
-            ingredient.getQuantityNeeded());
+        if (product.getIngredients().stream()
+            .noneMatch(pi -> pi.getIngredient().getId().equals(ingredient.getIngredientId()))) {
+          addIngredientToProduct(product.getId(),
+              ingredient.getIngredientId(),
+              ingredient.getQuantityNeeded());
+        }
       }
     }
 

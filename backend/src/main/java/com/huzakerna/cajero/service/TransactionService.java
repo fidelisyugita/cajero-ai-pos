@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.huzakerna.cajero.dto.ProductIngredientRequest;
 import com.huzakerna.cajero.dto.TransactionProductRequest;
 import com.huzakerna.cajero.dto.TransactionProductResponse;
 import com.huzakerna.cajero.dto.TransactionRequest;
@@ -91,6 +92,14 @@ public class TransactionService {
     tpRepo.delete(transactionProduct);
   }
 
+  public void removeProductFromTransaction(UUID transactionId, List<UUID> productIds) {
+    List<TransactionProductId> transactionProducts = productIds.stream()
+        .map(productId -> new TransactionProductId(transactionId, productId))
+        .toList();
+
+    tpRepo.deleteAllByIdInBatch(transactionProducts);
+  }
+
   public TransactionResponse getTransactionById(UUID id) {
     Transaction transaction = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -123,23 +132,34 @@ public class TransactionService {
     transaction.setPaymentMethodCode(request.getPaymentMethodCode());
     transaction.setTransactionTypeCode(request.getTransactionTypeCode());
     transaction.setDescription(request.getDescription());
-    transaction.setIn(request.isIn());
-    transaction.setTotalDiscount(request.getTotalDiscount());
-    transaction.setTotalTax(request.getTotalTax());
+    // transaction.setIn(request.isIn());
+    // transaction.setTotalDiscount(request.getTotalDiscount());
+    // transaction.setTotalTax(request.getTotalTax());
 
     // Remove existing transaction products
-    tpRepo.deleteByTransactionId(id);
+    // tpRepo.deleteByTransactionId(id);
+
+    List<UUID> removedProductIds = transaction.getTransactionProducts().stream()
+        .filter(tp -> request.getTransactionProducts() == null || request.getTransactionProducts().stream()
+            .noneMatch(ri -> ri.getProductId().equals(tp.getProduct().getId())))
+        .map(tp -> tp.getProduct().getId())
+        .toList();
+
+    removeProductFromTransaction(transaction.getId(), removedProductIds);
 
     // Add new transaction products if any
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request.getTransactionProducts()) {
-        addProductToTransaction(transaction.getId(),
-            product.getProductId(),
-            product.getBuyingPrice(),
-            product.getSellingPrice(),
-            product.getNote(),
-            product.getQuantity(),
-            product.getSelectedVariants());
+        if (transaction.getTransactionProducts().stream()
+            .noneMatch(tp -> tp.getProduct().getId().equals(product.getProductId()))) {
+          addProductToTransaction(transaction.getId(),
+              product.getProductId(),
+              product.getBuyingPrice(),
+              product.getSellingPrice(),
+              product.getNote(),
+              product.getQuantity(),
+              product.getSelectedVariants());
+        }
       }
     }
 
