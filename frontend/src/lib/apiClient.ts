@@ -8,9 +8,6 @@ interface ApiErrorResponse {
 // Create axios instance with default config
 const axiosInstance = axios.create({
   baseURL: "/api", // All our API endpoints start with /api
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // Add a request interceptor to add the auth token
@@ -47,6 +44,17 @@ export async function apiClient<T>(
   options: Omit<AxiosRequestConfig, "url"> = {}
 ): Promise<T> {
   try {
+    // If the request body is FormData, don't set Content-Type header
+    if (
+      !(options.data instanceof FormData) &&
+      !options.headers?.["Content-Type"]
+    ) {
+      options.headers = {
+        ...options.headers,
+        "Content-Type": "application/json",
+      };
+    }
+
     const response = await axiosInstance({
       url: endpoint,
       ...options,
