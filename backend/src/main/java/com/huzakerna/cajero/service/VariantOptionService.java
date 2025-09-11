@@ -3,7 +3,6 @@ package com.huzakerna.cajero.service;
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.VariantOptionRequest;
-import com.huzakerna.cajero.dto.VariantOptionResponse;
 import com.huzakerna.cajero.model.VariantOption;
 import com.huzakerna.cajero.repository.VariantRepository;
 import com.huzakerna.cajero.repository.VariantOptionRepository;
@@ -35,14 +34,14 @@ public class VariantOptionService {
 
   }
 
-  private VariantOptionResponse mapToResponse(VariantOption variantOption) {
-    return VariantOptionResponse.builder()
-        .id(variantOption.getId())
-        .variantId(variantOption.getVariantId())
-        .name(variantOption.getName())
-        .priceAdjusment(variantOption.getPriceAdjusment())
-        .stock(variantOption.getStock())
-        .build();
-  }
+  // private VariantOptionResponse mapToResponse(VariantOption variantOption) {
+  // return VariantOptionResponse.builder()
+  // .id(variantOption.getId())
+  // .variantId(variantOption.getVariantId())
+  // .name(variantOption.getName())
+  // .priceAdjusment(variantOption.getPriceAdjusment())
+  // .stock(variantOption.getStock())
+  // .build();
+  // }
 
 }
