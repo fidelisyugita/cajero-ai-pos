@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { useTransactions } from "@/hooks/useTransactions";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { useLogs } from "@/hooks/useLogs";
 
 const Reports = () => {
-  const [transactionPage, setTransactionPage] = useState(0);
+  const [reportPage, setReportPage] = useState(0);
 
-  const { data: transactionsData } = useTransactions(transactionPage);
+  const { data: reportsData } = useLogs(reportPage);
 
   return (
     <DashboardLayout>
@@ -14,53 +14,47 @@ const Reports = () => {
         <h1 className="text-2xl font-bold mb-6">Reports</h1>
 
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Transaction Report</h2>
+          <h2 className="text-xl font-semibold mb-4">Report</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
                 <tr>
                   <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Total</th>
-                  <th className="px-4 py-2">Status</th>
                   <th className="px-4 py-2">Type</th>
-                  <th className="px-4 py-2">Payment Method</th>
+                  <th className="px-4 py-2">Action</th>
+                  <th className="px-4 py-2">Details</th>
                   <th className="px-4 py-2">Created At</th>
                 </tr>
               </thead>
               <tbody>
-                {transactionsData?.content.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td className="border px-4 py-2">{transaction.id}</td>
-                    <td className="border px-4 py-2">${transaction.total}</td>
-                    <td className="border px-4 py-2">{transaction.status}</td>
+                {(reportsData?.content || []).map((report) => (
+                  <tr key={report.id}>
+                    <td className="border px-4 py-2">{report.id}</td>
+                    <td className="border px-4 py-2">${report.type}</td>
+                    <td className="border px-4 py-2">{report.action}</td>
+                    <td className="border px-4 py-2">{report.details}</td>
                     <td className="border px-4 py-2">
-                      {transaction.transactionType}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {transaction.paymentMethod}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {new Date(transaction.createdAt).toLocaleDateString()}
+                      {new Date(report.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {transactionsData && (
+            {reportsData && (
               <div className="mt-4 flex justify-between items-center">
                 <button
-                  onClick={() => setTransactionPage((p) => Math.max(0, p - 1))}
-                  disabled={transactionPage === 0}
+                  onClick={() => setReportPage((p) => Math.max(0, p - 1))}
+                  disabled={reportPage === 0}
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Previous
                 </button>
                 <span>
-                  Page {transactionPage + 1} of {transactionsData.totalPages}
+                  Page {reportPage + 1} of {reportsData.totalPages}
                 </span>
                 <button
-                  onClick={() => setTransactionPage((p) => p + 1)}
-                  disabled={transactionPage >= transactionsData.totalPages - 1}
+                  onClick={() => setReportPage((p) => p + 1)}
+                  disabled={reportPage >= reportsData.totalPages - 1}
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Next
