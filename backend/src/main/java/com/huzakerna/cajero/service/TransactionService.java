@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.huzakerna.cajero.dto.ProductIngredientRequest;
 import com.huzakerna.cajero.dto.TransactionProductRequest;
 import com.huzakerna.cajero.dto.TransactionProductResponse;
 import com.huzakerna.cajero.dto.TransactionRequest;
@@ -123,7 +123,7 @@ public class TransactionService {
     }
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("transactionId", id);
     logDetails.put("oldValues", mapToResponse(transaction));
 

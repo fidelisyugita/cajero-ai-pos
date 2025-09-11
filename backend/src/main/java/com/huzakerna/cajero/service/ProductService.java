@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -228,7 +229,7 @@ public class ProductService {
     product = repo.save(product);
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("productId", id);
     logService.logAction(storeId, "product", "deleted", logDetails);
 

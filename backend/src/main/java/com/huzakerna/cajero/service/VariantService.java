@@ -1,6 +1,7 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -156,7 +157,7 @@ public class VariantService {
     variant = repo.save(variant);
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("variantId", id);
     logService.logAction(storeId, "variant", "deleted", logDetails);
 

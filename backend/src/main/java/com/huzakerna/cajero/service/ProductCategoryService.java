@@ -1,6 +1,7 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class ProductCategoryService {
     }
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("productCategoryCode", code);
     logDetails.put("oldValues", (productCategory));
 
@@ -89,7 +90,7 @@ public class ProductCategoryService {
     productCategory = repo.save(productCategory);
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("productCategoryCode", code);
     logService.logAction(storeId, "productCategory", "deleted", logDetails);
 

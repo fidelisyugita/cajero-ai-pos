@@ -1,6 +1,7 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,7 +127,7 @@ public class IngredientService {
     ingredient = repo.save(ingredient);
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("ingredientId", id);
     logService.logAction(storeId, "ingredient", "deleted", logDetails);
 
