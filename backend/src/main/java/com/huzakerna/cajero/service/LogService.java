@@ -3,7 +3,7 @@ package com.huzakerna.cajero.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huzakerna.cajero.model.Log;
 import com.huzakerna.cajero.repository.LogRepository;
@@ -24,14 +25,14 @@ public class LogService {
   private final LogRepository repo;
   private final ObjectMapper objectMapper;
 
-  public void logAction(UUID storeId, String type, String action, Object details) {
+  public void logAction(UUID storeId, String type, String action, Map<String, Object> details) {
     try {
-      String jsonDetails = objectMapper.writeValueAsString(details);
+      JsonNode jsonNode = objectMapper.valueToTree(details);
       Log log = Log.builder()
           .storeId(storeId)
           .type(type)
           .action(action)
-          .details(jsonDetails)
+          .details(jsonNode)
           .createdAt(LocalDateTime.now())
           .build();
       repo.save(log);
