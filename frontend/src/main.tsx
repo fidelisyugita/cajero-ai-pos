@@ -10,6 +10,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Transactions from "./pages/Transactions";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               element={
                 <ProtectedRoute>
                   <Products />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/:id"
+              element={
+                <ProtectedRoute>
+                  <ProductDetail />
                 </ProtectedRoute>
               }
             />

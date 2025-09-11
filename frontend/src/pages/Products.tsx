@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useProducts } from "@/hooks/useProducts";
 import { DashboardLayout } from "@/components/DashboardLayout";
 
 const Products = () => {
   const [page, setPage] = useState(0);
+  const navigate = useNavigate();
 
   const { data: productsData } = useProducts(page);
 
@@ -29,7 +31,11 @@ const Products = () => {
               </thead>
               <tbody>
                 {productsData?.content.map((product) => (
-                  <tr key={product.id}>
+                  <tr
+                    key={product.id}
+                    onClick={() => navigate(`/products/${product.id}`)}
+                    className="cursor-pointer hover:bg-gray-50"
+                  >
                     <td className="border px-4 py-2">{product.id}</td>
                     <td className="border px-4 py-2">{product.name}</td>
                     <td className="border px-4 py-2">{`${product.stock} ${product.measureUnitName}`}</td>
