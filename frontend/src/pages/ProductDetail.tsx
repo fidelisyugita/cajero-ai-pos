@@ -14,7 +14,8 @@ const ProductDetail = () => {
   const { data: product, isLoading } = useProduct(id!);
   const updateMutation = useUpdateProduct(id!);
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -22,7 +23,7 @@ const ProductDetail = () => {
     buyingPrice: 0,
     sellingPrice: 0,
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  // const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   // Initialize form data when product is loaded
   useEffect(() => {
@@ -46,17 +47,17 @@ const ProductDetail = () => {
     return <div>Product not found</div>;
   }
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     setSelectedImage(file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setImagePreview(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -153,7 +154,7 @@ const ProductDetail = () => {
                     id="image"
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
+                    // onChange={handleImageChange}
                   />
                 </div>
               </div>

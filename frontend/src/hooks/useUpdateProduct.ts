@@ -6,7 +6,7 @@ export const useUpdateProduct = (id: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: Product) => {
+    mutationFn: async (data: Partial<Product>) => {
       // const formData = new FormData();
       // formData.append("name", data.name);
       // formData.append("description", data.description);
