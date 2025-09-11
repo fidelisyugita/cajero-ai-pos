@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
@@ -6,12 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useProduct } from "@/hooks/useProduct";
+import { useUpdateProduct } from "@/hooks/useUpdateProduct";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: product, isLoading } = useProduct(id!);
+  const updateMutation = useUpdateProduct(id!);
+
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    stock: 0,
+    buyingPrice: 0,
+    sellingPrice: 0,
+  });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  // Initialize form data when product is loaded
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        ...product,
+        name: product.name,
+        description: product.description,
+        stock: product.stock,
+        buyingPrice: product.buyingPrice,
+        sellingPrice: product.sellingPrice,
+      });
+    }
+  }, [product]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -24,11 +49,32 @@ const ProductDetail = () => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: id.includes("Price") || id === "stock" ? Number(value) : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await updateMutation.mutateAsync({
+        ...formData,
+        // imageFile: selectedImage || undefined,
+      });
+      navigate("/products");
+    } catch (error) {
+      console.error("Failed to update product:", error);
     }
   };
 
@@ -48,11 +94,19 @@ const ProductDetail = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" defaultValue={product.name} />
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="description">Description</Label>
-                  <Input id="description" defaultValue={product.description} />
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="stock">
@@ -61,7 +115,8 @@ const ProductDetail = () => {
                   <Input
                     id="stock"
                     type="number"
-                    defaultValue={product.stock}
+                    value={formData.stock}
+                    onChange={handleInputChange}
                   />
                 </div>
                 <div>
@@ -69,7 +124,8 @@ const ProductDetail = () => {
                   <Input
                     id="buyingPrice"
                     type="number"
-                    defaultValue={product.buyingPrice}
+                    value={formData.buyingPrice}
+                    onChange={handleInputChange}
                   />
                 </div>
                 <div>
@@ -77,7 +133,8 @@ const ProductDetail = () => {
                   <Input
                     id="sellingPrice"
                     type="number"
-                    defaultValue={product.sellingPrice}
+                    value={formData.sellingPrice}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
@@ -107,13 +164,13 @@ const ProductDetail = () => {
                   <div className="p-4 bg-gray-100 rounded-lg">
                     <div className="text-sm text-gray-600">Sold</div>
                     <div className="text-xl font-semibold">
-                      {product.soldCount} {product.measureUnitName}
+                      {product.soldCount ?? 0} {product.measureUnitName}
                     </div>
                   </div>
                   <div className="p-4 bg-gray-100 rounded-lg">
                     <div className="text-sm text-gray-600">Rejected</div>
                     <div className="text-xl font-semibold">
-                      {product.rejectCount} {product.measureUnitName}
+                      {product.rejectCount ?? 0} {product.measureUnitName}
                     </div>
                   </div>
                 </div>
@@ -125,7 +182,9 @@ const ProductDetail = () => {
             <Button variant="outline" onClick={() => navigate("/products")}>
               Cancel
             </Button>
-            <Button>Save Changes</Button>
+            <Button onClick={handleSubmit} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </Card>
       </div>
