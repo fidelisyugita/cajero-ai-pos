@@ -14,6 +14,7 @@ import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+import com.huzakerna.cajero.util.ChangeTracker;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class IngredientService {
   }
 
   public List<IngredientResponse> getAllByStoreId(UUID storeId) {
-    return repo.findByStoreId(storeId).stream()
+    return repo.findByStoreIdAndDeletedAtIsNull(storeId).stream()
         .map(this::mapToResponse)
         .toList();
   }
@@ -88,7 +89,14 @@ public class IngredientService {
     // Create log details
     var logDetails = new java.util.HashMap<String, Object>();
     logDetails.put("ingredientId", id);
-    logDetails.put("oldValues", mapToResponse(ingredient));
+
+    // Create change tracker
+    ChangeTracker changeTracker = new ChangeTracker();
+    // Compare and store only changed values
+    changeTracker.compareAndTrack("name", ingredient.getName(), request.getName());
+    changeTracker.compareAndTrack("description", ingredient.getDescription(), request.getDescription());
+    changeTracker.compareAndTrack("measureUnitCode", ingredient.getMeasureUnit().getCode(),
+        request.getMeasureUnitCode());
 
     // Update ingredient fields
     ingredient.setName(request.getName());
@@ -98,9 +106,12 @@ public class IngredientService {
 
     ingredient = repo.save(ingredient);
 
-    // Add new values to log details and create log
-    logDetails.put("newValues", mapToResponse(ingredient));
-    logService.logAction(storeId, "ingredient", "updated", logDetails);
+    // Only add oldValues and newValues to log details if there were changes
+    if (changeTracker.hasChanges()) {
+      logDetails.put("oldValues", changeTracker.getOldValues());
+      logDetails.put("newValues", changeTracker.getNewValues());
+      logService.logAction(storeId, "ingredient", "updated", logDetails);
+    }
 
     return mapToResponse(ingredient);
   }

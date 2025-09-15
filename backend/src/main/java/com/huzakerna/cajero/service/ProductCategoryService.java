@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.huzakerna.cajero.model.ProductCategory;
 import com.huzakerna.cajero.repository.ProductCategoryRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+import com.huzakerna.cajero.util.ChangeTracker;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,7 +54,12 @@ public class ProductCategoryService {
     // Create log details
     var logDetails = new HashMap<String, Object>();
     logDetails.put("productCategoryCode", code);
-    logDetails.put("oldValues", (productCategory));
+
+    // Create change tracker
+    ChangeTracker changeTracker = new ChangeTracker();
+    // Compare and store only changed values
+    changeTracker.compareAndTrack("name", productCategory.getName(), request.getName());
+    changeTracker.compareAndTrack("description", productCategory.getDescription(), request.getDescription());
 
     // Update productCategory fields
     productCategory.setName(request.getName());
@@ -61,9 +67,12 @@ public class ProductCategoryService {
 
     productCategory = repo.save(productCategory);
 
-    // Add new values to log details and create log
-    logDetails.put("newValues", (productCategory));
-    logService.logAction(storeId, "productCategory", "updated", logDetails);
+    // Only add oldValues and newValues to log details if there were changes
+    if (changeTracker.hasChanges()) {
+      logDetails.put("oldValues", changeTracker.getOldValues());
+      logDetails.put("newValues", changeTracker.getNewValues());
+      logService.logAction(storeId, "productCategory", "updated", logDetails);
+    }
 
     return (productCategory);
   }

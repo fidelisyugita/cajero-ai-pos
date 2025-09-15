@@ -26,6 +26,7 @@ import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import com.huzakerna.cajero.repository.ProductIngredientRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 
+import com.huzakerna.cajero.util.ChangeTracker;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -160,7 +161,23 @@ public class ProductService {
     // Create log details
     var logDetails = new java.util.HashMap<String, Object>();
     logDetails.put("productId", id);
-    logDetails.put("oldValues", mapToResponse(product));
+
+    // Create change tracker
+    ChangeTracker changeTracker = new ChangeTracker();
+    // Compare and store only changed values
+    changeTracker.compareAndTrack("name", product.getName(), request.getName());
+    changeTracker.compareAndTrack("description", product.getDescription(), request.getDescription());
+    changeTracker.compareAndTrack("buyingPrice", product.getBuyingPrice(), request.getBuyingPrice());
+    changeTracker.compareAndTrack("sellingPrice", product.getSellingPrice(), request.getSellingPrice());
+    changeTracker.compareAndTrack("stock", product.getStock(), request.getStock());
+    changeTracker.compareAndTrack("categoryCode", product.getCategoryCode(), request.getCategoryCode());
+    changeTracker.compareAndTrack("measureUnitCode", product.getMeasureUnit().getCode(), request.getMeasureUnitCode());
+    changeTracker.compareAndTrack("imageUrl", product.getImageUrl(), request.getImageUrl());
+    changeTracker.compareAndTrack("barcode", product.getBarcode(), request.getBarcode());
+    changeTracker.compareAndTrack("commission", product.getCommission(), request.getCommission());
+    changeTracker.compareAndTrack("discount", product.getDiscount(), request.getDiscount());
+    changeTracker.compareAndTrack("tax", product.getTax(), request.getTax());
+    changeTracker.compareAndTrack("ingredients", product.getIngredients(), request.getIngredients());
 
     // Update product fields
     product.setName(request.getName());
@@ -200,9 +217,12 @@ public class ProductService {
 
     product = repo.save(product);
 
-    // Add new values to log details and create log
-    logDetails.put("newValues", mapToResponse(product));
-    logService.logAction(storeId, "product", "updated", logDetails);
+    // Only add oldValues and newValues to log details if there were changes
+    if (changeTracker.hasChanges()) {
+      logDetails.put("oldValues", changeTracker.getOldValues());
+      logDetails.put("newValues", changeTracker.getNewValues());
+      logService.logAction(storeId, "product", "updated", logDetails);
+    }
 
     return mapToResponse(product);
   }
