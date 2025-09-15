@@ -21,6 +21,7 @@ import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
 import com.huzakerna.cajero.model.TransactionProductId;
 import com.huzakerna.cajero.repository.TransactionRepository;
+import com.huzakerna.cajero.util.ChangeTracker;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -123,9 +124,20 @@ public class TransactionService {
     }
 
     // Create log details
-    var logDetails = new HashMap<String, Object>();
+    var logDetails = new java.util.HashMap<String, Object>();
     logDetails.put("transactionId", id);
-    logDetails.put("oldValues", mapToResponse(transaction));
+
+    // Create change tracker
+    ChangeTracker changeTracker = new ChangeTracker();
+    // Compare and store only changed values
+    changeTracker.compareAndTrack("statusCode", transaction.getStatusCode(), request.getStatusCode());
+    changeTracker.compareAndTrack("paymentMethodCode", transaction.getPaymentMethodCode(),
+        request.getPaymentMethodCode());
+    changeTracker.compareAndTrack("transactionTypeCode", transaction.getTransactionTypeCode(),
+        request.getTransactionTypeCode());
+    changeTracker.compareAndTrack("description", transaction.getDescription(), request.getDescription());
+    changeTracker.compareAndTrack("transactionProducts", transaction.getTransactionProducts(),
+        request.getTransactionProducts());
 
     // Update transaction fields
     transaction.setStatusCode(request.getStatusCode());
@@ -165,9 +177,12 @@ public class TransactionService {
 
     transaction = repo.save(transaction);
 
-    // Add new values to log details and create log
-    logDetails.put("newValues", mapToResponse(transaction));
-    logService.logAction(storeId, "transaction", "updated", logDetails);
+    // Only add oldValues and newValues to log details if there were changes
+    if (changeTracker.hasChanges()) {
+      logDetails.put("oldValues", changeTracker.getOldValues());
+      logDetails.put("newValues", changeTracker.getNewValues());
+      logService.logAction(storeId, "transaction", "updated", logDetails);
+    }
 
     return mapToResponse(transaction);
   }

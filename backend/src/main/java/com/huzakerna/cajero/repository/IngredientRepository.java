@@ -9,4 +9,6 @@ import com.huzakerna.cajero.model.Ingredient;
 public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
 
   List<Ingredient> findByStoreId(UUID storeId);
+
+  List<Ingredient> findByStoreIdAndDeletedAtIsNull(UUID storeId);
 }

@@ -35,7 +35,7 @@ public class ProductCategoryController {
       @AuthenticationPrincipal UserDetailsImpl user) {
     UUID storeId = user.getStoreId();
 
-    return ResponseEntity.ok(repo.findByStoreId(storeId));
+    return ResponseEntity.ok(repo.findByStoreIdAndDeletedAtIsNull(storeId));
   }
 
   @PostMapping

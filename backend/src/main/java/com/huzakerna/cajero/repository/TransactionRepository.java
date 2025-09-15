@@ -11,21 +11,22 @@ import com.huzakerna.cajero.model.Transaction;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
-    @Query("""
-            SELECT t FROM Transaction t
-            WHERE t.storeId = :storeId
-              AND (:statusCode IS NULL OR t.statusCode = :statusCode)
-              AND (:transactionTypeCode IS NULL OR t.transactionTypeCode = :transactionTypeCode)
-              AND (:paymentMethodCode IS NULL OR t.paymentMethodCode = :paymentMethodCode)
-              AND t.createdAt BETWEEN :start AND :end
-        """)
-    Page<Transaction> findFiltered(
-        @Param("storeId") UUID storeId,
-        @Param("statusCode") String statusCode,
-        @Param("transactionTypeCode") String transactionTypeCode,
-        @Param("paymentMethodCode") String paymentMethodCode,
-        @Param("start") LocalDateTime start,
-        @Param("end") LocalDateTime end,
-        Pageable pageable);
+  @Query("""
+          SELECT t FROM Transaction t
+          WHERE t.storeId = :storeId
+            AND (:statusCode IS NULL OR t.statusCode = :statusCode)
+            AND (:transactionTypeCode IS NULL OR t.transactionTypeCode = :transactionTypeCode)
+            AND (:paymentMethodCode IS NULL OR t.paymentMethodCode = :paymentMethodCode)
+            AND t.deletedAt IS NULL
+            AND t.createdAt BETWEEN :start AND :end
+      """)
+  Page<Transaction> findFiltered(
+      @Param("storeId") UUID storeId,
+      @Param("statusCode") String statusCode,
+      @Param("transactionTypeCode") String transactionTypeCode,
+      @Param("paymentMethodCode") String paymentMethodCode,
+      @Param("start") LocalDateTime start,
+      @Param("end") LocalDateTime end,
+      Pageable pageable);
 
 }

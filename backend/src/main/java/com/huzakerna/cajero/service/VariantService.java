@@ -16,6 +16,7 @@ import com.huzakerna.cajero.dto.VariantResponse;
 import com.huzakerna.cajero.model.Variant;
 import com.huzakerna.cajero.model.VariantOption;
 import com.huzakerna.cajero.repository.VariantRepository;
+import com.huzakerna.cajero.util.ChangeTracker;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.VariantOptionRepository;
 
@@ -32,7 +33,7 @@ public class VariantService {
   private final LogService logService;
 
   public List<VariantResponse> getAllByStoreId(UUID storeId) {
-    return repo.findByStoreId(storeId).stream()
+    return repo.findByStoreIdAndDeletedAtIsNull(storeId).stream()
         .map(this::mapToResponse)
         .toList();
   }
@@ -95,7 +96,19 @@ public class VariantService {
     // Create log details
     var logDetails = new java.util.HashMap<String, Object>();
     logDetails.put("variantId", id);
-    logDetails.put("oldValues", mapToResponse(variant));
+
+    // Create change tracker
+    ChangeTracker changeTracker = new ChangeTracker();
+    // Compare and store only changed values
+    changeTracker.compareAndTrack("name", variant.getName(), request.getName());
+    changeTracker.compareAndTrack("description", variant.getDescription(),
+        request.getDescription());
+    changeTracker.compareAndTrack("isRequired", variant.isRequired(),
+        request.isRequired());
+    changeTracker.compareAndTrack("isMultiple", variant.isMultiple(),
+        request.isMultiple());
+    changeTracker.compareAndTrack("options", variant.getOptions(),
+        request.getOptions());
 
     // Update variant fields
     variant.setName(request.getName());
@@ -128,9 +141,12 @@ public class VariantService {
 
     variant = repo.save(variant);
 
-    // Add new values to log details and create log
-    logDetails.put("newValues", mapToResponse(variant));
-    logService.logAction(storeId, "variant", "updated", logDetails);
+    // Only add oldValues and newValues to log details if there were changes
+    if (changeTracker.hasChanges()) {
+      logDetails.put("oldValues", changeTracker.getOldValues());
+      logDetails.put("newValues", changeTracker.getNewValues());
+      logService.logAction(storeId, "variant", "updated", logDetails);
+    }
 
     return mapToResponse(variant);
   }

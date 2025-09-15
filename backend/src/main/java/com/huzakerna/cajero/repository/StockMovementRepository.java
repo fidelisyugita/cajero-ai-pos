@@ -9,4 +9,6 @@ import com.huzakerna.cajero.model.StockMovement;
 public interface StockMovementRepository extends JpaRepository<StockMovement, UUID> {
 
   List<StockMovement> findByStoreId(UUID storeId);
+
+  List<StockMovement> findByStoreIdAndDeletedAtIsNull(UUID storeId);
 }

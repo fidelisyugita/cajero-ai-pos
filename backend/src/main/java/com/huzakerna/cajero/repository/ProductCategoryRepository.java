@@ -8,4 +8,6 @@ import com.huzakerna.cajero.model.ProductCategory;
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, String> {
 
     List<ProductCategory> findByStoreId(UUID storeId);
+
+    List<ProductCategory> findByStoreIdAndDeletedAtIsNull(UUID storeId);
 }
