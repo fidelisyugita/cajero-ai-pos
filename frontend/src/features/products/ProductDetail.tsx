@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useProduct } from "@/hooks/useProduct";
-import { useUpdateProduct } from "@/hooks/useUpdateProduct";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { useProduct, useUpdateProduct } from "./hooks";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: product, isLoading } = useProduct(id!);
-  const updateMutation = useUpdateProduct(id!);
+  const updateMutation = useUpdateProduct();
 
   // const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imagePreview] = useState<string | null>(null);
@@ -70,8 +69,11 @@ const ProductDetail = () => {
   const handleSubmit = async () => {
     try {
       await updateMutation.mutateAsync({
-        ...formData,
-        // imageFile: selectedImage || undefined,
+        id: id!,
+        data: {
+          ...formData,
+          // imageFile: selectedImage || undefined,
+        },
       });
       navigate("/products");
     } catch (error) {

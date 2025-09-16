@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { useTransactions } from "@/hooks/useTransactions";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { useTransactions } from "./hooks";
 
 const Transactions = () => {
   const [page, setPage] = useState(0);

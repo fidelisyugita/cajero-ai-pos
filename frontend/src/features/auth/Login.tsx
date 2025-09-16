@@ -1,6 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { useLoginMutation } from "@/hooks/useLoginMutation";
 import {
   Card,
   CardContent,
@@ -8,22 +6,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LoginForm } from "@/components/auth/LoginForm";
 import type { LoginFormData } from "@/schemas/auth";
+import { LoginForm } from "./LoginForm";
+import { useAuth } from "./AuthContext";
+import { useLoginMutation } from "./hooks";
 
 export default function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const loginMutation = useLoginMutation();
 
-  const handleSubmit = (values: LoginFormData) => {
-    loginMutation.mutate(values, {
-      onSuccess: (data) => {
-        login(data);
-      },
-      onError: (error) => {
-        console.error("Login error:", error);
-      },
-    });
+  const handleSubmit = async (values: LoginFormData) => {
+    try {
+      await loginMutation.mutateAsync(values);
+    } catch (error) {
+      console.error("Failed to login:", error);
+    }
   };
 
   if (isAuthenticated) return <Navigate to="/" replace />;

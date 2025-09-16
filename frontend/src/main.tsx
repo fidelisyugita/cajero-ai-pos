@@ -3,14 +3,12 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Reports from "./pages/Reports";
-import { AuthProvider } from "./contexts/AuthContext";
+import { Home } from "./features/pos";
+import { Login, AuthProvider } from "./features/auth";
+import { Reports } from "./features/reports";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import Transactions from "./pages/Transactions";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
+import { Transactions } from "./features/transactions";
+import { Products, ProductDetail } from "./features/products";
 
 const queryClient = new QueryClient();
 

@@ -1,5 +1,3 @@
-import { Button } from "./ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
@@ -9,6 +7,8 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useAuth } from "@/features/auth";
+import { Button } from "@/components/ui/button";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
