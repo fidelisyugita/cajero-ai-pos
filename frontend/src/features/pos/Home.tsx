@@ -1,11 +1,11 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Minus } from "lucide-react";
-import { useProductCategories } from "@/hooks/useProductCategories";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProducts } from "@/hooks/useProducts";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { useProducts } from "../products/hooks";
+import { useProductCategories } from "../productCategories/hooks";
 
 export default function Home() {
   const { data: categoriesData, isLoading: isLoadingCategories } =
@@ -25,18 +25,18 @@ export default function Home() {
               </div>
             </div>
             {isLoadingCategories ? (
-              <div className="flex gap-2 mb-6">
-                <Skeleton className="h-9 w-[100px] rounded-full" />
-                <Skeleton className="h-9 w-[100px] rounded-full" />
-                <Skeleton className="h-9 w-[100px] rounded-full" />
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <Skeleton className="h-9 w-[100px] rounded-full flex-shrink-0" />
+                <Skeleton className="h-9 w-[100px] rounded-full flex-shrink-0" />
+                <Skeleton className="h-9 w-[100px] rounded-full flex-shrink-0" />
               </div>
             ) : (
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                 {categoriesData?.map((category) => (
                   <Button
                     key={category.code}
                     variant={category.code === "All" ? "default" : "outline"}
-                    className="rounded-full"
+                    className="rounded-full flex-shrink-0"
                   >
                     {category.name}
                   </Button>

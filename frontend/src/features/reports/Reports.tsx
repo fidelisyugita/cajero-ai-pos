@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { useLogs } from "@/hooks/useLogs";
-
+import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { useLogs } from "./hooks";
 const Reports = () => {
   const [page, setPage] = useState(0);
 
@@ -21,8 +20,8 @@ const Reports = () => {
                 <tr>
                   <th className="px-4 py-2">Type</th>
                   <th className="px-4 py-2">Action</th>
+                  <th className="px-4 py-2">At</th>
                   <th className="px-4 py-2">Details</th>
-                  <th className="px-4 py-2">Created At</th>
                 </tr>
               </thead>
               <tbody>
@@ -30,6 +29,9 @@ const Reports = () => {
                   <tr key={report.id}>
                     <td className="border px-4 py-2">{report.type}</td>
                     <td className="border px-4 py-2">{report.action}</td>
+                    <td className="border px-4 py-2">
+                      {new Date(report.createdAt).toLocaleDateString()}
+                    </td>
                     <td className="border px-4 py-2">
                       <table className="text-sm">
                         <tbody>
@@ -44,9 +46,6 @@ const Reports = () => {
                             )}
                         </tbody>
                       </table>
-                    </td>
-                    <td className="border px-4 py-2">
-                      {new Date(report.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}

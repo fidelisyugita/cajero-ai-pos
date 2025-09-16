@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { useProducts } from "@/hooks/useProducts";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { useProducts } from "./hooks";
 
 const Products = () => {
   const [page, setPage] = useState(0);
