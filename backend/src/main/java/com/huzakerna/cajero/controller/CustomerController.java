@@ -21,22 +21,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CustomerController {
 
-    private final CustomerService customerService;
+    private final CustomerService service;
 
     @GetMapping
     public List<Customer> getAll() {
-        return customerService.getAllCustomers();
+        return service.getAllCustomers();
     }
 
     @PostMapping
     public Customer add(@AuthenticationPrincipal UserDetailsImpl user, @RequestBody Customer request) {
 
         UUID storeId = user.getStoreId();
-        return customerService.addCustomer(storeId, request);
+        return service.addCustomer(storeId, request);
     }
 
     @GetMapping("/{id}")
     public Customer getById(@PathVariable UUID id) {
-        return customerService.getCustomerById(id);
+        return service.getCustomerById(id);
     }
 }

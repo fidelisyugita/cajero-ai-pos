@@ -17,11 +17,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserService service;
 
     @GetMapping
     public List<UserResponse> getAll() {
-        return userService.getAllUsers();
+        return service.getAllUsers();
     }
 
     @PostMapping
@@ -29,11 +29,11 @@ public class UserController {
     public UserResponse add(@AuthenticationPrincipal UserDetailsImpl user, @Valid @RequestBody UserRequest request) {
 
         UUID storeId = user.getStoreId();
-        return userService.addUser(storeId, request);
+        return service.addUser(storeId, request);
     }
 
     @GetMapping("/{id}")
     public UserResponse getById(@PathVariable UUID id) {
-        return userService.getUserById(id);
+        return service.getUserById(id);
     }
 }

@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ImageController {
 
-  private final StorageService storageService;
+  private final StorageService service;
 
   @Operation(summary = "Upload a product image", description = "Upload an image file for a product. Supports JPG, PNG, and GIF formats.", responses = {
       @ApiResponse(responseCode = "200", description = "Image successfully uploaded", content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", format = "uri"))),
@@ -33,7 +33,7 @@ public class ImageController {
   public ResponseEntity<String> uploadProductImage(
       @Parameter(description = "Image file to upload (max 10MB, formats: JPG, PNG, GIF)", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)) @RequestParam("file") MultipartFile file,
       @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    String imageUrl = storageService.uploadImage(file, "product", userDetails.getStoreId());
+    String imageUrl = service.uploadImage(file, "product", userDetails.getStoreId());
     return ResponseEntity.ok(imageUrl);
   }
 
@@ -47,7 +47,7 @@ public class ImageController {
       @Parameter(description = "Store ID", example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable String storeId,
       @Parameter(description = "Image filename with extension", example = "image123.jpg") @PathVariable String filename) {
     String objectName = String.format("%s/%s/%s", prefix, storeId, filename);
-    byte[] imageData = storageService.downloadImage(objectName);
+    byte[] imageData = service.downloadImage(objectName);
     return ResponseEntity.ok().body(imageData);
   }
 }

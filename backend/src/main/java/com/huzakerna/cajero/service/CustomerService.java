@@ -30,9 +30,9 @@ public class CustomerService {
         }
 
         Customer customer = Customer.builder()
+                .storeId(storeId)
                 .name(request.getName())
                 .phone(request.getPhone())
-                .storeId(storeId)
                 .imageUrl(request.getImageUrl())
                 .build();
 
