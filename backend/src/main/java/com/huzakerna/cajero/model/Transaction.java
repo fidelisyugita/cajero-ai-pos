@@ -51,6 +51,9 @@ public class Transaction extends BaseEntity {
     @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
 
+    @Column(name = "customer_id")
+    private UUID customerId;
+
     @Column(name = "created_By")
     private UUID createdBy;
     @Column(name = "updated_By")

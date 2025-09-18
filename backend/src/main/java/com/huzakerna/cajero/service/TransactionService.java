@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -34,6 +33,7 @@ public class TransactionService {
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
   private final LogService logService;
+  private final CustomerService customerService;
 
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     // Validate store exists
@@ -52,6 +52,7 @@ public class TransactionService {
             .totalDiscount(request.getTotalDiscount())
             .totalPrice(request.getTotalPrice())
             .totalTax(request.getTotalTax())
+            .customerId(request.getCustomerId())
             .build());
 
     // Add transaction products if any
@@ -66,6 +67,11 @@ public class TransactionService {
             product.getQuantity(),
             product.getSelectedVariants());
       }
+    }
+
+    if (request.getCustomerId() != null) {
+      customerService.updateCustomer(storeId, request.getCustomerId(),
+          BigDecimal.valueOf(transaction.getTotalPrice().doubleValue() / 1000));
     }
 
     return mapToResponse(transaction);
@@ -261,6 +267,9 @@ public class TransactionService {
         .totalDiscount(transaction.getTotalDiscount())
         .totalPrice(transaction.getTotalPrice())
         .totalTax(transaction.getTotalTax())
+        .customerId(transaction.getCustomerId())
+        .createdBy(transaction.getCreatedBy())
+        .updatedBy(transaction.getUpdatedBy())
         .createdAt(transaction.getCreatedAt())
         .updatedAt(transaction.getUpdatedAt())
         .transactionProduct(transaction.getTransactionProducts().stream()
