@@ -290,7 +290,7 @@ public class ProductService {
         .updatedBy(product.getUpdatedBy())
         .createdAt(product.getCreatedAt())
         .updatedAt(product.getUpdatedAt())
-        .ingredients(product.getIngredients().stream()
+        .ingredients(product.getIngredients() != null ? product.getIngredients().stream()
             .map(pi -> ProductIngredientResponse.builder()
                 .ingredientId(pi.getIngredient().getId())
                 .name(pi.getIngredient().getName())
@@ -300,7 +300,7 @@ public class ProductService {
                 .measureUnitName(pi.getIngredient().getMeasureUnit().getName())
                 .quantityNeeded(pi.getQuantityNeeded())
                 .build())
-            .toList())
+            .toList() : List.of())
         .build();
   }
 }

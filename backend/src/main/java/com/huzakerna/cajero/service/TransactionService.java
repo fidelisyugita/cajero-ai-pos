@@ -6,12 +6,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.huzakerna.cajero.controller.AuthController;
 import com.huzakerna.cajero.dto.TransactionProductRequest;
 import com.huzakerna.cajero.dto.TransactionProductResponse;
 import com.huzakerna.cajero.dto.TransactionRequest;
@@ -30,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
+  private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
   private final StoreRepository sRepo;
   private final TransactionRepository repo;
@@ -280,7 +285,7 @@ public class TransactionService {
         .updatedBy(transaction.getUpdatedBy())
         .createdAt(transaction.getCreatedAt())
         .updatedAt(transaction.getUpdatedAt())
-        .transactionProduct(transaction.getTransactionProducts().stream()
+        .transactionProduct(transaction.getTransactionProducts() != null ? transaction.getTransactionProducts().stream()
             .map(tp -> TransactionProductResponse.builder()
                 .productId(tp.getProduct().getId())
                 .categoryCode(tp.getProduct().getCategoryCode())
@@ -301,7 +306,7 @@ public class TransactionService {
                 .discount(tp.getDiscount())
                 .tax(tp.getTax())
                 .build())
-            .toList())
+            .toList() : List.of())
         .build();
   }
 }
