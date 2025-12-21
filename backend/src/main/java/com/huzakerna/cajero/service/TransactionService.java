@@ -59,10 +59,10 @@ public class TransactionService {
             .build());
 
     // Add transaction products if any
-    if (request.getTransactionProducts() != null) {
+    if (request.getTransactionProducts() != null && !request.getTransactionProducts().isEmpty()) {
       for (TransactionProductRequest product : request
           .getTransactionProducts()) {
-        addProductToTransaction(transaction.getId(),
+        addProductToTransaction(transaction,
             product.getProductId(),
             product.getBuyingPrice(),
             product.getSellingPrice(),
@@ -80,7 +80,7 @@ public class TransactionService {
     return mapToResponse(transaction);
   }
 
-  public void addProductToTransaction(UUID transactionId, UUID productId,
+  public void addProductToTransaction(Transaction transaction, UUID productId,
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
       JsonNode selectedVariants) {
 
@@ -88,13 +88,14 @@ public class TransactionService {
         .orElseThrow(() -> new RuntimeException("Product not found"));
 
     TransactionProduct transactionProduct = new TransactionProduct();
-    transactionProduct.setId(new TransactionProductId(transactionId, productId));
+    transactionProduct.setId(new TransactionProductId(transaction.getId(), productId));
     transactionProduct.setBuyingPrice(buyingPrice);
     transactionProduct.setSellingPrice(sellingPrice);
     transactionProduct.setNote(note);
     transactionProduct.setQuantity(quantity);
     transactionProduct.setSelectedVariants(selectedVariants);
     transactionProduct.setProduct(product);
+    transactionProduct.setTransaction(transaction);
 
     tpRepo.save(transactionProduct);
   }
@@ -173,11 +174,11 @@ public class TransactionService {
     removeProductFromTransaction(transaction.getId(), removedProductIds);
 
     // Add new transaction products if any
-    if (request.getTransactionProducts() != null) {
+    if (request.getTransactionProducts() != null && !request.getTransactionProducts().isEmpty()) {
       for (TransactionProductRequest product : request.getTransactionProducts()) {
         if (transaction.getTransactionProducts().stream()
             .noneMatch(tp -> tp.getProduct().getId().equals(product.getProductId()))) {
-          addProductToTransaction(transaction.getId(),
+          addProductToTransaction(transaction,
               product.getProductId(),
               product.getBuyingPrice(),
               product.getSellingPrice(),
