@@ -23,6 +23,8 @@ import com.huzakerna.cajero.repository.TransactionRepository;
 import com.huzakerna.cajero.util.ChangeTracker;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
+import com.huzakerna.cajero.repository.ProductRepository;
+import com.huzakerna.cajero.model.Product;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,6 +34,7 @@ public class TransactionService {
   private final StoreRepository sRepo;
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
+  private final ProductRepository pRepo;
   private final LogService logService;
   private final CustomerService customerService;
 
@@ -81,6 +84,9 @@ public class TransactionService {
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
       JsonNode selectedVariants) {
 
+    Product product = pRepo.findById(productId)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
     TransactionProduct transactionProduct = new TransactionProduct();
     transactionProduct.setId(new TransactionProductId(transactionId, productId));
     transactionProduct.setBuyingPrice(buyingPrice);
@@ -88,6 +94,7 @@ public class TransactionService {
     transactionProduct.setNote(note);
     transactionProduct.setQuantity(quantity);
     transactionProduct.setSelectedVariants(selectedVariants);
+    transactionProduct.setProduct(product);
 
     tpRepo.save(transactionProduct);
   }
