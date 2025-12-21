@@ -70,7 +70,7 @@ public class ProductService {
             .build());
 
     // Add product ingredients if any
-    if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
+    if (request.getIngredients() != null) {
       for (ProductIngredientRequest ingredient : request.getIngredients()) {
         addIngredientToProduct(product.getId(),
             ingredient.getIngredientId(),
@@ -215,7 +215,7 @@ public class ProductService {
     removeIngredientFromProduct(product.getId(), removedIngredientIds);
 
     // Add product ingredients if any
-    if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
+    if (request.getIngredients() != null) {
       for (ProductIngredientRequest ingredient : request.getIngredients()) {
         if (product.getIngredients().stream()
             .noneMatch(pi -> pi.getIngredient().getId().equals(ingredient.getIngredientId()))) {

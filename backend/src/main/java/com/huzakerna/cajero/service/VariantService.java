@@ -64,7 +64,7 @@ public class VariantService {
     Set<VariantOption> options = new HashSet<>();
 
     // Add variant options if any
-    if (request.getOptions() != null && !request.getOptions().isEmpty()) {
+    if (request.getOptions() != null) {
       for (VariantOptionRequest option : request.getOptions()) {
         option.setVariantId(variant.getId());
         VariantOption variantOption = voService.addVariantOption(option);
@@ -119,7 +119,7 @@ public class VariantService {
     Set<VariantOption> options = new HashSet<>();
 
     // Add variant options if any
-    if (request.getOptions() != null && !request.getOptions().isEmpty()) {
+    if (request.getOptions() != null) {
       for (VariantOptionRequest option : request.getOptions()) {
         if (option.getId() != null) {
           VariantOption optionToUpdate = voRepo.findById(option.getId())

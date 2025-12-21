@@ -59,7 +59,7 @@ public class TransactionService {
             .build());
 
     // Add transaction products if any
-    if (request.getTransactionProducts() != null && !request.getTransactionProducts().isEmpty()) {
+    if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request
           .getTransactionProducts()) {
         addProductToTransaction(transaction,
@@ -174,7 +174,7 @@ public class TransactionService {
     removeProductFromTransaction(transaction.getId(), removedProductIds);
 
     // Add new transaction products if any
-    if (request.getTransactionProducts() != null && !request.getTransactionProducts().isEmpty()) {
+    if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request.getTransactionProducts()) {
         if (transaction.getTransactionProducts().stream()
             .noneMatch(tp -> tp.getProduct().getId().equals(product.getProductId()))) {
