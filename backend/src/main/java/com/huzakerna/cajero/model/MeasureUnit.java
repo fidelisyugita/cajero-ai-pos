@@ -1,5 +1,6 @@
 package com.huzakerna.cajero.model;
 
+import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -18,6 +19,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class MeasureUnit {
+
+    @Column(name = "store_id")
+    private UUID storeId;
 
     @Id
     @Column(name = "code", length = 10)
