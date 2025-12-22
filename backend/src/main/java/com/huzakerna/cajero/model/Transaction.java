@@ -37,7 +37,7 @@ public class Transaction extends BaseEntity {
     @Column(name = "is_in")
     private boolean isIn;
 
-    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TransactionProduct> transactionProducts;
 
     @Column(name = "total_commission")

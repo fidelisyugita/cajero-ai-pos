@@ -46,7 +46,7 @@ public class Variant extends BaseEntity {
     @Column(name = "is_multiple")
     private boolean isMultiple;
 
-    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL)
     @Builder.Default
     private Set<VariantOption> options = new HashSet<>();
 

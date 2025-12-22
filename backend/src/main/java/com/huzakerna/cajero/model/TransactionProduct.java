@@ -30,12 +30,12 @@ public class TransactionProduct {
     @EmbeddedId
     private TransactionProductId id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("transactionId")
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
