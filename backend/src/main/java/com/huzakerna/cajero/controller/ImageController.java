@@ -22,18 +22,19 @@ public class ImageController {
 
   private final StorageService service;
 
-  @Operation(summary = "Upload a product image", description = "Upload an image file for a product. Supports JPG, PNG, and GIF formats.", responses = {
+  @Operation(summary = "Upload an image", description = "Upload an image file for a specific type (e.g., product, petty-cash). Supports JPG, PNG, and GIF formats.", responses = {
       @ApiResponse(responseCode = "200", description = "Image successfully uploaded", content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", format = "uri"))),
       @ApiResponse(responseCode = "400", description = "Invalid file format or size"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
       @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
   })
-  @PostMapping(value = "/product-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(value = "/{type}-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'ADMIN')")
-  public ResponseEntity<String> uploadProductImage(
+  public ResponseEntity<String> uploadImage(
+      @Parameter(description = "Image type (e.g., 'product', 'petty-cash')", required = true, example = "product") @PathVariable String type,
       @Parameter(description = "Image file to upload (max 10MB, formats: JPG, PNG, GIF)", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)) @RequestParam("file") MultipartFile file,
       @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    String imageUrl = service.uploadImage(file, "product", userDetails.getStoreId());
+    String imageUrl = service.uploadImage(file, type, userDetails.getStoreId());
     return ResponseEntity.ok(imageUrl);
   }
 
