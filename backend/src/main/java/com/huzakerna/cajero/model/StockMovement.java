@@ -26,6 +26,8 @@ public class StockMovement extends BaseEntity {
     private UUID ingredientId;
     @Column(name = "product_id")
     private UUID productId;
+    @Column(name = "variant_id")
+    private UUID variantId;
 
     @Column(name = "transaction_id")
     private UUID transactionId;

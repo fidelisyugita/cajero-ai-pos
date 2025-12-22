@@ -3,6 +3,7 @@ package com.huzakerna.cajero.service;
 import org.springframework.stereotype.Service;
 
 import com.huzakerna.cajero.dto.VariantOptionRequest;
+import com.huzakerna.cajero.model.Variant;
 import com.huzakerna.cajero.model.VariantOption;
 import com.huzakerna.cajero.repository.VariantRepository;
 import com.huzakerna.cajero.repository.VariantOptionRepository;
@@ -18,13 +19,13 @@ public class VariantOptionService {
 
   public VariantOption addVariantOption(VariantOptionRequest request) {
     // Validate variant exists
-    if (!vRepo.existsById(request.getVariantId())) {
-      throw new IllegalArgumentException("Variant not found");
-    }
+    Variant variant = vRepo.findById(request.getVariantId())
+        .orElseThrow(() -> new IllegalArgumentException("Variant not found"));
 
     VariantOption variantOption = repo.save(
         VariantOption.builder()
             .variantId(request.getVariantId())
+            .variant(variant) // Set the relationship
             .name(request.getName())
             .priceAdjusment(request.getPriceAdjusment())
             .stock(request.getStock())

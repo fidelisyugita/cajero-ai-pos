@@ -2,6 +2,7 @@ package com.huzakerna.cajero.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,15 +30,15 @@ public class MeasureUnitController {
     @GetMapping
     public ResponseEntity<List<MeasureUnit>> getAll(
             @AuthenticationPrincipal UserDetailsImpl user) {
-        return ResponseEntity.ok(repo.findAll());
-        // UUID storeId = user.getStoreId();
-
-        // return ResponseEntity.ok(repo.findByStoreId(storeId));
+        UUID storeId = (user != null) ? user.getStoreId() : null;
+        return ResponseEntity.ok(repo.findAllByStoreIdIncludingGlobal(storeId));
     }
 
     @PostMapping
-    public MeasureUnit add(@Valid @RequestBody MeasureUnit measureUnit) {
-
+    public MeasureUnit add(@AuthenticationPrincipal UserDetailsImpl user, @Valid @RequestBody MeasureUnit measureUnit) {
+        if (user != null) {
+            measureUnit.setStoreId(user.getStoreId());
+        }
         return service.addMeasureUnit(measureUnit);
     }
 

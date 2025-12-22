@@ -6,23 +6,25 @@ import com.huzakerna.cajero.model.MeasureUnit;
 import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import lombok.RequiredArgsConstructor;
 
+import com.huzakerna.cajero.repository.StoreRepository;
+
 @Service
 @RequiredArgsConstructor // Lombok will auto-inject the dependency
 public class MeasureUnitService {
 
-  // private final StoreRepository sRepo;
+  private final StoreRepository sRepo;
   private final MeasureUnitRepository repo;
 
   public MeasureUnit addMeasureUnit(MeasureUnit request) {
     // Validate store exists
-    // if (!sRepo.existsById(request.getStoreId())) {
-    // throw new IllegalArgumentException("Store not found");
-    // }
+    if (request.getStoreId() != null && !sRepo.existsById(request.getStoreId())) {
+      throw new IllegalArgumentException("Store not found");
+    }
 
     return repo.save(
         MeasureUnit.builder()
             .code(request.getCode())
-            // .storeId(request.getStoreId())
+            .storeId(request.getStoreId())
             .name(request.getName())
             .description(request.getDescription())
             .build());

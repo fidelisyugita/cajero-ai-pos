@@ -34,10 +34,10 @@ public class UserService {
         }
 
         User user = User.builder()
+                .storeId(storeId)
                 .name(request.getName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
-                .storeId(storeId)
                 .roleCode(request.getRoleCode())
                 .passwordHash(encoder.encode(request.getPassword()))
                 .imageUrl(request.getImageUrl())

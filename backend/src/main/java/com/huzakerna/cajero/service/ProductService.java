@@ -22,8 +22,10 @@ import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductIngredient;
 import com.huzakerna.cajero.model.ProductIngredientId;
 import com.huzakerna.cajero.repository.ProductRepository;
+import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.repository.MeasureUnitRepository;
 import com.huzakerna.cajero.repository.ProductIngredientRepository;
+import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.repository.StoreRepository;
 
 import com.huzakerna.cajero.util.ChangeTracker;
@@ -37,6 +39,7 @@ public class ProductService {
   private final StoreRepository sRepo;
   private final ProductRepository repo;
   private final ProductIngredientRepository piRepo;
+  private final IngredientRepository iRepo;
   private final MeasureUnitRepository muRepo;
   private final LogService logService;
 
@@ -81,9 +84,17 @@ public class ProductService {
   public void addIngredientToProduct(UUID productId, UUID ingredientId,
       BigDecimal quantityNeeded) {
 
+    Product product = repo.findById(productId)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    Ingredient ingredient = iRepo.findById(ingredientId)
+        .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+
     ProductIngredient productIngredient = new ProductIngredient();
     productIngredient.setId(new ProductIngredientId(productId, ingredientId));
     productIngredient.setQuantityNeeded(quantityNeeded);
+    productIngredient.setProduct(product);
+    productIngredient.setIngredient(ingredient);
 
     piRepo.save(productIngredient);
   }
@@ -279,7 +290,7 @@ public class ProductService {
         .updatedBy(product.getUpdatedBy())
         .createdAt(product.getCreatedAt())
         .updatedAt(product.getUpdatedAt())
-        .ingredients(product.getIngredients().stream()
+        .ingredients(product.getIngredients() != null ? product.getIngredients().stream()
             .map(pi -> ProductIngredientResponse.builder()
                 .ingredientId(pi.getIngredient().getId())
                 .name(pi.getIngredient().getName())
@@ -289,7 +300,7 @@ public class ProductService {
                 .measureUnitName(pi.getIngredient().getMeasureUnit().getName())
                 .quantityNeeded(pi.getQuantityNeeded())
                 .build())
-            .toList())
+            .toList() : List.of())
         .build();
   }
 }

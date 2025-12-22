@@ -43,6 +43,8 @@ public class TransactionRequest {
 
     private boolean isIn;
 
+    private UUID customerId;
+
     private UUID createdBy;
     private UUID updatedBy;
 

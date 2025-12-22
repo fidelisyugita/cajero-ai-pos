@@ -192,7 +192,7 @@ public class VariantService {
         .updatedBy(variant.getUpdatedBy())
         .createdAt(variant.getCreatedAt())
         .updatedAt(variant.getUpdatedAt())
-        .options(variant.getOptions().stream()
+        .options(variant.getOptions() != null ? variant.getOptions().stream()
             .map(vo -> VariantOptionResponse.builder()
                 .id(vo.getId())
                 .name(vo.getName())
@@ -200,7 +200,7 @@ public class VariantService {
                 .stock(vo.getStock())
                 .variantId(vo.getVariantId())
                 .build())
-            .toList())
+            .toList() : List.of())
         .build();
   }
 
