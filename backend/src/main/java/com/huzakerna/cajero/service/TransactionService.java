@@ -118,6 +118,12 @@ public class TransactionService {
 
     // Deduct stock for ingredients
     handleStockMovement(transaction, product, quantity, "OUT");
+
+    // Deduct stock for product
+    if (product.getStock() != null) {
+      product.setStock(product.getStock().subtract(quantity));
+      pRepo.save(product);
+    }
   }
 
   public void removeProductFromTransaction(UUID transactionId, UUID productId) {

@@ -27,6 +27,7 @@ public class StockMovementService {
             .storeId(storeId)
             .ingredientId(request.getIngredientId())
             .productId(request.getProductId())
+            .variantId(request.getVariantId())
             .transactionId(request.getTransactionId())
 
             .type(request.getType())
