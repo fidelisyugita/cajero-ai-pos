@@ -4,8 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +15,12 @@ import com.huzakerna.cajero.security.UserDetailsServiceImpl;
 import com.huzakerna.cajero.util.JwtUtils;
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
-  private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+  // private static final Logger logger =
+  // LoggerFactory.getLogger(JwtAuthFilter.class);
 
   private JwtUtils jwtUtils;
   private UserDetailsServiceImpl userDetailsService;
@@ -35,9 +38,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   @SuppressWarnings("null")
   @Override
   protected void doFilterInternal(
-    HttpServletRequest request,
-    HttpServletResponse response,
-    FilterChain filterChain) throws ServletException, IOException {
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain filterChain) throws ServletException, IOException {
 
     final String authHeader = request.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -48,30 +51,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     try {
       final String jwt = authHeader.substring(7);
       final String userEmail = jwtUtils.extractUsername(jwt);
-      logger.info("Validating token for: {}", userEmail);
+      log.debug("Validating token for: {}", userEmail);
 
       if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetailsImpl userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
         if (jwtUtils.isTokenValid(jwt, userDetails)) {
-          logger.info("Wait a moment...");
-          UsernamePasswordAuthenticationToken authToken =
-            new UsernamePasswordAuthenticationToken(
+          UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
               userDetails,
               null,
               userDetails.getAuthorities());
 
           authToken.setDetails(
-            new WebAuthenticationDetailsSource().buildDetails(request));
-          logger.info("Almost there...");
+              new WebAuthenticationDetailsSource().buildDetails(request));
 
           SecurityContextHolder.getContext().setAuthentication(authToken);
-          logger.info("Validated");
+          log.debug("Token successfully validated for user: {}", userEmail);
         }
       }
     } catch (Exception e) {
       // Log the error
-      logger.error("Token validation failed: {}", e.getMessage());
+      log.error("Token validation failed: {}", e.getMessage());
     }
 
     filterChain.doFilter(request, response);

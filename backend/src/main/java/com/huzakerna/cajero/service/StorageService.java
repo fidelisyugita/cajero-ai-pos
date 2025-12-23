@@ -39,14 +39,17 @@ public class StorageService {
 
       objectStorage.putObject(request);
 
-      // Return the public URL
-      return String.format("https://objectstorage.%s.oraclecloud.com/n/%s/b/%s/o/%s",
+      String publicUrl = String.format("https://objectstorage.%s.oraclecloud.com/n/%s/b/%s/o/%s",
           config.getRegion(),
           config.getNamespace(),
           config.getBucketName(),
           filename);
 
+      log.info("File uploaded successfully: {}", filename);
+      return publicUrl;
+
     } catch (IOException e) {
+      log.error("Failed to store file {}", file.getOriginalFilename(), e);
       throw new StorageException("Failed to store file " + file.getOriginalFilename(), e);
     }
   }

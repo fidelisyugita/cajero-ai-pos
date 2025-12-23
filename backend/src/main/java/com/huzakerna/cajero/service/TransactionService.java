@@ -7,8 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +28,6 @@ import com.huzakerna.cajero.model.StockMovementType;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
 import com.huzakerna.cajero.model.TransactionProductId;
-import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
@@ -40,21 +38,20 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionService {
-  private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
   private final StoreRepository sRepo;
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
   private final ProductRepository pRepo;
-  private final IngredientRepository ingredientRepo;
   private final StockMovementService stockMovementService;
   private final LogService logService;
   private final CustomerService customerService;
 
   @Transactional
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
-    logger.info("Adding transaction for store: {}", storeId);
+    log.info("Adding transaction for store: {}", storeId);
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
@@ -121,7 +118,7 @@ public class TransactionService {
           BigDecimal.valueOf(transaction.getTotalPrice().doubleValue() / 1000));
     }
 
-    logger.info("Transaction added successfully: {}", transaction.getId());
+    log.info("Transaction added successfully: {}", transaction.getId());
     return mapToResponse(transaction);
   }
 
@@ -129,7 +126,7 @@ public class TransactionService {
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
       JsonNode selectedVariants,
       BigDecimal commission, BigDecimal discount, BigDecimal tax) {
-    logger.info("Adding product {} to transaction {}", productId, transaction.getId());
+    log.info("Adding product {} to transaction {}", productId, transaction.getId());
 
     Product product = pRepo.findById(productId)
         .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -172,17 +169,22 @@ public class TransactionService {
     // Deduct stock for ingredients
     handleStockMovement(transaction, product, quantity, StockMovementType.SALE);
 
-    // Deduct stock for product
+    // Deduct stock for product (Standardized via StockMovementService)
     if (product.getStock() != null) {
-      product.setStock(product.getStock().subtract(quantity));
-      pRepo.save(product);
+      stockMovementService.addStockMovement(transaction.getStoreId(),
+          StockMovement.builder()
+              .productId(product.getId())
+              .transactionId(transaction.getId())
+              .type(StockMovementType.SALE)
+              .quantity(quantity)
+              .build());
     }
 
     return transactionProduct;
   }
 
   public void removeProductFromTransaction(UUID transactionId, UUID productId) {
-    logger.info("Removing product {} from transaction {}", productId, transactionId);
+    log.info("Removing product {} from transaction {}", productId, transactionId);
     TransactionProduct transactionProduct = new TransactionProduct();
     transactionProduct.setId(new TransactionProductId(transactionId, productId));
 
@@ -190,7 +192,7 @@ public class TransactionService {
   }
 
   public void removeProductFromTransaction(UUID transactionId, List<UUID> productIds) {
-    logger.info("Removing products {} from transaction {}", productIds, transactionId);
+    log.info("Removing products {} from transaction {}", productIds, transactionId);
     List<TransactionProductId> transactionProducts = productIds.stream()
         .map(productId -> new TransactionProductId(transactionId, productId))
         .toList();
@@ -206,18 +208,6 @@ public class TransactionService {
         Ingredient ingredient = pi.getIngredient();
         BigDecimal totalNeeded = pi.getQuantityNeeded().multiply(quantity);
 
-        logger.info("Adjusting stock for product {} ingredient {}: {} {}", product.getName(), ingredient.getName(),
-            type, totalNeeded);
-
-        if ("OUT".equals(type)) {
-          ingredient.setStock(ingredient.getStock().subtract(totalNeeded));
-        } else if ("IN".equals(type)) {
-          ingredient.setStock(ingredient.getStock().add(totalNeeded));
-        }
-
-        ingredientRepo.save(ingredient);
-
-        // Log stock movement
         stockMovementService.addStockMovement(transaction.getStoreId(),
             StockMovement.builder()
                 .ingredientId(ingredient.getId())
@@ -239,7 +229,7 @@ public class TransactionService {
 
   @Transactional
   public TransactionResponse updateTransaction(UUID storeId, UUID id, TransactionRequest request) {
-    logger.info("Updating transaction: {}", id);
+    log.info("Updating transaction: {}", id);
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
@@ -355,7 +345,7 @@ public class TransactionService {
   // soft delete
   @Transactional
   public TransactionResponse removeTransaction(UUID storeId, UUID id) {
-    logger.info("Removing transaction: {}", id);
+    log.info("Removing transaction: {}", id);
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
