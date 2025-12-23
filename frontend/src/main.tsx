@@ -9,6 +9,7 @@ import { Reports } from "./features/reports";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Transactions } from "./features/transactions";
 import { Products, ProductDetail } from "./features/products";
+import { Logs } from "./features/logHistories";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               element={
                 <ProtectedRoute>
                   <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logs"
+              element={
+                <ProtectedRoute>
+                  <Logs />
                 </ProtectedRoute>
               }
             />
