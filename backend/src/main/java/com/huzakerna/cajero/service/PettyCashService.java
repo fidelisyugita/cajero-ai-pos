@@ -6,12 +6,16 @@ import com.huzakerna.cajero.model.PettyCash;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.util.ChangeTracker;
 
-import jakarta.persistence.Column;
+import com.huzakerna.cajero.repository.PettyCashRepository;
 import jakarta.persistence.EntityNotFoundException;
 
-import com.huzakerna.cajero.repository.PettyCashRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -99,8 +103,14 @@ public class PettyCashService {
         return (pettyCash);
     }
 
-    public List<PettyCash> getAllPettyCashs() {
-        return repo.findAll();
-    }
+    public Page<PettyCash> getAllPettyCashs(UUID storeId, int page, int size, String sortBy, String sortDir,
+            LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDate.of(1970, 1, 1).atStartOfDay();
+        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : LocalDateTime.now();
 
+        Pageable pageable = PageRequest.of(page, size,
+                sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending());
+
+        return repo.findAllByStoreIdAndCreatedAtBetween(storeId, start, end, pageable);
+    }
 }
