@@ -32,8 +32,9 @@ public class StockMovement extends BaseEntity {
     @Column(name = "transaction_id")
     private UUID transactionId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private String type;
+    private StockMovementType type;
 
     @Column(name = "quantity")
     private BigDecimal quantity;

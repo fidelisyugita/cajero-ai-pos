@@ -25,6 +25,7 @@ import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductIngredient;
 import com.huzakerna.cajero.model.StockMovement;
+import com.huzakerna.cajero.model.StockMovementType;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
 import com.huzakerna.cajero.model.TransactionProductId;
@@ -74,18 +75,46 @@ public class TransactionService {
             .build());
 
     // Add transaction products if any
+    // Add transaction products if any
+    BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
+    BigDecimal calculatedTotalTax = BigDecimal.ZERO;
+    BigDecimal calculatedTotalCommission = BigDecimal.ZERO;
+    BigDecimal calculatedTotalPrice = BigDecimal.ZERO;
+
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request
           .getTransactionProducts()) {
-        addProductToTransaction(transaction,
+        TransactionProduct tp = addProductToTransaction(transaction,
             product.getProductId(),
             product.getBuyingPrice(),
             product.getSellingPrice(),
             product.getNote(),
             product.getQuantity(),
-            product.getSelectedVariants());
+            product.getSelectedVariants(),
+            product.getCommission(),
+            product.getDiscount(),
+            product.getTax());
+
+        calculatedTotalDiscount = calculatedTotalDiscount.add(tp.getDiscount());
+        calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
+        calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
+
+        // Price Calculation: (Selling Price * Quantity) - Discount + Tax
+        // Note: Assuming Selling Price is Pre-Tax and Pre-Discount base unit price.
+        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+            .subtract(tp.getDiscount())
+            .add(tp.getTax());
+        calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
       }
     }
+
+    // Update transaction totals with calculated values
+    transaction.setTotalDiscount(calculatedTotalDiscount);
+    transaction.setTotalTax(calculatedTotalTax);
+    transaction.setTotalCommission(calculatedTotalCommission);
+    transaction.setTotalPrice(calculatedTotalPrice);
+
+    repo.save(transaction);
 
     if (request.getCustomerId() != null) {
       customerService.updateCustomer(storeId, request.getCustomerId(),
@@ -96,9 +125,10 @@ public class TransactionService {
     return mapToResponse(transaction);
   }
 
-  public void addProductToTransaction(Transaction transaction, UUID productId,
+  public TransactionProduct addProductToTransaction(Transaction transaction, UUID productId,
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
-      JsonNode selectedVariants) {
+      JsonNode selectedVariants,
+      BigDecimal commission, BigDecimal discount, BigDecimal tax) {
     logger.info("Adding product {} to transaction {}", productId, transaction.getId());
 
     Product product = pRepo.findById(productId)
@@ -114,16 +144,41 @@ public class TransactionService {
     transactionProduct.setProduct(product);
     transactionProduct.setTransaction(transaction);
 
+    // Calculate/Set Tax, Commission, Discount
+    // Priority: Request > Product Default > 0
+    if (commission != null) {
+      transactionProduct.setCommission(commission);
+    } else {
+      transactionProduct.setCommission(
+          product.getCommission() != null ? product.getCommission().multiply(quantity) : BigDecimal.ZERO);
+    }
+
+    if (discount != null) {
+      transactionProduct.setDiscount(discount);
+    } else {
+      transactionProduct.setDiscount(
+          product.getDiscount() != null ? product.getDiscount().multiply(quantity) : BigDecimal.ZERO);
+    }
+
+    if (tax != null) {
+      transactionProduct.setTax(tax);
+    } else {
+      transactionProduct.setTax(
+          product.getTax() != null ? product.getTax().multiply(quantity) : BigDecimal.ZERO);
+    }
+
     tpRepo.save(transactionProduct);
 
     // Deduct stock for ingredients
-    handleStockMovement(transaction, product, quantity, "OUT");
+    handleStockMovement(transaction, product, quantity, StockMovementType.SALE);
 
     // Deduct stock for product
     if (product.getStock() != null) {
       product.setStock(product.getStock().subtract(quantity));
       pRepo.save(product);
     }
+
+    return transactionProduct;
   }
 
   public void removeProductFromTransaction(UUID transactionId, UUID productId) {
@@ -143,8 +198,9 @@ public class TransactionService {
     tpRepo.deleteAllByIdInBatch(transactionProducts);
   }
 
-  // Helper to handle stock movement (OUT = deduct, IN = add)
-  private void handleStockMovement(Transaction transaction, Product product, BigDecimal quantity, String type) {
+  // Helper to handle stock movement
+  private void handleStockMovement(Transaction transaction, Product product, BigDecimal quantity,
+      StockMovementType type) {
     if (product.getIngredients() != null) {
       for (ProductIngredient pi : product.getIngredients()) {
         Ingredient ingredient = pi.getIngredient();
@@ -235,6 +291,7 @@ public class TransactionService {
     removeProductFromTransaction(transaction.getId(), removedProductIds);
 
     // Add new transaction products if any
+    // Add new transaction products if any
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request.getTransactionProducts()) {
         if (transaction.getTransactionProducts().stream()
@@ -245,10 +302,43 @@ public class TransactionService {
               product.getSellingPrice(),
               product.getNote(),
               product.getQuantity(),
-              product.getSelectedVariants());
+              product.getSelectedVariants(),
+              product.getCommission(),
+              product.getDiscount(),
+              product.getTax());
         }
       }
     }
+
+    // Recalculate totals for the ENTIRE transaction (existing + new)
+    // We need to fetch the fresh list of transaction products from DB or assume the
+    // session cache is updated
+    // Since we called addProductToTransaction (which saves), let's re-fetch the
+    // transaction products
+    List<TransactionProduct> allProducts = tpRepo.findByTransactionId(transaction.getId());
+
+    BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
+    BigDecimal calculatedTotalTax = BigDecimal.ZERO;
+    BigDecimal calculatedTotalCommission = BigDecimal.ZERO;
+    BigDecimal calculatedTotalPrice = BigDecimal.ZERO;
+
+    for (TransactionProduct tp : allProducts) {
+      calculatedTotalDiscount = calculatedTotalDiscount
+          .add(tp.getDiscount() != null ? tp.getDiscount() : BigDecimal.ZERO);
+      calculatedTotalTax = calculatedTotalTax.add(tp.getTax() != null ? tp.getTax() : BigDecimal.ZERO);
+      calculatedTotalCommission = calculatedTotalCommission
+          .add(tp.getCommission() != null ? tp.getCommission() : BigDecimal.ZERO);
+
+      BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+          .subtract(tp.getDiscount() != null ? tp.getDiscount() : BigDecimal.ZERO)
+          .add(tp.getTax() != null ? tp.getTax() : BigDecimal.ZERO);
+      calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
+    }
+
+    transaction.setTotalDiscount(calculatedTotalDiscount);
+    transaction.setTotalTax(calculatedTotalTax);
+    transaction.setTotalCommission(calculatedTotalCommission);
+    transaction.setTotalPrice(calculatedTotalPrice);
 
     transaction = repo.save(transaction);
 
