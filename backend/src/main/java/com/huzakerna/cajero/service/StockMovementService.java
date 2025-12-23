@@ -60,7 +60,7 @@ public class StockMovementService {
         ingredient.setStock(ingredient.getStock().subtract(quantity));
         break;
       case PURCHASE:
-      case RETURN:
+      case REFUND:
       case ADJUSTMENT:
         ingredient.setStock(ingredient.getStock().add(quantity));
         break;
@@ -87,7 +87,7 @@ public class StockMovementService {
         }
         break;
       case PURCHASE:
-      case RETURN:
+      case REFUND:
       case ADJUSTMENT:
         if (product.getStock() != null) {
           product.setStock(product.getStock().add(quantity));

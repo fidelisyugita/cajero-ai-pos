@@ -15,7 +15,6 @@ import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.PettyCashService;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
