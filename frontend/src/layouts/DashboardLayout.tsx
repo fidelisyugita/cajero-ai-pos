@@ -80,6 +80,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
               <li>
+                <Link to="/logs">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/logs" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    Logs
+                  </Button>
+                </Link>
+              </li>
+              <li>
                 <Link to="/settings">
                   <Button
                     variant="ghost"
