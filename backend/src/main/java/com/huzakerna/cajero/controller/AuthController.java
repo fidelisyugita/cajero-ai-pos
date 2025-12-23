@@ -1,7 +1,6 @@
 package com.huzakerna.cajero.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,8 +24,10 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
-  private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+  // private static final Logger logger =
+  // LoggerFactory.getLogger(AuthController.class);
 
   private final AuthenticationManager authenticationManager;
   private final JwtUtils jwtUtils;
@@ -35,14 +36,14 @@ public class AuthController {
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
     try {
-      logger.info("Attempting authentication for: {}", loginRequest.email());
+      log.info("Attempting authentication for: {}", loginRequest.email());
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
               loginRequest.email(),
               loginRequest.password()));
 
       UserDetailsImpl userDetails = ((UserDetailsImpl) authentication.getPrincipal());
-      logger.info("Authentication successful for: {}", userDetails.getUsername());
+      log.info("Authentication successful for: {}", userDetails.getUsername());
 
       User user = userRepo.findByEmail(userDetails.getUsername())
           .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
@@ -63,10 +64,10 @@ public class AuthController {
       return ResponseEntity.ok(userResponse);
 
     } catch (BadCredentialsException e) {
-      logger.error("Invalid credentials for: {}", loginRequest.email());
+      log.error("Invalid credentials for: {}", loginRequest.email());
       return ResponseEntity.status(401).body("Invalid credentials");
     } catch (Exception e) {
-      logger.error("Authentication error", e);
+      log.error("Authentication error", e);
       return ResponseEntity.status(500).body("Authentication failed");
     }
   }

@@ -15,8 +15,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PettyCashService {
 
     private final PettyCashRepository repo;
@@ -39,6 +42,8 @@ public class PettyCashService {
                 .build();
 
         PettyCash savedPettyCash = repo.save(pettyCash);
+        log.info("PettyCash added: ID={}, Amount={}, IsIncome={}", savedPettyCash.getId(), savedPettyCash.getAmount(),
+                savedPettyCash.getIsIncome());
         return (savedPettyCash);
     }
 

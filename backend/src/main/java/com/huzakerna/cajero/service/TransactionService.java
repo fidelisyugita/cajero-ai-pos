@@ -7,8 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +24,10 @@ import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductIngredient;
 import com.huzakerna.cajero.model.StockMovement;
+import com.huzakerna.cajero.model.StockMovementType;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
 import com.huzakerna.cajero.model.TransactionProductId;
-import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
@@ -39,21 +38,20 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionService {
-  private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
   private final StoreRepository sRepo;
   private final TransactionRepository repo;
   private final TransactionProductRepository tpRepo;
   private final ProductRepository pRepo;
-  private final IngredientRepository ingredientRepo;
   private final StockMovementService stockMovementService;
   private final LogService logService;
   private final CustomerService customerService;
 
   @Transactional
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
-    logger.info("Adding transaction for store: {}", storeId);
+    log.info("Adding transaction for store: {}", storeId);
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
@@ -74,32 +72,61 @@ public class TransactionService {
             .build());
 
     // Add transaction products if any
+    // Add transaction products if any
+    BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
+    BigDecimal calculatedTotalTax = BigDecimal.ZERO;
+    BigDecimal calculatedTotalCommission = BigDecimal.ZERO;
+    BigDecimal calculatedTotalPrice = BigDecimal.ZERO;
+
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request
           .getTransactionProducts()) {
-        addProductToTransaction(transaction,
+        TransactionProduct tp = addProductToTransaction(transaction,
             product.getProductId(),
             product.getBuyingPrice(),
             product.getSellingPrice(),
             product.getNote(),
             product.getQuantity(),
-            product.getSelectedVariants());
+            product.getSelectedVariants(),
+            product.getCommission(),
+            product.getDiscount(),
+            product.getTax());
+
+        calculatedTotalDiscount = calculatedTotalDiscount.add(tp.getDiscount());
+        calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
+        calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
+
+        // Price Calculation: (Selling Price * Quantity) - Discount + Tax
+        // Note: Assuming Selling Price is Pre-Tax and Pre-Discount base unit price.
+        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+            .subtract(tp.getDiscount())
+            .add(tp.getTax());
+        calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
       }
     }
+
+    // Update transaction totals with calculated values
+    transaction.setTotalDiscount(calculatedTotalDiscount);
+    transaction.setTotalTax(calculatedTotalTax);
+    transaction.setTotalCommission(calculatedTotalCommission);
+    transaction.setTotalPrice(calculatedTotalPrice);
+
+    repo.save(transaction);
 
     if (request.getCustomerId() != null) {
       customerService.updateCustomer(storeId, request.getCustomerId(),
           BigDecimal.valueOf(transaction.getTotalPrice().doubleValue() / 1000));
     }
 
-    logger.info("Transaction added successfully: {}", transaction.getId());
+    log.info("Transaction added successfully: {}", transaction.getId());
     return mapToResponse(transaction);
   }
 
-  public void addProductToTransaction(Transaction transaction, UUID productId,
+  public TransactionProduct addProductToTransaction(Transaction transaction, UUID productId,
       BigDecimal buyingPrice, BigDecimal sellingPrice, String note, BigDecimal quantity,
-      JsonNode selectedVariants) {
-    logger.info("Adding product {} to transaction {}", productId, transaction.getId());
+      JsonNode selectedVariants,
+      BigDecimal commission, BigDecimal discount, BigDecimal tax) {
+    log.info("Adding product {} to transaction {}", productId, transaction.getId());
 
     Product product = pRepo.findById(productId)
         .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -114,20 +141,50 @@ public class TransactionService {
     transactionProduct.setProduct(product);
     transactionProduct.setTransaction(transaction);
 
+    // Calculate/Set Tax, Commission, Discount
+    // Priority: Request > Product Default > 0
+    if (commission != null) {
+      transactionProduct.setCommission(commission);
+    } else {
+      transactionProduct.setCommission(
+          product.getCommission() != null ? product.getCommission().multiply(quantity) : BigDecimal.ZERO);
+    }
+
+    if (discount != null) {
+      transactionProduct.setDiscount(discount);
+    } else {
+      transactionProduct.setDiscount(
+          product.getDiscount() != null ? product.getDiscount().multiply(quantity) : BigDecimal.ZERO);
+    }
+
+    if (tax != null) {
+      transactionProduct.setTax(tax);
+    } else {
+      transactionProduct.setTax(
+          product.getTax() != null ? product.getTax().multiply(quantity) : BigDecimal.ZERO);
+    }
+
     tpRepo.save(transactionProduct);
 
     // Deduct stock for ingredients
-    handleStockMovement(transaction, product, quantity, "OUT");
+    handleStockMovement(transaction, product, quantity, StockMovementType.SALE);
 
-    // Deduct stock for product
+    // Deduct stock for product (Standardized via StockMovementService)
     if (product.getStock() != null) {
-      product.setStock(product.getStock().subtract(quantity));
-      pRepo.save(product);
+      stockMovementService.addStockMovement(transaction.getStoreId(),
+          StockMovement.builder()
+              .productId(product.getId())
+              .transactionId(transaction.getId())
+              .type(StockMovementType.SALE)
+              .quantity(quantity)
+              .build());
     }
+
+    return transactionProduct;
   }
 
   public void removeProductFromTransaction(UUID transactionId, UUID productId) {
-    logger.info("Removing product {} from transaction {}", productId, transactionId);
+    log.info("Removing product {} from transaction {}", productId, transactionId);
     TransactionProduct transactionProduct = new TransactionProduct();
     transactionProduct.setId(new TransactionProductId(transactionId, productId));
 
@@ -135,7 +192,7 @@ public class TransactionService {
   }
 
   public void removeProductFromTransaction(UUID transactionId, List<UUID> productIds) {
-    logger.info("Removing products {} from transaction {}", productIds, transactionId);
+    log.info("Removing products {} from transaction {}", productIds, transactionId);
     List<TransactionProductId> transactionProducts = productIds.stream()
         .map(productId -> new TransactionProductId(transactionId, productId))
         .toList();
@@ -143,25 +200,14 @@ public class TransactionService {
     tpRepo.deleteAllByIdInBatch(transactionProducts);
   }
 
-  // Helper to handle stock movement (OUT = deduct, IN = add)
-  private void handleStockMovement(Transaction transaction, Product product, BigDecimal quantity, String type) {
+  // Helper to handle stock movement
+  private void handleStockMovement(Transaction transaction, Product product, BigDecimal quantity,
+      StockMovementType type) {
     if (product.getIngredients() != null) {
       for (ProductIngredient pi : product.getIngredients()) {
         Ingredient ingredient = pi.getIngredient();
         BigDecimal totalNeeded = pi.getQuantityNeeded().multiply(quantity);
 
-        logger.info("Adjusting stock for product {} ingredient {}: {} {}", product.getName(), ingredient.getName(),
-            type, totalNeeded);
-
-        if ("OUT".equals(type)) {
-          ingredient.setStock(ingredient.getStock().subtract(totalNeeded));
-        } else if ("IN".equals(type)) {
-          ingredient.setStock(ingredient.getStock().add(totalNeeded));
-        }
-
-        ingredientRepo.save(ingredient);
-
-        // Log stock movement
         stockMovementService.addStockMovement(transaction.getStoreId(),
             StockMovement.builder()
                 .ingredientId(ingredient.getId())
@@ -183,7 +229,7 @@ public class TransactionService {
 
   @Transactional
   public TransactionResponse updateTransaction(UUID storeId, UUID id, TransactionRequest request) {
-    logger.info("Updating transaction: {}", id);
+    log.info("Updating transaction: {}", id);
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
@@ -235,6 +281,7 @@ public class TransactionService {
     removeProductFromTransaction(transaction.getId(), removedProductIds);
 
     // Add new transaction products if any
+    // Add new transaction products if any
     if (request.getTransactionProducts() != null) {
       for (TransactionProductRequest product : request.getTransactionProducts()) {
         if (transaction.getTransactionProducts().stream()
@@ -245,10 +292,43 @@ public class TransactionService {
               product.getSellingPrice(),
               product.getNote(),
               product.getQuantity(),
-              product.getSelectedVariants());
+              product.getSelectedVariants(),
+              product.getCommission(),
+              product.getDiscount(),
+              product.getTax());
         }
       }
     }
+
+    // Recalculate totals for the ENTIRE transaction (existing + new)
+    // We need to fetch the fresh list of transaction products from DB or assume the
+    // session cache is updated
+    // Since we called addProductToTransaction (which saves), let's re-fetch the
+    // transaction products
+    List<TransactionProduct> allProducts = tpRepo.findByTransactionId(transaction.getId());
+
+    BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
+    BigDecimal calculatedTotalTax = BigDecimal.ZERO;
+    BigDecimal calculatedTotalCommission = BigDecimal.ZERO;
+    BigDecimal calculatedTotalPrice = BigDecimal.ZERO;
+
+    for (TransactionProduct tp : allProducts) {
+      calculatedTotalDiscount = calculatedTotalDiscount
+          .add(tp.getDiscount() != null ? tp.getDiscount() : BigDecimal.ZERO);
+      calculatedTotalTax = calculatedTotalTax.add(tp.getTax() != null ? tp.getTax() : BigDecimal.ZERO);
+      calculatedTotalCommission = calculatedTotalCommission
+          .add(tp.getCommission() != null ? tp.getCommission() : BigDecimal.ZERO);
+
+      BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+          .subtract(tp.getDiscount() != null ? tp.getDiscount() : BigDecimal.ZERO)
+          .add(tp.getTax() != null ? tp.getTax() : BigDecimal.ZERO);
+      calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
+    }
+
+    transaction.setTotalDiscount(calculatedTotalDiscount);
+    transaction.setTotalTax(calculatedTotalTax);
+    transaction.setTotalCommission(calculatedTotalCommission);
+    transaction.setTotalPrice(calculatedTotalPrice);
 
     transaction = repo.save(transaction);
 
@@ -265,7 +345,7 @@ public class TransactionService {
   // soft delete
   @Transactional
   public TransactionResponse removeTransaction(UUID storeId, UUID id) {
-    logger.info("Removing transaction: {}", id);
+    log.info("Removing transaction: {}", id);
     // Validate store exists
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
