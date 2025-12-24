@@ -319,6 +319,7 @@ public class ProductService {
         .updatedBy(product.getUpdatedBy())
         .createdAt(product.getCreatedAt())
         .updatedAt(product.getUpdatedAt())
+        .deletedAt(product.getDeletedAt())
         .ingredients(product.getIngredients() != null ? product.getIngredients().stream()
             .map(pi -> ProductIngredientResponse.builder()
                 .ingredientId(pi.getIngredient().getId())
