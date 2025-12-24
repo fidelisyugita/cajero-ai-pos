@@ -85,7 +85,7 @@ const ProductDetail = () => {
     <DashboardLayout>
       <div className="container mx-auto p-4 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Product Detail</h1>
+          <div />
           <Button variant="outline" onClick={() => navigate("/products")}>
             Back to Products
           </Button>

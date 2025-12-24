@@ -11,7 +11,8 @@ const Logs = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto p-4 space-y-6">
-        <h1 className="text-2xl font-bold mb-6">Logs</h1>
+
+
 
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Log</h2>
