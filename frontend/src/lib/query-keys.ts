@@ -18,4 +18,13 @@ export const queryKeys = {
     all: ["logs"] as const,
     list: (page: number) => ["logs", "list", page] as const,
   },
+  stockMovements: {
+    all: ["stock-movements"] as const,
+    list: (page: number) => ["stock-movements", "list", page] as const,
+  },
+  pettyCash: {
+    all: ["petty-cash"] as const,
+    list: (page: number) => ["petty-cash", "list", page] as const,
+    detail: (id: string) => ["petty-cash", "detail", id] as const,
+  },
 } as const;

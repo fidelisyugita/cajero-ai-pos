@@ -92,3 +92,36 @@ export interface Log {
   details: string;
   createdAt: string;
 }
+
+export type StockMovementType =
+  | "SALE"
+  | "WASTE"
+  | "PURCHASE"
+  | "ADJUSTMENT"
+  | "REFUND";
+
+export interface StockMovement {
+  id: string;
+  storeId: string;
+  ingredientId?: string;
+  productId?: string;
+  variantId?: string;
+  transactionId?: string;
+  type: StockMovementType;
+  quantity: number;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PettyCash {
+  id: string;
+  storeId: string;
+  amount: number;
+  isIncome: boolean;
+  imageUrl?: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}

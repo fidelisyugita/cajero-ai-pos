@@ -67,6 +67,45 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </li>
               <li>
+                <Link to="/categories">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/categories" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Categories
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/stock-history">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/stock-history" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    Stock History
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/petty-cash">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      location.pathname === "/petty-cash" ? "bg-accent" : ""
+                    }`}
+                  >
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    Petty Cash
+                  </Button>
+                </Link>
+              </li>
+              <li>
                 <Link to="/reports">
                   <Button
                     variant="ghost"
