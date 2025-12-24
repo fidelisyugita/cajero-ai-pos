@@ -127,6 +127,7 @@ public class ProductService {
       String sortDir,
       String keyword,
       String categoryCode,
+      boolean includeDeleted,
       LocalDate startDate,
       LocalDate endDate) {
     Pageable pageable = PageRequest.of(page, size,
@@ -139,7 +140,7 @@ public class ProductService {
     LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
     Page<Product> productPage = repo.findFiltered(
-        storeId, categoryCode, keyword, start, end, pageable);
+        storeId, categoryCode, keyword, includeDeleted, start, end, pageable);
 
     return productPage.map(this::mapToResponse);
   }
