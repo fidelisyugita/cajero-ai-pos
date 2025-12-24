@@ -85,7 +85,7 @@ const ProductDetail = () => {
     <DashboardLayout>
       <div className="container mx-auto p-4 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Product Detail</h1>
+          <div />
           <Button variant="outline" onClick={() => navigate("/products")}>
             Back to Products
           </Button>
@@ -164,15 +164,19 @@ const ProductDetail = () => {
               <div>
                 <Label>Statistics</Label>
                 <div className="grid grid-cols-2 gap-4 mt-2">
-                  <div className="p-4 bg-gray-100 rounded-lg">
-                    <div className="text-sm text-gray-600">Sold</div>
-                    <div className="text-xl font-semibold">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-sm font-semibold text-green-700">
+                      Sold
+                    </div>
+                    <div className="text-xl font-bold text-green-900">
                       {product.soldCount ?? 0} {product.measureUnitName}
                     </div>
                   </div>
-                  <div className="p-4 bg-gray-100 rounded-lg">
-                    <div className="text-sm text-gray-600">Rejected</div>
-                    <div className="text-xl font-semibold">
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="text-sm font-semibold text-red-700">
+                      Rejected
+                    </div>
+                    <div className="text-xl font-bold text-red-900">
                       {product.rejectCount ?? 0} {product.measureUnitName}
                     </div>
                   </div>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { formatCurrency } from "@/lib/utils";
 import { useTransactions } from "./hooks";
 
 const Transactions = () => {
@@ -8,38 +10,77 @@ const Transactions = () => {
 
   const { data: transactionsData } = useTransactions(page);
 
+  const getStatusBadgeClass = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+      case "success":
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
+      case "cancelled":
+      case "canceled":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto p-4 space-y-6">
-        <h1 className="text-2xl font-bold mb-6">Transactions</h1>
-
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Transaction</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
-                <tr>
-                  <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Total</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2">Type</th>
-                  <th className="px-4 py-2">Payment Method</th>
-                  <th className="px-4 py-2">Created At</th>
+                <tr className="border-b">
+                  <th className="px-4 py-3 text-left">ID</th>
+                  <th className="px-4 py-3 text-right">Items</th>
+                  <th className="px-4 py-3 text-right">Tax</th>
+                  <th className="px-4 py-3 text-right">Total</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                  <th className="px-4 py-3 text-left">Type</th>
+                  <th className="px-4 py-3 text-left">Payment</th>
+                  <th className="px-4 py-3 text-right">Created At</th>
                 </tr>
               </thead>
               <tbody>
                 {transactionsData?.content.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td className="border px-4 py-2">{transaction.id}</td>
-                    <td className="border px-4 py-2">${transaction.total}</td>
-                    <td className="border px-4 py-2">{transaction.status}</td>
-                    <td className="border px-4 py-2">
-                      {transaction.transactionType}
+                  <tr
+                    key={transaction.id}
+                    className="border-b hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                      {transaction.id.slice(0, 8)}...
                     </td>
-                    <td className="border px-4 py-2">
-                      {transaction.paymentMethod}
+                    <td className="px-4 py-3 text-right">
+                      {transaction.transactionProduct?.length || 0}
                     </td>
-                    <td className="border px-4 py-2">
+                    <td className="px-4 py-3 text-right text-red-600 font-medium">
+                      {formatCurrency(transaction.totalTax)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-green-700">
+                      {formatCurrency(transaction.totalPrice)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                          transaction.statusCode
+                        )}`}
+                      >
+                        {transaction.statusCode}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {transaction.transactionTypeCode}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {transaction.paymentMethodCode}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-500 text-sm">
                       {new Date(transaction.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
@@ -48,23 +89,23 @@ const Transactions = () => {
             </table>
             {transactionsData && (
               <div className="mt-4 flex justify-between items-center">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Previous
-                </button>
-                <span>
+                </Button>
+                <span className="text-sm text-gray-600">
                   Page {page + 1} of {transactionsData.totalPages}
                 </span>
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= transactionsData.totalPages - 1}
-                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Next
-                </button>
+                </Button>
               </div>
             )}
           </div>

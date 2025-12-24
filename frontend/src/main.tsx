@@ -10,6 +10,9 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Transactions } from "./features/transactions";
 import { Products, ProductDetail } from "./features/products";
 import { Logs } from "./features/logHistories";
+import { Categories } from "./features/productCategories";
+import { StockHistory } from "./features/stockMovements";
+import { PettyCash } from "./features/pettyCash";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +72,30 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route
+              path="/categories"
+              element={
+                <ProtectedRoute>
+                  <Categories />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/stock-history"
+              element={
+                <ProtectedRoute>
+                  <StockHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/petty-cash"
+              element={
+                <ProtectedRoute>
+                  <PettyCash />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

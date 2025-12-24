@@ -53,12 +53,35 @@ export interface ProductCategory {
   deletedAt: string;
 }
 
+export interface TransactionProduct {
+  productId: string;
+  categoryCode: string;
+  measureUnitCode: string;
+  name: string;
+  description: string;
+  stock: number;
+  rejectCount: number;
+  soldCount: number;
+  imageUrl: string;
+  selectedVariants: any;
+  note: string;
+  quantity: number;
+  buyingPrice: number;
+  sellingPrice: number;
+  commission: number;
+  discount: number;
+  tax: number;
+}
+
 export interface Transaction {
   id: string;
-  total: number;
-  status: string;
-  transactionType: string;
-  paymentMethod: string;
+  totalPrice: number;
+  totalTax: number;
+  totalDiscount: number;
+  statusCode: string;
+  transactionTypeCode: string;
+  paymentMethodCode: string;
+  transactionProduct: TransactionProduct[];
   createdAt: string;
 }
 export interface Log {
@@ -68,4 +91,37 @@ export interface Log {
   action: string;
   details: string;
   createdAt: string;
+}
+
+export type StockMovementType =
+  | "SALE"
+  | "WASTE"
+  | "PURCHASE"
+  | "ADJUSTMENT"
+  | "REFUND";
+
+export interface StockMovement {
+  id: string;
+  storeId: string;
+  ingredientId?: string;
+  productId?: string;
+  variantId?: string;
+  transactionId?: string;
+  type: StockMovementType;
+  quantity: number;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PettyCash {
+  id: string;
+  storeId: string;
+  amount: number;
+  isIncome: boolean;
+  imageUrl?: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
 }
