@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { formatCurrency } from "@/lib/utils";
 import { useProducts } from "./hooks";
 
 const Products = () => {
@@ -20,13 +22,14 @@ const Products = () => {
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
-                <tr>
-                  <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Stock</th>
-                  <th className="px-4 py-2">Sold</th>
-                  <th className="px-4 py-2">Updated By</th>
-                  <th className="px-4 py-2">Updated At</th>
+                <tr className="border-b">
+                  <th className="px-4 py-3 text-left">ID</th>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Category</th>
+                  <th className="px-4 py-3 text-right">Price</th>
+                  <th className="px-4 py-3 text-right">Stock</th>
+                  <th className="px-4 py-3 text-right">Sold</th>
+                  <th className="px-4 py-3 text-right">Updated At</th>
                 </tr>
               </thead>
               <tbody>
@@ -34,14 +37,33 @@ const Products = () => {
                   <tr
                     key={product.id}
                     onClick={() => navigate(`/products/${product.id}`)}
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="border-b hover:bg-gray-50 cursor-pointer"
                   >
-                    <td className="border px-4 py-2">{product.id}</td>
-                    <td className="border px-4 py-2">{product.name}</td>
-                    <td className="border px-4 py-2">{`${product.stock} ${product.measureUnitName}`}</td>
-                    <td className="border px-4 py-2">{`${product.soldCount} ${product.measureUnitName}`}</td>
-                    <td className="border px-4 py-2">{product.updatedBy}</td>
-                    <td className="border px-4 py-2">
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                      {product.id.slice(0, 8)}...
+                    </td>
+                    <td className="px-4 py-3 font-medium">{product.name}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {product.categoryCode}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium text-gray-900">
+                      {formatCurrency(product.sellingPrice)}
+                    </td>
+                    <td
+                      className={`px-4 py-3 text-right ${
+                        product.stock === 0
+                          ? "text-red-600 font-medium"
+                          : product.stock < 10
+                          ? "text-amber-600 font-medium"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {`${product.stock} ${product.measureUnitName}`}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {`${product.soldCount} ${product.measureUnitName}`}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
                       {new Date(product.updatedAt).toLocaleDateString()}
                     </td>
                   </tr>
@@ -50,23 +72,23 @@ const Products = () => {
             </table>
             {productsData && (
               <div className="mt-4 flex justify-between items-center">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Previous
-                </button>
-                <span>
+                </Button>
+                <span className="text-sm text-gray-600">
                   Page {page + 1} of {productsData.totalPages}
                 </span>
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= productsData.totalPages - 1}
-                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
                 >
                   Next
-                </button>
+                </Button>
               </div>
             )}
           </div>
