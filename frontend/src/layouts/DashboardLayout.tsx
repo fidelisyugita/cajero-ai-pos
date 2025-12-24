@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <aside className="fixed inset-y-0 left-0 w-72 bg-card/50 backdrop-blur-xl border-r z-30 flex flex-col transition-all duration-300">
         {/* Logo */}
         <div className="py-8 flex items-center justify-center border-b border-border/50">
-           <img src="/src/assets/logo.svg" alt="Cajero Logo" className="w-30 h-auto" />
+           <img src="/logo.svg" alt="Cajero Logo" className="w-30 h-auto" />
         </div>
 
         {/* Navigation */}
