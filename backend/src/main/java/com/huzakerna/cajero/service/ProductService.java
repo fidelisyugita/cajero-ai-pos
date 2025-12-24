@@ -268,6 +268,34 @@ public class ProductService {
     return mapToResponse(product);
   }
 
+  public ProductResponse restoreProduct(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing product including deleted ones
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    // Verify the product belongs to the store
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
+    }
+
+    // Update product fields
+    product.setDeletedAt(null);
+
+    product = repo.save(product);
+
+    // Create log details
+    var logDetails = new HashMap<String, Object>();
+    logDetails.put("productId", id);
+    logService.logAction(storeId, "product", "restored", logDetails);
+
+    return mapToResponse(product);
+  }
+
   private ProductResponse mapToResponse(Product product) {
     return ProductResponse.builder()
         .id(product.getId())

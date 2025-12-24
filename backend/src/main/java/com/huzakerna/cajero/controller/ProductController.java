@@ -78,4 +78,11 @@ public class ProductController {
     UUID storeId = user.getStoreId();
     return ResponseEntity.ok(service.removeProduct(storeId, id));
   }
+
+  @GetMapping("/{id}/restore")
+  public ResponseEntity<ProductResponse> restoreById(
+      @AuthenticationPrincipal UserDetailsImpl user, @PathVariable UUID id) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.restoreProduct(storeId, id));
+  }
 }
