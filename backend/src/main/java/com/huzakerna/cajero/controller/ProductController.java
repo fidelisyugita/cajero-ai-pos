@@ -38,6 +38,7 @@ public class ProductController {
       @RequestParam(defaultValue = "name") String sortBy,
       @RequestParam(defaultValue = "asc") String sortDir,
       @RequestParam(defaultValue = "") String keyword,
+      @RequestParam(required = false, defaultValue = "false") Boolean includeDeleted,
       @RequestParam(required = false) String categoryCode,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -45,7 +46,7 @@ public class ProductController {
     UUID storeId = user.getStoreId();
 
     return ResponseEntity.ok(service.getProducts(
-        storeId, page, size, sortBy, sortDir, keyword, categoryCode, startDate, endDate));
+        storeId, page, size, sortBy, sortDir, keyword, categoryCode, includeDeleted, startDate, endDate));
 
   }
 
@@ -76,5 +77,12 @@ public class ProductController {
       @AuthenticationPrincipal UserDetailsImpl user, @PathVariable UUID id) {
     UUID storeId = user.getStoreId();
     return ResponseEntity.ok(service.removeProduct(storeId, id));
+  }
+
+  @GetMapping("/{id}/restore")
+  public ResponseEntity<ProductResponse> restoreById(
+      @AuthenticationPrincipal UserDetailsImpl user, @PathVariable UUID id) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.restoreProduct(storeId, id));
   }
 }

@@ -2,6 +2,7 @@ package com.huzakerna.cajero.config;
 
 import com.huzakerna.cajero.filter.JwtAuthFilter;
 import com.huzakerna.cajero.security.UserDetailsServiceImpl;
+import com.huzakerna.cajero.security.AuthEntryPointJwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,7 @@ public class SecurityConfig {
 
   private final UserDetailsServiceImpl userDetailsService;
   private final CorsConfigurationSource corsConfigurationSource;
+  private final AuthEntryPointJwt unauthorizedHandler;
 
   @Bean
   @Order(1)
@@ -60,6 +62,7 @@ public class SecurityConfig {
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .securityMatcher("/api/**")
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/signin").permitAll()

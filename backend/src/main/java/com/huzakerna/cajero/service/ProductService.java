@@ -127,6 +127,7 @@ public class ProductService {
       String sortDir,
       String keyword,
       String categoryCode,
+      boolean includeDeleted,
       LocalDate startDate,
       LocalDate endDate) {
     Pageable pageable = PageRequest.of(page, size,
@@ -139,7 +140,7 @@ public class ProductService {
     LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
     Page<Product> productPage = repo.findFiltered(
-        storeId, categoryCode, keyword, start, end, pageable);
+        storeId, categoryCode, keyword, includeDeleted, start, end, pageable);
 
     return productPage.map(this::mapToResponse);
   }
@@ -267,6 +268,34 @@ public class ProductService {
     return mapToResponse(product);
   }
 
+  public ProductResponse restoreProduct(UUID storeId, UUID id) {
+    // Validate store exists
+    if (!sRepo.existsById(storeId)) {
+      throw new IllegalArgumentException("Store not found");
+    }
+
+    // Find existing product including deleted ones
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    // Verify the product belongs to the store
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
+    }
+
+    // Update product fields
+    product.setDeletedAt(null);
+
+    product = repo.save(product);
+
+    // Create log details
+    var logDetails = new HashMap<String, Object>();
+    logDetails.put("productId", id);
+    logService.logAction(storeId, "product", "restored", logDetails);
+
+    return mapToResponse(product);
+  }
+
   private ProductResponse mapToResponse(Product product) {
     return ProductResponse.builder()
         .id(product.getId())
@@ -290,6 +319,7 @@ public class ProductService {
         .updatedBy(product.getUpdatedBy())
         .createdAt(product.getCreatedAt())
         .updatedAt(product.getUpdatedAt())
+        .deletedAt(product.getDeletedAt())
         .ingredients(product.getIngredients() != null ? product.getIngredients().stream()
             .map(pi -> ProductIngredientResponse.builder()
                 .ingredientId(pi.getIngredient().getId())

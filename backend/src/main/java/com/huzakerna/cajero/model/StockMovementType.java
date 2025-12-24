@@ -5,5 +5,5 @@ public enum StockMovementType {
   WASTE,
   PURCHASE,
   ADJUSTMENT,
-  RETURN
+  REFUND
 }

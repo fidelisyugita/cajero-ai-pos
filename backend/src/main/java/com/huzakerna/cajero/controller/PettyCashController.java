@@ -14,8 +14,13 @@ import com.huzakerna.cajero.model.PettyCash;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import com.huzakerna.cajero.service.PettyCashService;
 
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/petty-cash")
@@ -25,8 +30,17 @@ public class PettyCashController {
     private final PettyCashService service;
 
     @GetMapping
-    public List<PettyCash> getAll() {
-        return service.getAllPettyCashs();
+    public ResponseEntity<Page<PettyCash>> getAll(
+            @AuthenticationPrincipal UserDetailsImpl user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        UUID storeId = user.getStoreId();
+        return ResponseEntity.ok(service.getAllPettyCashs(storeId, page, size, sortBy, sortDir, startDate, endDate));
     }
 
     @PostMapping
