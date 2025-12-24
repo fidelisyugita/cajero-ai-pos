@@ -1,6 +1,8 @@
 import { apiClient } from "@/lib/apiClient";
 import type { PaginatedResponse, PettyCash } from "@/types/api";
 
+export type PettyCashError = Error;
+
 export const pettyCashService = {
   getPettyCashs: async (
     page = 0,
