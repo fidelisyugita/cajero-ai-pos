@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.huzakerna.cajero.model.StockMovement;
 
-public interface StockMovementRepository extends JpaRepository<StockMovement, UUID> {
+public interface StockMovementRepository
+    extends JpaRepository<StockMovement, UUID>,
+    org.springframework.data.jpa.repository.JpaSpecificationExecutor<StockMovement> {
 
   List<StockMovement> findByStoreId(UUID storeId);
 

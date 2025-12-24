@@ -56,16 +56,20 @@ public class ReportService {
       Long count = (Long) row[1];
       BigDecimal revenue = (BigDecimal) row[2];
       BigDecimal refund = (BigDecimal) row[3];
+      BigDecimal discount = (BigDecimal) row[4];
 
       if (revenue == null)
         revenue = BigDecimal.ZERO;
       if (refund == null)
         refund = BigDecimal.ZERO;
+      if (discount == null)
+        discount = BigDecimal.ZERO;
 
       builderMap.computeIfAbsent(date, k -> DailyReportDTO.builder().date(k))
           .totalTransaction(count)
           .totalRevenue(revenue)
           .totalRefund(refund)
+          .totalDiscount(discount)
           .totalNetRevenue(revenue.subtract(refund));
     }
 
@@ -141,6 +145,7 @@ public class ReportService {
     long totalProductSold = 0;
     BigDecimal totalRevenue = BigDecimal.ZERO;
     BigDecimal totalRefund = BigDecimal.ZERO;
+    BigDecimal totalDiscount = BigDecimal.ZERO;
     BigDecimal totalNetRevenue = BigDecimal.ZERO;
     Long totalRefundTransaction = 0L;
     Long totalRefundProduct = 0L;
@@ -154,6 +159,8 @@ public class ReportService {
       totalRefund = totalRefund.add(day.getTotalRefund() != null ? day.getTotalRefund() : BigDecimal.ZERO);
       totalNetRevenue = totalNetRevenue
           .add(day.getTotalNetRevenue() != null ? day.getTotalNetRevenue() : BigDecimal.ZERO);
+      totalDiscount = totalDiscount
+          .add(day.getTotalDiscount() != null ? day.getTotalDiscount() : BigDecimal.ZERO);
 
       if (day.getTotalRefundTransaction() != null)
         totalRefundTransaction += day.getTotalRefundTransaction();
@@ -200,6 +207,7 @@ public class ReportService {
         .totalRevenue(totalRevenue)
         .totalRefund(totalRefund) // Use summed value
         .totalNetRevenue(totalNetRevenue)
+        .totalDiscount(totalDiscount)
         .totalRefundTransaction(totalRefundTransaction)
         .totalRefundProduct(totalRefundProduct)
         .totalTax(totalTax)
