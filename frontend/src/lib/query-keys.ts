@@ -20,7 +20,8 @@ export const queryKeys = {
   },
   stockMovements: {
     all: ["stock-movements"] as const,
-    list: (page: number) => ["stock-movements", "list", page] as const,
+    list: (page: number, filters?: Record<string, any>) =>
+      ["stock-movements", "list", page, filters] as const,
   },
   pettyCash: {
     all: ["petty-cash"] as const,
