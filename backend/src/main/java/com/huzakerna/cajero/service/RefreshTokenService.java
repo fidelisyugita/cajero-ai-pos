@@ -28,16 +28,18 @@ public class RefreshTokenService {
 
   @Transactional
   public RefreshToken createRefreshToken(UUID userId) {
+    // Reuse user object
+    com.huzakerna.cajero.model.User user = userRepository.findById(userId).get();
+
     // Ensure we remove any existing token for this user to keep 1 token per user
     // policy
-    refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+    // We want to support multiple devices now, so we remove this deletion.
+    // refreshTokenRepository.deleteByUser(user);
 
     RefreshToken refreshToken = new RefreshToken();
 
-    refreshToken.setUser(userRepository.findById(userId).get());
-    refreshToken.setExpiryDate(Instant.now().plusMillis(Math.max(refreshTokenDurationMs, 0))); // Avoid negative
-                                                                                               // duration if config
-                                                                                               // missing
+    refreshToken.setUser(user);
+    refreshToken.setExpiryDate(Instant.now().plusMillis(Math.max(refreshTokenDurationMs, 0)));
     refreshToken.setToken(UUID.randomUUID().toString());
 
     return refreshTokenRepository.save(refreshToken);

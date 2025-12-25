@@ -11,6 +11,6 @@ import com.huzakerna.cajero.model.User;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
   Optional<RefreshToken> findByToken(String token);
 
-  @Modifying
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
   int deleteByUser(User user);
 }
