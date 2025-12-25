@@ -373,6 +373,7 @@ public class TransactionService {
     return mapToResponse(transaction);
   }
 
+  @Transactional(readOnly = true)
   public Page<TransactionResponse> getTransactions(UUID storeId,
       int page,
       int size,
