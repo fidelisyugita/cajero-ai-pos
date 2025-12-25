@@ -84,6 +84,7 @@ logging:
 jwt:
   secret-key: ${JWT_SECRET_KEY:your-secret-key-should-be-at-least-256-bits-for-hs512}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:2592000000} # 30 days
 
 springdoc:
   api-docs:

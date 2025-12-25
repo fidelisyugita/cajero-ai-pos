@@ -1,6 +1,5 @@
 package com.huzakerna.cajero.dto;
 
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
@@ -18,6 +17,7 @@ public class UserResponse {
     private String roleCode;
     private String imageUrl;
     private String accessToken;
+    private String refreshToken;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     // Exclude sensitive fields like passwordHash

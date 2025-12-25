@@ -32,6 +32,7 @@ public class AuthController {
   private final AuthenticationManager authenticationManager;
   private final JwtUtils jwtUtils;
   private final UserRepository userRepo;
+  private final com.huzakerna.cajero.service.RefreshTokenService refreshTokenService;
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -49,6 +50,7 @@ public class AuthController {
           .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
 
       String jwt = jwtUtils.generateToken(user);
+      com.huzakerna.cajero.model.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
       UserResponse userResponse = UserResponse.builder()
           .id(user.getId())
@@ -59,6 +61,7 @@ public class AuthController {
           .roleCode(user.getRoleCode())
           .imageUrl(user.getImageUrl())
           .accessToken(jwt)
+          .refreshToken(refreshToken.getToken())
           .build();
 
       return ResponseEntity.ok(userResponse);
@@ -71,11 +74,28 @@ public class AuthController {
       return ResponseEntity.status(500).body("Authentication failed");
     }
   }
-
+  // TODO: Add register user
   // @PostMapping("/signup")
   // public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest) {
   // userService.addUser(userRequest);
-
   // return ResponseEntity.ok("User registered successfully!");
   // }
+
+  @PostMapping("/refreshtoken")
+  public ResponseEntity<?> refreshtoken(@Valid @RequestBody com.huzakerna.cajero.dto.TokenRefreshRequest request) {
+    String requestRefreshToken = request.refreshToken();
+
+    return refreshTokenService.findByToken(requestRefreshToken)
+        .map(refreshTokenService::verifyExpiration)
+        .map(com.huzakerna.cajero.model.RefreshToken::getUser)
+        .map(user -> {
+          String token = jwtUtils.generateToken(user);
+          return ResponseEntity.ok(com.huzakerna.cajero.dto.TokenRefreshResponse.builder()
+              .accessToken(token)
+              .refreshToken(requestRefreshToken)
+              .build());
+        })
+        .orElseThrow(() -> new com.huzakerna.cajero.exception.TokenRefreshException(requestRefreshToken,
+            "Refresh token is not in database!"));
+  }
 }
