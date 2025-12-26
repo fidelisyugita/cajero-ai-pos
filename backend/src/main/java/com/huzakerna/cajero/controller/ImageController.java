@@ -33,7 +33,7 @@ public class ImageController {
   public ResponseEntity<String> uploadImage(
       @Parameter(description = "Image type (e.g., 'product', 'petty-cash', 'store', 'user')", required = true, example = "product") @PathVariable String type,
       @Parameter(description = "Image file to upload (max 10MB, formats: JPG, PNG, GIF)", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)) @RequestParam("file") MultipartFile file,
-      @Parameter(description = "Image ID", required = false, example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam("id") String id,
+      @Parameter(description = "Image ID", required = false, example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam(value = "id", required = false) String id,
       @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
     String imageUrl = service.uploadImage(file, type, userDetails.getStoreId(), id);
     return ResponseEntity.ok(imageUrl);
