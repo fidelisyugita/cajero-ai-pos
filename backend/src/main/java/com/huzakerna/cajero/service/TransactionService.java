@@ -382,6 +382,7 @@ public class TransactionService {
       String statusCode,
       String transactionTypeCode,
       String paymentMethodCode,
+      UUID productId,
       LocalDate startDate,
       LocalDate endDate) {
     Pageable pageable = PageRequest.of(page, size,
@@ -394,7 +395,7 @@ public class TransactionService {
     LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
     Page<Transaction> transactionPage = repo.findFiltered(
-        storeId, statusCode, transactionTypeCode, paymentMethodCode, start,
+        storeId, statusCode, transactionTypeCode, paymentMethodCode, productId, start,
         end, pageable);
 
     return transactionPage.map(this::mapToResponse);

@@ -14,11 +14,13 @@ import com.huzakerna.cajero.model.Transaction;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
   @Query("""
-          SELECT t FROM Transaction t
+          SELECT DISTINCT t FROM Transaction t
+          LEFT JOIN t.transactionProducts tp
           WHERE t.storeId = :storeId
             AND (:statusCode IS NULL OR t.statusCode = :statusCode)
             AND (:transactionTypeCode IS NULL OR t.transactionTypeCode = :transactionTypeCode)
             AND (:paymentMethodCode IS NULL OR t.paymentMethodCode = :paymentMethodCode)
+            AND (:productId IS NULL OR tp.product.id = :productId)
             AND t.deletedAt IS NULL
             AND t.createdAt BETWEEN :start AND :end
       """)
@@ -27,6 +29,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       @Param("statusCode") String statusCode,
       @Param("transactionTypeCode") String transactionTypeCode,
       @Param("paymentMethodCode") String paymentMethodCode,
+      @Param("productId") UUID productId,
       @Param("start") LocalDateTime start,
       @Param("end") LocalDateTime end,
       Pageable pageable);
