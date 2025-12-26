@@ -82,7 +82,7 @@ logging:
     max-history: 10
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY:your-secret-key-should-be-at-least-256-bits-for-hs512}
+  secret-key: ${JWT_SECRET_KEY:default-dev-secret-key-change-me}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:2592000000} # 30 days
 
@@ -103,6 +103,7 @@ swagger:
 admin:
   email: ${ADMIN_EMAIL:admin@cajero.com}
   password: ${ADMIN_PASSWORD:admin123}
+  secret-key: ${ADMIN_SECRET_KEY:default-dev-secret-key-change-me}
 
 # Oracle Cloud Configuration
 oracle:
