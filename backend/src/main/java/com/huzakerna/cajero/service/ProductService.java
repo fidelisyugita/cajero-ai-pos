@@ -42,7 +42,6 @@ public class ProductService {
   private final IngredientRepository iRepo;
   private final MeasureUnitRepository muRepo;
   private final LogService logService;
-  private final jakarta.persistence.EntityManager entityManager;
 
   public ProductResponse addProduct(UUID storeId, ProductRequest request) {
     // Validate store exists
@@ -201,12 +200,7 @@ public class ProductService {
     changeTracker.compareAndTrack("commission", product.getCommission(), request.getCommission());
     changeTracker.compareAndTrack("discount", product.getDiscount(), request.getDiscount());
     changeTracker.compareAndTrack("tax", product.getTax(), request.getTax());
-    // GRANULAR INGREDIENT TRACKING
-    // We strictly identify added, removed, and modified ingredients to produce
-    // clean, readable logs.
-    // We map to ProductIngredientRequest DTOs first to avoid Hibernate Proxy issues
-    // (LazyInitializationException)
-    // that occur when the entity manager is cleared later.
+
     List<ProductIngredientRequest> newIngredients = request.getIngredients() != null
         ? new ArrayList<>(request.getIngredients())
         : new ArrayList<>();
@@ -251,68 +245,41 @@ public class ProductService {
       }
     }
 
-    // TODO: need to investigate why this is not working
-    // product.setName(request.getName());
+    // Update product fields
+    product.setName(request.getName());
+    product.setDescription(request.getDescription());
+    product.setBuyingPrice(request.getBuyingPrice());
+    product.setSellingPrice(request.getSellingPrice());
+    product.setStock(request.getStock());
+    product.setCategoryCode(request.getCategoryCode());
+    product.setMeasureUnit(measureUnit);
+    product.setImageUrl(request.getImageUrl());
+    product.setBarcode(request.getBarcode());
+    product.setCommission(request.getCommission());
+    product.setDiscount(request.getDiscount());
+    product.setTax(request.getTax());
 
-    // 1. Update basic fields using Direct JPQL
-    // Bypasses Hibernate 'dirty check' on collections entirely.
-    repo.updateProductDetails(
-        id,
-        storeId,
-        request.getName(),
-        request.getDescription(),
-        request.getBuyingPrice(),
-        request.getSellingPrice(),
-        request.getStock(),
-        request.getCategoryCode(),
-        measureUnit,
-        request.getImageUrl(),
-        request.getBarcode(),
-        request.getCommission(),
-        request.getDiscount(),
-        request.getTax());
-
-    // CRITICAL: Clear the entity manager to detach the product.
-    // Since we accessed product.getIngredients() above for tracking, Hibernate
-    // loaded them.
-    // If we don't detach 'product' now, Hibernate will hold onto that in-memory
-    // collection
-    // and crash when we delete the underlying rows via piRepo below (Shared
-    // References/Stale state error).
-    entityManager.clear();
-
-    // DIRECT REPOSITORY MANAGEMENT STRATEGY
-    // 2. Delete existing ingredients directly from DB
-    piRepo.deleteByProductId(id); // Use ID directly
-    piRepo.flush();
-
+    // Handle ingredients
+    Set<ProductIngredient> newIngredientSet = new HashSet<>();
     if (request.getIngredients() != null) {
-      // Re-fetch product reference for the new ingredients (since we detached the
-      // original)
-      // We use getReferenceById to avoid a SELECT, as we just need the FK
-      Product productRef = repo.getReferenceById(id);
-
-      for (ProductIngredientRequest ingredientReq : request.getIngredients()) {
-        Ingredient ingredient = iRepo.findById(ingredientReq.getIngredientId())
-            .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientReq.getIngredientId()));
+      for (ProductIngredientRequest ingReq : request.getIngredients()) {
+        Ingredient ingredient = iRepo.findById(ingReq.getIngredientId())
+            .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingReq.getIngredientId()));
 
         ProductIngredient pi = new ProductIngredient();
-        pi.setId(new ProductIngredientId(id, ingredient.getId())); // Explicit ID
-        pi.setProduct(productRef); // Set reference
+        pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
+        pi.setProduct(product);
         pi.setIngredient(ingredient);
-        pi.setQuantityNeeded(ingredientReq.getQuantityNeeded());
-
-        // Save directly via repository
-        piRepo.save(pi);
+        pi.setQuantityNeeded(ingReq.getQuantityNeeded());
+        newIngredientSet.add(pi);
       }
     }
 
-    // 3. Force flush of ingredient changes
-    piRepo.flush();
+    // Safely update ingredients collection
+    product.setIngredients(newIngredientSet);
 
-    // 4. Reload the full product entity from DB to return fresh state
-    product = repo.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Product not found after update"));
+    // Save product (Hibernate handles changes)
+    product = repo.save(product);
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {

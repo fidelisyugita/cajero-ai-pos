@@ -69,4 +69,13 @@ public class Product extends BaseEntity {
     private BigDecimal discount;
     private BigDecimal tax;
 
+    public void setIngredients(Set<ProductIngredient> ingredients) {
+        if (this.ingredients == null) {
+            this.ingredients = new HashSet<>();
+        }
+        this.ingredients.clear();
+        if (ingredients != null) {
+            this.ingredients.addAll(ingredients);
+        }
+    }
 }

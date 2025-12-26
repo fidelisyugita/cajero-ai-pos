@@ -255,20 +255,7 @@ public class TransactionService {
     changeTracker.compareAndTrack("transactionTypeCode", transaction.getTransactionTypeCode(),
         request.getTransactionTypeCode());
     changeTracker.compareAndTrack("description", transaction.getDescription(), request.getDescription());
-    // TODO: IMPLEMENT SAFE TRACKING
-    // The previous tracking implementation caused a LazyInitializationException.
-    // This happens because changeTracker holds references to Hibernate Proxy
-    // objects (transactionProducts).
-    // When the transaction finishes or the entity manager is cleared, these proxies
-    // become detached.
-    // If LogService tries to serialize them later, it crashes.
-    //
-    // FIX REQUIRED:
-    // 1. Map 'transactionProducts' to a simple DTO or List<Map<String, Object>>
-    // BEFORE passing to changeTracker.
-    // 2. Ensure new values from 'request' are also mapped or sorted identically.
-    // 3. Pass these safe, detached objects to changeTracker.compareAndTrack().
-
+    // TODO: transactionProducts
     // changeTracker.compareAndTrack("transactionProducts", oldProducts,
     // newProducts);
 

@@ -106,21 +106,7 @@ public class VariantService {
         request.isRequired());
     changeTracker.compareAndTrack("isMultiple", variant.isMultiple(),
         request.isMultiple());
-    // TODO: IMPLEMENT SAFE TRACKING
-    // The previous tracking implementation caused a LazyInitializationException.
-    // This happens because changeTracker holds references to Hibernate Proxy
-    // objects (options).
-    // When the transaction finishes or the entity manager is cleared, these proxies
-    // become detached.
-    // If LogService tries to serialize them later, it crashes.
-    //
-    // FIX REQUIRED:
-    // 1. Map 'options' to a simple DTO or List<Map<String, Object>> BEFORE passing
-    // to changeTracker.
-    // 2. Ensure new values from 'request' are also mapped or sorted identically to
-    // avoid false positives.
-    // 3. Pass these safe, detached objects to changeTracker.compareAndTrack().
-
+    // TODO: options
     // changeTracker.compareAndTrack("options", oldOptions, newOptions);
 
     // Update variant fields
