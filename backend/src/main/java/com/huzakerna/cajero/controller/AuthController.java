@@ -74,12 +74,6 @@ public class AuthController {
       return ResponseEntity.status(500).body("Authentication failed");
     }
   }
-  // TODO: Add register user
-  // @PostMapping("/signup")
-  // public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest) {
-  // userService.addUser(userRequest);
-  // return ResponseEntity.ok("User registered successfully!");
-  // }
 
   @PostMapping("/refreshtoken")
   public ResponseEntity<?> refreshtoken(@Valid @RequestBody com.huzakerna.cajero.dto.TokenRefreshRequest request) {

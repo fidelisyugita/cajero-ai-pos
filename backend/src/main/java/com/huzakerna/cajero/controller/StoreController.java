@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import com.huzakerna.cajero.model.User;
 import com.huzakerna.cajero.dto.store.CreateStoreWithUserRequest;
 import com.huzakerna.cajero.model.Store;
 import com.huzakerna.cajero.repository.StoreRepository;
