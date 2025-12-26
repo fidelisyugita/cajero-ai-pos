@@ -28,6 +28,15 @@ public class ChangeTracker {
     }
 
     // Compare non-null values
+    if (oldValue instanceof java.math.BigDecimal && newValue instanceof java.math.BigDecimal) {
+      if (((java.math.BigDecimal) oldValue).compareTo((java.math.BigDecimal) newValue) != 0) {
+        oldValues.put(fieldName, oldValue);
+        newValues.put(fieldName, newValue);
+        return true;
+      }
+      return false;
+    }
+
     if (!Objects.equals(oldValue, newValue)) {
       oldValues.put(fieldName, oldValue);
       newValues.put(fieldName, newValue);

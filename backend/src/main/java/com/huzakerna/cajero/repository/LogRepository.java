@@ -16,6 +16,7 @@ public interface LogRepository extends JpaRepository<Log, UUID> {
 
   List<Log> findByStoreId(UUID storeId);
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "createdBy" })
   @Query("""
           SELECT l FROM Log l
           WHERE l.storeId = :storeId

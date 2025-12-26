@@ -33,7 +33,6 @@ public class LogService {
           .type(type)
           .action(action)
           .details(jsonNode)
-          .createdAt(LocalDateTime.now())
           .build();
       repo.save(log);
     } catch (Exception e) {
