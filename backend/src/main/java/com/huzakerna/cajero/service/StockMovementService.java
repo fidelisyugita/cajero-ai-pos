@@ -87,6 +87,7 @@ public class StockMovementService {
     } else if (request.getProductId() != null) {
       updateProductStock(request);
       return request; // Currently product update not affect stock movement
+                      // since tracked in transaction
     }
 
     // Ensure storeId is set

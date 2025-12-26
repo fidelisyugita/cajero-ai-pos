@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "transactions")
@@ -21,7 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Transaction extends BaseEntity {
 
     @Column(name = "store_id")
@@ -54,10 +55,5 @@ public class Transaction extends BaseEntity {
 
     @Column(name = "customer_id")
     private UUID customerId;
-
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
 
 }

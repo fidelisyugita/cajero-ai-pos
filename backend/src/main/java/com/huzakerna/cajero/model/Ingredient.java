@@ -14,13 +14,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import lombok.experimental.SuperBuilder;
+
 @Entity
 @Table(name = "ingredients")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Ingredient extends BaseEntity {
 
     @Column(name = "store_id")
@@ -38,10 +40,5 @@ public class Ingredient extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "measure_unit_code")
     private MeasureUnit measureUnit;
-
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
 
 }

@@ -7,11 +7,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "stock_movements")
@@ -19,7 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class StockMovement extends BaseEntity {
 
     @Column(name = "store_id")
@@ -40,10 +42,5 @@ public class StockMovement extends BaseEntity {
 
     @Column(name = "quantity")
     private BigDecimal quantity;
-
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
 
 }

@@ -72,7 +72,6 @@ public class TransactionService {
             .build());
 
     // Add transaction products if any
-    // Add transaction products if any
     BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
     BigDecimal calculatedTotalTax = BigDecimal.ZERO;
     BigDecimal calculatedTotalCommission = BigDecimal.ZERO;

@@ -18,13 +18,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import lombok.experimental.SuperBuilder;
+
 @Entity
 @Table(name = "variants")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Variant extends BaseEntity {
 
     @Column(name = "store_id")
@@ -49,10 +51,5 @@ public class Variant extends BaseEntity {
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<VariantOption> options = new HashSet<>();
-
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
 
 }

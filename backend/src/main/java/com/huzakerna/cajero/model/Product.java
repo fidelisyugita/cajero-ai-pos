@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "products")
@@ -24,7 +25,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Product extends BaseEntity {
 
     // @ManyToOne(fetch = FetchType.LAZY)
@@ -74,10 +75,5 @@ public class Product extends BaseEntity {
     private BigDecimal commission;
     private BigDecimal discount;
     private BigDecimal tax;
-
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
 
 }
