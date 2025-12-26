@@ -19,12 +19,18 @@ import lombok.experimental.SuperBuilder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.EntityListeners;
+
 @MappedSuperclass
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
   @Id
   @UuidGenerator(style = UuidGenerator.Style.TIME) // Modern UUID generation
@@ -42,11 +48,13 @@ public abstract class BaseEntity {
   private LocalDateTime updatedAt;
 
   @JsonIgnore
+  @CreatedBy
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "created_by", updatable = false)
   private User createdBy;
 
   @JsonIgnore
+  @LastModifiedBy
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "updated_by")
   private User updatedBy;
