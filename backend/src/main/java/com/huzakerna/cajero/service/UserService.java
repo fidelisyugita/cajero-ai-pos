@@ -65,6 +65,39 @@ public class UserService {
                 .toList();
     }
 
+    public List<UserResponse> getUsersByStoreId(UUID storeId) {
+        return repo.findByStoreId(storeId).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Transactional
+    public UserResponse updateUser(UUID storeId, UUID userId, UserRequest request) {
+        User user = repo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (!user.getStoreId().equals(storeId)) {
+            throw new IllegalArgumentException("User does not belong to this store");
+        }
+
+        user.setName(request.getName());
+        user.setPhone(request.getPhone());
+        user.setRoleCode(request.getRoleCode());
+        user.setImageUrl(request.getImageUrl());
+        user.setAddress(request.getAddress());
+        user.setDescription(request.getDescription());
+        user.setBankAccount(request.getBankAccount());
+        user.setBankNo(request.getBankNo());
+        user.setDailySalary(request.getDailySalary());
+        user.setOvertimeRate(request.getOvertimeRate());
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPasswordHash(encoder.encode(request.getPassword()));
+        }
+
+        return mapToResponse(repo.save(user));
+    }
+
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())

@@ -59,8 +59,11 @@ public class ProductController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
-    return ResponseEntity.ok(service.getProductById(id));
+  public ResponseEntity<ProductResponse> getById(
+      @AuthenticationPrincipal UserDetailsImpl user,
+      @PathVariable UUID id) {
+    UUID storeId = user.getStoreId();
+    return ResponseEntity.ok(service.getProductById(storeId, id));
   }
 
   @PutMapping("/{id}")

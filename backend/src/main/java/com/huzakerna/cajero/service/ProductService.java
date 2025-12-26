@@ -120,6 +120,17 @@ public class ProductService {
     return mapToResponse(product);
   }
 
+  public ProductResponse getProductById(UUID storeId, UUID id) {
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
+    }
+
+    return mapToResponse(product);
+  }
+
   public Page<ProductResponse> getProducts(UUID storeId,
       int page,
       int size,

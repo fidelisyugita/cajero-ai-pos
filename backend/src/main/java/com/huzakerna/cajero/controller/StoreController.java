@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.huzakerna.cajero.model.User;
 import com.huzakerna.cajero.dto.store.CreateStoreWithUserRequest;
 import com.huzakerna.cajero.model.Store;
 import com.huzakerna.cajero.repository.StoreRepository;
@@ -33,18 +36,64 @@ public class StoreController {
 
     @GetMapping
     public ResponseEntity<List<Store>> getAll(
-            @RequestHeader("X-Admin-Secret") String secretKey) {
+            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey,
+            @AuthenticationPrincipal User user) {
 
-        if (!adminSecretKey.equals(secretKey)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (adminSecretKey.equals(secretKey)) {
+            return ResponseEntity.ok(repo.findAll());
         }
 
-        return ResponseEntity.ok(repo.findAll());
+        if (user != null) {
+            return ResponseEntity.ok(
+                    repo.findById(user.getStoreId())
+                            .map(List::of)
+                            .orElse(List.of()));
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Store>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(repo.findById(id));
+    public ResponseEntity<Store> getById(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey,
+            @AuthenticationPrincipal User user) {
+
+        boolean isAdmin = adminSecretKey.equals(secretKey);
+        boolean isOwner = user != null && user.getStoreId().equals(id);
+
+        if (isAdmin || isOwner) {
+            return repo.findById(id)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    @PutMapping
+    public ResponseEntity<Store> update(
+            @Valid @RequestBody Store store,
+            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey,
+            @AuthenticationPrincipal User user) {
+
+        // For update, typically we need an ID.
+        // Assuming the store object comes with an ID or we determine it from context.
+        // If store has no ID, we can't update.
+        // Let's assume store.getId() works if it extends BaseEntity which it does.
+
+        if (store.getId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        boolean isAdmin = adminSecretKey.equals(secretKey);
+        boolean isOwner = user != null && user.getStoreId().equals(store.getId());
+
+        if (isAdmin || isOwner) {
+            return ResponseEntity.ok(repo.save(store));
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping("/admin")
