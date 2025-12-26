@@ -26,8 +26,12 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
+          load: true  # Loads the image back to local Docker so you can run it
           tags: ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
           platforms: linux/amd64,linux/arm64
+          # === MAGIC PART: GHA Caching ===
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # ✅ Deploy to Oracle VM
       - name: Deploy to Oracle VM
