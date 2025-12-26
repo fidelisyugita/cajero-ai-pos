@@ -9,8 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.huzakerna.cajero.model.Product;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
+  @EntityGraph(attributePaths = { "createdBy", "updatedBy" })
   @Query("""
           SELECT p FROM Product p
           WHERE p.storeId = :storeId

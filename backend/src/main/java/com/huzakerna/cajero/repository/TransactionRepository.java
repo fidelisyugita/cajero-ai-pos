@@ -11,8 +11,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.huzakerna.cajero.model.Transaction;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
+  @EntityGraph(attributePaths = { "createdBy", "updatedBy" })
   @Query("""
           SELECT DISTINCT t FROM Transaction t
           LEFT JOIN t.transactionProducts tp

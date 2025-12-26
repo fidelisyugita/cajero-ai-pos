@@ -13,11 +13,15 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+
 @Repository
 public interface PettyCashRepository extends JpaRepository<PettyCash, UUID> {
 
+  @EntityGraph(attributePaths = { "createdBy", "updatedBy" })
   List<PettyCash> findByStoreId(UUID storeId);
 
+  @EntityGraph(attributePaths = { "createdBy", "updatedBy" })
   Page<PettyCash> findAllByStoreIdAndCreatedAtBetween(UUID storeId, LocalDateTime start, LocalDateTime end,
       Pageable pageable);
 
