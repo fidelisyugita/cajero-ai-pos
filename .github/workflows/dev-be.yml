@@ -26,7 +26,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          load: true  # Loads the image back to local Docker so you can run it
+          # load: true  <-- Removed because it conflicts with multi-platform builds
           tags: ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
           platforms: linux/amd64,linux/arm64
           provenance: false
