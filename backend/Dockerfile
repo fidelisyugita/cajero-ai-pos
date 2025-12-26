@@ -5,7 +5,9 @@ WORKDIR /app
 COPY build.gradle settings.gradle gradlew ./
 COPY gradle ./gradle
 RUN chmod +x gradlew
-RUN ./gradlew dependencies --no-daemon
+
+# We use "> /dev/null" to silence the log output while still downloading dependencies
+RUN ./gradlew dependencies --no-daemon > /dev/null 2>&1 || true
 
 COPY src ./src
 RUN ./gradlew build -x test --no-daemon
