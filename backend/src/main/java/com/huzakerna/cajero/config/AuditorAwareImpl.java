@@ -9,9 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.UUID;
 
-@Component
+@Component("auditorAware")
 @RequiredArgsConstructor
 public class AuditorAwareImpl implements AuditorAware<User> {
 
