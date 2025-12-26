@@ -29,6 +29,7 @@ jobs:
           load: true  # Loads the image back to local Docker so you can run it
           tags: ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
           platforms: linux/amd64,linux/arm64
+          provenance: false
           # === MAGIC PART: GHA Caching ===
           cache-from: type=gha
           cache-to: type=gha,mode=max
