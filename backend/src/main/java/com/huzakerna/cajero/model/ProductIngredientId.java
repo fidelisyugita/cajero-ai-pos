@@ -14,6 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@lombok.EqualsAndHashCode
 public class ProductIngredientId implements Serializable {
     @Column(name = "product_id")
     private UUID productId;

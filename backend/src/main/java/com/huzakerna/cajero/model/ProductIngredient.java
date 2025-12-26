@@ -22,9 +22,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@lombok.EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ProductIngredient {
 
     @EmbeddedId
+    @lombok.EqualsAndHashCode.Include
     private ProductIngredientId id;
 
     @ManyToOne(fetch = FetchType.LAZY)

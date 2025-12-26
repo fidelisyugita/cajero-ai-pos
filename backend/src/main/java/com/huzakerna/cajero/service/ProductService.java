@@ -216,25 +216,21 @@ public class ProductService {
     product.setDiscount(request.getDiscount());
     product.setTax(request.getTax());
 
-    // Remove existing product ingredients
-    // piRepo.deleteByProductId(id);
-    List<UUID> removedIngredientIds = product.getIngredients().stream()
-        .filter(pi -> request.getIngredients() == null || request.getIngredients().stream()
-            .noneMatch(ri -> ri.getIngredientId().equals(pi.getIngredient().getId())))
-        .map(pi -> pi.getIngredient().getId())
-        .toList();
+    // Manage Product Ingredients safely
+    product.getIngredients().clear();
 
-    removeIngredientFromProduct(product.getId(), removedIngredientIds);
-
-    // Add product ingredients if any
     if (request.getIngredients() != null) {
-      for (ProductIngredientRequest ingredient : request.getIngredients()) {
-        if (product.getIngredients().stream()
-            .noneMatch(pi -> pi.getIngredient().getId().equals(ingredient.getIngredientId()))) {
-          addIngredientToProduct(product.getId(),
-              ingredient.getIngredientId(),
-              ingredient.getQuantityNeeded());
-        }
+      for (ProductIngredientRequest ingredientReq : request.getIngredients()) {
+        Ingredient ingredient = iRepo.findById(ingredientReq.getIngredientId())
+            .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientReq.getIngredientId()));
+
+        ProductIngredient pi = new ProductIngredient();
+        pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
+        pi.setProduct(product);
+        pi.setIngredient(ingredient);
+        pi.setQuantityNeeded(ingredientReq.getQuantityNeeded());
+
+        product.getIngredients().add(pi);
       }
     }
 
