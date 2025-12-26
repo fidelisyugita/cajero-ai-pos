@@ -66,6 +66,7 @@ public class SecurityConfig {
         .securityMatcher("/api/**")
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/signin").permitAll()
+            .requestMatchers("/api/store/admin").permitAll()
             .requestMatchers("/api/public/**").permitAll()
             .requestMatchers("/api/image/**").permitAll()
             .requestMatchers("/actuator/health").permitAll()
