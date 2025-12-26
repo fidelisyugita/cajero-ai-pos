@@ -25,9 +25,9 @@ public class StorageService {
   // private static final DateTimeFormatter DATE_FORMAT =
   // DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-  public String uploadImage(MultipartFile file, String prefix, UUID storeId) {
+  public String uploadImage(MultipartFile file, String prefix, UUID storeId, String id) {
     try {
-      String filename = generateUniqueFilename(file.getOriginalFilename(), prefix, storeId);
+      String filename = generateUniqueFilename(file.getOriginalFilename(), prefix, storeId, id);
 
       PutObjectRequest request = PutObjectRequest.builder()
           .bucketName(config.getBucketName())
@@ -70,12 +70,12 @@ public class StorageService {
     }
   }
 
-  private String generateUniqueFilename(String originalFilename, String prefix, UUID storeId) {
+  private String generateUniqueFilename(String originalFilename, String prefix, UUID storeId, String id) {
     String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
     return String.format("%s/%s/%s%s",
         prefix,
         storeId.toString(),
-        UUID.randomUUID().toString(),
+        id != null ? id : UUID.randomUUID().toString(),
         extension);
   }
 }
