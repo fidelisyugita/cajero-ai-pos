@@ -24,6 +24,13 @@ public class UserService {
 
     @Transactional
     public UserResponse addUser(UUID storeId, UserRequest request) {
+        if (request.getRoleCode() == null || request.getRoleCode().isBlank()) {
+            throw new IllegalArgumentException("Role Code is required");
+        }
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
         if (repo.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException(request.getEmail());
         }
@@ -82,7 +89,9 @@ public class UserService {
 
         user.setName(request.getName());
         user.setPhone(request.getPhone());
-        user.setRoleCode(request.getRoleCode());
+        if (request.getRoleCode() != null) {
+            user.setRoleCode(request.getRoleCode());
+        }
         user.setImageUrl(request.getImageUrl());
         user.setAddress(request.getAddress());
         user.setDescription(request.getDescription());

@@ -20,7 +20,6 @@ public class UserRequest {
     @Size(max = 100)
     private String name;
 
-    @NotNull(message = "Role Code is required")
     private String roleCode;
 
     @NotBlank
@@ -32,7 +31,6 @@ public class UserRequest {
     @Size(max = 20)
     private String phone;
 
-    @NotBlank(message = "Password is required")
     @Size(min = 8, max = 40, message = "Password must be between 8 and 40 characters")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Password must contain at least one digit, one lowercase and one uppercase")
     private String password; // Will be hashed
