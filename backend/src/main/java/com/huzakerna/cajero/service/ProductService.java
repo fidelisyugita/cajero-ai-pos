@@ -224,13 +224,13 @@ public class ProductService {
         ProductIngredientRequest oldIng = oldMap.get(newIng.getIngredientId());
         // Custom equals() in DTO handles BigDecimal scale comparison (e.g. 19.00 vs 19)
         if (!oldIng.equals(newIng)) {
-          changeTracker.compareAndTrack("ingredient_" + newIng.getIngredientId() + "_quantity",
+          changeTracker.compareAndTrack("ingredient," + newIng.getIngredientId(),
               oldIng.getQuantityNeeded(),
               newIng.getQuantityNeeded());
         }
       } else {
         // Ingredient is new
-        changeTracker.compareAndTrack("ingredient_added_" + newIng.getIngredientId(),
+        changeTracker.compareAndTrack("ingredient," + newIng.getIngredientId(),
             null,
             newIng.getQuantityNeeded());
       }
@@ -239,7 +239,7 @@ public class ProductService {
     // 2. Track Removed Ingredients
     for (UUID oldId : oldMap.keySet()) {
       if (!newMap.containsKey(oldId)) {
-        changeTracker.compareAndTrack("ingredient_removed_" + oldId,
+        changeTracker.compareAndTrack("ingredient," + oldId,
             oldMap.get(oldId).getQuantityNeeded(),
             null);
       }

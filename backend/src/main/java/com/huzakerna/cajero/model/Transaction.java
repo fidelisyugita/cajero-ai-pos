@@ -52,4 +52,13 @@ public class Transaction extends BaseEntity {
     @Column(name = "customer_id")
     private UUID customerId;
 
+    public void setTransactionProducts(List<TransactionProduct> transactionProducts) {
+        if (this.transactionProducts == null) {
+            this.transactionProducts = new java.util.ArrayList<>();
+        }
+        this.transactionProducts.clear();
+        if (transactionProducts != null) {
+            this.transactionProducts.addAll(transactionProducts);
+        }
+    }
 }

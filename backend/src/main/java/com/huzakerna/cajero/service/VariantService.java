@@ -106,8 +106,33 @@ public class VariantService {
         request.isRequired());
     changeTracker.compareAndTrack("isMultiple", variant.isMultiple(),
         request.isMultiple());
-    // TODO: options
-    // changeTracker.compareAndTrack("options", oldOptions, newOptions);
+    // Track Variant Options changes
+    if (request.getOptions() != null) {
+      Map<UUID, VariantOption> oldMap = variant.getOptions().stream()
+          .collect(java.util.stream.Collectors.toMap(VariantOption::getId, o -> o));
+
+      Set<UUID> newIds = new HashSet<>();
+
+      for (VariantOptionRequest newOpt : request.getOptions()) {
+        if (newOpt.getId() != null && oldMap.containsKey(newOpt.getId())) {
+          newIds.add(newOpt.getId());
+          VariantOption oldOpt = oldMap.get(newOpt.getId());
+          changeTracker.compareAndTrack("option_name," + oldOpt.getId(), oldOpt.getName(), newOpt.getName());
+          changeTracker.compareAndTrack("option_priceAdjustment," + oldOpt.getId(), oldOpt.getPriceAdjusment(),
+              newOpt.getPriceAdjusment());
+          changeTracker.compareAndTrack("option_stock," + oldOpt.getId(), oldOpt.getStock(), newOpt.getStock());
+        } else {
+          // Added
+          changeTracker.compareAndTrack("option_added," + newOpt.getName(), null, newOpt.getPriceAdjusment());
+        }
+      }
+
+      for (UUID oldId : oldMap.keySet()) {
+        if (!newIds.contains(oldId)) {
+          changeTracker.compareAndTrack("option_removed," + oldId, oldMap.get(oldId).getName(), null);
+        }
+      }
+    }
 
     // Update variant fields
     variant.setName(request.getName());
@@ -115,86 +140,31 @@ public class VariantService {
     variant.setRequired(request.isRequired());
     variant.setMultiple(request.isMultiple());
 
-    // Use collection modification to handle options safely (Orphan Removal)
-    variant.getOptions().clear();
-
-    if (request.getOptions() != null) {
-      for (VariantOptionRequest optionReq : request.getOptions()) {
-        // If ID is provided, try to find existing (though we just cleared list, so this
-        // is logically just "adding back")
-        // But technically in orphan removal pattern we just rebuild the list.
-        // However, to preserve IDs of existing options (if they match), we can try to
-        // reuse them if we hadn't cleared.
-        // Since we cleared, Hibernate treats them as Removed. If we add them back with
-        // SAME ID, Hibernate might Merge.
-        // A safer approach for simple child lists is to just create new instances or
-        // merge.
-        // To keep it simple and robust against "shared references": rebuild.
-
-        VariantOption newOption = new VariantOption();
-        // if (optionReq.getId() != null) newOption.setId(optionReq.getId()); //
-        // Optional: try to keep ID? Risk of Detached Entity error.
-        // Safest for "Edit" where exact ID match isn't critical for foreign keys: Let
-        // it generate new ID or careful merge.
-        // Given VariantOptions are usually simple children, re-creating is often
-        // acceptable unless historical data links to specific Option IDs.
-        // Looking at VariantOption, it has Generated ID.
-
-        // Let's try to find if it existed to copy ID, but we must use a fresh instance
-        // attached to parent
-        if (optionReq.getId() != null) {
-          // Valid update of existing option?
-          // Since we cleared `variant.getOptions()`, they are scheduled for deletion.
-          // If we want to UPDATE instead of DELETE+INSERT, we should not have cleared
-          // ALL.
-          // We should have cleared only those NOT in the request.
-        }
-      }
-      // RE-STRATEGY: Do not Clear All blindly if we want to update.
-      // 1. Identify IDs to Keep.
-      // 2. Remove those NOT in Keep list.
-      // 3. Update those IN Keep list.
-      // 4. Add NEW ones.
-    }
-
-    // Correct Implementation of Retain/Update/Add pattern:
-    Set<UUID> keepIds = new HashSet<>();
-    if (request.getOptions() != null) {
-      request.getOptions().stream()
-          .filter(o -> o.getId() != null)
-          .forEach(o -> keepIds.add(o.getId()));
-    }
-
-    // 1. Remove options that are missing from request
-    variant.getOptions().removeIf(o -> !keepIds.contains(o.getId()));
-
-    // 2. Update existing and Add new
+    // Prepare new options set
+    Set<VariantOption> newOptions = new HashSet<>();
     if (request.getOptions() != null) {
       for (VariantOptionRequest req : request.getOptions()) {
+        VariantOption option = VariantOption.builder()
+            .variant(variant)
+            .name(req.getName())
+            .priceAdjusment(req.getPriceAdjusment())
+            .stock(req.getStock())
+            .build();
+
+        // If ID is provided, maintain it to update existing record instead of
+        // delete-insert
         if (req.getId() != null) {
-          // Update existing
-          variant.getOptions().stream()
-              .filter(o -> o.getId().equals(req.getId()))
-              .findFirst()
-              .ifPresent(o -> {
-                o.setName(req.getName());
-                o.setPriceAdjusment(req.getPriceAdjusment());
-                o.setStock(req.getStock());
-              });
-        } else {
-          // Add new
-          VariantOption newOption = VariantOption.builder()
-              .variant(variant)
-              .name(req.getName())
-              .priceAdjusment(req.getPriceAdjusment())
-              .stock(req.getStock())
-              .build();
-          variant.getOptions().add(newOption);
+          option.setId(req.getId());
         }
+
+        newOptions.add(option);
       }
     }
 
-    // variant = repo.save(variant); // Redundant for managed entity
+    // Safely update options collection
+    variant.setOptions(newOptions);
+
+    variant = repo.save(variant);
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {

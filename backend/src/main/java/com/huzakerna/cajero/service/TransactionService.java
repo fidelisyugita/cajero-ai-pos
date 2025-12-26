@@ -255,9 +255,34 @@ public class TransactionService {
     changeTracker.compareAndTrack("transactionTypeCode", transaction.getTransactionTypeCode(),
         request.getTransactionTypeCode());
     changeTracker.compareAndTrack("description", transaction.getDescription(), request.getDescription());
-    // TODO: transactionProducts
-    // changeTracker.compareAndTrack("transactionProducts", oldProducts,
-    // newProducts);
+    // Track Transaction Products changes
+    if (request.getTransactionProducts() != null) {
+      Map<UUID, BigDecimal> oldMap = transaction.getTransactionProducts().stream()
+          .collect(java.util.stream.Collectors.toMap(tp -> tp.getProduct().getId(), TransactionProduct::getQuantity));
+
+      Map<UUID, BigDecimal> newMap = request.getTransactionProducts().stream()
+          .collect(java.util.stream.Collectors.toMap(TransactionProductRequest::getProductId,
+              TransactionProductRequest::getQuantity));
+
+      // 1. Modified & Added
+      for (TransactionProductRequest newTp : request.getTransactionProducts()) {
+        BigDecimal oldQty = oldMap.get(newTp.getProductId());
+        if (oldMap.containsKey(newTp.getProductId())) {
+          if (oldQty.compareTo(newTp.getQuantity()) != 0) {
+            changeTracker.compareAndTrack("product_quantity," + newTp.getProductId(), oldQty, newTp.getQuantity());
+          }
+        } else {
+          changeTracker.compareAndTrack("product_quantity," + newTp.getProductId(), null, newTp.getQuantity());
+        }
+      }
+
+      // 2. Removed
+      for (UUID oldProdId : oldMap.keySet()) {
+        if (!newMap.containsKey(oldProdId)) {
+          changeTracker.compareAndTrack("product_quantity," + oldProdId, oldMap.get(oldProdId), null);
+        }
+      }
+    }
 
     // Update transaction fields
     transaction.setStatusCode(request.getStatusCode());
@@ -268,10 +293,8 @@ public class TransactionService {
     // transaction.setTotalDiscount(request.getTotalDiscount());
     // transaction.setTotalTax(request.getTotalTax());
 
-    // Remove existing transaction products via collection clear
-    transaction.getTransactionProducts().clear();
-
-    // Add new transaction products if any
+    // Prepare new transaction products list
+    List<TransactionProduct> newTransactionProducts = new ArrayList<>();
     BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
     BigDecimal calculatedTotalTax = BigDecimal.ZERO;
     BigDecimal calculatedTotalCommission = BigDecimal.ZERO;
@@ -300,10 +323,10 @@ public class TransactionService {
         tp.setTax(product.getTax() != null ? product.getTax()
             : (p.getTax() != null ? p.getTax().multiply(product.getQuantity()) : BigDecimal.ZERO));
 
-        // Add to collection
-        transaction.getTransactionProducts().add(tp);
+        // Add to list
+        newTransactionProducts.add(tp);
 
-        // Aggregate totals immediately as we iterate through new products
+        // Aggregate totals
         calculatedTotalDiscount = calculatedTotalDiscount.add(tp.getDiscount());
         calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
         calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
@@ -312,28 +335,17 @@ public class TransactionService {
             .subtract(tp.getDiscount())
             .add(tp.getTax());
         calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
-
-        // Handle Stock Movement (Sale)
-        // Since we are clearing and re-adding, strictly speaking we should reverse old
-        // stock movements and add new ones
-        // But for this simple implementation we assume this logic needs revisit or is
-        // handled elsewhere if transaction is edited
-        // For now preventing double deduction or implementing stock correction on edit
-        // is complex;
-        // leaving standard stock logic out of this specific block unless requested, or
-        // assuming "update" logic re-applies it?
-        // CAUTION: The original code logic for stock movement on EDIT wasn't explicitly
-        // shown being reversed.
-        // Keeping it simple to fix the 500 first.
       }
     }
 
+    // Set updated products and totals
+    transaction.setTransactionProducts(newTransactionProducts);
     transaction.setTotalDiscount(calculatedTotalDiscount);
     transaction.setTotalTax(calculatedTotalTax);
     transaction.setTotalCommission(calculatedTotalCommission);
     transaction.setTotalPrice(calculatedTotalPrice);
 
-    // transaction = repo.save(transaction); // Redundant for managed entity
+    transaction = repo.save(transaction);
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {

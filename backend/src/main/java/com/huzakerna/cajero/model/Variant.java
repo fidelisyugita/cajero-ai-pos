@@ -49,4 +49,13 @@ public class Variant extends BaseEntity {
     @Builder.Default
     private Set<VariantOption> options = new HashSet<>();
 
+    public void setOptions(Set<VariantOption> options) {
+        if (this.options == null) {
+            this.options = new HashSet<>();
+        }
+        this.options.clear();
+        if (options != null) {
+            this.options.addAll(options);
+        }
+    }
 }
