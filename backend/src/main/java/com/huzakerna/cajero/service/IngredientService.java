@@ -154,8 +154,10 @@ public class IngredientService {
         .stock(ingredient.getStock())
         .measureUnitCode(ingredient.getMeasureUnit().getCode())
         .measureUnitName(ingredient.getMeasureUnit().getName())
-        .createdBy(ingredient.getCreatedBy())
-        .updatedBy(ingredient.getUpdatedBy())
+        .createdBy(ingredient.getCreatedBy() != null ? ingredient.getCreatedBy().getId() : null)
+        .createdByName(ingredient.getCreatedBy() != null ? ingredient.getCreatedBy().getName() : null)
+        .updatedBy(ingredient.getUpdatedBy() != null ? ingredient.getUpdatedBy().getId() : null)
+        .updatedByName(ingredient.getUpdatedBy() != null ? ingredient.getUpdatedBy().getName() : null)
         .createdAt(ingredient.getCreatedAt())
         .updatedAt(ingredient.getUpdatedAt())
         .build();

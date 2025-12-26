@@ -121,7 +121,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
         u.name,
         SUM(t.totalCommission)
       FROM Transaction t
-      JOIN User u ON t.createdBy = u.id
+      JOIN t.createdBy u
       WHERE t.storeId = :storeId
         AND t.statusCode = 'COMPLETED'
         AND t.createdAt BETWEEN :start AND :end
@@ -194,7 +194,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
         u.name,
         SUM(t.totalCommission)
       FROM Transaction t
-      JOIN User u ON t.createdBy = u.id
+      JOIN t.createdBy u
       WHERE t.storeId = :storeId
         AND t.statusCode = 'COMPLETED'
         AND t.createdAt BETWEEN :start AND :end

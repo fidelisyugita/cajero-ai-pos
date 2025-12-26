@@ -3,7 +3,6 @@ package com.huzakerna.cajero.model;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,12 +26,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class Product extends BaseEntity {
-
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "store_id")
-    // private Store store;
-    @Column(name = "store_id")
-    private UUID storeId;
 
     @Column(name = "category_code")
     private String categoryCode;

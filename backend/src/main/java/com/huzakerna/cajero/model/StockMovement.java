@@ -7,9 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,12 +22,12 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class StockMovement extends BaseEntity {
 
-    @Column(name = "store_id")
-    private UUID storeId;
     @Column(name = "ingredient_id")
     private UUID ingredientId;
+
     @Column(name = "product_id")
     private UUID productId;
+
     @Column(name = "variant_id")
     private UUID variantId;
 

@@ -1,11 +1,11 @@
 package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,11 +14,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class TransactionResponse {
-
-    private UUID id;
-    private UUID storeId;
+@SuperBuilder
+public class TransactionResponse extends BaseResponse {
 
     private BigDecimal totalCommission;
     private BigDecimal totalDiscount;
@@ -36,11 +33,5 @@ public class TransactionResponse {
     private boolean isIn;
 
     private UUID customerId;
-
-    private UUID createdBy;
-    private UUID updatedBy;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
 }

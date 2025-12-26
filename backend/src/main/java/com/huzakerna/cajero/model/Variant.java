@@ -29,9 +29,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Variant extends BaseEntity {
 
-    @Column(name = "store_id")
-    private UUID storeId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
