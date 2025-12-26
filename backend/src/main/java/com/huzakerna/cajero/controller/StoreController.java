@@ -36,6 +36,30 @@ public class StoreController {
     @Value("${admin.secret-key}")
     private String adminSecretKey;
 
+    @GetMapping
+    public ResponseEntity<List<Store>> getAll(
+            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey,
+            @AuthenticationPrincipal UserDetailsImpl user) {
+
+        log.info("StoreController.getAll called");
+
+        if (adminSecretKey.equals(secretKey)) {
+            log.info("Admin access granted");
+            return ResponseEntity.ok(repo.findAll());
+        }
+
+        if (user.getStoreId() != null) {
+            log.info("User access granted for store: {}", user.getStoreId());
+            return ResponseEntity.ok(
+                    repo.findById(user.getStoreId())
+                            .map(List::of)
+                            .orElse(List.of()));
+        }
+
+        log.warn("Access denied: User is null");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Store> getById(
             @PathVariable UUID id,
@@ -85,21 +109,6 @@ public class StoreController {
         }
 
         log.warn("Update access denied: isAdmin={}, isOwner={}", isAdmin, isOwner);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Store>> getAll(
-            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey) {
-
-        log.info("StoreController.getAll called");
-
-        if (adminSecretKey.equals(secretKey)) {
-            log.info("Admin access granted");
-            return ResponseEntity.ok(repo.findAll());
-        }
-
-        log.warn("Access denied: User is null");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
