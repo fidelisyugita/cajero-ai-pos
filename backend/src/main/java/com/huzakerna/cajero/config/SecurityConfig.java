@@ -1,5 +1,6 @@
 package com.huzakerna.cajero.config;
 
+import com.huzakerna.cajero.filter.AdminSecretAuthFilter;
 import com.huzakerna.cajero.filter.JwtAuthFilter;
 import com.huzakerna.cajero.security.UserDetailsServiceImpl;
 import com.huzakerna.cajero.security.AuthEntryPointJwt;
@@ -58,7 +59,8 @@ public class SecurityConfig {
 
   @Bean
   @Order(2)
-  public SecurityFilterChain apiFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+  public SecurityFilterChain apiFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter,
+      AdminSecretAuthFilter adminSecretAuthFilter) throws Exception {
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(AbstractHttpConfigurer::disable)
@@ -66,17 +68,18 @@ public class SecurityConfig {
         .securityMatcher("/api/**")
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/signin").permitAll()
-            .requestMatchers("/api/store/admin").permitAll()
             .requestMatchers("/api/public/**").permitAll()
             .requestMatchers("/api/image/**").permitAll()
             .requestMatchers("/actuator/health").permitAll()
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            .requestMatchers("/api/owner/**").hasRole("OWNER")
-            .requestMatchers("/api/user/**").hasRole("OWNER")
+            // .requestMatchers("/api/store/**").permitAll()
+            // .requestMatchers("/api/user/**").permitAll()
+            // .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            // .requestMatchers("/api/owner/**").hasRole("OWNER")
             .requestMatchers("/api/**").authenticated())
         .userDetailsService(userDetailsService)
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(adminSecretAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

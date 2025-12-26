@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.huzakerna.cajero.dto.store.CreateStoreWithUserRequest;
 import com.huzakerna.cajero.model.Store;
@@ -34,30 +35,6 @@ public class StoreController {
 
     @Value("${admin.secret-key}")
     private String adminSecretKey;
-
-    @GetMapping
-    public ResponseEntity<List<Store>> getAll(
-            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey,
-            @AuthenticationPrincipal UserDetailsImpl user) {
-
-        log.info("StoreController.getAll called");
-
-        if (adminSecretKey.equals(secretKey)) {
-            log.info("Admin access granted");
-            return ResponseEntity.ok(repo.findAll());
-        }
-
-        if (user.getStoreId() != null) {
-            log.info("User access granted for store: {}", user.getStoreId());
-            return ResponseEntity.ok(
-                    repo.findById(user.getStoreId())
-                            .map(List::of)
-                            .orElse(List.of()));
-        }
-
-        log.warn("Access denied: User is null");
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Store> getById(
@@ -81,6 +58,7 @@ public class StoreController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
     public ResponseEntity<Store> update(
             @Valid @RequestBody Store store,
             @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey,
@@ -107,6 +85,21 @@ public class StoreController {
         }
 
         log.warn("Update access denied: isAdmin={}, isOwner={}", isAdmin, isOwner);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Store>> getAll(
+            @RequestHeader(value = "X-Admin-Secret", required = false) String secretKey) {
+
+        log.info("StoreController.getAll called");
+
+        if (adminSecretKey.equals(secretKey)) {
+            log.info("Admin access granted");
+            return ResponseEntity.ok(repo.findAll());
+        }
+
+        log.warn("Access denied: User is null");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 

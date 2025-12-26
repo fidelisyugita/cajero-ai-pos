@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.huzakerna.cajero.dto.UserRequest;
 import com.huzakerna.cajero.dto.UserResponse;
@@ -95,6 +96,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
     public UserResponse add(@AuthenticationPrincipal UserDetailsImpl user, @Valid @RequestBody UserRequest request) {
 
         UUID storeId = user.getStoreId();
