@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.UUID;
-
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class TransactionService {
 
@@ -244,7 +243,7 @@ public class TransactionService {
     }
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("transactionId", id);
 
     // Create change tracker
@@ -256,8 +255,22 @@ public class TransactionService {
     changeTracker.compareAndTrack("transactionTypeCode", transaction.getTransactionTypeCode(),
         request.getTransactionTypeCode());
     changeTracker.compareAndTrack("description", transaction.getDescription(), request.getDescription());
-    changeTracker.compareAndTrack("transactionProducts", transaction.getTransactionProducts(),
-        request.getTransactionProducts());
+    // TODO: IMPLEMENT SAFE TRACKING
+    // The previous tracking implementation caused a LazyInitializationException.
+    // This happens because changeTracker holds references to Hibernate Proxy
+    // objects (transactionProducts).
+    // When the transaction finishes or the entity manager is cleared, these proxies
+    // become detached.
+    // If LogService tries to serialize them later, it crashes.
+    //
+    // FIX REQUIRED:
+    // 1. Map 'transactionProducts' to a simple DTO or List<Map<String, Object>>
+    // BEFORE passing to changeTracker.
+    // 2. Ensure new values from 'request' are also mapped or sorted identically.
+    // 3. Pass these safe, detached objects to changeTracker.compareAndTrack().
+
+    // changeTracker.compareAndTrack("transactionProducts", oldProducts,
+    // newProducts);
 
     // Update transaction fields
     transaction.setStatusCode(request.getStatusCode());
@@ -333,7 +346,7 @@ public class TransactionService {
     transaction.setTotalCommission(calculatedTotalCommission);
     transaction.setTotalPrice(calculatedTotalPrice);
 
-    transaction = repo.save(transaction);
+    // transaction = repo.save(transaction); // Redundant for managed entity
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {

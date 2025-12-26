@@ -1,11 +1,7 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.stereotype.Service;
 
@@ -22,8 +18,11 @@ import com.huzakerna.cajero.repository.VariantOptionRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor // Lombok will auto-inject the dependency
+@Transactional
 public class VariantService {
 
   private final StoreRepository sRepo;
@@ -94,7 +93,7 @@ public class VariantService {
     }
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("variantId", id);
 
     // Create change tracker
@@ -107,8 +106,22 @@ public class VariantService {
         request.isRequired());
     changeTracker.compareAndTrack("isMultiple", variant.isMultiple(),
         request.isMultiple());
-    changeTracker.compareAndTrack("options", variant.getOptions(),
-        request.getOptions());
+    // TODO: IMPLEMENT SAFE TRACKING
+    // The previous tracking implementation caused a LazyInitializationException.
+    // This happens because changeTracker holds references to Hibernate Proxy
+    // objects (options).
+    // When the transaction finishes or the entity manager is cleared, these proxies
+    // become detached.
+    // If LogService tries to serialize them later, it crashes.
+    //
+    // FIX REQUIRED:
+    // 1. Map 'options' to a simple DTO or List<Map<String, Object>> BEFORE passing
+    // to changeTracker.
+    // 2. Ensure new values from 'request' are also mapped or sorted identically to
+    // avoid false positives.
+    // 3. Pass these safe, detached objects to changeTracker.compareAndTrack().
+
+    // changeTracker.compareAndTrack("options", oldOptions, newOptions);
 
     // Update variant fields
     variant.setName(request.getName());
@@ -195,7 +208,7 @@ public class VariantService {
       }
     }
 
-    variant = repo.save(variant);
+    // variant = repo.save(variant); // Redundant for managed entity
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {

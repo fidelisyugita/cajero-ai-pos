@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,10 +28,12 @@ import com.huzakerna.cajero.repository.StoreRepository;
 
 import com.huzakerna.cajero.util.ChangeTracker;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor // Lombok will auto-inject the dependency
+@Transactional
 public class ProductService {
 
   private final StoreRepository sRepo;
@@ -42,6 +42,7 @@ public class ProductService {
   private final IngredientRepository iRepo;
   private final MeasureUnitRepository muRepo;
   private final LogService logService;
+  private final jakarta.persistence.EntityManager entityManager;
 
   public ProductResponse addProduct(UUID storeId, ProductRequest request) {
     // Validate store exists
@@ -200,41 +201,118 @@ public class ProductService {
     changeTracker.compareAndTrack("commission", product.getCommission(), request.getCommission());
     changeTracker.compareAndTrack("discount", product.getDiscount(), request.getDiscount());
     changeTracker.compareAndTrack("tax", product.getTax(), request.getTax());
-    changeTracker.compareAndTrack("ingredients", product.getIngredients(), request.getIngredients());
+    // GRANULAR INGREDIENT TRACKING
+    // We strictly identify added, removed, and modified ingredients to produce
+    // clean, readable logs.
+    // We map to ProductIngredientRequest DTOs first to avoid Hibernate Proxy issues
+    // (LazyInitializationException)
+    // that occur when the entity manager is cleared later.
+    List<ProductIngredientRequest> newIngredients = request.getIngredients() != null
+        ? new ArrayList<>(request.getIngredients())
+        : new ArrayList<>();
 
-    // Update product fields
-    product.setName(request.getName());
-    product.setDescription(request.getDescription());
-    product.setBuyingPrice(request.getBuyingPrice());
-    product.setSellingPrice(request.getSellingPrice());
-    product.setStock(request.getStock());
-    product.setCategoryCode(request.getCategoryCode());
-    product.setMeasureUnit(measureUnit);
-    product.setImageUrl(request.getImageUrl());
-    product.setBarcode(request.getBarcode());
-    product.setCommission(request.getCommission());
-    product.setDiscount(request.getDiscount());
-    product.setTax(request.getTax());
+    // Create maps for O(1) lookups to efficiently compare old vs new state
+    Map<UUID, ProductIngredientRequest> oldMap = product.getIngredients().stream()
+        .collect(java.util.stream.Collectors.toMap(
+            pi -> pi.getIngredient().getId(),
+            pi -> ProductIngredientRequest.builder()
+                .ingredientId(pi.getIngredient().getId())
+                .quantityNeeded(pi.getQuantityNeeded())
+                .build()));
 
-    // Manage Product Ingredients safely
-    product.getIngredients().clear();
+    Map<UUID, ProductIngredientRequest> newMap = newIngredients.stream()
+        .collect(java.util.stream.Collectors.toMap(ProductIngredientRequest::getIngredientId, i -> i));
+
+    // 1. Track Modified & Added Ingredients
+    for (ProductIngredientRequest newIng : newIngredients) {
+      if (oldMap.containsKey(newIng.getIngredientId())) {
+        // Ingredient exists in both -> Check if quantity changed
+        ProductIngredientRequest oldIng = oldMap.get(newIng.getIngredientId());
+        // Custom equals() in DTO handles BigDecimal scale comparison (e.g. 19.00 vs 19)
+        if (!oldIng.equals(newIng)) {
+          changeTracker.compareAndTrack("ingredient_" + newIng.getIngredientId() + "_quantity",
+              oldIng.getQuantityNeeded(),
+              newIng.getQuantityNeeded());
+        }
+      } else {
+        // Ingredient is new
+        changeTracker.compareAndTrack("ingredient_added_" + newIng.getIngredientId(),
+            null,
+            newIng.getQuantityNeeded());
+      }
+    }
+
+    // 2. Track Removed Ingredients
+    for (UUID oldId : oldMap.keySet()) {
+      if (!newMap.containsKey(oldId)) {
+        changeTracker.compareAndTrack("ingredient_removed_" + oldId,
+            oldMap.get(oldId).getQuantityNeeded(),
+            null);
+      }
+    }
+
+    // TODO: need to investigate why this is not working
+    // product.setName(request.getName());
+
+    // 1. Update basic fields using Direct JPQL
+    // Bypasses Hibernate 'dirty check' on collections entirely.
+    repo.updateProductDetails(
+        id,
+        storeId,
+        request.getName(),
+        request.getDescription(),
+        request.getBuyingPrice(),
+        request.getSellingPrice(),
+        request.getStock(),
+        request.getCategoryCode(),
+        measureUnit,
+        request.getImageUrl(),
+        request.getBarcode(),
+        request.getCommission(),
+        request.getDiscount(),
+        request.getTax());
+
+    // CRITICAL: Clear the entity manager to detach the product.
+    // Since we accessed product.getIngredients() above for tracking, Hibernate
+    // loaded them.
+    // If we don't detach 'product' now, Hibernate will hold onto that in-memory
+    // collection
+    // and crash when we delete the underlying rows via piRepo below (Shared
+    // References/Stale state error).
+    entityManager.clear();
+
+    // DIRECT REPOSITORY MANAGEMENT STRATEGY
+    // 2. Delete existing ingredients directly from DB
+    piRepo.deleteByProductId(id); // Use ID directly
+    piRepo.flush();
 
     if (request.getIngredients() != null) {
+      // Re-fetch product reference for the new ingredients (since we detached the
+      // original)
+      // We use getReferenceById to avoid a SELECT, as we just need the FK
+      Product productRef = repo.getReferenceById(id);
+
       for (ProductIngredientRequest ingredientReq : request.getIngredients()) {
         Ingredient ingredient = iRepo.findById(ingredientReq.getIngredientId())
             .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingredientReq.getIngredientId()));
 
         ProductIngredient pi = new ProductIngredient();
-        pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
-        pi.setProduct(product);
+        pi.setId(new ProductIngredientId(id, ingredient.getId())); // Explicit ID
+        pi.setProduct(productRef); // Set reference
         pi.setIngredient(ingredient);
         pi.setQuantityNeeded(ingredientReq.getQuantityNeeded());
 
-        product.getIngredients().add(pi);
+        // Save directly via repository
+        piRepo.save(pi);
       }
     }
 
-    product = repo.save(product);
+    // 3. Force flush of ingredient changes
+    piRepo.flush();
+
+    // 4. Reload the full product entity from DB to return fresh state
+    product = repo.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Product not found after update"));
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
