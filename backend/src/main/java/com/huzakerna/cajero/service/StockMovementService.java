@@ -22,6 +22,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import com.huzakerna.cajero.dto.StockMovementResponse;
 import com.huzakerna.cajero.model.StockMovementType;
 
 @Service
@@ -34,7 +35,7 @@ public class StockMovementService {
   private final IngredientRepository ingredientRepo;
   private final ProductRepository productRepo;
 
-  public Page<StockMovement> getStockMovements(
+  public Page<StockMovementResponse> getStockMovements(
       UUID storeId, int page, int size, String sortBy, String sortDir,
       LocalDate startDate, LocalDate endDate, UUID ingredientId, UUID productId, String typeCode) {
 
@@ -71,7 +72,38 @@ public class StockMovementService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    return repo.findAll(spec, pageable);
+    return repo.findAll(spec, pageable).map(this::mapToResponse);
+  }
+
+  private StockMovementResponse mapToResponse(StockMovement sm) {
+    String transactionDesc = null;
+
+    if (sm.getTransaction() != null) {
+      transactionDesc = sm.getTransaction().getDescription();
+      // Since we don't have direct customer object in Transaction (only ID),
+      // we might not get customer name easily unless we link Customer to Transaction
+      // too.
+      // For now, let's just use description.
+      // Update: Transaction model DOES have customerId only. We'd need to fetch
+      // customer or join in Transaction.
+      // Let's stick to description for now and CreatedBy.
+    }
+
+    return StockMovementResponse.builder()
+        .id(sm.getId())
+        .storeId(sm.getStoreId())
+        .ingredientId(sm.getIngredientId())
+        .productId(sm.getProductId())
+        .variantId(sm.getVariantId())
+        .transactionId(sm.getTransactionId())
+        .type(sm.getType())
+        .quantity(sm.getQuantity())
+        .createdAt(sm.getCreatedAt())
+        .updatedAt(sm.getUpdatedAt())
+        .createdByName(sm.getCreatedByName())
+        .transactionDescription(transactionDesc)
+        // .customerName(customerName) // Todo: Link Customer to Transaction if needed
+        .build();
   }
 
   @Transactional

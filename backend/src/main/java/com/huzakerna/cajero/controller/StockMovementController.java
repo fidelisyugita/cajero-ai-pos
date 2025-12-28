@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.huzakerna.cajero.dto.StockMovementResponse;
 import com.huzakerna.cajero.model.StockMovement;
 import com.huzakerna.cajero.repository.StockMovementRepository;
 import com.huzakerna.cajero.security.UserDetailsImpl;
@@ -28,7 +30,7 @@ public class StockMovementController {
     private final StockMovementService service;
 
     @GetMapping
-    public ResponseEntity<Page<StockMovement>> getAll(
+    public ResponseEntity<Page<StockMovementResponse>> getAll(
             @AuthenticationPrincipal UserDetailsImpl user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
