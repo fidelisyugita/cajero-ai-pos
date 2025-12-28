@@ -174,7 +174,7 @@ public class TransactionService {
               .productId(product.getId())
               .transactionId(transaction.getId())
               .type(StockMovementType.SALE)
-              .quantity(quantity)
+              .quantity(quantity.negate())
               .build());
     }
 
@@ -212,7 +212,7 @@ public class TransactionService {
                 .productId(product.getId())
                 .transactionId(transaction.getId())
                 .type(type)
-                .quantity(totalNeeded)
+                .quantity(totalNeeded.negate())
                 .build());
       }
     }
