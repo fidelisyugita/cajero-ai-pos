@@ -63,15 +63,30 @@ public class ChangeTracker {
   /**
    * Get the consolidated changes map
    * Format: fieldName -> { "old": oldValue, "new": newValue }
+   * Supports nested keys via "k1,k2" -> "k1": { "k2": ... }
    */
-  public Map<String, Map<String, Object>> getChanges() {
-    Map<String, Map<String, Object>> changes = new HashMap<>();
+  public Map<String, Object> getChanges() {
+    Map<String, Object> changes = new HashMap<>();
 
     for (String field : oldValues.keySet()) {
       Map<String, Object> diff = new HashMap<>();
       diff.put("old", oldValues.get(field));
       diff.put("new", newValues.get(field));
-      changes.put(field, diff);
+
+      if (field.contains(",")) {
+        // Handle nested key: "group,id" -> "group": { "id": diff }
+        String[] parts = field.split(",", 2);
+        String group = parts[0];
+        String id = parts[1];
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> groupMap = (Map<String, Object>) changes.computeIfAbsent(group,
+            k -> new HashMap<String, Object>());
+        groupMap.put(id, diff);
+      } else {
+        // Flat key
+        changes.put(field, diff);
+      }
     }
 
     return changes;

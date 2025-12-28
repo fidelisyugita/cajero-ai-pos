@@ -26,7 +26,7 @@ public class LogService {
   private final ObjectMapper objectMapper;
 
   public void logAction(UUID storeId, String type, String action, UUID entityId, String entityName,
-      Map<String, Map<String, Object>> changes) {
+      Map<String, Object> changes) {
     try {
       Map<String, Object> logPayload = Map.of(
           "entityId", entityId != null ? entityId.toString() : null,
