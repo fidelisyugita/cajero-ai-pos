@@ -86,8 +86,7 @@ public class StockMovementService {
       updateIngredientStock(request);
     } else if (request.getProductId() != null) {
       updateProductStock(request);
-      return request; // Currently product update not affect stock movement
-                      // since tracked in transaction
+      // return request; // Comment if product update not affect stock movement
     }
 
     // Ensure storeId is set
@@ -147,5 +146,48 @@ public class StockMovementService {
     log.info("Stock updated for Product {} ({}): {} {}", product.getId(), product.getName(), movement.getType(),
         quantity);
     productRepo.save(product);
+  }
+
+  @Transactional
+  public void adjustStock(UUID storeId, com.huzakerna.cajero.dto.StockUpdateRequest request) {
+    if (request.getType().equalsIgnoreCase("INGREDIENT")) {
+      var ingredient = ingredientRepo.findById(request.getId())
+          .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+
+      BigDecimal currentStock = ingredient.getStock() != null ? ingredient.getStock() : BigDecimal.ZERO;
+      BigDecimal difference = request.getNewStock().subtract(currentStock);
+
+      if (difference.compareTo(BigDecimal.ZERO) == 0) {
+        return; // No change
+      }
+
+      StockMovement movement = new StockMovement();
+      movement.setStoreId(storeId);
+      movement.setIngredientId(request.getId());
+      movement.setQuantity(difference.abs());
+      movement.setType(StockMovementType.ADJUSTMENT);
+      addStockMovement(storeId, movement);
+
+    } else if (request.getType().equalsIgnoreCase("PRODUCT")) {
+      var product = productRepo.findById(request.getId())
+          .orElseThrow(() -> new RuntimeException("Product not found"));
+
+      BigDecimal currentStock = product.getStock() != null ? product.getStock() : BigDecimal.ZERO;
+      BigDecimal difference = request.getNewStock().subtract(currentStock);
+
+      if (difference.compareTo(BigDecimal.ZERO) == 0) {
+        return;
+      }
+
+      StockMovement movement = new StockMovement();
+      movement.setStoreId(storeId);
+      movement.setProductId(request.getId());
+      movement.setQuantity(difference.abs());
+      movement.setType(StockMovementType.ADJUSTMENT);
+
+      addStockMovement(storeId, movement);
+    } else {
+      throw new IllegalArgumentException("Invalid type: " + request.getType());
+    }
   }
 }
