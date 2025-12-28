@@ -168,9 +168,8 @@ public class VariantService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "variant", "updated", logDetails);
+      logService.logAction(storeId, "variant", "updated", variant.getId(), variant.getName(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(variant);
@@ -197,10 +196,8 @@ public class VariantService {
 
     variant = repo.save(variant);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("variantId", id);
-    logService.logAction(storeId, "variant", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "variant", "deleted", variant.getId(), variant.getName(), null);
 
     return mapToResponse(variant);
   }

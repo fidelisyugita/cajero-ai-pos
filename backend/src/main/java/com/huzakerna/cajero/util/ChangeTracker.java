@@ -61,6 +61,23 @@ public class ChangeTracker {
   }
 
   /**
+   * Get the consolidated changes map
+   * Format: fieldName -> { "old": oldValue, "new": newValue }
+   */
+  public Map<String, Map<String, Object>> getChanges() {
+    Map<String, Map<String, Object>> changes = new HashMap<>();
+
+    for (String field : oldValues.keySet()) {
+      Map<String, Object> diff = new HashMap<>();
+      diff.put("old", oldValues.get(field));
+      diff.put("new", newValues.get(field));
+      changes.put(field, diff);
+    }
+
+    return changes;
+  }
+
+  /**
    * Check if any changes were tracked
    */
   public boolean hasChanges() {

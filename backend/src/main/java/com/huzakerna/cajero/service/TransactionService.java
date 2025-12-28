@@ -349,9 +349,8 @@ public class TransactionService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "transaction", "updated", logDetails);
+      logService.logAction(storeId, "transaction", "updated", transaction.getId(), transaction.getId().toString(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(transaction);
@@ -380,10 +379,8 @@ public class TransactionService {
 
     transaction = repo.save(transaction);
 
-    // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
-    logDetails.put("transactionId", id);
-    logService.logAction(storeId, "transaction", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "transaction", "deleted", transaction.getId(), transaction.getId().toString(), null);
 
     return mapToResponse(transaction);
   }

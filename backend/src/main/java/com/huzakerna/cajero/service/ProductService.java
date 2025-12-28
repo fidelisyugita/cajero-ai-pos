@@ -283,9 +283,8 @@ public class ProductService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "product", "updated", logDetails);
+      logService.logAction(storeId, "product", "updated", product.getId(), product.getName(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(product);
@@ -312,10 +311,8 @@ public class ProductService {
 
     product = repo.save(product);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("productId", id);
-    logService.logAction(storeId, "product", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "product", "deleted", product.getId(), product.getName(), null);
 
     return mapToResponse(product);
   }
@@ -343,7 +340,7 @@ public class ProductService {
     // Create log details
     var logDetails = new HashMap<String, Object>();
     logDetails.put("productId", id);
-    logService.logAction(storeId, "product", "restored", logDetails);
+    logService.logAction(storeId, "product", "restored", product.getId(), product.getName(), null);
 
     return mapToResponse(product);
   }

@@ -1,7 +1,6 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -108,9 +107,8 @@ public class IngredientService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "ingredient", "updated", logDetails);
+      logService.logAction(storeId, "ingredient", "updated", ingredient.getId(), ingredient.getName(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(ingredient);
@@ -137,10 +135,8 @@ public class IngredientService {
 
     ingredient = repo.save(ingredient);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("ingredientId", id);
-    logService.logAction(storeId, "ingredient", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "ingredient", "deleted", ingredient.getId(), ingredient.getName(), null);
 
     return mapToResponse(ingredient);
   }

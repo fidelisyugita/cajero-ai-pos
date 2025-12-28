@@ -25,9 +25,15 @@ public class LogService {
   private final LogRepository repo;
   private final ObjectMapper objectMapper;
 
-  public void logAction(UUID storeId, String type, String action, Map<String, Object> details) {
+  public void logAction(UUID storeId, String type, String action, UUID entityId, String entityName,
+      Map<String, Map<String, Object>> changes) {
     try {
-      JsonNode jsonNode = objectMapper.valueToTree(details);
+      Map<String, Object> logPayload = Map.of(
+          "entityId", entityId != null ? entityId.toString() : null,
+          "entityName", entityName,
+          "changes", changes);
+
+      JsonNode jsonNode = objectMapper.valueToTree(logPayload);
       Log log = Log.builder()
           .storeId(storeId)
           .type(type)

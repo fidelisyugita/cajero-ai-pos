@@ -88,9 +88,8 @@ public class PettyCashService {
 
         // Only add oldValues and newValues to log details if there were changes
         if (changeTracker.hasChanges()) {
-            logDetails.put("oldValues", changeTracker.getOldValues());
-            logDetails.put("newValues", changeTracker.getNewValues());
-            logService.logAction(storeId, "pettyCash", "updated", logDetails);
+            logService.logAction(storeId, "pettyCash", "updated", pettyCash.getId(),
+                    "Petty Cash: " + pettyCash.getAmount(), changeTracker.getChanges());
         }
 
         return (pettyCash);
