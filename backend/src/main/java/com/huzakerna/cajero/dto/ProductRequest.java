@@ -44,7 +44,7 @@ public class ProductRequest {
     private String barcode;
 
     @NotNull(message = "Stock is required")
-    @Min(value = 0, message = "Stock cannot be negative")
+    // @Min(value = 0, message = "Stock cannot be negative")
     private BigDecimal stock;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")
