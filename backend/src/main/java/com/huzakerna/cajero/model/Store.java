@@ -69,4 +69,14 @@ public class Store {
   @Column(name = "bank_no", length = 50)
   private String bankNo;
 
+  @Column(name = "subscription_status", length = 20)
+  @Builder.Default
+  private String subscriptionStatus = "free";
+
+  @Column(name = "subscription_plan_id", length = 50)
+  private String subscriptionPlanId;
+
+  @Column(name = "subscription_expires_at")
+  private LocalDateTime subscriptionExpiresAt;
+
 }
