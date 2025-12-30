@@ -1,70 +1,79 @@
 {
-	"expo": {
-		"name": "Cajero",
-		"slug": "cajero",
-		"version": "1.0.4",
-		"orientation": "landscape",
-		"icon": "./assets/images/icon.png",
-		"scheme": "cajero",
-		"userInterfaceStyle": "automatic",
-		"newArchEnabled": true,
-		"ios": {
-			"supportsTablet": true,
-			"bundleIdentifier": "com.cajero.app",
-			"icon": {
-				"dark": "./assets/images/ios-light.png",
-				"light": "./assets/images/ios-light.png"
-			},
-			"infoPlist": {
-				"NSAppTransportSecurity": {
-					"NSAllowsArbitraryLoads": true
-				}
-			}
-		},
-		"android": {
-			"usesCleartextTraffic": true,
-			"adaptiveIcon": {
-				"monochromeImage": "./assets/images/adaptive-icon.png",
-				"foregroundImage": "./assets/images/adaptive-icon.png",
-				"backgroundColor": "#FEF5E2"
-			},
-			"edgeToEdgeEnabled": true,
-			"package": "com.cajero.app"
-		},
-		"web": {
-			"bundler": "metro",
-			"output": "static",
-			"favicon": "./assets/images/icon.png"
-		},
-		"plugins": [
-			"expo-router",
-			[
-				"expo-splash-screen",
-				{
-					"image": "./assets/images/splash-icon-light.png",
-					"imageWidth": 200,
-					"resizeMode": "contain",
-					"backgroundColor": "#FEF5E2"
-				}
-			],
-			"expo-sqlite",
-			[
-				"expo-image-picker",
-				{
-					"photosPermission": "The app needs access to your photos to let you upload product images."
-				}
-			],
-			[
-				"@config-plugins/react-native-ble-plx",
-				{
-					"isBackgroundEnabled": false,
-					"modes": ["central"],
-					"bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
-				}
-			]
-		],
-		"experiments": {
-			"typedRoutes": true
-		}
-	}
+  "expo": {
+    "name": "Cajero",
+    "slug": "cajero",
+    "version": "1.0.4",
+    "orientation": "landscape",
+    "icon": "./assets/images/icon.png",
+    "scheme": "cajero",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cajero.app",
+      "icon": {
+        "dark": "./assets/images/ios-light.png",
+        "light": "./assets/images/ios-light.png"
+      },
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "monochromeImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#FEF5E2"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.cajero.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon-light.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FEF5E2"
+        }
+      ],
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to let you upload product images."
+        }
+      ],
+      [
+        "@config-plugins/react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": [
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
 }
