@@ -1,0 +1,19 @@
+appId: com.cajero.app
+---
+- launchApp
+- waitForAnimationToEnd:
+      timeout: 5000
+
+# Email
+- tapOn:
+      id: "email-input"
+- inputText: "${EMAIL}"
+
+# Password
+- tapOn:
+      id: "password-input"
+- inputText: "${PASSWORD}"
+
+# Submit
+- tapOn:
+      id: "sign-in-button"

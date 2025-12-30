@@ -1,0 +1,31 @@
+import "expo-router/entry";
+import "./config/Unistyles";
+import { Buffer } from "buffer";
+import dayjs from "dayjs";
+import calendar from "dayjs/plugin/calendar";
+import jalaliday from "jalaliday";
+import localeData from "dayjs/plugin/localeData";
+import weekday from "dayjs/plugin/weekday";
+import isBetween from "dayjs/plugin/isBetween";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import weekOfYear from "dayjs/plugin/weekOfYear";
+import isoWeek from "dayjs/plugin/isoWeek";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(calendar);
+dayjs.extend(jalaliday);
+dayjs.extend(localeData);
+dayjs.extend(weekday);
+dayjs.extend(isBetween);
+dayjs.extend(localizedFormat);
+dayjs.extend(customParseFormat);
+dayjs.extend(advancedFormat);
+dayjs.extend(weekOfYear);
+dayjs.extend(isoWeek);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+global.Buffer = global.Buffer || Buffer;
