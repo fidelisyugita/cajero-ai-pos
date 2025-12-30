@@ -209,4 +209,66 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       @Param("start") LocalDateTime start,
       @Param("end") LocalDateTime end);
 
+  // AI-Specific Helpers
+
+  @Query("""
+      SELECT new map(
+        p.name as name,
+        SUM(tp.quantity) as quantity,
+        SUM(tp.quantity * tp.sellingPrice) as totalSales
+      )
+      FROM TransactionProduct tp
+      JOIN tp.product p
+      JOIN tp.transaction t
+      WHERE t.storeId = :storeId
+        AND t.statusCode = 'COMPLETED'
+        AND t.createdAt BETWEEN :start AND :end
+        AND t.deletedAt IS NULL
+      GROUP BY p.id, p.name
+      ORDER BY SUM(tp.quantity) DESC
+      """)
+  List<Object> findTopSellingProducts(
+      @Param("storeId") UUID storeId,
+      @Param("start") LocalDateTime start,
+      @Param("end") LocalDateTime end,
+      Pageable pageable);
+
+  @Query("""
+      SELECT new map(
+        COUNT(t) as count,
+        COALESCE(SUM(t.totalPrice), 0) as totalRevenue
+      )
+      FROM Transaction t
+      WHERE t.storeId = :storeId
+        AND t.statusCode = 'COMPLETED'
+        AND t.createdAt BETWEEN :start AND :end
+        AND t.deletedAt IS NULL
+      """)
+  Object findSalesSummary(
+      @Param("storeId") UUID storeId,
+      @Param("start") LocalDateTime start,
+      @Param("end") LocalDateTime end);
+
+  @Query("""
+      SELECT new map(
+        t.description as name,
+        COUNT(t) as count,
+        SUM(t.totalPrice) as totalSpent
+      )
+      FROM Transaction t
+      WHERE t.storeId = :storeId
+        AND t.statusCode = 'COMPLETED'
+        AND t.createdAt BETWEEN :start AND :end
+        AND t.deletedAt IS NULL
+        AND t.description IS NOT NULL
+        AND t.description <> ''
+      GROUP BY t.description
+      ORDER BY COUNT(t) DESC
+      """)
+  List<Object> findFrequentDescriptions(
+      @Param("storeId") UUID storeId,
+      @Param("start") LocalDateTime start,
+      @Param("end") LocalDateTime end,
+      Pageable pageable);
+
 }
