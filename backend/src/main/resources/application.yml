@@ -121,3 +121,8 @@ oracle:
       base64: ${ORACLE_CLOUD_FINGERPRINT_BASE64:your-fingerprint}
     privatekey:
       base64: ${ORACLE_CLOUD_PRIVATEKEY_BASE64:your-privatekey}
+
+# Groq API Configuration
+groq:
+  api:
+    key: ${GROQ_API_KEY:}
