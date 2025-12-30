@@ -79,4 +79,8 @@ public class Store {
   @Column(name = "subscription_expires_at")
   private LocalDateTime subscriptionExpiresAt;
 
+  @Column(name = "max_discount")
+  @Builder.Default
+  private Double maxDiscount = 10.0;
+
 }
