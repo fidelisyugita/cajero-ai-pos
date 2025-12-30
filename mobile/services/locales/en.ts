@@ -241,4 +241,9 @@ export default {
     // Stock Update Modal
     update_stock_for: "Update Stock for",
     new_stock_value: "New Stock Value",
+    
+    // AI Chat
+    ai_welcome_message: "Hello! I am your AI assistant.",
+    type_message_placeholder: "Type a message...",
+    ai_connection_error: "Error: Could not connect to AI server. Please try again.",
 };

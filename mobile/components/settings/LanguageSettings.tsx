@@ -17,9 +17,9 @@ const LanguageSettings = () => {
         setTempLanguage(language);
     }, [language]);
 
-    const languages: { code: "en" | "id"; label: string; icon: string }[] = [
-        { code: "en", label: "English", icon: "https://flagcdn.com/w80/us.png" },
-        { code: "id", label: "Indonesian", icon: "https://flagcdn.com/w80/id.png" },
+    const languages: { code: "en" | "id"; label: string; icon: any }[] = [
+        { code: "en", label: "English", icon: require("@/assets/images/flags/us.png") },
+        { code: "id", label: "Indonesian", icon: require("@/assets/images/flags/id.png") },
     ];
 
     const handleSave = () => {
@@ -41,7 +41,6 @@ const LanguageSettings = () => {
                         activeOpacity={0.7}
                     >
                         <View style={$.languageInfo}>
-                            {/* Simple circular flag placeholder or use Expo Image */}
                             <Image source={lang.icon} style={$.flag} contentFit="cover" />
                             <Text style={$.languageName}>{lang.label}</Text>
                         </View>

@@ -1,7 +1,7 @@
 export default {
     settings: "Pengaturan",
     developer: "Developer",
-    ai_settings: "AI Assistant",
+    ai_settings: "Asisten AI",
     printers: "Printer",
     language: "Bahasa",
     payment_method: "Metode Pembayaran",
@@ -236,4 +236,9 @@ export default {
     // Stock Update Modal
     update_stock_for: "Perbaharui stok untuk",
     new_stock_value: "Nilai Stok Baru",
+
+    // AI Chat
+    ai_welcome_message: "Halo! Saya asisten AI Anda.",
+    type_message_placeholder: "Ketik pesan...",
+    ai_connection_error: "Kesalahan: Tidak dapat terhubung ke server AI. Silakan coba lagi.",
 };

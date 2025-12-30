@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Platform } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 import { Feather } from "@expo/vector-icons";
 import { postAIChat } from "@/services/endpoints/postAIChat";
+import { t } from "@/services/i18n";
+import { useLanguageStore } from "@/store/useLanguageStore";
 
 interface Message {
   id: string;
@@ -11,8 +14,9 @@ interface Message {
 }
 
 const ChatInterface = () => {
+  const language = useLanguageStore((state) => state.language); // Subscribe to language changes
   const [messages, setMessages] = useState<Message[]>([
-    { id: "1", role: "assistant", content: "Hello! I am your AI assistant." }
+    { id: "1", role: "assistant", content: t("ai_welcome_message") }
   ]);
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -50,7 +54,7 @@ const ChatInterface = () => {
         return [...filtered, {
           id: (Date.now() + 1).toString(),
           role: "system",
-          content: "Error: Could not connect to AI server. Please try again."
+          content: t("ai_connection_error")
         }];
       });
     } finally {
@@ -59,7 +63,11 @@ const ChatInterface = () => {
   };
 
   return (
-    <View style={$.container}>
+    <KeyboardAvoidingView 
+      style={$.container} 
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 80}
+    >
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
@@ -79,31 +87,29 @@ const ChatInterface = () => {
         contentContainerStyle={$.listContent}
       />
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <View style={$.inputContainer}>
-          <TextInput
-            style={$.input}
-            placeholder="Type a message..."
-            value={input}
-            onChangeText={setInput}
-            editable={!isGenerating}
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-          />
-          <TouchableOpacity
-            style={[$.sendButton, (!input.trim() || isGenerating) && $.disabledButton]}
-            onPress={handleSend}
-            disabled={!input.trim() || isGenerating}
-          >
-            {isGenerating ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Feather name="send" size={20} color="white" />
-            )}
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+      <View style={$.inputContainer}>
+        <TextInput
+          style={$.input}
+          placeholder={t("type_message_placeholder")}
+          value={input}
+          onChangeText={setInput}
+          editable={!isGenerating}
+          onSubmitEditing={handleSend}
+          returnKeyType="send"
+        />
+        <TouchableOpacity
+          style={[$.sendButton, (!input.trim() || isGenerating) && $.disabledButton]}
+          onPress={handleSend}
+          disabled={!input.trim() || isGenerating}
+        >
+          {isGenerating ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <Feather name="send" size={20} color="white" />
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
