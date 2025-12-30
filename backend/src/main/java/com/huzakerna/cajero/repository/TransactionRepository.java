@@ -271,4 +271,38 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       @Param("end") LocalDateTime end,
       Pageable pageable);
 
+  @Query(value = """
+      SELECT
+        CAST(EXTRACT(HOUR FROM created_at) AS INTEGER) as hour,
+        COUNT(*) as count
+      FROM transactions
+      WHERE store_id = :storeId
+        AND status_code = 'COMPLETED'
+        AND created_at BETWEEN :start AND :end
+        AND deleted_at IS NULL
+      GROUP BY EXTRACT(HOUR FROM created_at)
+      ORDER BY count DESC
+      """, nativeQuery = true)
+  List<Object[]> findPeakHours(
+      @Param("storeId") UUID storeId,
+      @Param("start") LocalDateTime start,
+      @Param("end") LocalDateTime end);
+
+  @Query(value = """
+      SELECT
+        CAST(EXTRACT(ISODOW FROM created_at) AS INTEGER) as dayOfWeek,
+        COUNT(*) as count
+      FROM transactions
+      WHERE store_id = :storeId
+        AND status_code = 'COMPLETED'
+        AND created_at BETWEEN :start AND :end
+        AND deleted_at IS NULL
+      GROUP BY EXTRACT(ISODOW FROM created_at)
+      ORDER BY count DESC
+      """, nativeQuery = true)
+  List<Object[]> findBusyDays(
+      @Param("storeId") UUID storeId,
+      @Param("start") LocalDateTime start,
+      @Param("end") LocalDateTime end);
+
 }

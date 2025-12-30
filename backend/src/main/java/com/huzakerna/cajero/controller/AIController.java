@@ -96,6 +96,20 @@ public class AIController {
           List<Object> frequentDescriptions = transactionRepository.findFrequentDescriptions(userDetails.getStoreId(),
               startOfDay.minusDays(30), endOfDay, PageRequest.of(0, 5));
 
+          // Peak Time Analytics
+          // Peak Time Analytics (Native Queries return List<Object[]>)
+          List<Object[]> peakHoursList = transactionRepository.findPeakHours(userDetails.getStoreId(),
+              startOfDay.minusDays(30), endOfDay);
+          String peakHours = peakHoursList.stream()
+              .map(row -> String.format("{hour=%s, count=%s}", row[0], row[1]))
+              .toList().toString();
+
+          List<Object[]> busyDaysList = transactionRepository.findBusyDays(userDetails.getStoreId(),
+              startOfDay.minusDays(30), endOfDay);
+          String busyDays = busyDaysList.stream()
+              .map(row -> String.format("{dayOfWeek=%s, count=%s}", row[0], row[1]))
+              .toList().toString();
+
           dataContext = String.format(
               """
 
@@ -104,11 +118,15 @@ public class AIController {
                   - Top Selling Products (Last 30 Days): %s
                   - Make sure to prioritize products that are available in stock.
                   - Frequent Customer Descriptions (Last 30 Days): %s
+                  - Peak Hours (Last 30 Days): %s (Format: hour=0-23, count=transactions)
+                  - Busiest Days (Last 30 Days): %s (Format: dayOfWeek=1(Mon)-7(Sun), count=transactions)
 
-                  Use this data to answer user questions about sales, revenue, popular items, or frequent customers directly.
+                  Use this data to answer user questions about sales, revenue, popular items, frequent customers, or busy times directly.
+                  For "Peak Hours", convert 24h format to AM/PM (e.g. 13 -> 1 PM).
+                  For "Busiest Days", convert numbers to Day Names (1=Monday, 7=Sunday).
                   If the user asks about "customers", refer to the "Frequent Customer Descriptions" data as likely customer names or notes.
                   """,
-              salesSummary, topProducts, frequentDescriptions);
+              salesSummary, topProducts, frequentDescriptions, peakHours, busyDays);
         } catch (Exception e) {
           log.warn("Failed to fetch real data context: {}", e.getMessage());
         }
