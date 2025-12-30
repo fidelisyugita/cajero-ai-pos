@@ -2,12 +2,11 @@ package com.huzakerna.cajero.controller;
 
 import com.huzakerna.cajero.dto.AIRequest;
 import com.huzakerna.cajero.dto.AIResponse;
-import com.huzakerna.cajero.repository.TransactionRepository;
+import com.huzakerna.cajero.service.AnalyticsService;
 import com.huzakerna.cajero.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +25,7 @@ import java.util.Map;
 @Slf4j
 public class AIController {
 
-  private final TransactionRepository transactionRepository;
+  private final AnalyticsService analyticsService;
 
   // Inject Groq API Key from application.yml or environment variables
   @Value("${groq.api.key}")
@@ -72,7 +70,7 @@ public class AIController {
         return new AIResponse("Error: Groq API Key is not configured in backend.");
       }
 
-      // 2. Get User Context and Real Data
+      // 2. Get User Context and Cached Real Data
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
       String userContext = "";
       String dataContext = "";
@@ -82,54 +80,8 @@ public class AIController {
         userContext = String.format("Current User: %s (Role: %s, Store ID: %s).",
             userDetails.getUser().getName(), userDetails.getAuthorities(), userDetails.getStoreId());
 
-        // Fetch Real Data (Sales Today & Top Products)
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfDay = now.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = now.toLocalDate().atTime(23, 59, 59);
-
-        try {
-          Object salesSummary = transactionRepository.findSalesSummary(userDetails.getStoreId(), startOfDay, endOfDay);
-          List<Object> topProducts = transactionRepository.findTopSellingProducts(userDetails.getStoreId(),
-              startOfDay.minusDays(30), endOfDay, PageRequest.of(0, 5)); // Last 30 days
-
-          // Also fetch frequent transaction descriptions (often used for customer names)
-          List<Object> frequentDescriptions = transactionRepository.findFrequentDescriptions(userDetails.getStoreId(),
-              startOfDay.minusDays(30), endOfDay, PageRequest.of(0, 5));
-
-          // Peak Time Analytics
-          // Peak Time Analytics (Native Queries return List<Object[]>)
-          List<Object[]> peakHoursList = transactionRepository.findPeakHours(userDetails.getStoreId(),
-              startOfDay.minusDays(30), endOfDay);
-          String peakHours = peakHoursList.stream()
-              .map(row -> String.format("{hour=%s, count=%s}", row[0], row[1]))
-              .toList().toString();
-
-          List<Object[]> busyDaysList = transactionRepository.findBusyDays(userDetails.getStoreId(),
-              startOfDay.minusDays(30), endOfDay);
-          String busyDays = busyDaysList.stream()
-              .map(row -> String.format("{dayOfWeek=%s, count=%s}", row[0], row[1]))
-              .toList().toString();
-
-          dataContext = String.format(
-              """
-
-                  REAL-TIME DATA CONTEXT:
-                  - Sales Today: %s
-                  - Top Selling Products (Last 30 Days): %s
-                  - Make sure to prioritize products that are available in stock.
-                  - Frequent Customer Descriptions (Last 30 Days): %s
-                  - Peak Hours (Last 30 Days): %s (Format: hour=0-23, count=transactions)
-                  - Busiest Days (Last 30 Days): %s (Format: dayOfWeek=1(Mon)-7(Sun), count=transactions)
-
-                  Use this data to answer user questions about sales, revenue, popular items, frequent customers, or busy times directly.
-                  For "Peak Hours", convert 24h format to AM/PM (e.g. 13 -> 1 PM).
-                  For "Busiest Days", convert numbers to Day Names (1=Monday, 7=Sunday).
-                  If the user asks about "customers", refer to the "Frequent Customer Descriptions" data as likely customer names or notes.
-                  """,
-              salesSummary, topProducts, frequentDescriptions, peakHours, busyDays);
-        } catch (Exception e) {
-          log.warn("Failed to fetch real data context: {}", e.getMessage());
-        }
+        // Helper call to cached service
+        dataContext = analyticsService.getAIDataContext(userDetails.getStoreId());
       }
 
       // 3. Prepare Groq API Request

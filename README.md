@@ -8,9 +8,8 @@ A modern Point-of-Sale system with AI-powered analytics, built as a monorepo.
 
 | Service    | Tech Stack     | Port | Description                  |
 | ---------- | -------------- | ---- | ---------------------------- |
-| Backend    | Spring Boot    | 8080 | Core POS business logic      |
-| Frontend   | Vite           | 5173 | Admin dashboard & cashier UI |
-| AI Service | FastAPI/Python | 8000 | Recommendation & analytics   |
+| Backend    | Spring Boot    | 8080 | Core POS logic + AI Chat     |
+| Frontend   | React Native   | -    | Mobile POS Application       |
 | Database   | PostgreSQL     | 5432 | Persistent data storage      |
 
 ## 🛠 Setup
@@ -18,18 +17,16 @@ A modern Point-of-Sale system with AI-powered analytics, built as a monorepo.
 ### Prerequisites
 
 - Docker 20+
-- Java 17 (for local backend dev)
+- Java 17 (for backend dev)
 - Node 20+ (for frontend)
-- Python 3.10+ (for AI service)
 
 ### Quick Start
 
 ```bash
-# Start all services
-docker-compose up --build
+# Start backend and database
+docker-compose up --build -d
 
 # Access services:
-# - Backend: http://localhost:8080/api
-# - Frontend: http://localhost:5173
-# - AI Service: http://localhost:8000/docs
+# - Backend API: http://localhost:8080/api
+# - Swagger UI: http://localhost:8080/swagger-ui.html
 ```

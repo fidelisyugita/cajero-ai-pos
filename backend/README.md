@@ -7,6 +7,8 @@ A comprehensive Spring Boot backend for a point-of-sale (POS) system with Oracle
 - **User Management**: Role-based authentication and authorization
 - **Product Management**: CRUD operations with variants and categories
 - **Transaction Processing**: Complete sales transaction handling
+- **AI Chat Integration**: LLM-powered assistant with real-time business context (Groq)
+- **Scalable Analytics**: High-performance cached data aggregation for AI context
 - **File Storage**: Oracle Cloud Object Storage integration
 - **Security**: JWT-based authentication with Spring Security
 - **API Documentation**: Swagger/OpenAPI 3.0 documentation
@@ -16,6 +18,8 @@ A comprehensive Spring Boot backend for a point-of-sale (POS) system with Oracle
 
 - **Backend**: Java 17, Spring Boot 3.5.0
 - **Database**: PostgreSQL 15
+- **AI Engine**: Groq API (Llama 3.1 8B Instant)
+- **Caching**: Caffeine (In-Memory)
 - **Security**: Spring Security, JWT
 - **Cloud**: Oracle Cloud Infrastructure (OCI)
 - **Documentation**: Swagger/OpenAPI 3.0
@@ -97,6 +101,7 @@ Credentials for Swagger UI (from .env):
 | `JWT_EXPIRATION_MS` | JWT expiration time | 86400000 |
 | `ORACLE_CLOUD_BUCKET_NAME` | OCI Object Storage bucket | - |
 | `ORACLE_CLOUD_COMPARTMENT_ID` | OCI compartment ID | - |
+| `GROQ_API_KEY` | Groq API Key for AI service | - |
 
 ### Oracle Cloud Setup
 

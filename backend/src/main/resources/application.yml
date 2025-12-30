@@ -65,7 +65,7 @@ spring:
   cache:
     type: caffeine
     caffeine:
-      spec: maximumSize=1000,expireAfterAccess=30m
+      spec: maximumSize=100,expireAfterWrite=15m
 
 logging:
   level:
