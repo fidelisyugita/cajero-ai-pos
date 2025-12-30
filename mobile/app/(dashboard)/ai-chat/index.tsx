@@ -20,7 +20,7 @@ const AIChatScreen = () => {
 const $ = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: theme.colors.neutral[200],
   },
   content: {
     flex: 1,

@@ -116,10 +116,16 @@ const ChatInterface = () => {
 const $ = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.neutral[100],
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[300],
+    overflow: "hidden",
   },
   listContent: {
     padding: theme.spacing.md,
     gap: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
   },
   messageBubble: {
     padding: theme.spacing.md,
@@ -132,9 +138,11 @@ const $ = StyleSheet.create((theme) => ({
     borderBottomRightRadius: theme.radius.xs,
   },
   aiBubble: {
-    backgroundColor: theme.colors.neutral[200],
+    backgroundColor: theme.colors.primary[100],
     alignSelf: "flex-start",
     borderBottomLeftRadius: theme.radius.xs,
+    borderWidth: 1,
+    borderColor: theme.colors.primary[200],
   },
   systemBubble: {
     backgroundColor: theme.colors.error[100],
@@ -147,13 +155,13 @@ const $ = StyleSheet.create((theme) => ({
     ...theme.typography.bodyMd,
   },
   userText: {
-    color: "white",
+    color: "#FFFFFF",
   },
   aiText: {
     color: theme.colors.neutral[700],
   },
   systemText: {
-    color: theme.colors.error[500],
+    color: theme.colors.error[600],
     fontSize: 12,
     textAlign: 'center',
   },
@@ -162,17 +170,21 @@ const $ = StyleSheet.create((theme) => ({
     padding: theme.spacing.md,
     borderTopWidth: 1,
     borderTopColor: theme.colors.neutral[200],
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     gap: theme.spacing.sm,
   },
   input: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     backgroundColor: theme.colors.neutral[100],
-    borderRadius: theme.radius.full,
-    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
     color: theme.colors.neutral[700],
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[300],
+    ...theme.typography.bodyMd,
   },
   sendButton: {
     width: 44,
@@ -183,7 +195,7 @@ const $ = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   disabledButton: {
-    backgroundColor: theme.colors.neutral[400],
+    backgroundColor: theme.colors.neutral[300],
   },
 }));
 
