@@ -25,11 +25,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@lombok.EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VariantOption {
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME) // Modern UUID generation
     @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
+    @lombok.EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

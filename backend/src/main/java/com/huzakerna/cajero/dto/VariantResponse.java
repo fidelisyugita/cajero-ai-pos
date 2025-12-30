@@ -1,11 +1,10 @@
 package com.huzakerna.cajero.dto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,11 +13,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class VariantResponse {
-
-    private UUID id;
-    private UUID storeId;
+@SuperBuilder
+public class VariantResponse extends BaseResponse {
 
     private UUID productId;
 
@@ -28,11 +24,5 @@ public class VariantResponse {
     private boolean isMultiple;
 
     private List<VariantOptionResponse> options;
-
-    private UUID createdBy;
-    private UUID updatedBy;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
 }

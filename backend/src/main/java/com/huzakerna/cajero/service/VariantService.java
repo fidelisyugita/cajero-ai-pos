@@ -1,11 +1,7 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.stereotype.Service;
 
@@ -22,8 +18,11 @@ import com.huzakerna.cajero.repository.VariantOptionRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor // Lombok will auto-inject the dependency
+@Transactional
 public class VariantService {
 
   private final StoreRepository sRepo;
@@ -94,7 +93,7 @@ public class VariantService {
     }
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("variantId", id);
 
     // Create change tracker
@@ -107,8 +106,33 @@ public class VariantService {
         request.isRequired());
     changeTracker.compareAndTrack("isMultiple", variant.isMultiple(),
         request.isMultiple());
-    changeTracker.compareAndTrack("options", variant.getOptions(),
-        request.getOptions());
+    // Track Variant Options changes
+    if (request.getOptions() != null) {
+      Map<UUID, VariantOption> oldMap = variant.getOptions().stream()
+          .collect(java.util.stream.Collectors.toMap(VariantOption::getId, o -> o));
+
+      Set<UUID> newIds = new HashSet<>();
+
+      for (VariantOptionRequest newOpt : request.getOptions()) {
+        if (newOpt.getId() != null && oldMap.containsKey(newOpt.getId())) {
+          newIds.add(newOpt.getId());
+          VariantOption oldOpt = oldMap.get(newOpt.getId());
+          changeTracker.compareAndTrack("option_name," + oldOpt.getId(), oldOpt.getName(), newOpt.getName());
+          changeTracker.compareAndTrack("option_priceAdjustment," + oldOpt.getId(), oldOpt.getPriceAdjusment(),
+              newOpt.getPriceAdjusment());
+          changeTracker.compareAndTrack("option_stock," + oldOpt.getId(), oldOpt.getStock(), newOpt.getStock());
+        } else {
+          // Added
+          changeTracker.compareAndTrack("option_added," + newOpt.getName(), null, newOpt.getPriceAdjusment());
+        }
+      }
+
+      for (UUID oldId : oldMap.keySet()) {
+        if (!newIds.contains(oldId)) {
+          changeTracker.compareAndTrack("option_removed," + oldId, oldMap.get(oldId).getName(), null);
+        }
+      }
+    }
 
     // Update variant fields
     variant.setName(request.getName());
@@ -116,36 +140,36 @@ public class VariantService {
     variant.setRequired(request.isRequired());
     variant.setMultiple(request.isMultiple());
 
-    Set<VariantOption> options = new HashSet<>();
-
-    // Add variant options if any
+    // Prepare new options set
+    Set<VariantOption> newOptions = new HashSet<>();
     if (request.getOptions() != null) {
-      for (VariantOptionRequest option : request.getOptions()) {
-        if (option.getId() != null) {
-          VariantOption optionToUpdate = voRepo.findById(option.getId())
-              .orElseThrow(() -> new RuntimeException("Variant Option not found"));
-          optionToUpdate.setName(option.getName());
-          optionToUpdate.setPriceAdjusment(option.getPriceAdjusment());
-          optionToUpdate.setStock(option.getStock());
-          VariantOption updatedOption = voRepo.save(optionToUpdate);
-          options.add(updatedOption);
-        } else {
-          option.setVariantId(variant.getId());
-          VariantOption variantOption = voService.addVariantOption(option);
-          options.add(variantOption);
+      for (VariantOptionRequest req : request.getOptions()) {
+        VariantOption option = VariantOption.builder()
+            .variant(variant)
+            .name(req.getName())
+            .priceAdjusment(req.getPriceAdjusment())
+            .stock(req.getStock())
+            .build();
+
+        // If ID is provided, maintain it to update existing record instead of
+        // delete-insert
+        if (req.getId() != null) {
+          option.setId(req.getId());
         }
+
+        newOptions.add(option);
       }
     }
 
-    variant.setOptions(options);
+    // Safely update options collection
+    variant.setOptions(newOptions);
 
     variant = repo.save(variant);
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "variant", "updated", logDetails);
+      logService.logAction(storeId, "variant", "updated", variant.getId(), variant.getName(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(variant);
@@ -172,10 +196,8 @@ public class VariantService {
 
     variant = repo.save(variant);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("variantId", id);
-    logService.logAction(storeId, "variant", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "variant", "deleted", variant.getId(), variant.getName(), null);
 
     return mapToResponse(variant);
   }
@@ -188,8 +210,10 @@ public class VariantService {
         .description(variant.getDescription())
         .isRequired(variant.isRequired())
         .isMultiple(variant.isMultiple())
-        .createdBy(variant.getCreatedBy())
-        .updatedBy(variant.getUpdatedBy())
+        .createdBy(variant.getCreatedBy() != null ? variant.getCreatedBy().getId() : null)
+        .createdByName(variant.getCreatedBy() != null ? variant.getCreatedBy().getName() : null)
+        .updatedBy(variant.getUpdatedBy() != null ? variant.getUpdatedBy().getId() : null)
+        .updatedByName(variant.getUpdatedBy() != null ? variant.getUpdatedBy().getName() : null)
         .createdAt(variant.getCreatedAt())
         .updatedAt(variant.getUpdatedAt())
         .options(variant.getOptions() != null ? variant.getOptions().stream()

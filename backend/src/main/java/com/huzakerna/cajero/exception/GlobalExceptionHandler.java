@@ -128,6 +128,7 @@ public class GlobalExceptionHandler {
 
   @Getter
   @AllArgsConstructor
+  @lombok.ToString
   public static class FieldError {
     private String field;
     private String message;

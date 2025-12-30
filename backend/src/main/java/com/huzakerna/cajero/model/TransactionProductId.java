@@ -14,6 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@lombok.EqualsAndHashCode
 public class TransactionProductId implements Serializable {
     @Column(name = "transaction_id")
     private UUID transactionId;

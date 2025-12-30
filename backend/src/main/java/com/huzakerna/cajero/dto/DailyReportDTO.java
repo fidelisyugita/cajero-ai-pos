@@ -25,6 +25,7 @@ public class DailyReportDTO {
   private BigDecimal totalRefund;
 
   private BigDecimal totalNetRevenue;
+  private BigDecimal totalDiscount;
 
   private BigDecimal totalTax;
   private BigDecimal totalExpenses;

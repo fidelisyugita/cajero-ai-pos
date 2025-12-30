@@ -69,9 +69,9 @@ public class ProductCategoryService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "productCategory", "updated", logDetails);
+      logService.logAction(storeId, "productCategory", "updated",
+          UUID.nameUUIDFromBytes(productCategory.getCode().getBytes()), productCategory.getName(),
+          changeTracker.getChanges());
     }
 
     return (productCategory);
@@ -98,10 +98,10 @@ public class ProductCategoryService {
 
     productCategory = repo.save(productCategory);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("productCategoryCode", code);
-    logService.logAction(storeId, "productCategory", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "productCategory", "deleted",
+        UUID.nameUUIDFromBytes(productCategory.getCode().getBytes()), productCategory.getName(),
+        null);
 
     return (productCategory);
   }

@@ -20,7 +20,7 @@ public class IngredientRequest {
     @NotBlank(message = "Ingredient name cannot be empty")
     private String name;
 
-    @DecimalMin(value = "0.0", message = "Stock cannot be negative")
+    // @DecimalMin(value = "0.0", message = "Stock cannot be negative")
     private BigDecimal stock;
 
     @NotBlank

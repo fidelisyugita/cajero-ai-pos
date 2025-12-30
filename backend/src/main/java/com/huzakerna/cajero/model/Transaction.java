@@ -10,10 +10,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "transactions")
@@ -21,11 +21,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Transaction extends BaseEntity {
-
-    @Column(name = "store_id")
-    private UUID storeId;
 
     @Column(name = "status_code")
     private String statusCode;
@@ -37,7 +34,7 @@ public class Transaction extends BaseEntity {
     @Column(name = "is_in")
     private boolean isIn;
 
-    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<TransactionProduct> transactionProducts;
 
     @Column(name = "total_commission")
@@ -55,9 +52,13 @@ public class Transaction extends BaseEntity {
     @Column(name = "customer_id")
     private UUID customerId;
 
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
-
+    public void setTransactionProducts(List<TransactionProduct> transactionProducts) {
+        if (this.transactionProducts == null) {
+            this.transactionProducts = new java.util.ArrayList<>();
+        }
+        this.transactionProducts.clear();
+        if (transactionProducts != null) {
+            this.transactionProducts.addAll(transactionProducts);
+        }
+    }
 }

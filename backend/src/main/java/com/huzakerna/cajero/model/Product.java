@@ -3,7 +3,6 @@ package com.huzakerna.cajero.model;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "products")
@@ -24,14 +24,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Product extends BaseEntity {
-
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "store_id")
-    // private Store store;
-    @Column(name = "store_id")
-    private UUID storeId;
 
     @Column(name = "category_code")
     private String categoryCode;
@@ -43,11 +37,11 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "measure_unit_code")
     private MeasureUnit measureUnit;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private Set<ProductIngredient> ingredients = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private Set<Variant> variants = new HashSet<>();
 
@@ -75,9 +69,13 @@ public class Product extends BaseEntity {
     private BigDecimal discount;
     private BigDecimal tax;
 
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
-
+    public void setIngredients(Set<ProductIngredient> ingredients) {
+        if (this.ingredients == null) {
+            this.ingredients = new HashSet<>();
+        }
+        this.ingredients.clear();
+        if (ingredients != null) {
+            this.ingredients.addAll(ingredients);
+        }
+    }
 }

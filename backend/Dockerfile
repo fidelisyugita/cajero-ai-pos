@@ -2,8 +2,15 @@
 # FROM eclipse-temurin:17-jdk-jammy AS builder
 FROM gradle:8.4-jdk17 AS builder
 WORKDIR /app
-COPY . .
-RUN ./gradlew build -x test  # Skip tests during Docker build
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
+RUN chmod +x gradlew
+
+# We use "> /dev/null" to silence the log output while still downloading dependencies
+RUN ./gradlew dependencies --no-daemon > /dev/null 2>&1 || true
+
+COPY src ./src
+RUN ./gradlew build -x test --no-daemon
 
 # Stage 2: Run the JAR
 FROM eclipse-temurin:17-jre-jammy

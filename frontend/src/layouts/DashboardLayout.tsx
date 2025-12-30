@@ -11,6 +11,15 @@ import {
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 
+
+/**
+ * 
+ * TODO
+ * Impelement readable data for log
+ * change report as Home / Dashboard (replace current since no need do transaction)
+ * Implement ingredient
+ */
+
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuth(); // Assuming user object is available
   const location = useLocation();

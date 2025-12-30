@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,10 +28,12 @@ import com.huzakerna.cajero.repository.StoreRepository;
 
 import com.huzakerna.cajero.util.ChangeTracker;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor // Lombok will auto-inject the dependency
+@Transactional
 public class ProductService {
 
   private final StoreRepository sRepo;
@@ -120,6 +120,17 @@ public class ProductService {
     return mapToResponse(product);
   }
 
+  public ProductResponse getProductById(UUID storeId, UUID id) {
+    Product product = repo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+
+    if (!product.getStoreId().equals(storeId)) {
+      throw new IllegalArgumentException("Product does not belong to the store");
+    }
+
+    return mapToResponse(product);
+  }
+
   public Page<ProductResponse> getProducts(UUID storeId,
       int page,
       int size,
@@ -189,7 +200,50 @@ public class ProductService {
     changeTracker.compareAndTrack("commission", product.getCommission(), request.getCommission());
     changeTracker.compareAndTrack("discount", product.getDiscount(), request.getDiscount());
     changeTracker.compareAndTrack("tax", product.getTax(), request.getTax());
-    changeTracker.compareAndTrack("ingredients", product.getIngredients(), request.getIngredients());
+
+    List<ProductIngredientRequest> newIngredients = request.getIngredients() != null
+        ? new ArrayList<>(request.getIngredients())
+        : new ArrayList<>();
+
+    // Create maps for O(1) lookups to efficiently compare old vs new state
+    Map<UUID, ProductIngredientRequest> oldMap = product.getIngredients().stream()
+        .collect(java.util.stream.Collectors.toMap(
+            pi -> pi.getIngredient().getId(),
+            pi -> ProductIngredientRequest.builder()
+                .ingredientId(pi.getIngredient().getId())
+                .quantityNeeded(pi.getQuantityNeeded())
+                .build()));
+
+    Map<UUID, ProductIngredientRequest> newMap = newIngredients.stream()
+        .collect(java.util.stream.Collectors.toMap(ProductIngredientRequest::getIngredientId, i -> i));
+
+    // 1. Track Modified & Added Ingredients
+    for (ProductIngredientRequest newIng : newIngredients) {
+      if (oldMap.containsKey(newIng.getIngredientId())) {
+        // Ingredient exists in both -> Check if quantity changed
+        ProductIngredientRequest oldIng = oldMap.get(newIng.getIngredientId());
+        // Custom equals() in DTO handles BigDecimal scale comparison (e.g. 19.00 vs 19)
+        if (!oldIng.equals(newIng)) {
+          changeTracker.compareAndTrack("ingredient," + newIng.getIngredientId(),
+              oldIng.getQuantityNeeded(),
+              newIng.getQuantityNeeded());
+        }
+      } else {
+        // Ingredient is new
+        changeTracker.compareAndTrack("ingredient," + newIng.getIngredientId(),
+            null,
+            newIng.getQuantityNeeded());
+      }
+    }
+
+    // 2. Track Removed Ingredients
+    for (UUID oldId : oldMap.keySet()) {
+      if (!newMap.containsKey(oldId)) {
+        changeTracker.compareAndTrack("ingredient," + oldId,
+            oldMap.get(oldId).getQuantityNeeded(),
+            null);
+      }
+    }
 
     // Update product fields
     product.setName(request.getName());
@@ -205,35 +259,32 @@ public class ProductService {
     product.setDiscount(request.getDiscount());
     product.setTax(request.getTax());
 
-    // Remove existing product ingredients
-    // piRepo.deleteByProductId(id);
-    List<UUID> removedIngredientIds = product.getIngredients().stream()
-        .filter(pi -> request.getIngredients() == null || request.getIngredients().stream()
-            .noneMatch(ri -> ri.getIngredientId().equals(pi.getIngredient().getId())))
-        .map(pi -> pi.getIngredient().getId())
-        .toList();
-
-    removeIngredientFromProduct(product.getId(), removedIngredientIds);
-
-    // Add product ingredients if any
+    // Handle ingredients
+    Set<ProductIngredient> newIngredientSet = new HashSet<>();
     if (request.getIngredients() != null) {
-      for (ProductIngredientRequest ingredient : request.getIngredients()) {
-        if (product.getIngredients().stream()
-            .noneMatch(pi -> pi.getIngredient().getId().equals(ingredient.getIngredientId()))) {
-          addIngredientToProduct(product.getId(),
-              ingredient.getIngredientId(),
-              ingredient.getQuantityNeeded());
-        }
+      for (ProductIngredientRequest ingReq : request.getIngredients()) {
+        Ingredient ingredient = iRepo.findById(ingReq.getIngredientId())
+            .orElseThrow(() -> new EntityNotFoundException("Ingredient not found: " + ingReq.getIngredientId()));
+
+        ProductIngredient pi = new ProductIngredient();
+        pi.setId(new ProductIngredientId(product.getId(), ingredient.getId()));
+        pi.setProduct(product);
+        pi.setIngredient(ingredient);
+        pi.setQuantityNeeded(ingReq.getQuantityNeeded());
+        newIngredientSet.add(pi);
       }
     }
 
+    // Safely update ingredients collection
+    product.setIngredients(newIngredientSet);
+
+    // Save product (Hibernate handles changes)
     product = repo.save(product);
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "product", "updated", logDetails);
+      logService.logAction(storeId, "product", "updated", product.getId(), product.getName(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(product);
@@ -260,10 +311,8 @@ public class ProductService {
 
     product = repo.save(product);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("productId", id);
-    logService.logAction(storeId, "product", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "product", "deleted", product.getId(), product.getName(), null);
 
     return mapToResponse(product);
   }
@@ -291,7 +340,7 @@ public class ProductService {
     // Create log details
     var logDetails = new HashMap<String, Object>();
     logDetails.put("productId", id);
-    logService.logAction(storeId, "product", "restored", logDetails);
+    logService.logAction(storeId, "product", "restored", product.getId(), product.getName(), null);
 
     return mapToResponse(product);
   }
@@ -315,8 +364,10 @@ public class ProductService {
         .commission(product.getCommission())
         .discount(product.getDiscount())
         .tax(product.getTax())
-        .createdBy(product.getCreatedBy())
-        .updatedBy(product.getUpdatedBy())
+        .createdBy(product.getCreatedBy() != null ? product.getCreatedBy().getId() : null)
+        .createdByName(product.getCreatedBy() != null ? product.getCreatedBy().getName() : null)
+        .updatedBy(product.getUpdatedBy() != null ? product.getUpdatedBy().getId() : null)
+        .updatedByName(product.getUpdatedBy() != null ? product.getUpdatedBy().getName() : null)
         .createdAt(product.getCreatedAt())
         .updatedAt(product.getUpdatedAt())
         .deletedAt(product.getDeletedAt())

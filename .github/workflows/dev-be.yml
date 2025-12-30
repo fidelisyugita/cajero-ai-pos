@@ -26,8 +26,13 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
+          # load: true  <-- Removed because it conflicts with multi-platform builds
           tags: ${{ secrets.DOCKER_USERNAME }}/cajero-backend:dev
           platforms: linux/amd64,linux/arm64
+          provenance: false
+          # === MAGIC PART: GHA Caching ===
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # ✅ Deploy to Oracle VM
       - name: Deploy to Oracle VM
@@ -51,6 +56,8 @@ jobs:
               -e SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} \
               -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
               -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              -e ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} \
+              -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} \
               -e ORACLE_CLOUD_CONFIG_PATH=${{ secrets.ORACLE_CLOUD_CONFIG_PATH }} \
               -e ORACLE_CLOUD_BUCKET_NAME=${{ secrets.ORACLE_CLOUD_BUCKET_NAME }} \
               -e ORACLE_CLOUD_COMPARTMENT_ID=${{ secrets.ORACLE_CLOUD_COMPARTMENT_ID }} \

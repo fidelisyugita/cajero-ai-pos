@@ -40,6 +40,7 @@ public class TransactionController {
       @RequestParam(required = false) String statusCode,
       @RequestParam(required = false) String transactionTypeCode,
       @RequestParam(required = false) String paymentMethodCode,
+      @RequestParam(required = false) UUID productId,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
@@ -47,7 +48,7 @@ public class TransactionController {
 
     return ResponseEntity.ok(service.getTransactions(
         storeId, page, size, sortBy, sortDir, statusCode, transactionTypeCode,
-        paymentMethodCode, startDate, endDate));
+        paymentMethodCode, productId, startDate, endDate));
   }
 
   @PostMapping

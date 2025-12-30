@@ -26,10 +26,10 @@ public class VariantOptionRequest {
     @NotBlank(message = "Name cannot be blank")
     private String name;
 
-    @DecimalMin(value = "0.0", message = "Stock cannot be negative")
+    @DecimalMin(value = "0.0", message = "Price adjustment cannot be negative")
     private BigDecimal priceAdjusment;
 
-    @DecimalMin(value = "0.0", message = "Stock cannot be negative")
+    // @DecimalMin(value = "0.0", message = "Stock cannot be negative")
     private BigDecimal stock;
 
 }

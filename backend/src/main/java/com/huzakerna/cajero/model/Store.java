@@ -1,10 +1,17 @@
 package com.huzakerna.cajero.model;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +26,23 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Store extends BaseEntity {
+public class Store {
+
+  @Id
+  @UuidGenerator(style = UuidGenerator.Style.TIME) // Modern UUID generation
+  @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()")
+  private UUID id;
+
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  private LocalDateTime updatedAt;
+
+  @Column(name = "deleted_at")
+  private LocalDateTime deletedAt;
 
   @Column(nullable = false, length = 100)
   private String name;
@@ -45,5 +68,19 @@ public class Store extends BaseEntity {
 
   @Column(name = "bank_no", length = 50)
   private String bankNo;
+
+  @Column(name = "subscription_status", length = 20)
+  @Builder.Default
+  private String subscriptionStatus = "free";
+
+  @Column(name = "subscription_plan_id", length = 50)
+  private String subscriptionPlanId;
+
+  @Column(name = "subscription_expires_at")
+  private LocalDateTime subscriptionExpiresAt;
+
+  @Column(name = "max_discount")
+  @Builder.Default
+  private Double maxDiscount = 10.0;
 
 }

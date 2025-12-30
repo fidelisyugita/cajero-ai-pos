@@ -1,7 +1,6 @@
 package com.huzakerna.cajero.service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -108,9 +107,8 @@ public class IngredientService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "ingredient", "updated", logDetails);
+      logService.logAction(storeId, "ingredient", "updated", ingredient.getId(), ingredient.getName(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(ingredient);
@@ -137,10 +135,8 @@ public class IngredientService {
 
     ingredient = repo.save(ingredient);
 
-    // Create log details
-    var logDetails = new HashMap<String, Object>();
-    logDetails.put("ingredientId", id);
-    logService.logAction(storeId, "ingredient", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "ingredient", "deleted", ingredient.getId(), ingredient.getName(), null);
 
     return mapToResponse(ingredient);
   }
@@ -154,8 +150,10 @@ public class IngredientService {
         .stock(ingredient.getStock())
         .measureUnitCode(ingredient.getMeasureUnit().getCode())
         .measureUnitName(ingredient.getMeasureUnit().getName())
-        .createdBy(ingredient.getCreatedBy())
-        .updatedBy(ingredient.getUpdatedBy())
+        .createdBy(ingredient.getCreatedBy() != null ? ingredient.getCreatedBy().getId() : null)
+        .createdByName(ingredient.getCreatedBy() != null ? ingredient.getCreatedBy().getName() : null)
+        .updatedBy(ingredient.getUpdatedBy() != null ? ingredient.getUpdatedBy().getId() : null)
+        .updatedByName(ingredient.getUpdatedBy() != null ? ingredient.getUpdatedBy().getName() : null)
         .createdAt(ingredient.getCreatedAt())
         .updatedAt(ingredient.getUpdatedAt())
         .build();

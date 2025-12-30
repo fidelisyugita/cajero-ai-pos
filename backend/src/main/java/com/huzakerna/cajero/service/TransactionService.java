@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.UUID;
-
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class TransactionService {
 
@@ -71,7 +70,6 @@ public class TransactionService {
             .customerId(request.getCustomerId())
             .build());
 
-    // Add transaction products if any
     // Add transaction products if any
     BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
     BigDecimal calculatedTotalTax = BigDecimal.ZERO;
@@ -176,7 +174,7 @@ public class TransactionService {
               .productId(product.getId())
               .transactionId(transaction.getId())
               .type(StockMovementType.SALE)
-              .quantity(quantity)
+              .quantity(quantity.negate())
               .build());
     }
 
@@ -214,7 +212,7 @@ public class TransactionService {
                 .productId(product.getId())
                 .transactionId(transaction.getId())
                 .type(type)
-                .quantity(totalNeeded)
+                .quantity(totalNeeded.negate())
                 .build());
       }
     }
@@ -245,7 +243,7 @@ public class TransactionService {
     }
 
     // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
+    var logDetails = new HashMap<String, Object>();
     logDetails.put("transactionId", id);
 
     // Create change tracker
@@ -257,8 +255,34 @@ public class TransactionService {
     changeTracker.compareAndTrack("transactionTypeCode", transaction.getTransactionTypeCode(),
         request.getTransactionTypeCode());
     changeTracker.compareAndTrack("description", transaction.getDescription(), request.getDescription());
-    changeTracker.compareAndTrack("transactionProducts", transaction.getTransactionProducts(),
-        request.getTransactionProducts());
+    // Track Transaction Products changes
+    if (request.getTransactionProducts() != null) {
+      Map<UUID, BigDecimal> oldMap = transaction.getTransactionProducts().stream()
+          .collect(java.util.stream.Collectors.toMap(tp -> tp.getProduct().getId(), TransactionProduct::getQuantity));
+
+      Map<UUID, BigDecimal> newMap = request.getTransactionProducts().stream()
+          .collect(java.util.stream.Collectors.toMap(TransactionProductRequest::getProductId,
+              TransactionProductRequest::getQuantity));
+
+      // 1. Modified & Added
+      for (TransactionProductRequest newTp : request.getTransactionProducts()) {
+        BigDecimal oldQty = oldMap.get(newTp.getProductId());
+        if (oldMap.containsKey(newTp.getProductId())) {
+          if (oldQty.compareTo(newTp.getQuantity()) != 0) {
+            changeTracker.compareAndTrack("product_quantity," + newTp.getProductId(), oldQty, newTp.getQuantity());
+          }
+        } else {
+          changeTracker.compareAndTrack("product_quantity," + newTp.getProductId(), null, newTp.getQuantity());
+        }
+      }
+
+      // 2. Removed
+      for (UUID oldProdId : oldMap.keySet()) {
+        if (!newMap.containsKey(oldProdId)) {
+          changeTracker.compareAndTrack("product_quantity," + oldProdId, oldMap.get(oldProdId), null);
+        }
+      }
+    }
 
     // Update transaction fields
     transaction.setStatusCode(request.getStatusCode());
@@ -269,62 +293,53 @@ public class TransactionService {
     // transaction.setTotalDiscount(request.getTotalDiscount());
     // transaction.setTotalTax(request.getTotalTax());
 
-    // Remove existing transaction products
-    // tpRepo.deleteByTransactionId(id);
-
-    List<UUID> removedProductIds = transaction.getTransactionProducts().stream()
-        .filter(tp -> request.getTransactionProducts() == null || request.getTransactionProducts().stream()
-            .noneMatch(ri -> ri.getProductId().equals(tp.getProduct().getId())))
-        .map(tp -> tp.getProduct().getId())
-        .toList();
-
-    removeProductFromTransaction(transaction.getId(), removedProductIds);
-
-    // Add new transaction products if any
-    // Add new transaction products if any
-    if (request.getTransactionProducts() != null) {
-      for (TransactionProductRequest product : request.getTransactionProducts()) {
-        if (transaction.getTransactionProducts().stream()
-            .noneMatch(tp -> tp.getProduct().getId().equals(product.getProductId()))) {
-          addProductToTransaction(transaction,
-              product.getProductId(),
-              product.getBuyingPrice(),
-              product.getSellingPrice(),
-              product.getNote(),
-              product.getQuantity(),
-              product.getSelectedVariants(),
-              product.getCommission(),
-              product.getDiscount(),
-              product.getTax());
-        }
-      }
-    }
-
-    // Recalculate totals for the ENTIRE transaction (existing + new)
-    // We need to fetch the fresh list of transaction products from DB or assume the
-    // session cache is updated
-    // Since we called addProductToTransaction (which saves), let's re-fetch the
-    // transaction products
-    List<TransactionProduct> allProducts = tpRepo.findByTransactionId(transaction.getId());
-
+    // Prepare new transaction products list
+    List<TransactionProduct> newTransactionProducts = new ArrayList<>();
     BigDecimal calculatedTotalDiscount = BigDecimal.ZERO;
     BigDecimal calculatedTotalTax = BigDecimal.ZERO;
     BigDecimal calculatedTotalCommission = BigDecimal.ZERO;
     BigDecimal calculatedTotalPrice = BigDecimal.ZERO;
 
-    for (TransactionProduct tp : allProducts) {
-      calculatedTotalDiscount = calculatedTotalDiscount
-          .add(tp.getDiscount() != null ? tp.getDiscount() : BigDecimal.ZERO);
-      calculatedTotalTax = calculatedTotalTax.add(tp.getTax() != null ? tp.getTax() : BigDecimal.ZERO);
-      calculatedTotalCommission = calculatedTotalCommission
-          .add(tp.getCommission() != null ? tp.getCommission() : BigDecimal.ZERO);
+    if (request.getTransactionProducts() != null) {
+      for (TransactionProductRequest product : request.getTransactionProducts()) {
+        Product p = pRepo.findById(product.getProductId())
+            .orElseThrow(() -> new RuntimeException("Product not found"));
 
-      BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
-          .subtract(tp.getDiscount() != null ? tp.getDiscount() : BigDecimal.ZERO)
-          .add(tp.getTax() != null ? tp.getTax() : BigDecimal.ZERO);
-      calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
+        TransactionProduct tp = new TransactionProduct();
+        tp.setId(new TransactionProductId(transaction.getId(), p.getId()));
+        tp.setBuyingPrice(product.getBuyingPrice());
+        tp.setSellingPrice(product.getSellingPrice());
+        tp.setNote(product.getNote());
+        tp.setQuantity(product.getQuantity());
+        tp.setSelectedVariants(product.getSelectedVariants());
+        tp.setProduct(p);
+        tp.setTransaction(transaction);
+
+        // Calculate/Set Tax, Commission, Discount
+        tp.setCommission(product.getCommission() != null ? product.getCommission()
+            : (p.getCommission() != null ? p.getCommission().multiply(product.getQuantity()) : BigDecimal.ZERO));
+        tp.setDiscount(product.getDiscount() != null ? product.getDiscount()
+            : (p.getDiscount() != null ? p.getDiscount().multiply(product.getQuantity()) : BigDecimal.ZERO));
+        tp.setTax(product.getTax() != null ? product.getTax()
+            : (p.getTax() != null ? p.getTax().multiply(product.getQuantity()) : BigDecimal.ZERO));
+
+        // Add to list
+        newTransactionProducts.add(tp);
+
+        // Aggregate totals
+        calculatedTotalDiscount = calculatedTotalDiscount.add(tp.getDiscount());
+        calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
+        calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
+
+        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+            .subtract(tp.getDiscount())
+            .add(tp.getTax());
+        calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
+      }
     }
 
+    // Set updated products and totals
+    transaction.setTransactionProducts(newTransactionProducts);
     transaction.setTotalDiscount(calculatedTotalDiscount);
     transaction.setTotalTax(calculatedTotalTax);
     transaction.setTotalCommission(calculatedTotalCommission);
@@ -334,9 +349,8 @@ public class TransactionService {
 
     // Only add oldValues and newValues to log details if there were changes
     if (changeTracker.hasChanges()) {
-      logDetails.put("oldValues", changeTracker.getOldValues());
-      logDetails.put("newValues", changeTracker.getNewValues());
-      logService.logAction(storeId, "transaction", "updated", logDetails);
+      logService.logAction(storeId, "transaction", "updated", transaction.getId(), transaction.getId().toString(),
+          changeTracker.getChanges());
     }
 
     return mapToResponse(transaction);
@@ -365,14 +379,13 @@ public class TransactionService {
 
     transaction = repo.save(transaction);
 
-    // Create log details
-    var logDetails = new java.util.HashMap<String, Object>();
-    logDetails.put("transactionId", id);
-    logService.logAction(storeId, "transaction", "deleted", logDetails);
+    // Log action
+    logService.logAction(storeId, "transaction", "deleted", transaction.getId(), transaction.getId().toString(), null);
 
     return mapToResponse(transaction);
   }
 
+  @Transactional(readOnly = true)
   public Page<TransactionResponse> getTransactions(UUID storeId,
       int page,
       int size,
@@ -381,6 +394,7 @@ public class TransactionService {
       String statusCode,
       String transactionTypeCode,
       String paymentMethodCode,
+      UUID productId,
       LocalDate startDate,
       LocalDate endDate) {
     Pageable pageable = PageRequest.of(page, size,
@@ -393,7 +407,7 @@ public class TransactionService {
     LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
     Page<Transaction> transactionPage = repo.findFiltered(
-        storeId, statusCode, transactionTypeCode, paymentMethodCode, start,
+        storeId, statusCode, transactionTypeCode, paymentMethodCode, productId, start,
         end, pageable);
 
     return transactionPage.map(this::mapToResponse);
@@ -419,8 +433,10 @@ public class TransactionService {
         .totalPrice(transaction.getTotalPrice())
         .totalTax(transaction.getTotalTax())
         .customerId(transaction.getCustomerId())
-        .createdBy(transaction.getCreatedBy())
-        .updatedBy(transaction.getUpdatedBy())
+        .createdBy(transaction.getCreatedBy() != null ? transaction.getCreatedBy().getId() : null)
+        .createdByName(transaction.getCreatedBy() != null ? transaction.getCreatedBy().getName() : null)
+        .updatedBy(transaction.getUpdatedBy() != null ? transaction.getUpdatedBy().getId() : null)
+        .updatedByName(transaction.getUpdatedBy() != null ? transaction.getUpdatedBy().getName() : null)
         .createdAt(transaction.getCreatedAt())
         .updatedAt(transaction.getUpdatedAt())
         .transactionProduct(transaction.getTransactionProducts() != null ? transaction.getTransactionProducts().stream()

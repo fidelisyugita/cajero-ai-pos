@@ -81,9 +81,8 @@ public class CustomerService {
 
         // Only add oldValues and newValues to log details if there were changes
         if (changeTracker.hasChanges()) {
-            logDetails.put("oldValues", changeTracker.getOldValues());
-            logDetails.put("newValues", changeTracker.getNewValues());
-            logService.logAction(storeId, "customer", "updated", logDetails);
+            logService.logAction(storeId, "customer", "updated", customer.getId(), customer.getName(),
+                    changeTracker.getChanges());
         }
 
         return (customer);

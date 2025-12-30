@@ -18,17 +18,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import lombok.experimental.SuperBuilder;
+
 @Entity
 @Table(name = "variants")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Variant extends BaseEntity {
-
-    @Column(name = "store_id")
-    private UUID storeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -46,13 +45,17 @@ public class Variant extends BaseEntity {
     @Column(name = "is_multiple")
     private boolean isMultiple;
 
-    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private Set<VariantOption> options = new HashSet<>();
 
-    @Column(name = "created_By")
-    private UUID createdBy;
-    @Column(name = "updated_By")
-    private UUID updatedBy;
-
+    public void setOptions(Set<VariantOption> options) {
+        if (this.options == null) {
+            this.options = new HashSet<>();
+        }
+        this.options.clear();
+        if (options != null) {
+            this.options.addAll(options);
+        }
+    }
 }

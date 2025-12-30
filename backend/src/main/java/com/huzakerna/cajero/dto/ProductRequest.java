@@ -3,7 +3,6 @@ package com.huzakerna.cajero.dto;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import com.huzakerna.cajero.model.TransactionProduct;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -26,12 +25,6 @@ public class ProductRequest {
     @NotBlank(message = "Product name cannot be empty")
     private String name;
 
-    /**
-     * TODO: Will check will use set or list (in Transaction)
-     * 
-     * @see ProductIngredientRequest
-     * @see TransactionProduct
-     */
     @Builder.Default
     private Set<ProductIngredientRequest> ingredients = new HashSet<>();
 
@@ -51,7 +44,7 @@ public class ProductRequest {
     private String barcode;
 
     @NotNull(message = "Stock is required")
-    @Min(value = 0, message = "Stock cannot be negative")
+    // @Min(value = 0, message = "Stock cannot be negative")
     private BigDecimal stock;
 
     @DecimalMin(value = "0.0", message = "Buying price cannot be negative")

@@ -28,6 +28,15 @@ public class ChangeTracker {
     }
 
     // Compare non-null values
+    if (oldValue instanceof java.math.BigDecimal && newValue instanceof java.math.BigDecimal) {
+      if (((java.math.BigDecimal) oldValue).compareTo((java.math.BigDecimal) newValue) != 0) {
+        oldValues.put(fieldName, oldValue);
+        newValues.put(fieldName, newValue);
+        return true;
+      }
+      return false;
+    }
+
     if (!Objects.equals(oldValue, newValue)) {
       oldValues.put(fieldName, oldValue);
       newValues.put(fieldName, newValue);
@@ -49,6 +58,38 @@ public class ChangeTracker {
    */
   public Map<String, Object> getNewValues() {
     return newValues;
+  }
+
+  /**
+   * Get the consolidated changes map
+   * Format: fieldName -> { "old": oldValue, "new": newValue }
+   * Supports nested keys via "k1,k2" -> "k1": { "k2": ... }
+   */
+  public Map<String, Object> getChanges() {
+    Map<String, Object> changes = new HashMap<>();
+
+    for (String field : oldValues.keySet()) {
+      Map<String, Object> diff = new HashMap<>();
+      diff.put("old", oldValues.get(field));
+      diff.put("new", newValues.get(field));
+
+      if (field.contains(",")) {
+        // Handle nested key: "group,id" -> "group": { "id": diff }
+        String[] parts = field.split(",", 2);
+        String group = parts[0];
+        String id = parts[1];
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> groupMap = (Map<String, Object>) changes.computeIfAbsent(group,
+            k -> new HashMap<String, Object>());
+        groupMap.put(id, diff);
+      } else {
+        // Flat key
+        changes.put(field, diff);
+      }
+    }
+
+    return changes;
   }
 
   /**
