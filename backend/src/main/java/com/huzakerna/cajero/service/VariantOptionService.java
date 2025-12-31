@@ -50,7 +50,7 @@ public class VariantOptionService {
             .orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + ingReq.getIngredientId()));
 
         VariantOptionIngredient voi = VariantOptionIngredient.builder()
-            .id(new VariantOptionIngredientId(variantOption.getId(), ingredient.getId()))
+            .id(new VariantOptionIngredientId(ingredient.getId(), variantOption.getId()))
             .variantOption(variantOption)
             .ingredient(ingredient)
             .quantityNeeded(ingReq.getQuantityNeeded())
@@ -58,11 +58,7 @@ public class VariantOptionService {
 
         ingredients.add(voiRepo.save(voi));
       }
-      // Since VariantOption doesn't have a mappedBy 'ingredients' set
-      // initialized/managed here for return,
-      // we might just return the saved option.
-      // Ideally the entity relationship should be bi-directional and handled, but for
-      // now this saves the data.
+      variantOption.setIngredients(ingredients);
     }
 
     return variantOption;

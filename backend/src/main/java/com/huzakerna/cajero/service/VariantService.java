@@ -232,6 +232,7 @@ public class VariantService {
     return VariantResponse.builder()
         .id(variant.getId())
         .storeId(variant.getStoreId())
+        .productId(variant.getProductId())
         .name(variant.getName())
         .description(variant.getDescription())
         .isRequired(variant.isRequired())
