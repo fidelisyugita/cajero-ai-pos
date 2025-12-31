@@ -69,7 +69,7 @@ const OrderItem = ({
 							{item.variants.map((v, i) => (
 								<View key={i} style={$.variantRow}>
 									<Text style={$.variantName}>
-										{v.name}: {v.optionId}
+										{v.groupName}: {v.name}
 									</Text>
 									{v.price > 0 && (
 										<Text style={$.variantPrice}>

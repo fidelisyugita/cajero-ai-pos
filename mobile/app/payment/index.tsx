@@ -95,27 +95,32 @@ const PaymentScreen = () => {
             onSuccess: (data) => {
                 setLastTransactionNumber(data.id || "2023-0001");
                 setIsSuccess(true);
-                
+
                 // Auto Payment Success Print Logic
                 if (isAutoPrintEnabled && isPrinterConnected && connectedDevice) {
-                     // We construct receipt data similar to handlePrintReceipt
-                     const receiptData = {
+                    // We construct receipt data similar to handlePrintReceipt
+                    const receiptData = {
                         title: "RECEIPT / STRUK",
                         subtotal: formatCurrency(finalSubtotal),
                         discount: formatCurrency(globalDiscount),
                         tax: formatCurrency(totalTax),
                         total: formatCurrency(total),
                         paymentMethod: selectedMethod,
-                        items: transactionProducts.map(p => ({
-                            name: items.find(i => i.productId === p.productId)?.name || "Item",
-                            quantity: p.quantity,
-                            price: formatCurrency(p.sellingPrice * p.quantity)
+                        items: items.map(item => ({
+                            name: item.name,
+                            quantity: item.quantity,
+                            price: formatCurrency((item.sellingPrice + (item.variants?.reduce((s, v) => s + (v.price || 0), 0) || 0)) * item.quantity),
+                            variants: item.variants?.map(v => ({
+                                groupName: v.groupName,
+                                name: v.name,
+                                price: v.price
+                            })) || []
                         })),
                         footerMessage: "Thank you for your visit!",
                         transactionId: data.id || "2023-0001",
                         transactionDate: new Date() // Use current time or data.createdAt
                     };
-                    
+
                     // Fire and forget print (or handle error quietly/toast)
                     printerService.printReceipt(receiptData).catch(err => {
                         Logger.error("Auto print failed", err);
@@ -144,9 +149,15 @@ const PaymentScreen = () => {
             tax: formatCurrency(totalTax),
             total: formatCurrency(total),
             items: items.map(item => ({
-                name: item.name,
+                name: `${item.name} (${formatCurrency(item.sellingPrice)})`,
                 quantity: item.quantity,
-                price: item.sellingPrice * item.quantity // passing raw number or string formatted
+                // price: item.sellingPrice * item.quantity, // passing raw number or string formatted,
+                price: (item.sellingPrice + (item.variants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * item.quantity,
+                variants: item.variants?.map((v: any) => ({
+                    groupName: v.groupName,
+                    name: v.name,
+                    price: v.price
+                })) || []
             })),
             footerMessage: "Please pay at cashier"
         });
@@ -176,9 +187,15 @@ const PaymentScreen = () => {
             total: formatCurrency(total),
             paymentMethod: selectedMethod,
             items: items.map(item => ({
-                name: item.name,
+                name: `${item.name} (${formatCurrency(item.sellingPrice)})`,
                 quantity: item.quantity,
-                price: item.sellingPrice * item.quantity
+                // price: item.sellingPrice * item.quantity,
+                price: (item.sellingPrice + (item.variants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * item.quantity,
+                variants: item.variants?.map((v: any) => ({
+                    groupName: v.groupName,
+                    name: v.name,
+                    price: v.price
+                })) || []
             })),
             footerMessage: "Thank you for your visit!",
             transactionId: lastTransactionNumber,
