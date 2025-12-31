@@ -209,6 +209,12 @@ export default {
     empty_expenses_date_subtitle: "Tidak ada pengeluaran tercatat untuk tanggal yang dipilih.",
     empty_employees_title: "Karyawan Tidak Ditemukan",
     empty_employees_subtitle: "Tambahkan karyawan untuk mengelolanya di sini.",
+
+    // Missing keys added
+    no_history: "Tidak Ada Riwayat",
+    no_stock_history_subtitle: "Tidak ada riwayat stok untuk item ini.",
+    empty_variants_title: "Varian Tidak Ditemukan",
+    empty_variants_subtitle: "Coba sesuaikan pencarian Anda atau tambahkan varian.",
     empty_reports_title: "Laporan Tidak Ditemukan",
     empty_reports_date_subtitle: "Tidak ada laporan tersedia untuk rentang tanggal yang dipilih.",
     no_devices_found: "Perangkat tidak ditemukan",
@@ -267,7 +273,7 @@ export default {
     add_variant: "Tambah Varian",
     variant_details: "Detail Varian",
     variant_name: "Nama Varian",
-    e_g_size_color: "cth. Ukuran, Warna",
+    e_g_size_color: "cth. Ukuran",
     multiple_selection: "Pilihan Ganda",
     stock: "Stok",
     price_adj: "Penambahan Harga",

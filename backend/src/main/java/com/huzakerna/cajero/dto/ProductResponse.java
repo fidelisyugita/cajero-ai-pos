@@ -23,8 +23,6 @@ public class ProductResponse extends BaseResponse {
     private Integer rejectCount;
     private Integer soldCount;
     private String categoryCode;
-    private String measureUnitCode;
-    private String measureUnitName;
     private String barcode;
 
     private BigDecimal buyingPrice;

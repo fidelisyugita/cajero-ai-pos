@@ -214,6 +214,12 @@ export default {
     empty_expenses_date_subtitle: "No expenses recorded for the selected date.",
     empty_employees_title: "No Employees Found",
     empty_employees_subtitle: "Add employees to manage them here.",
+    
+    // Missing keys added
+    no_history: "No History",
+    no_stock_history_subtitle: "No stock history found for this item.",
+    empty_variants_title: "No Variants Found",
+    empty_variants_subtitle: "Try adjusting your search or add variants.",
     empty_reports_title: "No Reports Found",
     empty_reports_date_subtitle: "No reports available for the selected date range.",
     no_devices_found: "No devices found",
@@ -272,7 +278,7 @@ export default {
     add_variant: "Add Variant",
     variant_details: "Variant Details",
     variant_name: "Variant Name",
-    e_g_size_color: "e.g. Size, Color",
+    e_g_size_color: "e.g. Size",
     multiple_selection: "Multiple Selection",
     stock: "Stock",
     price_adj: "Increase Price",

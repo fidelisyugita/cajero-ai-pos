@@ -208,6 +208,7 @@ public class TransactionService {
                 .transactionId(transaction.getId())
                 .type(type)
                 .quantity(totalNeeded.negate())
+                .createdAt(transaction.getCreatedAt())
                 .build());
       }
     }
@@ -217,14 +218,18 @@ public class TransactionService {
       for (JsonNode node : selectedVariants) {
         if (node.has("optionId")) {
           try {
+            log.info("Processing variant option for stock deduction: {}", node);
             UUID optionId = UUID.fromString(node.get("optionId").asText());
             VariantOption option = voRepo.findById(optionId).orElse(null);
 
             if (option != null) {
+              log.info("Found variant option: {}", option.getName());
               // Priority 1: If mapped to ingredients, deduct ingredients (Cafe Case)
               if (option.getIngredients() != null && !option.getIngredients().isEmpty()) {
+                log.info("Variant option has {} ingredients. Deducting stock...", option.getIngredients().size());
                 for (VariantOptionIngredient voi : option.getIngredients()) {
                   BigDecimal requiredQty = voi.getQuantityNeeded().multiply(quantity);
+                  log.info("Deducting ingredient {} by {}", voi.getIngredient().getName(), requiredQty);
 
                   stockMovementService.addStockMovement(transaction.getStoreId(),
                       StockMovement.builder()
@@ -233,13 +238,16 @@ public class TransactionService {
                           .transactionId(transaction.getId())
                           .type(type)
                           .quantity(requiredQty.negate())
+                          .createdAt(transaction.getCreatedAt())
                           .build());
                 }
               } else {
+                log.info("Variant option has NO ingredients. Attempting to deduct option stock directly...");
                 // Priority 2: If validation passed, deduct option stock directly (Retail/Shoes
                 // Case)
                 // BUT only if stock is tracked (stock is not null)
                 if (option.getStock() != null) {
+                  log.info("Deducting variant option stock: {}", quantity);
                   stockMovementService.addStockMovement(transaction.getStoreId(),
                       StockMovement.builder()
                           .variantId(option.getId())
@@ -247,13 +255,20 @@ public class TransactionService {
                           .transactionId(transaction.getId())
                           .type(type)
                           .quantity(quantity.negate())
+                          .createdAt(transaction.getCreatedAt())
                           .build());
+                } else {
+                  log.info("Variant option stock is NULL, skipping deduction.");
                 }
               }
+            } else {
+              log.warn("Variant option not found for ID: {}", optionId);
             }
           } catch (Exception e) {
-            log.error("Error processing variant option stock movement: {}", e.getMessage());
+            log.error("Error processing variant option stock movement: {}", e.getMessage(), e);
           }
+        } else {
+          log.warn("Variant node missing optionId: {}", node);
         }
       }
     } else if (product.getStock() != null) {
@@ -264,6 +279,7 @@ public class TransactionService {
               .transactionId(transaction.getId())
               .type(StockMovementType.SALE)
               .quantity(quantity.negate())
+              .createdAt(transaction.getCreatedAt())
               .build());
     }
   }
@@ -493,7 +509,7 @@ public class TransactionService {
             .map(tp -> TransactionProductResponse.builder()
                 .productId(tp.getProduct().getId())
                 .categoryCode(tp.getProduct().getCategoryCode())
-                .measureUnitCode(tp.getProduct().getMeasureUnit().getCode())
+
                 .name(tp.getProduct().getName())
                 .description(tp.getProduct().getDescription())
                 .stock(tp.getProduct().getStock())

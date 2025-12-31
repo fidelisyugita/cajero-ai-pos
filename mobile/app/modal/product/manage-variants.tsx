@@ -78,7 +78,7 @@ const ManageVariantsModal = () => {
                 </View>
             </ScreenModal.Body>
             <ScreenModal.Footer>
-                 <Button
+                <Button
                     onPress={() => router.dismiss()}
                     size="md"
                     style={$.flex}

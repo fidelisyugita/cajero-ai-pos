@@ -1,7 +1,7 @@
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { useForm, Controller, useFieldArray, Resolver } from "react-hook-form";
 import { t } from "@/services/i18n";
 import { Alert, Text, View, ScrollView } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -53,7 +53,7 @@ const EditVariantModal = () => {
     }));
 
     const { control, handleSubmit, reset, formState: { errors } } = useForm<VariantFormData>({
-        resolver: zodResolver(variantSchema),
+        resolver: zodResolver(variantSchema) as Resolver<VariantFormData>,
         defaultValues: {
             name: "",
             isRequired: true,
@@ -185,7 +185,7 @@ const EditVariantModal = () => {
                     variant="secondary"
                 />
                 <Button
-                    onPress={handleSubmit(onSubmit)}
+                    onPress={handleSubmit(onSubmit as any)}
                     size="md"
                     style={$.flex}
                     title={t("save")}
@@ -267,59 +267,62 @@ const VariantOptionItem = ({ control, index, remove, canRemove, ingredientOption
             </View>
 
             {/* Ingredients Section */}
-            <View style={$.ingredientsSection}>
-                <Text style={$.ingredientsTitle}>{t("ingredients")}</Text>
-                {fields.map((field: any, ingIndex: number) => (
-                    <View key={field.id} style={$.ingredientRow}>
-                        <Controller
-                            control={control}
-                            name={`options.${index}.ingredients.${ingIndex}.ingredientId`}
-                            render={({ field: { onChange, value } }) => (
-                                <Select
-                                    // label={t("ingredient")}
-                                    options={ingredientOptions}
-                                    value={value}
-                                    onSelect={(val) => {
-                                        onChange(val);
-                                    }}
-                                    containerStyle={{ flex: 2, }}
-                                    placeholder={t("select_ingredient")}
+            {
+                ingredientOptions.length > 0 && (
+                    <View style={$.ingredientsSection}>
+                        <Text style={$.ingredientsTitle}>{t("ingredients")}</Text>
+                        {fields.map((field: any, ingIndex: number) => (
+                            <View key={field.id} style={$.ingredientRow}>
+                                <Controller
+                                    control={control}
+                                    name={`options.${index}.ingredients.${ingIndex}.ingredientId`}
+                                    render={({ field: { onChange, value } }) => (
+                                        <Select
+                                            // label={t("ingredient")}
+                                            options={ingredientOptions}
+                                            value={value}
+                                            onSelect={(val) => {
+                                                onChange(val);
+                                            }}
+                                            containerStyle={{ flex: 2, }}
+                                            placeholder={t("select_ingredient")}
+                                        />
+                                    )}
                                 />
-                            )}
-                        />
-                        <Controller
-                            control={control}
-                            name={`options.${index}.ingredients.${ingIndex}.quantityNeeded`}
-                            render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                <Input
-                                    label={t("qty")}
-                                    value={value?.toString()}
-                                    onChangeText={onChange}
-                                    keyboardType="numeric"
-                                    size="md"
-                                    containerStyle={{ flex: 1 }}
-                                    error={error?.message}
+                                <Controller
+                                    control={control}
+                                    name={`options.${index}.ingredients.${ingIndex}.quantityNeeded`}
+                                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                                        <Input
+                                            label={t("qty")}
+                                            value={value?.toString()}
+                                            onChangeText={onChange}
+                                            keyboardType="numeric"
+                                            size="md"
+                                            containerStyle={{ flex: 1 }}
+                                            error={error?.message}
+                                        />
+                                    )}
                                 />
-                            )}
-                        />
-                        <IconButton
-                            Icon={IcX}
-                            onPress={() => removeIngredient(ingIndex)}
+                                <IconButton
+                                    Icon={IcX}
+                                    onPress={() => removeIngredient(ingIndex)}
+                                    size="sm"
+                                    variant="secondary-warning"
+                                // style={{ marginTop: 28 }} // Align with inputs
+                                />
+                            </View>
+                        ))}
+                        <Button
+                            leftIcon={() => <IcPlus color="white" />}
+                            onPress={() => append({ ingredientId: "", name: "", quantityNeeded: 0, measureUnit: "" })}
                             size="sm"
-                            variant="secondary-warning"
-                        // style={{ marginTop: 28 }} // Align with inputs
+                            title={t("add_ingredient")}
+                            variant="soft"
+                            style={{ alignSelf: 'flex-start' }}
                         />
                     </View>
-                ))}
-                <Button
-                    leftIcon={() => <IcPlus color="white" />}
-                    onPress={() => append({ ingredientId: "", name: "", quantityNeeded: 0, measureUnit: "" })}
-                    size="sm"
-                    title={t("add_ingredient")}
-                    variant="soft"
-                    style={{ alignSelf: 'flex-start' }}
-                />
-            </View>
+                )}
         </View>
     );
 };

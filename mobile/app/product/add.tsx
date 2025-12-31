@@ -21,9 +21,9 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 import Input from "@/components/ui/Input";
 import { useCategoryStore } from "@/store/useProductCategoryStore";
 import { useProductCategoriesQuery } from "@/services/queries/useProductCategoriesQuery";
-import { useMeasureUnitsQuery } from "@/services/queries/useMeasureUnitsQuery";
+
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
-import { useMeasureUnitStore } from "@/store/useMeasureUnitStore";
+
 import useImageSelectionStore from "@/store/useImageSelectionStore";
 import { useIngredientStore } from "@/store/useIngredientStore";
 import { useCreateProductMutation } from "@/services/mutations/useCreateProductMutation";
@@ -78,10 +78,7 @@ const productSchema = z.object({
 		code: z.string().min(2, "Category code must be at least 2 characters"),
 		name: z.string().min(2, "Category name must be at least 2 characters"),
 	}),
-	measureUnit: z.object({
-		code: z.string().min(2, "Measure unit code must be at least 2 characters"),
-		name: z.string().min(2, "Measure unit name must be at least 2 characters"),
-	}),
+
 	commission: z
 		.number()
 		.min(0, "Commission must be a positive number")
@@ -124,7 +121,7 @@ const AddProduct = () => {
 	const { mutateAsync: uploadImage } = useUploadImageMutation();
 	const { data: productToEdit } = useProductQuery(id!, isEditing);
 	const { data: categories } = useProductCategoriesQuery();
-	const { data: measureUnits } = useMeasureUnitsQuery();
+
 
 	const {
 		reset: resetImageSelectionStore,
@@ -135,10 +132,7 @@ const AddProduct = () => {
 		setSaveCallback: setSaveCategoryCallback,
 	} = useCategoryStore();
 
-	const {
-		reset: resetMeasureUnitStore,
-		setSaveCallback: setSaveMeasureUnitCallback,
-	} = useMeasureUnitStore();
+
 
 	const {
 		reset: resetIngredientStore,
@@ -179,7 +173,7 @@ const AddProduct = () => {
 			sellingPrice: undefined,
 			buyingPrice: undefined,
 			category: undefined,
-			measureUnit: undefined,
+
 			commission: undefined,
 			description: undefined,
 			stock: undefined,
@@ -191,13 +185,11 @@ const AddProduct = () => {
 
 	// Populate form when product data is loaded
 	useEffect(() => {
-		if (productToEdit && categories && measureUnits) {
+		if (productToEdit && categories) {
 			const category = categories.find(
 				(c) => c.code === productToEdit.categoryCode,
 			);
-			const measureUnit = measureUnits.find(
-				(m) => m.code === productToEdit.measureUnitCode,
-			);
+
 
 			setValue("name", productToEdit.name);
 			setValue("sellingPrice", productToEdit.sellingPrice);
@@ -224,12 +216,7 @@ const AddProduct = () => {
 			if (category) {
 				setValue("category", { code: category.code, name: category.name });
 			}
-			if (measureUnit) {
-				setValue("measureUnit", {
-					code: measureUnit.code,
-					name: measureUnit.name,
-				});
-			}
+
 
 			if (productToEdit.ingredients) {
 				const ingredients = productToEdit.ingredients.map((ing) => ({
@@ -252,7 +239,7 @@ const AddProduct = () => {
 			// 	} as any);
 			// });
 		}
-	}, [productToEdit, categories, measureUnits, setValue, setImageUri]);
+	}, [productToEdit, categories, setValue, setImageUri]);
 
 	// Sync variants to store
 	useEffect(() => {
@@ -268,12 +255,12 @@ const AddProduct = () => {
 					name: opt.name,
 					stock: opt.stock,
 					priceAdjusment: opt.priceAdjusment,
-                    ingredients: opt.ingredients?.map(ing => ({
-                        ingredientId: ing.ingredientId,
-                        name: ing.name,
-                        quantityNeeded: ing.quantityNeeded,
-                        measureUnit: ing.measureUnit
-                    }))
+					ingredients: opt.ingredients?.map(ing => ({
+						ingredientId: ing.ingredientId,
+						name: ing.name,
+						quantityNeeded: ing.quantityNeeded,
+						measureUnit: ing.measureUnit
+					}))
 				}))
 			}));
 			setVariants(mappedVariants);
@@ -294,19 +281,7 @@ const AddProduct = () => {
 		}
 	}, [categories, setValue, getValues, isEditing]);
 
-	useEffect(() => {
-		if (
-			!isEditing &&
-			measureUnits &&
-			measureUnits.length > 0 &&
-			!getValues("measureUnit")
-		) {
-			setValue("measureUnit", {
-				code: measureUnits[0].code,
-				name: measureUnits[0].name,
-			});
-		}
-	}, [measureUnits, setValue, getValues, isEditing]);
+
 
 	// Watch selling price to update tax amount when price changes
 	// (keeping percentage constant)
@@ -350,7 +325,7 @@ const AddProduct = () => {
 		return () => {
 			resetImageSelectionStore();
 			resetCategoryStore();
-			resetMeasureUnitStore();
+
 			resetIngredientStore();
 			resetVariantStore();
 		};
@@ -376,7 +351,7 @@ const AddProduct = () => {
 				description: data.description || "",
 				categoryCode: data.category.code,
 				imageUrl: uploadedImageUrl || "",
-				measureUnitCode: data.measureUnit.code,
+
 
 				sellingPrice: isTaxIncluded && taxRate
 					? data.sellingPrice / (1 + taxRate / 100)
@@ -415,7 +390,7 @@ const AddProduct = () => {
 				}
 
 				// 2. Create or Update variants
-                console.log("Saving variants. Count:", storeVariants.length);
+				console.log("Saving variants. Count:", storeVariants.length);
 				const variantPromises = storeVariants.map(async (variant) => {
 					const variantPayload = {
 						productId: currentProductId!, // Asserting non-null as we checked currentProductId
@@ -426,14 +401,14 @@ const AddProduct = () => {
 							name: opt.name,
 							stock: opt.stock,
 							priceAdjusment: opt.priceAdjusment,
-                            ingredients: opt.ingredients?.map(ing => ({
-                                ingredientId: ing.ingredientId,
-                                quantityNeeded: ing.quantityNeeded
-                            })),
+							ingredients: opt.ingredients?.map(ing => ({
+								ingredientId: ing.ingredientId,
+								quantityNeeded: ing.quantityNeeded
+							})),
 						}))
 					};
-                    
-                    console.log("Processing variant:", variant.name, "isNew:", variant.isNew, "Payload:", JSON.stringify(variantPayload));
+
+					console.log("Processing variant:", variant.name, "isNew:", variant.isNew, "Payload:", JSON.stringify(variantPayload));
 
 					if (variant.isNew) {
 						return createVariant(variantPayload);
@@ -497,23 +472,7 @@ const AddProduct = () => {
 		});
 	};
 
-	const handleSelectMeasureUnitPress = (measureUnit: {
-		code: string;
-		name: string;
-	}) => {
-		setSaveMeasureUnitCallback((selectedMeasureUnit) => {
-			if (selectedMeasureUnit) {
-				setValue("measureUnit", selectedMeasureUnit);
-			}
-		});
 
-		router.push({
-			pathname: "/modal/product/select-measure-unit",
-			params: {
-				...measureUnit,
-			},
-		});
-	};
 
 	const handleSelectIngredientPress = () => {
 		setSaveIngredientCallback((selectedIngredients) => {
@@ -725,30 +684,7 @@ const AddProduct = () => {
 							)}
 						/>
 					</FormSectionCard>
-					<FormSectionCard required title={t("measure_unit")}>
-						<Controller
-							control={control}
-							name="measureUnit"
-							render={({
-								field: { onChange, value },
-								fieldState: { error },
-							}) => (
-								<View style={$.categoryContainer}>
-									{!!value && (
-										<Text style={$.selectedCategoryText}>
-											{value?.name} ({value?.code})
-										</Text>
-									)}
-									<Button
-										onPress={() => handleSelectMeasureUnitPress(value)}
-										size="lg"
-										title={value ? t("change_measure_unit") : t("select_measure_unit")}
-										variant="soft"
-									/>
-								</View>
-							)}
-						/>
-					</FormSectionCard>
+
 
 					<FormSectionCard title={t("variants")}>
 						<View style={$.categoryContainer}>
@@ -980,41 +916,6 @@ const AddProduct = () => {
 							)}
 						/>
 					</FormSectionCard>
-
-					{/* {isStockManagementEnabled && (
-						<FormSectionCard title={t("stock_management")}>
-							<Controller
-								control={control}
-								name="stock"
-								render={({
-									field: { onChange, ref, value },
-									fieldState: { error },
-								}) => (
-									<Input
-										editable={!disableAction}
-										error={error?.message}
-										keyboardType="numeric"
-										label={t("initial_stock_required")}
-										maxLength={10}
-										onChangeText={(text: string) =>
-											onChange(parseNumber(text))
-										}
-										ref={ref}
-										returnKeyType="done"
-										size="lg"
-										value={
-											value !== undefined ? formatNumber(value || 0) : ""
-										}
-									/>
-								)}
-							/>
-						</FormSectionCard>
-					)} */}
-
-					{/* <FormSectionCard title="Product Variant">
-						<Button size="lg" title="Add New Variant" variant="soft" />
-						<Button size="lg" title="Choose Existing Variant" variant="soft" />
-					</FormSectionCard> */}
 
 					<FormSectionCard title={t("product_ingredient")}>
 						<Controller
