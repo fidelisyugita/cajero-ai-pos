@@ -40,7 +40,7 @@ public class StockMovementService {
 
   public Page<StockMovementResponse> getStockMovements(
       UUID storeId, int page, int size, String sortBy, String sortDir,
-      LocalDate startDate, LocalDate endDate, UUID ingredientId, UUID productId, String typeCode) {
+      LocalDate startDate, LocalDate endDate, UUID ingredientId, UUID productId, UUID variantId, String typeCode) {
 
     Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
         : Sort.by(sortBy).descending();
@@ -56,6 +56,9 @@ public class StockMovementService {
       }
       if (productId != null) {
         predicates.add(cb.equal(root.get("productId"), productId));
+      }
+      if (variantId != null) {
+        predicates.add(cb.equal(root.get("variantId"), variantId));
       }
       if (startDate != null) {
         predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay()));

