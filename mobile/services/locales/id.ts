@@ -270,7 +270,9 @@ export default {
     e_g_size_color: "cth. Ukuran, Warna",
     multiple_selection: "Pilihan Ganda",
     stock: "Stok",
-    price_adj: "Penyesuaian Harga",
+    price_adj: "Penambahan Harga",
     add_option: "Tambah Opsi",
     select_option: "Pilih Opsi",
+    option: "Opsi",
+    ingredient: "Bahan Baku",
 };
