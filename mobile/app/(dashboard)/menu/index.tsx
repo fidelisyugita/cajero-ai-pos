@@ -15,7 +15,7 @@ import MenuSearchBar from "@/components/menu/MenuSearchBar";
 /**
  * 
  * TODO
- * implement store settings maybe update API & DB, to have max_discount in percent, limit view all report/receipt
+ * implement store settings maybe update API & DB, to have special_code for limit view all report/receipt
  */
 const MenuScreen = () => {
 	return (

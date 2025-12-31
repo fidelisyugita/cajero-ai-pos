@@ -184,8 +184,9 @@ MeasureUnitItem.displayName = "MeasureUnitItem";
 
 const $ = StyleSheet.create((theme) => ({
 	modal: {
-		aspectRatio: 649 / 874,
+		// aspectRatio: 649 / 874,
 		width: vs(649),
+		height: "90%",
 	},
 	flex: {
 		flex: 1,
