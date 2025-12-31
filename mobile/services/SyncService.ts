@@ -260,7 +260,7 @@ export const SyncService = {
               selectedVariants: parsedVariants
             };
           }),
-          // createdAt: txn.createdAt // Backend usually ignores or auto-sets this on POST
+          createdAt: txn.createdAt ? txn.createdAt.toISOString() : undefined // Send local creation time
         };
 
         // Send to API
