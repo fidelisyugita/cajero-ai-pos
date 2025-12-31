@@ -13,7 +13,7 @@ import EmptyState from "@/components/ui/EmptyState";
 
 interface EmployeeListCardProps {
 	employees: Employee[];
-	onAddEmployee: () => void;
+	onAddEmployee?: () => void;
 	loading?: boolean;
 }
 
@@ -60,7 +60,7 @@ const EmployeeListCard = ({
 								/>
 							))
 						)}
-						{!loading && (
+						{!loading && onAddEmployee && employees.length < 5 && (
 							<Button
 								title={t("add_employee")}
 								variant="primary"

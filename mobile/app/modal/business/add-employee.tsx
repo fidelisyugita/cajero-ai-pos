@@ -163,9 +163,11 @@ const AddEmployeeModal = () => {
 const $ = StyleSheet.create((theme) => ({
   modal: {
     width: vs(500),
-    maxHeight: "90%",
+    height: "80%",
+    maxHeight: vs(900),
   },
   container: {
+    flex: 1,
     backgroundColor: theme.colors.neutral[100],
   },
   scrollContent: {
