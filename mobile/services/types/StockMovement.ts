@@ -4,6 +4,7 @@ export interface StockMovement {
 	updatedAt: string;
 	storeId: string;
 	ingredientId: string;
+	variantId: string | null;
 	productId: string | null;
 	transactionId: string | null;
 	type: string;
