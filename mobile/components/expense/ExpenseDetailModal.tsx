@@ -70,7 +70,7 @@ const ExpenseDetailModal = ({ visible, onClose, expense }: ExpenseDetailModalPro
               <View style={$.row}>
                 <Text style={$.label}>Date</Text>
                 <Text style={$.value}>
-                  {dayjs(expense.createdAt).format("DD MMM YYYY, HH:mm")}
+                  {dayjs.utc(expense.createdAt).local().format("DD MMM YYYY, HH:mm")}
                 </Text>
               </View>
 

@@ -26,8 +26,7 @@ export interface Product {
 	soldCount: number;
 	categoryCode: string;
 	categoryName?: string; // Added for display
-	measureUnitCode: string;
-	measureUnitName: string;
+
 	barcode: string;
 	buyingPrice: number;
 	sellingPrice: number;
@@ -59,7 +58,6 @@ export interface CreateProductRequest {
 	buyingPrice: number;
 	sellingPrice: number;
 	categoryCode: string;
-	measureUnitCode: string;
 	imageUrl?: string;
 	barcode?: string;
 	tax?: number;

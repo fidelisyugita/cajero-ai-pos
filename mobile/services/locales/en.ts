@@ -272,7 +272,7 @@ export default {
     add_variant: "Add Variant",
     variant_details: "Variant Details",
     variant_name: "Variant Name",
-    e_g_size_color: "e.g. Size, Color",
+    e_g_size_color: "e.g. Size",
     multiple_selection: "Multiple Selection",
     stock: "Stock",
     price_adj: "Increase Price",

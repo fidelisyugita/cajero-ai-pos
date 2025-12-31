@@ -135,9 +135,9 @@ const ExpenseRow = memo(({ item, onPress }: { item: PettyCash; onPress: () => vo
 		<View style={$.row}>
 			{/* Time */}
 			<View style={{ flex: COLUMNS[0].flex }}>
-				<Text style={$.timeText}>{dayjs(item.createdAt).format("HH:mm")}</Text>
+				<Text style={$.timeText}>{dayjs.utc(item.createdAt).local().format("HH:mm")}</Text>
 				<Text style={$.dateText}>
-					{dayjs(item.createdAt).format("ddd, DD MMM")}
+					{dayjs.utc(item.createdAt).local().format("ddd, DD MMM")}
 				</Text>
 			</View>
 

@@ -267,7 +267,7 @@ export default {
     add_variant: "Tambah Varian",
     variant_details: "Detail Varian",
     variant_name: "Nama Varian",
-    e_g_size_color: "cth. Ukuran, Warna",
+    e_g_size_color: "cth. Ukuran",
     multiple_selection: "Pilihan Ganda",
     stock: "Stok",
     price_adj: "Penambahan Harga",
