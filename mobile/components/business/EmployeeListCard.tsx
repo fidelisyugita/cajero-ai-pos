@@ -60,7 +60,7 @@ const EmployeeListCard = ({
 								/>
 							))
 						)}
-						{!loading && onAddEmployee && (
+						{!loading && onAddEmployee && employees.length < 5 && (
 							<Button
 								title={t("add_employee")}
 								variant="primary"
