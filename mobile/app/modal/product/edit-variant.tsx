@@ -7,6 +7,7 @@ import { Alert, Text, View, ScrollView } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcPlus from "@/assets/icons/plus.svg";
 import IcTrash from "@/assets/icons/trash.svg";
+import IcX from "@/assets/icons/x.svg";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
@@ -152,8 +153,8 @@ const EditVariantModal = () => {
                     </FormSectionCard>
 
                     <FormSectionCard title={t("options")} required>
-                         {fields.map((field, index) => (
-                             <VariantOptionItem
+                        {fields.map((field, index) => (
+                            <VariantOptionItem
                                 key={field.id}
                                 control={control}
                                 index={index}
@@ -161,9 +162,9 @@ const EditVariantModal = () => {
                                 canRemove={fields.length > 1}
                                 ingredientOptions={ingredientOptions}
                                 allIngredients={ingredientsData || []}
-                             />
-                         ))}
-                         <Button
+                            />
+                        ))}
+                        <Button
                             leftIcon={() => <IcPlus color="white" />}
                             onPress={() => append({ id: createTempId(), name: "", stock: 0, priceAdjusment: 0, ingredients: [] })}
                             size="sm"
@@ -171,7 +172,7 @@ const EditVariantModal = () => {
                             variant="primary"
                             style={{ alignSelf: 'flex-start' }}
                         />
-                         {errors.options && <Text style={$.errorText}>{errors.options.message}</Text>}
+                        {errors.options && <Text style={$.errorText}>{errors.options.message}</Text>}
                     </FormSectionCard>
                 </ScrollView>
             </ScreenModal.Body>
@@ -213,35 +214,21 @@ const VariantOptionItem = ({ control, index, remove, canRemove, ingredientOption
                     disabled={!canRemove}
                 />
             </View>
-            
+
             <View style={$.optionRow}>
                 <View style={[$.optionInputs, { flexDirection: 'column' }]}>
-                    <Controller
-                        control={control}
-                        name={`options.${index}.name`}
-                        render={({ field: { onChange, value }, fieldState: { error } }) => (
-                            <Input
-                                label={t("name")}
-                                value={value}
-                                onChangeText={onChange}
-                                error={error?.message}
-                                size="md"
-                            />
-                        )}
-                    />
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                         <Controller
                             control={control}
-                            name={`options.${index}.stock`}
+                            name={`options.${index}.name`}
                             render={({ field: { onChange, value }, fieldState: { error } }) => (
                                 <Input
-                                    label={t("stock")}
-                                    value={value.toString()}
-                                    onChangeText={onChange} 
+                                    label={t("name")}
+                                    value={value}
+                                    onChangeText={onChange}
                                     error={error?.message}
-                                    keyboardType="numeric"
                                     size="md"
-                                    containerStyle={{ flex: 1 }}
+                                    containerStyle={{ flex: 1.5 }}
                                 />
                             )}
                         />
@@ -256,7 +243,22 @@ const VariantOptionItem = ({ control, index, remove, canRemove, ingredientOption
                                     error={error?.message}
                                     keyboardType="numeric"
                                     size="md"
-                                        containerStyle={{ flex: 1 }}
+                                    containerStyle={{ flex: 1 }}
+                                />
+                            )}
+                        />
+                        <Controller
+                            control={control}
+                            name={`options.${index}.stock`}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                                <Input
+                                    label={t("stock")}
+                                    value={value.toString()}
+                                    onChangeText={onChange}
+                                    error={error?.message}
+                                    keyboardType="numeric"
+                                    size="md"
+                                    containerStyle={{ flex: 1 }}
                                 />
                             )}
                         />
@@ -274,13 +276,13 @@ const VariantOptionItem = ({ control, index, remove, canRemove, ingredientOption
                             name={`options.${index}.ingredients.${ingIndex}.ingredientId`}
                             render={({ field: { onChange, value } }) => (
                                 <Select
-                                    label={t("ingredient")}
+                                    // label={t("ingredient")}
                                     options={ingredientOptions}
                                     value={value}
                                     onSelect={(val) => {
                                         onChange(val);
                                     }}
-                                    containerStyle={{ flex: 2 }}
+                                    containerStyle={{ flex: 2, }}
                                     placeholder={t("select_ingredient")}
                                 />
                             )}
@@ -300,12 +302,12 @@ const VariantOptionItem = ({ control, index, remove, canRemove, ingredientOption
                                 />
                             )}
                         />
-                         <IconButton
-                            Icon={IcTrash}
+                        <IconButton
+                            Icon={IcX}
                             onPress={() => removeIngredient(ingIndex)}
                             size="sm"
-                            variant="warning"
-                            style={{ marginTop: 28 }} // Align with inputs
+                            variant="secondary-warning"
+                        // style={{ marginTop: 28 }} // Align with inputs
                         />
                     </View>
                 ))}
@@ -351,9 +353,9 @@ const $ = StyleSheet.create((theme) => ({
         marginBottom: theme.spacing.sm,
     },
     optionInputs: {
-         flex: 1,
-         flexDirection: 'row',
-         gap: theme.spacing.xs,
+        flex: 1,
+        flexDirection: 'row',
+        gap: theme.spacing.xs,
     },
     errorText: {
         ...theme.typography.bodySm,
@@ -394,7 +396,7 @@ const $ = StyleSheet.create((theme) => ({
     ingredientRow: {
         flexDirection: 'row',
         gap: theme.spacing.sm,
-        alignItems: 'flex-start',
+        alignItems: 'center',
     }
 }));
 

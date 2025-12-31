@@ -275,10 +275,9 @@ export default {
     e_g_size_color: "e.g. Size, Color",
     multiple_selection: "Multiple Selection",
     stock: "Stock",
-    price_adj: "Price Adj.",
+    price_adj: "Increase Price",
     add_option: "Add Option",
     select_option: "Select Option",
     option: "Option",
-    ingredients: "Ingredients",
     ingredient: "Ingredient",
 };
