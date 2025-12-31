@@ -14,9 +14,10 @@ import com.huzakerna.cajero.model.VariantOption;
 import com.huzakerna.cajero.repository.VariantRepository;
 import com.huzakerna.cajero.util.ChangeTracker;
 import com.huzakerna.cajero.repository.StoreRepository;
-import com.huzakerna.cajero.repository.VariantOptionRepository;
+import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.IngredientRepository;
 import com.huzakerna.cajero.model.Ingredient;
+import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.VariantOptionIngredient;
 import com.huzakerna.cajero.model.VariantOptionIngredientId;
 import com.huzakerna.cajero.dto.VariantOptionIngredientRequest;
@@ -33,10 +34,10 @@ public class VariantService {
 
   private final StoreRepository sRepo;
   private final VariantRepository repo;
-  private final VariantOptionRepository voRepo;
   private final VariantOptionService voService;
   private final LogService logService;
   private final IngredientRepository iRepo;
+  private final ProductRepository pRepo;
 
   public List<VariantResponse> getAllByStoreId(UUID storeId) {
     return repo.findByStoreIdAndDeletedAtIsNull(storeId).stream()
@@ -57,10 +58,14 @@ public class VariantService {
       throw new IllegalArgumentException("Store not found");
     }
 
+    // Validate product exists
+    Product product = pRepo.findById(request.getProductId())
+        .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
     Variant variant = repo.save(
         Variant.builder()
             .storeId(storeId)
-            .productId(request.getProductId())
+            .product(product) // Set the relationship
             .name(request.getName())
             .description(request.getDescription())
             .isRequired(request.isRequired())
