@@ -2,7 +2,7 @@ import api from "@/lib/axios";
 
 export interface StockUpdateRequest {
   id: string;
-  type: "INGREDIENT" | "PRODUCT";
+  type: "INGREDIENT" | "PRODUCT" | "VARIANT";
   newStock: number;
   reason?: string;
 }

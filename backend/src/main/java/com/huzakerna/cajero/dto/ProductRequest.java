@@ -34,10 +34,6 @@ public class ProductRequest {
     @NotNull(message = "Category Code is required")
     private String categoryCode;
 
-    @NotBlank
-    @Size(max = 10)
-    private String measureUnitCode; // Stores the measure unit code
-
     // Optional fields with validation
     // @Size(max = 255, message = "Image URL too long")
     private String imageUrl;

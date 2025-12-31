@@ -170,6 +170,10 @@ public class StockMovementService {
   }
 
   private void updateVariantStock(StockMovement movement) {
+    /**
+     * TODO
+     * need to adjust, since variant option could be more than one in one variant
+     */
     var option = variantOptionRepo.findById(movement.getVariantId())
         .orElseThrow(() -> new RuntimeException("Variant Option not found"));
 
@@ -221,6 +225,29 @@ public class StockMovementService {
       movement.setStoreId(storeId);
       movement.setProductId(request.getId());
       movement.setQuantity(difference.abs());
+      movement.setType(StockMovementType.ADJUSTMENT);
+
+      addStockMovement(storeId, movement);
+    } else if (request.getType().equalsIgnoreCase("VARIANT")) {
+      /**
+       * TODO
+       * need to adjust, since it change variant option stock
+       * not variant, since variant is not stockable
+       */
+      var option = variantOptionRepo.findById(request.getId())
+          .orElseThrow(() -> new RuntimeException("Variant Option not found"));
+
+      BigDecimal currentStock = option.getStock() != null ? option.getStock() : BigDecimal.ZERO;
+      BigDecimal difference = request.getNewStock().subtract(currentStock);
+
+      if (difference.compareTo(BigDecimal.ZERO) == 0) {
+        return;
+      }
+
+      StockMovement movement = new StockMovement();
+      movement.setStoreId(storeId);
+      movement.setVariantId(request.getId());
+      movement.setQuantity(difference);
       movement.setType(StockMovementType.ADJUSTMENT);
 
       addStockMovement(storeId, movement);

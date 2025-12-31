@@ -160,7 +160,7 @@ public class VariantService {
             .variant(variant)
             .name(req.getName())
             .priceAdjusment(req.getPriceAdjusment())
-            .stock(req.getStock())
+            // .stock(req.getStock()) // Available through StockMovement
             .build();
 
         // If ID is provided, maintain it to update existing record instead of

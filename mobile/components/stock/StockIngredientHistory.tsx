@@ -59,7 +59,7 @@ const StockIngredientHistory = ({ ingredient, onClose }: StockIngredientHistoryP
                             onEndReachedThreshold={0.5}
                             renderItem={({ item }: { item: StockMovement }) => (
                                 <View style={$.row}>
-                                    <Text style={$.cell}>{dayjs(item.createdAt).format("DD/MM/YY HH:mm")}</Text>
+                                    <Text style={$.cell}>{dayjs.utc(item.createdAt).local().format("DD/MM/YY HH:mm")}</Text>
                                     <Text style={[$.cell, { color: item.type === 'IN' ? 'green' : 'red' }]}>{item.type}</Text>
                                     <Text style={$.cell}>{item.quantity}</Text>
                                     <Text style={$.cell}>{item.createdByName || '-'}</Text>

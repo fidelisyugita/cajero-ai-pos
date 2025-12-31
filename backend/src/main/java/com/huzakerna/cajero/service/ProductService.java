@@ -15,13 +15,13 @@ import com.huzakerna.cajero.dto.ProductIngredientRequest;
 import com.huzakerna.cajero.dto.ProductIngredientResponse;
 import com.huzakerna.cajero.dto.ProductRequest;
 import com.huzakerna.cajero.dto.ProductResponse;
-import com.huzakerna.cajero.model.MeasureUnit;
+
 import com.huzakerna.cajero.model.Product;
 import com.huzakerna.cajero.model.ProductIngredient;
 import com.huzakerna.cajero.model.ProductIngredientId;
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.IngredientRepository;
-import com.huzakerna.cajero.repository.MeasureUnitRepository;
+
 import com.huzakerna.cajero.repository.ProductIngredientRepository;
 import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.repository.StoreRepository;
@@ -40,7 +40,7 @@ public class ProductService {
   private final ProductRepository repo;
   private final ProductIngredientRepository piRepo;
   private final IngredientRepository iRepo;
-  private final MeasureUnitRepository muRepo;
+
   private final LogService logService;
 
   public ProductResponse addProduct(UUID storeId, ProductRequest request) {
@@ -48,9 +48,6 @@ public class ProductService {
     if (!sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
-    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
-        .orElseThrow(
-            () -> new EntityNotFoundException("Measure Unit not found"));
 
     Product product = repo.save(
         Product.builder()
@@ -61,7 +58,6 @@ public class ProductService {
             .sellingPrice(request.getSellingPrice())
             .stock(request.getStock())
             .categoryCode(request.getCategoryCode())
-            .measureUnit(measureUnit)
             .imageUrl(request.getImageUrl())
             .barcode(request.getBarcode())
             .commission(request.getCommission())
@@ -177,10 +173,6 @@ public class ProductService {
       throw new IllegalArgumentException("Product does not belong to the store");
     }
 
-    MeasureUnit measureUnit = muRepo.findById(request.getMeasureUnitCode())
-        .orElseThrow(
-            () -> new EntityNotFoundException("Measure Unit not found"));
-
     // Create log details
     var logDetails = new java.util.HashMap<String, Object>();
     logDetails.put("productId", id);
@@ -194,7 +186,7 @@ public class ProductService {
     changeTracker.compareAndTrack("sellingPrice", product.getSellingPrice(), request.getSellingPrice());
     changeTracker.compareAndTrack("stock", product.getStock(), request.getStock());
     changeTracker.compareAndTrack("categoryCode", product.getCategoryCode(), request.getCategoryCode());
-    changeTracker.compareAndTrack("measureUnitCode", product.getMeasureUnit().getCode(), request.getMeasureUnitCode());
+
     changeTracker.compareAndTrack("imageUrl", product.getImageUrl(), request.getImageUrl());
     changeTracker.compareAndTrack("barcode", product.getBarcode(), request.getBarcode());
     changeTracker.compareAndTrack("commission", product.getCommission(), request.getCommission());
@@ -252,7 +244,7 @@ public class ProductService {
     product.setSellingPrice(request.getSellingPrice());
     product.setStock(request.getStock());
     product.setCategoryCode(request.getCategoryCode());
-    product.setMeasureUnit(measureUnit);
+
     product.setImageUrl(request.getImageUrl());
     product.setBarcode(request.getBarcode());
     product.setCommission(request.getCommission());
@@ -356,8 +348,7 @@ public class ProductService {
         .rejectCount(product.getRejectCount())
         .soldCount(product.getSoldCount())
         .categoryCode(product.getCategoryCode())
-        .measureUnitCode(product.getMeasureUnit().getCode())
-        .measureUnitName(product.getMeasureUnit().getName())
+
         .buyingPrice(product.getBuyingPrice())
         .sellingPrice(product.getSellingPrice())
         .barcode(product.getBarcode())
