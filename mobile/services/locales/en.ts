@@ -14,6 +14,8 @@ export default {
     list_of_printer: "List of Printer",
     add_printer: "Add Printer",
     test_printer: "Test Printer",
+    auto_print: "Auto Print",
+    auto_print_desc: "Print receipt automatically after payment success",
     scan_devices: "Scan Devices",
     stop_scan: "Stop Scan",
     connect: "Connect",

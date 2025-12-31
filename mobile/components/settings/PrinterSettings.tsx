@@ -9,10 +9,11 @@ import { Feather } from "@expo/vector-icons";
 import FormSectionCard from "@/components/ui/FormSectionCard";
 import EmptyState from "@/components/ui/EmptyState";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
+import Switch from "@/components/ui/Switch";
 import Logger from "@/services/logger";
 
 const PrinterSettings = () => {
-    const { connectedDevice, isConnected, setConnectedDevice, setIsConnected } = usePrinterStore();
+    const { connectedDevice, isConnected, setConnectedDevice, setIsConnected, isAutoPrintEnabled, setIsAutoPrintEnabled } = usePrinterStore();
     const [devices, setDevices] = useState<PrinterDevice[]>([]);
     const [isScanning, setIsScanning] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
@@ -152,6 +153,20 @@ const PrinterSettings = () => {
             style={{ flex: 1 }}
             contentStyle={$.container}
         >
+            {/* Auto Print Setting */}
+             <View >
+                <View style={$.rowBetween}>
+                    <View>
+                        <Text style={$.sectionTitle}>{t("auto_print")}</Text>
+                        <Text style={$.sectionSubtitle}>{t("auto_print_desc")}</Text>
+                    </View>
+                    <Switch 
+                        value={isAutoPrintEnabled} 
+                        onValueChange={setIsAutoPrintEnabled}
+                    />
+                </View>
+            </View>
+
             {/* Saved / Connected Printer Section */}
             {connectedDevice && (
                 <View style={$.section}>
@@ -319,6 +334,16 @@ const $ = StyleSheet.create((theme) => ({
         color: theme.colors.neutral[700],
     },
     printerType: {
+        ...theme.typography.bodySm,
+        color: theme.colors.neutral[500],
+    },
+    rowBetween: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: theme.spacing.sm,
+    },
+    sectionSubtitle: {
         ...theme.typography.bodySm,
         color: theme.colors.neutral[500],
     },

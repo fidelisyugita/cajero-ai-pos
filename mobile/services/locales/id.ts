@@ -14,6 +14,8 @@ export default {
     list_of_printer: "Daftar Printer",
     add_printer: "Tambah Printer",
     test_printer: "Tes Printer",
+    auto_print: "Cetak Otomatis",
+    auto_print_desc: "Cetak struk secara otomatis setelah pembayaran berhasil",
     scan_devices: "Pindai Perangkat",
     stop_scan: "Hentikan Pindai",
     connect: "Sambungkan",

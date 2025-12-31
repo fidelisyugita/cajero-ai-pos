@@ -15,6 +15,7 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 import { useReferenceStore } from "@/store/useReferenceStore";
 import { useDraftStore } from "@/store/useDraftStore";
 import { printerService } from "@/services/PrinterService";
+import { usePrinterStore } from "@/store/PrinterStore";
 import { formatCurrency } from "@/utils/Format";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
 import Logger from "@/services/logger";
@@ -26,6 +27,7 @@ const PaymentScreen = () => {
     const tableNumber = useOrderStore((state) => state.tableNumber);
     const globalDiscount = useOrderStore((state) => state.discount);
     const clearOrder = useOrderStore((state) => state.clearOrder);
+    const { isAutoPrintEnabled, connectedDevice, isConnected: isPrinterConnected } = usePrinterStore();
 
     const { mutate: createTransaction, isPending } = useCreateTransactionMutation();
 
@@ -93,6 +95,33 @@ const PaymentScreen = () => {
             onSuccess: (data) => {
                 setLastTransactionNumber(data.id || "2023-0001");
                 setIsSuccess(true);
+                
+                // Auto Payment Success Print Logic
+                if (isAutoPrintEnabled && isPrinterConnected && connectedDevice) {
+                     // We construct receipt data similar to handlePrintReceipt
+                     const receiptData = {
+                        title: "RECEIPT / STRUK",
+                        subtotal: formatCurrency(finalSubtotal),
+                        discount: formatCurrency(globalDiscount),
+                        tax: formatCurrency(totalTax),
+                        total: formatCurrency(total),
+                        paymentMethod: selectedMethod,
+                        items: transactionProducts.map(p => ({
+                            name: items.find(i => i.productId === p.productId)?.name || "Item",
+                            quantity: p.quantity,
+                            price: formatCurrency(p.sellingPrice * p.quantity)
+                        })),
+                        footerMessage: "Thank you for your visit!",
+                        transactionId: data.id || "2023-0001",
+                        transactionDate: new Date() // Use current time or data.createdAt
+                    };
+                    
+                    // Fire and forget print (or handle error quietly/toast)
+                    printerService.printReceipt(receiptData).catch(err => {
+                        Logger.error("Auto print failed", err);
+                        // Optional: Alert user visually or toast
+                    });
+                }
             },
             onError: (error) => {
                 Alert.alert("Payment Failed", "An error occurred while processing the transaction.");
