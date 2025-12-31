@@ -71,7 +71,8 @@ public class SecurityConfig {
             .requestMatchers("/api/public/**").permitAll()
             .requestMatchers("/api/image/**").permitAll()
             .requestMatchers("/actuator/health").permitAll()
-            .requestMatchers("/api/ai/**").hasRole("OWNER")
+            .requestMatchers("/api/ai/**").hasAnyRole("OWNER", "MANAGER")
+            .requestMatchers("/api/reports/**").hasAnyRole("OWNER", "MANAGER")
             .requestMatchers("/api/**").authenticated())
         .userDetailsService(userDetailsService)
         .sessionManagement(session -> session

@@ -30,6 +30,9 @@ import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
 import com.huzakerna.cajero.repository.TransactionRepository;
+import com.huzakerna.cajero.repository.VariantOptionRepository;
+import com.huzakerna.cajero.model.VariantOption;
+import com.huzakerna.cajero.model.VariantOptionIngredient;
 import com.huzakerna.cajero.util.ChangeTracker;
 
 import lombok.RequiredArgsConstructor;
@@ -47,12 +50,13 @@ public class TransactionService {
   private final StockMovementService stockMovementService;
   private final LogService logService;
   private final CustomerService customerService;
+  private final VariantOptionRepository voRepo;
 
   @Transactional
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     log.info("Adding transaction for store: {}", storeId);
     // Validate store exists
-    if (!sRepo.existsById(storeId)) {
+    if (storeId == null || !sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
@@ -165,19 +169,8 @@ public class TransactionService {
 
     tpRepo.save(transactionProduct);
 
-    // Deduct stock for ingredients
-    handleStockMovement(transaction, product, quantity, StockMovementType.SALE);
-
-    // Deduct stock for product (Standardized via StockMovementService)
-    if (product.getStock() != null) {
-      stockMovementService.addStockMovement(transaction.getStoreId(),
-          StockMovement.builder()
-              .productId(product.getId())
-              .transactionId(transaction.getId())
-              .type(StockMovementType.SALE)
-              .quantity(quantity.negate())
-              .build());
-    }
+    // Deduct stock for ingredients / variants / products
+    handleStockMovement(transaction, product, quantity, selectedVariants, StockMovementType.SALE);
 
     return transactionProduct;
   }
@@ -201,7 +194,8 @@ public class TransactionService {
 
   // Helper to handle stock movement
   private void handleStockMovement(Transaction transaction, Product product, BigDecimal quantity,
-      StockMovementType type) {
+      JsonNode selectedVariants, StockMovementType type) {
+    // 1. Base Product Ingredients
     if (product.getIngredients() != null) {
       for (ProductIngredient pi : product.getIngredients()) {
         Ingredient ingredient = pi.getIngredient();
@@ -217,6 +211,61 @@ public class TransactionService {
                 .build());
       }
     }
+
+    // 2. Variant Ingredients
+    if (selectedVariants != null && selectedVariants.isArray()) {
+      for (JsonNode node : selectedVariants) {
+        if (node.has("optionId")) {
+          try {
+            UUID optionId = UUID.fromString(node.get("optionId").asText());
+            VariantOption option = voRepo.findById(optionId).orElse(null);
+
+            if (option != null) {
+              // Priority 1: If mapped to ingredients, deduct ingredients (Cafe Case)
+              if (option.getIngredients() != null && !option.getIngredients().isEmpty()) {
+                for (VariantOptionIngredient voi : option.getIngredients()) {
+                  BigDecimal requiredQty = voi.getQuantityNeeded().multiply(quantity);
+
+                  stockMovementService.addStockMovement(transaction.getStoreId(),
+                      StockMovement.builder()
+                          .ingredientId(voi.getIngredient().getId())
+                          .productId(product.getId())
+                          .transactionId(transaction.getId())
+                          .type(type)
+                          .quantity(requiredQty.negate())
+                          .build());
+                }
+              } else {
+                // Priority 2: If validation passed, deduct option stock directly (Retail/Shoes
+                // Case)
+                // BUT only if stock is tracked (stock is not null)
+                if (option.getStock() != null) {
+                  stockMovementService.addStockMovement(transaction.getStoreId(),
+                      StockMovement.builder()
+                          .variantId(option.getId())
+                          .productId(product.getId())
+                          .transactionId(transaction.getId())
+                          .type(type)
+                          .quantity(quantity.negate())
+                          .build());
+                }
+              }
+            }
+          } catch (Exception e) {
+            log.error("Error processing variant option stock movement: {}", e.getMessage());
+          }
+        }
+      }
+    } else if (product.getStock() != null) {
+      // 3. Product Stock (DEFAULT)
+      stockMovementService.addStockMovement(transaction.getStoreId(),
+          StockMovement.builder()
+              .productId(product.getId())
+              .transactionId(transaction.getId())
+              .type(StockMovementType.SALE)
+              .quantity(quantity.negate())
+              .build());
+    }
   }
 
   public TransactionResponse getTransactionById(UUID id) {
@@ -230,7 +279,7 @@ public class TransactionService {
   public TransactionResponse updateTransaction(UUID storeId, UUID id, TransactionRequest request) {
     log.info("Updating transaction: {}", id);
     // Validate store exists
-    if (!sRepo.existsById(storeId)) {
+    if (storeId == null || !sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 
@@ -362,7 +411,7 @@ public class TransactionService {
   public TransactionResponse removeTransaction(UUID storeId, UUID id) {
     log.info("Removing transaction: {}", id);
     // Validate store exists
-    if (!sRepo.existsById(storeId)) {
+    if (storeId == null || !sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
     }
 

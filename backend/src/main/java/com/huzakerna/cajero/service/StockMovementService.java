@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.huzakerna.cajero.model.StockMovement;
 import com.huzakerna.cajero.repository.StockMovementRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
+import com.huzakerna.cajero.repository.VariantOptionRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,10 +36,11 @@ public class StockMovementService {
   private final StockMovementRepository repo;
   private final IngredientRepository ingredientRepo;
   private final ProductRepository productRepo;
+  private final VariantOptionRepository variantOptionRepo;
 
   public Page<StockMovementResponse> getStockMovements(
       UUID storeId, int page, int size, String sortBy, String sortDir,
-      LocalDate startDate, LocalDate endDate, UUID ingredientId, UUID productId, String typeCode) {
+      LocalDate startDate, LocalDate endDate, UUID ingredientId, UUID productId, UUID variantId, String typeCode) {
 
     Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
         : Sort.by(sortBy).descending();
@@ -53,6 +56,9 @@ public class StockMovementService {
       }
       if (productId != null) {
         predicates.add(cb.equal(root.get("productId"), productId));
+      }
+      if (variantId != null) {
+        predicates.add(cb.equal(root.get("variantId"), variantId));
       }
       if (startDate != null) {
         predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay()));
@@ -116,6 +122,8 @@ public class StockMovementService {
     // Update Stock Logic
     if (request.getIngredientId() != null) {
       updateIngredientStock(request);
+    } else if (request.getVariantId() != null) {
+      updateVariantStock(request);
     } else if (request.getProductId() != null) {
       updateProductStock(request);
       // return request; // Comment if product update not affect stock movement
@@ -135,17 +143,10 @@ public class StockMovementService {
     if (quantity == null)
       return;
 
-    switch (movement.getType()) {
-      case SALE:
-      case WASTE:
-        ingredient.setStock(ingredient.getStock().subtract(quantity));
-        break;
-      case PURCHASE:
-      case REFUND:
-      case ADJUSTMENT:
-        ingredient.setStock(ingredient.getStock().add(quantity));
-        break;
+    if (ingredient.getStock() != null) {
+      ingredient.setStock(ingredient.getStock().add(quantity)); // quantity will be - or + base on params
     }
+
     log.info("Stock updated for Ingredient {} ({}): {} {}", ingredient.getId(), ingredient.getName(),
         movement.getType(), quantity);
     ingredientRepo.save(ingredient);
@@ -159,25 +160,30 @@ public class StockMovementService {
     if (quantity == null)
       return;
 
-    switch (movement.getType()) {
-      case SALE:
-      case WASTE:
-        // For products, usually SALE reduces stock
-        if (product.getStock() != null) {
-          product.setStock(product.getStock().subtract(quantity));
-        }
-        break;
-      case PURCHASE:
-      case REFUND:
-      case ADJUSTMENT:
-        if (product.getStock() != null) {
-          product.setStock(product.getStock().add(quantity));
-        }
-        break;
+    if (product.getStock() != null) {
+      product.setStock(product.getStock().add(quantity)); // quantity will be - or + base on params
     }
+
     log.info("Stock updated for Product {} ({}): {} {}", product.getId(), product.getName(), movement.getType(),
         quantity);
     productRepo.save(product);
+  }
+
+  private void updateVariantStock(StockMovement movement) {
+    var option = variantOptionRepo.findById(movement.getVariantId())
+        .orElseThrow(() -> new RuntimeException("Variant Option not found"));
+
+    BigDecimal quantity = movement.getQuantity();
+    if (quantity == null)
+      return;
+
+    if (option.getStock() != null) {
+      option.setStock(option.getStock().add(quantity)); // quantity will be - or + base on params
+    }
+
+    log.info("Stock updated for Variant Option {} ({}): {} {}", option.getId(), option.getName(), movement.getType(),
+        quantity);
+    variantOptionRepo.save(option);
   }
 
   @Transactional

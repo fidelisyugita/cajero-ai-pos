@@ -32,4 +32,5 @@ public class VariantOptionRequest {
     // @DecimalMin(value = "0.0", message = "Stock cannot be negative")
     private BigDecimal stock;
 
+    private java.util.List<VariantOptionIngredientRequest> ingredients;
 }

