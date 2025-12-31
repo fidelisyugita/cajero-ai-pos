@@ -252,6 +252,8 @@ export default {
     // Receipt / Print
     print_preview: "Print Preview",
     printing: "Printing...",
+    print: "Print",
+    reprint: "Reprint",
     // Stock Update Modal
     update_stock_for: "Update Stock for",
     new_stock_value: "New Stock Value",

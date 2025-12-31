@@ -5,6 +5,7 @@ import zustandStorage from "@/lib/Storage";
 
 export interface OrderItemVariant {
 	groupId: string;
+	groupName: string;
 	optionId: string;
 	name: string;
 	price: number;

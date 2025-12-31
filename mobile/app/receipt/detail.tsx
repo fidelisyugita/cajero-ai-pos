@@ -89,11 +89,20 @@ const ReceiptDetailScreen = () => {
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                     <Text style={$.qtyBadge}>{item.quantity}x</Text>
                     <View>
-                      <Text style={$.itemName}>{item.productName}</Text>
+                      <Text style={$.itemName}>{`${item.productName} (${formatCurrency(item.sellingPrice)})`}</Text>
+                      {item.selectedVariants?.map((v: any, i: number) => (
+                        <Text key={i} style={$.itemNote}>
+                          + {v.groupName}: {v.name} ({formatCurrency(v.price || 0)})
+                        </Text>
+                      ))}
                       {item.note && <Text style={$.itemNote}>{item.note}</Text>}
                     </View>
                   </View>
-                  <Text style={$.itemPrice}>{formatCurrency(item.sellingPrice * item.quantity)}</Text>
+                  <Text style={$.itemPrice}>
+                    {formatCurrency(
+                      (item.sellingPrice + (item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * item.quantity
+                    )}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -105,7 +114,10 @@ const ReceiptDetailScreen = () => {
               <Text style={$.cardTitle}>Summary</Text>
             </View>
             <View style={$.cardContent}>
-              <Row label="Subtotal" value={formatCurrency(transactionProduct?.reduce((sum: number, item: any) => sum + (item.sellingPrice * item.quantity), 0) || 0)} />
+              <Row label="Subtotal" value={formatCurrency(transactionProduct?.reduce((sum: number, item: any) => {
+                const variantTotal = item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0;
+                return sum + ((item.sellingPrice + variantTotal) * item.quantity);
+              }, 0) || 0)} />
               <Row
                 label="Discount"
                 value={`-${formatCurrency(totalDiscount || 0)}`}
@@ -162,15 +174,24 @@ const ReceiptDetailScreen = () => {
               title: "RECEIPT / STRUK (COPY)",
               transactionId: transaction.id || "",
               transactionDate: transaction.createdAt,
-              subtotal: formatCurrency(transactionProduct?.reduce((sum: number, item: any) => sum + (item.sellingPrice * item.quantity), 0) || 0),
+              subtotal: formatCurrency(transactionProduct?.reduce((sum: number, item: any) => {
+                const variantTotal = item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0;
+                return sum + ((item.sellingPrice + variantTotal) * item.quantity);
+              }, 0) || 0),
               discount: formatCurrency(totalDiscount || 0),
               tax: formatCurrency(totalTax),
               total: formatCurrency(totalPrice),
               paymentMethod: paymentMethodCode,
               items: transactionProduct?.map((p: any) => ({
-                name: p.productName,
+                // name: p.productName,
+                name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
                 quantity: p.quantity,
-                price: formatCurrency(p.sellingPrice * p.quantity)
+                price: (p.sellingPrice + (p.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * p.quantity,
+                variants: p.selectedVariants?.map((v: any) => ({
+                  groupName: v.groupName,
+                  name: v.name,
+                  price: v.price
+                })) || []
               })) || [],
               footerMessage: "Thank you for your visit!"
             });
@@ -190,20 +211,7 @@ const ReceiptDetailScreen = () => {
           setIsPrinting(true);
           if (previewData) {
             try {
-              await printerService.printReceipt({
-                title: previewData.title,
-                total: previewData.total,
-                items: previewData.items.map((i: any) => ({
-                  name: i.name,
-                  quantity: i.quantity,
-                  price: i.price
-                })),
-                subtotal: previewData.subtotal,
-                discount: previewData.discount,
-                tax: previewData.tax,
-                paymentMethod: previewData.paymentMethod,
-                footerMessage: previewData.footerMessage
-              });
+              await printerService.printReceipt(previewData);
             } catch (e: any) {
               Alert.alert(t("print_error"), e.message);
             }

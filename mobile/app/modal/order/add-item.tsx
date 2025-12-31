@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { t } from "@/services/i18n";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcMinus from "@/assets/icons/minus.svg";
@@ -46,9 +46,37 @@ const AddItemModal = () => {
 	const business = useBusinessStore((state) => state.business);
 	const maxDiscountPercent = business?.maxDiscount ?? 10;
 
-	const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>(
-		params.initialVariants ? JSON.parse(params.initialVariants as string) : {},
-	);
+	const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>({});
+	const variantsInitialized = useRef(false);
+
+	useEffect(() => {
+		if (productVariants.length > 0 && params.initialVariants && !variantsInitialized.current) {
+			try {
+				const initialItems = JSON.parse(params.initialVariants as string);
+				if (Array.isArray(initialItems)) {
+					const newSelection: Record<string, any> = {};
+
+					productVariants.forEach(v => {
+						const selectedForGroup = initialItems.filter((i: any) => i.groupId === v.id);
+
+						if (selectedForGroup.length > 0) {
+							if (v.isMultiple) {
+								newSelection[v.id] = selectedForGroup.map((i: any) => i.optionId);
+							} else {
+								// For single select, define as the last one found or just the first
+								newSelection[v.id] = selectedForGroup[0].optionId;
+							}
+						}
+					});
+
+					setSelectedVariants(newSelection);
+				}
+			} catch (e) {
+				console.error("Failed to parse initial variants", e);
+			}
+			variantsInitialized.current = true;
+		}
+	}, [productVariants, params.initialVariants]);
 	const [note, setNote] = useState((params.initialNote as string) || "");
 	const [discount, setDiscount] = useState(
 		params.initialDiscount ? String(params.initialDiscount) : "",
@@ -97,6 +125,7 @@ const AddItemModal = () => {
 				if (opt) {
 					variants.push({
 						groupId: variant.id,
+						groupName: variant.name,
 						optionId: opt.id,
 						name: opt.name,
 						price: opt.priceAdjusment, // backend typo: priceAdjusment

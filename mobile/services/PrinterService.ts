@@ -5,6 +5,7 @@ import { Platform, PermissionsAndroid } from 'react-native';
 import { Buffer } from 'buffer';
 import { useBusinessStore } from '@/store/useBusinessStore';
 import Logger from './logger';
+import { formatCurrency } from '@/utils/Format';
 
 
 if (!global.structuredClone) {
@@ -292,7 +293,7 @@ class PrinterService {
   async printReceipt(data: {
     title?: string;
     total: string;
-    items: { name: string; quantity: number; price: string }[];
+    items: { name: string; quantity: number; price: string; variants?: { groupName: string; name: string; price: number }[] }[];
     subtotal?: string;
     discount?: string;
     tax?: string;
@@ -343,13 +344,27 @@ class PrinterService {
       data.items.forEach((item) => {
         // Line 1: Item Name
         encoderChain.line(item.name);
+        
+        // Print Variants if any
+        if (item.variants && item.variants.length > 0) {
+           item.variants.forEach(variant => {
+             // Indent with "  + "
+             // Format: "  + Large (2.000)"
+             // We can use pairText if we want price on right, or just inline.
+             // Inline is simpler for variants usually.
+             const variantText = `  + ${variant.groupName}: ${variant.name}`;
+             const variantPrice = `(${formatCurrency(variant.price)})`;
+             encoderChain.line(this.pairText(variantText, variantPrice));
+           });
+        }
+
         // Line 2: Qty and Price (Right aligned or Paired?)
         // Let's use Pair: "x2" on left (indented?), "10.000" on right?
         // Or "x2" .... "10.000"
 
         // Format: "  x2              20.000"
-        const qtyStr = `x${item.quantity}`;
-        const line2 = this.pairText("  " + qtyStr, item.price);
+        const qtyStr = `  x${item.quantity}`;
+        const line2 = this.pairText(qtyStr, item.price);
         encoderChain.line(line2);
       });
     }

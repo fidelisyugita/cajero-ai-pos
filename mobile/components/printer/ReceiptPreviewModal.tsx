@@ -12,6 +12,7 @@ interface ReceiptItem {
   name: string;
   quantity: number;
   price: string | number; // pre-formatted or number
+  variants?: { groupName: string; name: string; price: number }[];
 }
 
 interface ReceiptPreviewModalProps {
@@ -80,7 +81,16 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
                   <View key={index} style={$.itemRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={$.itemText}>{item.name}</Text>
-                      <Text style={$.itemSubText}>{item.quantity} x {typeof item.price === 'number' ? formatCurrency(item.price / item.quantity) : ''}</Text>
+                      {item.variants && item.variants.length > 0 && (
+                        <View style={{ paddingLeft: 8 }}>
+                          {item.variants.map((v, i) => (
+                            <Text key={i} style={$.itemSubText}>+ {v.groupName}: {v.name} ({formatCurrency(v.price)})</Text>
+                          ))}
+                        </View>
+                      )}
+                      {item.quantity > 1 && (
+                        <Text style={$.itemSubText}>{item.quantity} x {typeof item.price === 'number' ? formatCurrency(item.price / item.quantity) : ''}</Text>
+                      )}
                     </View>
                     <Text style={$.itemText}>
                       {typeof item.price === 'number' ? formatCurrency(item.price) : item.price}
