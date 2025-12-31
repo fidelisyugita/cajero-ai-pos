@@ -68,6 +68,7 @@ public class TransactionService {
             .totalPrice(request.getTotalPrice())
             .totalTax(request.getTotalTax())
             .customerId(request.getCustomerId())
+            .createdAt(request.getCreatedAt()) // Use client provided creation time if available
             .build());
 
     // Add transaction products if any

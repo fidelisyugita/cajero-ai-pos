@@ -51,7 +51,7 @@ public class ProductRequest {
     private BigDecimal buyingPrice;
 
     @NotNull(message = "Selling price is required")
-    @DecimalMin(value = "0.1", message = "Stock cannot be negative")
+    @DecimalMin(value = "0.1", message = "Selling price cannot be negative")
     private BigDecimal sellingPrice;
 
     @DecimalMin(value = "0.0", message = "Commission cannot be negative")
