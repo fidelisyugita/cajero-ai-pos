@@ -2,8 +2,13 @@ package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.hibernate.annotations.UuidGenerator;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,4 +53,7 @@ public class VariantOption {
     private BigDecimal priceAdjusment;
 
     private BigDecimal stock;
+    @OneToMany(mappedBy = "variantOption", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
+    private Set<VariantOptionIngredient> ingredients = new HashSet<>();
 }

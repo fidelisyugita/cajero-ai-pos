@@ -15,6 +15,13 @@ import com.huzakerna.cajero.repository.VariantRepository;
 import com.huzakerna.cajero.util.ChangeTracker;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.VariantOptionRepository;
+import com.huzakerna.cajero.repository.IngredientRepository;
+import com.huzakerna.cajero.repository.VariantOptionIngredientRepository;
+import com.huzakerna.cajero.model.Ingredient;
+import com.huzakerna.cajero.model.VariantOptionIngredient;
+import com.huzakerna.cajero.model.VariantOptionIngredientId;
+import com.huzakerna.cajero.dto.VariantOptionIngredientRequest;
+import com.huzakerna.cajero.dto.VariantOptionIngredientResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +37,8 @@ public class VariantService {
   private final VariantOptionRepository voRepo;
   private final VariantOptionService voService;
   private final LogService logService;
+  private final IngredientRepository iRepo;
+  private final VariantOptionIngredientRepository voiRepo;
 
   public List<VariantResponse> getAllByStoreId(UUID storeId) {
     return repo.findByStoreIdAndDeletedAtIsNull(storeId).stream()
@@ -157,6 +166,25 @@ public class VariantService {
           option.setId(req.getId());
         }
 
+        // Add ingredients
+        if (req.getIngredients() != null) {
+          Set<VariantOptionIngredient> ingredients = new HashSet<>();
+          for (VariantOptionIngredientRequest ingReq : req.getIngredients()) {
+            Ingredient ingredient = iRepo.findById(ingReq.getIngredientId())
+                .orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + ingReq.getIngredientId()));
+
+            VariantOptionIngredient voi = VariantOptionIngredient.builder()
+                .id(new VariantOptionIngredientId(option.getId(), ingredient.getId()))
+                .variantOption(option)
+                .ingredient(ingredient)
+                .quantityNeeded(ingReq.getQuantityNeeded())
+                .build();
+
+            ingredients.add(voi);
+          }
+          option.setIngredients(ingredients);
+        }
+
         newOptions.add(option);
       }
     }
@@ -223,6 +251,14 @@ public class VariantService {
                 .priceAdjusment(vo.getPriceAdjusment())
                 .stock(vo.getStock())
                 .variantId(vo.getVariantId())
+                .ingredients(vo.getIngredients() != null ? vo.getIngredients().stream()
+                    .map(voi -> VariantOptionIngredientResponse.builder()
+                        .ingredientId(voi.getIngredient().getId())
+                        .name(voi.getIngredient().getName())
+                        .quantityNeeded(voi.getQuantityNeeded())
+                        .measureUnit(voi.getIngredient().getMeasureUnit().getCode())
+                        .build())
+                    .toList() : List.of())
                 .build())
             .toList() : List.of())
         .build();

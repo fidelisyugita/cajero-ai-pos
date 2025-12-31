@@ -29,18 +29,7 @@ backend/.classpath
 backend/*.iml
 backend/*.ipr
 backend/*.iws
-
-# Frontend
-frontend/.next/
-frontend/coverage/
-frontend/.cache/
-
-# AI Service
-ai-api/fastapi/__pycache__/
-ai-api/fastapi/.venv/
-ai-api/fastapi/*.pyc
-ai-api/fastapi/.pytest_cache/
-ai-api/nodejs/node_modules/
+**/SecurityExtension.java
 
 # Database
 *.db

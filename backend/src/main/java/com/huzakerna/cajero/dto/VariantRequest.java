@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,7 @@ public class VariantRequest {
     @NotBlank(message = "Variant name cannot be empty")
     private String name;
 
-    @NotBlank(message = "Product Id cannot be empty")
+    @NotNull(message = "Product Id cannot be empty")
     private UUID productId;
 
     @Size(max = 500, message = "Description must be less than 500 characters")

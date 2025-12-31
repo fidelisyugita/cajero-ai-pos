@@ -24,4 +24,6 @@ public class VariantOptionResponse {
     private BigDecimal priceAdjusment;
     private BigDecimal stock;
 
+    private java.util.List<VariantOptionIngredientResponse> ingredients;
+
 }

@@ -1,12 +1,21 @@
 package com.huzakerna.cajero.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
+import com.huzakerna.cajero.dto.VariantOptionIngredientRequest;
 import com.huzakerna.cajero.dto.VariantOptionRequest;
+import com.huzakerna.cajero.model.Ingredient;
 import com.huzakerna.cajero.model.Variant;
 import com.huzakerna.cajero.model.VariantOption;
-import com.huzakerna.cajero.repository.VariantRepository;
+import com.huzakerna.cajero.model.VariantOptionIngredient;
+import com.huzakerna.cajero.model.VariantOptionIngredientId;
+import com.huzakerna.cajero.repository.IngredientRepository;
+import com.huzakerna.cajero.repository.VariantOptionIngredientRepository;
 import com.huzakerna.cajero.repository.VariantOptionRepository;
+import com.huzakerna.cajero.repository.VariantRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +25,8 @@ public class VariantOptionService {
 
   private final VariantRepository vRepo;
   private final VariantOptionRepository repo;
+  private final IngredientRepository iRepo;
+  private final VariantOptionIngredientRepository voiRepo;
 
   public VariantOption addVariantOption(VariantOptionRequest request) {
     // Validate variant exists
@@ -31,7 +42,30 @@ public class VariantOptionService {
             .stock(request.getStock())
             .build());
 
-    return (variantOption);
+    // Add ingredients
+    if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
+      Set<VariantOptionIngredient> ingredients = new HashSet<>();
+      for (VariantOptionIngredientRequest ingReq : request.getIngredients()) {
+        Ingredient ingredient = iRepo.findById(ingReq.getIngredientId())
+            .orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + ingReq.getIngredientId()));
+
+        VariantOptionIngredient voi = VariantOptionIngredient.builder()
+            .id(new VariantOptionIngredientId(variantOption.getId(), ingredient.getId()))
+            .variantOption(variantOption)
+            .ingredient(ingredient)
+            .quantityNeeded(ingReq.getQuantityNeeded())
+            .build();
+
+        ingredients.add(voiRepo.save(voi));
+      }
+      // Since VariantOption doesn't have a mappedBy 'ingredients' set
+      // initialized/managed here for return,
+      // we might just return the saved option.
+      // Ideally the entity relationship should be bi-directional and handled, but for
+      // now this saves the data.
+    }
+
+    return variantOption;
 
   }
 
