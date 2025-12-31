@@ -1,4 +1,4 @@
-import { View, Text, FlatList, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, Alert, TouchableOpacity, Linking, Platform } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { usePrinterStore, PrinterDevice } from "@/store/PrinterStore";
@@ -9,6 +9,7 @@ import { Feather } from "@expo/vector-icons";
 import FormSectionCard from "@/components/ui/FormSectionCard";
 import EmptyState from "@/components/ui/EmptyState";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
+import Logger from "@/services/logger";
 
 const PrinterSettings = () => {
     const { connectedDevice, isConnected, setConnectedDevice, setIsConnected } = usePrinterStore();
@@ -31,14 +32,39 @@ const PrinterSettings = () => {
         setDevices([]);
         setIsScanning(true);
         try {
-            await printerService.scanDevices((device) => {
-                setDevices((prev) => {
-                    if (prev.find(d => d.id === device.id)) return prev;
-                    return [...prev, { id: device.id, name: device.name || t("visitor") }]; // using visitor as unknown replacement
-                });
-            });
+            await printerService.scanDevices(
+                (device) => {
+                    setDevices((prev) => {
+                        if (prev.find(d => d.id === device.id)) return prev;
+                        return [...prev, { id: device.id, name: device.name || t("visitor") }];
+                    });
+                },
+                (error) => {
+                    // Handle async scan errors (e.g. bluetooth turned off during scan)
+                    Logger.error("Scan failed async:", error);
+                    Alert.alert(t("failed"), error.message);
+                    setIsScanning(false);
+                }
+            );
         } catch (error: any) {
-            Alert.alert(t("failed"), error.message);
+            console.log("Scan start error:", error);
+            if (error.message === 'Bluetooth permissions not granted') {
+                Alert.alert(
+                    t("permission_required"),
+                    t("bluetooth_permission_msg"),
+                    [
+                        { text: t("cancel"), style: "cancel" },
+                        { text: t("open_settings"), onPress: () => Linking.openSettings() }
+                    ]
+                );
+            } else if (error.message.includes('Bluetooth is not powered on')) {
+                 Alert.alert(
+                    t("bluetooth_off"),
+                    t("bluetooth_off_msg")
+                );
+            } else {
+                Alert.alert(t("failed"), error.message);
+            }
             setIsScanning(false);
         }
     };

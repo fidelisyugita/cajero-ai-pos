@@ -24,6 +24,12 @@ export default {
     connection_failed: "Gagal Terhubung",
     not_connected: "Tidak Terhubung",
     language_setting: "Pengaturan Bahasa",
+    // Printer Permissions
+    permission_required: "Izin Diperlukan",
+    open_settings: "Buka Pengaturan",
+    bluetooth_off: "Bluetooth Off",
+    bluetooth_off_msg: "Silakan aktifkan Bluetooth untuk menghubungkan printer.",
+    bluetooth_permission_msg: "Cajero memerlukan akses Bluetooth untuk memindai printer. Silakan aktifkan di pengaturan.",
 
     // Payment Methods
     select_payment_method: "Pilih Metode Pembayaran",

@@ -158,57 +158,56 @@ const PaymentScreen = () => {
         setShowPreview(true);
     };
 
-    if (isSuccess) {
-        return (
-            <SuccessView
-                transactionNumber={lastTransactionNumber}
-                totalAmount={total}
-                paidAmount={paidAmount}
-                change={paidAmount - total}
-                onNewTransaction={handleNewTransaction}
-                onPrintReceipt={handlePrintReceipt}
-            />
-        );
-    }
-
-
     return (
         <View style={$.container}>
-            <ScreenHeader title={t("transaction")} />
-
-            <View style={$.content}>
-                <View style={$.leftColumn}>
-                    <PaymentMethods
-                        selectedMethod={selectedMethod}
-                        onSelect={setSelectedMethod}
-                    />
-
-                    {/* Draft / Open Bill feature */}
-                    <View style={$.draftSection}>
-                        <Button
-                            title={t("print_bill")}
-                            variant="secondary"
-                            onPress={handlePrintBill}
-                            style={{ width: '100%' }}
-                        />
-                        <Button
-                            title={t("draft_open_bill")}
-                            variant="primary"
-                            onPress={handleDraftBill}
-                            style={{ width: '100%' }}
-                        />
-                    </View>
-                </View>
-
-                {/* Right Column: Dynamic based on method */}
-                <CashPayment
+            {isSuccess ? (
+                <SuccessView
+                    transactionNumber={lastTransactionNumber}
                     totalAmount={total}
                     paidAmount={paidAmount}
-                    onChangePaidAmount={setPaidAmount}
-                    onPay={handlePay}
-                    isProcessing={isPending}
+                    change={paidAmount - total}
+                    onNewTransaction={handleNewTransaction}
+                    onPrintReceipt={handlePrintReceipt}
                 />
-            </View>
+            ) : (
+                <>
+                    <ScreenHeader title={t("transaction")} />
+
+                    <View style={$.content}>
+                        <View style={$.leftColumn}>
+                            <PaymentMethods
+                                selectedMethod={selectedMethod}
+                                onSelect={setSelectedMethod}
+                            />
+
+                            {/* Draft / Open Bill feature */}
+                            <View style={$.draftSection}>
+                                <Button
+                                    title={t("print_bill")}
+                                    variant="secondary"
+                                    onPress={handlePrintBill}
+                                    style={{ width: '100%' }}
+                                />
+                                <Button
+                                    title={t("draft_open_bill")}
+                                    variant="primary"
+                                    onPress={handleDraftBill}
+                                    style={{ width: '100%' }}
+                                />
+                            </View>
+                        </View>
+
+                        {/* Right Column: Dynamic based on method */}
+                        <CashPayment
+                            totalAmount={total}
+                            paidAmount={paidAmount}
+                            onChangePaidAmount={setPaidAmount}
+                            onPay={handlePay}
+                            isProcessing={isPending}
+                        />
+                    </View>
+                </>
+            )}
 
 
             {/* Receipt Preview Modal */}

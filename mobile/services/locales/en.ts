@@ -24,6 +24,12 @@ export default {
     connection_failed: "Connection Failed",
     not_connected: "Not Connected",
     language_setting: "Language Setting",
+    // Printer Permissions
+    permission_required: "Permission Required",
+    open_settings: "Open Settings",
+    bluetooth_off: "Bluetooth Off",
+    bluetooth_off_msg: "Please turn on Bluetooth to connect to printer.",
+    bluetooth_permission_msg: "Cajero needs Bluetooth access to scan for printers. Please enable it in settings.",
 
     // Payment Methods
     select_payment_method: "Select Payment Method",
