@@ -20,6 +20,8 @@ import Skeleton from "@/components/ui/Skeleton";
 import StockUpdateModal from "./StockUpdateModal";
 import { useUpdateVariantStockMutation } from "@/services/mutations/useUpdateVariantStockMutation";
 import StockVariantHistory from "./StockVariantHistory";
+import SaveVariantOptionModal from "./SaveVariantOptionModal";
+import { useUpdateVariantMutation } from "@/services/mutations/useUpdateVariantMutation";
 
 const COLUMNS = [
   { label: "Product Name", flex: 2 },
@@ -57,7 +59,9 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
 
   const [selectedHistory, setSelectedHistory] = useState<{ variant: Variant, option: VariantOption } | null>(null);
   const [editingItem, setEditingItem] = useState<{ variant: Variant, option: VariantOption } | null>(null);
+  const [editDetailTarget, setEditDetailTarget] = useState<{ variant: Variant, option: VariantOption } | null>(null);
   const updateVariantStockMutation = useUpdateVariantStockMutation();
+  const updateVariantMutation = useUpdateVariantMutation();
 
   const flattenedVariants: FlattenedVariant[] = React.useMemo(() => {
     if (!variants || !productsData) return [];
@@ -114,6 +118,59 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
     );
   };
 
+  const handleSaveOptionDetail = (data: { name: string; priceAdjusment: number }) => {
+    if (!editDetailTarget) return;
+
+    const variantToUpdate = editDetailTarget.variant;
+    const optionToUpdate = editDetailTarget.option;
+
+    if (!variantToUpdate) return;
+
+    // Construct valid UpdateVariantData
+    const updatedOptions = variantToUpdate.options.map(opt => {
+      if (opt.id === optionToUpdate.id) {
+        return {
+          id: opt.id,
+          name: data.name,
+          priceAdjusment: data.priceAdjusment,
+          stock: opt.stock,
+          ingredients: opt.ingredients?.map(ing => ({
+            ingredientId: ing.ingredientId,
+            quantityNeeded: ing.quantityNeeded
+          })) || []
+        };
+      }
+      return {
+        id: opt.id,
+        name: opt.name,
+        priceAdjusment: opt.priceAdjusment,
+        stock: opt.stock,
+        ingredients: opt.ingredients?.map(ing => ({
+          ingredientId: ing.ingredientId,
+          quantityNeeded: ing.quantityNeeded
+        })) || []
+      };
+    });
+
+    updateVariantMutation.mutate(
+      {
+        id: variantToUpdate.id,
+        data: {
+          name: variantToUpdate.name,
+          description: variantToUpdate.description,
+          isRequired: variantToUpdate.isRequired,
+          isMultiple: variantToUpdate.isMultiple,
+          options: updatedOptions
+        }
+      },
+      {
+        onSuccess: () => {
+          setEditDetailTarget(null);
+        }
+      }
+    );
+  };
+
   const renderSkeleton = () => (
     <View style={$.container}>
       <View style={$.header}>
@@ -166,6 +223,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
             item={item}
             onHistoryPress={() => setSelectedHistory({ variant: item.variant, option: item.option })}
             onStockUpdatePress={() => setEditingItem({ variant: item.variant, option: item.option })}
+            onEditPress={() => setEditDetailTarget({ variant: item.variant, option: item.option })}
           />
         )}
         ItemSeparatorComponent={() => <View style={$.separator} />}
@@ -193,11 +251,20 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
           isLoading={updateVariantStockMutation.isPending}
         />
       )}
+      {editDetailTarget && (
+        <SaveVariantOptionModal
+          visible={!!editDetailTarget}
+          onClose={() => setEditDetailTarget(null)}
+          onSave={handleSaveOptionDetail}
+          option={editDetailTarget.option}
+          isLoading={updateVariantMutation.isPending}
+        />
+      )}
     </View>
   );
 };
 
-const VariantRow = ({ item, onHistoryPress, onStockUpdatePress }: { item: FlattenedVariant; onHistoryPress: () => void; onStockUpdatePress: () => void }) => {
+const VariantRow = ({ item, onHistoryPress, onStockUpdatePress, onEditPress }: { item: FlattenedVariant; onHistoryPress: () => void; onStockUpdatePress: () => void; onEditPress: () => void }) => {
   let status = "In Stock";
   let statusVariant: "active" | "inactive" | "warning" = "active";
 
@@ -226,6 +293,13 @@ const VariantRow = ({ item, onHistoryPress, onStockUpdatePress }: { item: Flatte
         <StatusBadge variant={statusVariant} label={status} />
       </View>
       <View style={[$.actionContainer, { flex: COLUMNS[4].flex }]}>
+        {/* TODO: Update API for this */}
+        {/* <Button
+          size="sm"
+          title="Edit"
+          variant="neutral"
+          onPress={onEditPress}
+        /> */}
         <Button
           size="sm"
           title="History"

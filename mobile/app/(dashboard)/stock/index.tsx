@@ -31,7 +31,7 @@ const StockScreen = () => {
                     options={[
                         { label: t("ingredients"), value: "Ingredients" },
                         { label: t("products"), value: "Products" },
-                        { label: t("variants"), value: "Variants" },
+                        // { label: t("variants"), value: "Variants" }, // TODO
                     ] as { label: string; value: Tab }[]}
                     value={activeTab}
                     onChange={setActiveTab}

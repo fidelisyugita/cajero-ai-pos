@@ -917,41 +917,6 @@ const AddProduct = () => {
 						/>
 					</FormSectionCard>
 
-					{/* {isStockManagementEnabled && (
-						<FormSectionCard title={t("stock_management")}>
-							<Controller
-								control={control}
-								name="stock"
-								render={({
-									field: { onChange, ref, value },
-									fieldState: { error },
-								}) => (
-									<Input
-										editable={!disableAction}
-										error={error?.message}
-										keyboardType="numeric"
-										label={t("initial_stock_required")}
-										maxLength={10}
-										onChangeText={(text: string) =>
-											onChange(parseNumber(text))
-										}
-										ref={ref}
-										returnKeyType="done"
-										size="lg"
-										value={
-											value !== undefined ? formatNumber(value || 0) : ""
-										}
-									/>
-								)}
-							/>
-						</FormSectionCard>
-					)} */}
-
-					{/* <FormSectionCard title="Product Variant">
-						<Button size="lg" title="Add New Variant" variant="soft" />
-						<Button size="lg" title="Choose Existing Variant" variant="soft" />
-					</FormSectionCard> */}
-
 					<FormSectionCard title={t("product_ingredient")}>
 						<Controller
 							control={control}
