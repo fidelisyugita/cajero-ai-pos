@@ -1,3 +1,4 @@
+import { parseNumber } from "@/utils/Format";
 import { useState, forwardRef, memo } from "react";
 import { Text, TextInput, type TextInputProps, View } from "react-native";
 import Animated, {
@@ -14,6 +15,8 @@ export interface InputProps extends TextInputProps {
 	right?: React.ReactNode;
 	containerStyle?: any;
 	size?: "sm" | "md" | "lg";
+	maxValue?: number;
+	minValue?: number;
 }
 
 const getInputSizes = (theme: Theme) => ({
@@ -149,6 +152,8 @@ const Input = forwardRef<TextInput, InputProps>(
 			placeholder,
 			onChangeText,
 			value,
+			maxValue,
+			minValue,
 			...rest
 		},
 		ref,
@@ -196,6 +201,12 @@ const Input = forwardRef<TextInput, InputProps>(
 							rest.onBlur?.(e);
 						}}
 						onChangeText={(text) => {
+							if (maxValue !== undefined) {
+								const numericVal = parseNumber(text);
+								if (numericVal > maxValue) {
+									return;
+								}
+							}
 							onChangeText?.(text);
 							setHasText(!!text);
 						}}

@@ -29,8 +29,8 @@ const DiscountModal = () => {
     (sum, item) => sum + (item.discount || 0),
     0,
   );
-  const currentTotal = subtotal - totalItemDiscounts;
-  const maxAmount = currentTotal * (maxDiscountPercent / 100);
+  // const currentTotal = subtotal - totalItemDiscounts;
+  const maxAmount = subtotal * (maxDiscountPercent / 100) - totalItemDiscounts;
 
   const [value, setValue] = useState(discount > 0 ? String(discount) : "");
 

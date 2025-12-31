@@ -216,8 +216,9 @@ IngredientItem.displayName = "IngredientItem";
 
 const $ = StyleSheet.create((theme) => ({
 	modal: {
-		aspectRatio: 649 / 874,
+		// aspectRatio: 649 / 874,
 		width: vs(649),
+		height: "90%",
 	},
 	container: {
 		padding: theme.spacing.xl,

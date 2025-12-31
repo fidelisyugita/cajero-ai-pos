@@ -90,13 +90,16 @@ export const LocalTransactionService = {
 
     // Date handling
     if (startDate) {
-      conditions.push(sql`${transactions.createdAt} >= ${new Date(startDate).getTime()}`);
+      // Ensure start of day
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      conditions.push(sql`${transactions.createdAt} >= ${start.getTime()}`);
     }
     if (endDate) {
-      // End of day logic might be needed, but assume exact or handled by caller?
-      // Usually endDate includes time or is just date. If just date, we want < next day.
-      // For simplicity, raw comparison.
-      conditions.push(sql`${transactions.createdAt} <= ${new Date(endDate).getTime()}`);
+      // Ensure end of day
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      conditions.push(sql`${transactions.createdAt} <= ${end.getTime()}`);
     }
 
     if (params.search) {

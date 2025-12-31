@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Platform } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 import { Feather } from "@expo/vector-icons";
 import { postAIChat } from "@/services/endpoints/postAIChat";
+import { t } from "@/services/i18n";
+import { useLanguageStore } from "@/store/useLanguageStore";
 
 interface Message {
   id: string;
@@ -11,8 +14,9 @@ interface Message {
 }
 
 const ChatInterface = () => {
+  const language = useLanguageStore((state) => state.language); // Subscribe to language changes
   const [messages, setMessages] = useState<Message[]>([
-    { id: "1", role: "assistant", content: "Hello! I am your AI assistant." }
+    { id: "1", role: "assistant", content: t("ai_welcome_message") }
   ]);
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -50,7 +54,7 @@ const ChatInterface = () => {
         return [...filtered, {
           id: (Date.now() + 1).toString(),
           role: "system",
-          content: "Error: Could not connect to AI server. Please try again."
+          content: t("ai_connection_error")
         }];
       });
     } finally {
@@ -59,7 +63,11 @@ const ChatInterface = () => {
   };
 
   return (
-    <View style={$.container}>
+    <KeyboardAvoidingView 
+      style={$.container} 
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 80}
+    >
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
@@ -79,41 +87,45 @@ const ChatInterface = () => {
         contentContainerStyle={$.listContent}
       />
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <View style={$.inputContainer}>
-          <TextInput
-            style={$.input}
-            placeholder="Type a message..."
-            value={input}
-            onChangeText={setInput}
-            editable={!isGenerating}
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-          />
-          <TouchableOpacity
-            style={[$.sendButton, (!input.trim() || isGenerating) && $.disabledButton]}
-            onPress={handleSend}
-            disabled={!input.trim() || isGenerating}
-          >
-            {isGenerating ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Feather name="send" size={20} color="white" />
-            )}
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+      <View style={$.inputContainer}>
+        <TextInput
+          style={$.input}
+          placeholder={t("type_message_placeholder")}
+          value={input}
+          onChangeText={setInput}
+          editable={!isGenerating}
+          onSubmitEditing={handleSend}
+          returnKeyType="send"
+        />
+        <TouchableOpacity
+          style={[$.sendButton, (!input.trim() || isGenerating) && $.disabledButton]}
+          onPress={handleSend}
+          disabled={!input.trim() || isGenerating}
+        >
+          {isGenerating ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <Feather name="send" size={20} color="white" />
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const $ = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.neutral[100],
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[300],
+    overflow: "hidden",
   },
   listContent: {
     padding: theme.spacing.md,
     gap: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
   },
   messageBubble: {
     padding: theme.spacing.md,
@@ -126,9 +138,11 @@ const $ = StyleSheet.create((theme) => ({
     borderBottomRightRadius: theme.radius.xs,
   },
   aiBubble: {
-    backgroundColor: theme.colors.neutral[200],
+    backgroundColor: theme.colors.primary[100],
     alignSelf: "flex-start",
     borderBottomLeftRadius: theme.radius.xs,
+    borderWidth: 1,
+    borderColor: theme.colors.primary[200],
   },
   systemBubble: {
     backgroundColor: theme.colors.error[100],
@@ -141,13 +155,13 @@ const $ = StyleSheet.create((theme) => ({
     ...theme.typography.bodyMd,
   },
   userText: {
-    color: "white",
+    color: "#FFFFFF",
   },
   aiText: {
     color: theme.colors.neutral[700],
   },
   systemText: {
-    color: theme.colors.error[500],
+    color: theme.colors.error[600],
     fontSize: 12,
     textAlign: 'center',
   },
@@ -156,17 +170,21 @@ const $ = StyleSheet.create((theme) => ({
     padding: theme.spacing.md,
     borderTopWidth: 1,
     borderTopColor: theme.colors.neutral[200],
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     gap: theme.spacing.sm,
   },
   input: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
     backgroundColor: theme.colors.neutral[100],
-    borderRadius: theme.radius.full,
-    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
     color: theme.colors.neutral[700],
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[300],
+    ...theme.typography.bodyMd,
   },
   sendButton: {
     width: 44,
@@ -177,7 +195,7 @@ const $ = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   disabledButton: {
-    backgroundColor: theme.colors.neutral[400],
+    backgroundColor: theme.colors.neutral[300],
   },
 }));
 

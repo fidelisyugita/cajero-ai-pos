@@ -1,4 +1,4 @@
-import { View, Text, FlatList, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, Alert, TouchableOpacity, Linking, Platform } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { usePrinterStore, PrinterDevice } from "@/store/PrinterStore";
@@ -9,9 +9,11 @@ import { Feather } from "@expo/vector-icons";
 import FormSectionCard from "@/components/ui/FormSectionCard";
 import EmptyState from "@/components/ui/EmptyState";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
+import Switch from "@/components/ui/Switch";
+import Logger from "@/services/logger";
 
 const PrinterSettings = () => {
-    const { connectedDevice, isConnected, setConnectedDevice, setIsConnected } = usePrinterStore();
+    const { connectedDevice, isConnected, setConnectedDevice, setIsConnected, isAutoPrintEnabled, setIsAutoPrintEnabled } = usePrinterStore();
     const [devices, setDevices] = useState<PrinterDevice[]>([]);
     const [isScanning, setIsScanning] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
@@ -31,14 +33,39 @@ const PrinterSettings = () => {
         setDevices([]);
         setIsScanning(true);
         try {
-            await printerService.scanDevices((device) => {
-                setDevices((prev) => {
-                    if (prev.find(d => d.id === device.id)) return prev;
-                    return [...prev, { id: device.id, name: device.name || t("visitor") }]; // using visitor as unknown replacement
-                });
-            });
+            await printerService.scanDevices(
+                (device) => {
+                    setDevices((prev) => {
+                        if (prev.find(d => d.id === device.id)) return prev;
+                        return [...prev, { id: device.id, name: device.name || t("visitor") }];
+                    });
+                },
+                (error) => {
+                    // Handle async scan errors (e.g. bluetooth turned off during scan)
+                    Logger.error("Scan failed async:", error);
+                    Alert.alert(t("failed"), error.message);
+                    setIsScanning(false);
+                }
+            );
         } catch (error: any) {
-            Alert.alert(t("failed"), error.message);
+            console.log("Scan start error:", error);
+            if (error.message === 'Bluetooth permissions not granted') {
+                Alert.alert(
+                    t("permission_required"),
+                    t("bluetooth_permission_msg"),
+                    [
+                        { text: t("cancel"), style: "cancel" },
+                        { text: t("open_settings"), onPress: () => Linking.openSettings() }
+                    ]
+                );
+            } else if (error.message.includes('Bluetooth is not powered on')) {
+                 Alert.alert(
+                    t("bluetooth_off"),
+                    t("bluetooth_off_msg")
+                );
+            } else {
+                Alert.alert(t("failed"), error.message);
+            }
             setIsScanning(false);
         }
     };
@@ -126,6 +153,20 @@ const PrinterSettings = () => {
             style={{ flex: 1 }}
             contentStyle={$.container}
         >
+            {/* Auto Print Setting */}
+             <View >
+                <View style={$.rowBetween}>
+                    <View>
+                        <Text style={$.sectionTitle}>{t("auto_print")}</Text>
+                        <Text style={$.sectionSubtitle}>{t("auto_print_desc")}</Text>
+                    </View>
+                    <Switch 
+                        value={isAutoPrintEnabled} 
+                        onValueChange={setIsAutoPrintEnabled}
+                    />
+                </View>
+            </View>
+
             {/* Saved / Connected Printer Section */}
             {connectedDevice && (
                 <View style={$.section}>
@@ -293,6 +334,16 @@ const $ = StyleSheet.create((theme) => ({
         color: theme.colors.neutral[700],
     },
     printerType: {
+        ...theme.typography.bodySm,
+        color: theme.colors.neutral[500],
+    },
+    rowBetween: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: theme.spacing.sm,
+    },
+    sectionSubtitle: {
         ...theme.typography.bodySm,
         color: theme.colors.neutral[500],
     },

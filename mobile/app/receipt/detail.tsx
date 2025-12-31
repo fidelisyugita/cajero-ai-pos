@@ -159,7 +159,7 @@ const ReceiptDetailScreen = () => {
           title={t("print_receipt")}
           onPress={() => {
             setPreviewData({
-              title: "RECEIPT / STRUK",
+              title: "RECEIPT / STRUK (COPY)",
               transactionId: transaction.id || "",
               transactionDate: transaction.createdAt,
               subtotal: formatCurrency(transactionProduct?.reduce((sum: number, item: any) => sum + (item.sellingPrice * item.quantity), 0) || 0),

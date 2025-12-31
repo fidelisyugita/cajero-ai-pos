@@ -15,6 +15,8 @@ interface PrinterState {
   setIsScanning: (isScanning: boolean) => void;
   setIsConnected: (isConnected: boolean) => void;
   disconnect: () => void;
+  isAutoPrintEnabled: boolean;
+  setIsAutoPrintEnabled: (enabled: boolean) => void;
 }
 
 const storage = new MMKV({ id: 'printer-storage' });
@@ -42,11 +44,16 @@ export const usePrinterStore = create<PrinterState>()(
       setIsScanning: (isScanning) => set({ isScanning }),
       setIsConnected: (isConnected) => set({ isConnected }),
       disconnect: () => set({ connectedDevice: null, isConnected: false }),
+      isAutoPrintEnabled: false,
+      setIsAutoPrintEnabled: (enabled) => set({ isAutoPrintEnabled: enabled }),
     }),
     {
       name: 'printer-storage',
       storage: createJSONStorage(() => mmkvStorage),
-      partialize: (state) => ({ connectedDevice: state.connectedDevice }), // Only persist connected device
+      partialize: (state) => ({ 
+        connectedDevice: state.connectedDevice,
+        isAutoPrintEnabled: state.isAutoPrintEnabled
+      }),
     }
   )
 );

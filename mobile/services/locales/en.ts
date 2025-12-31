@@ -14,6 +14,8 @@ export default {
     list_of_printer: "List of Printer",
     add_printer: "Add Printer",
     test_printer: "Test Printer",
+    auto_print: "Auto Print",
+    auto_print_desc: "Print receipt automatically after payment success",
     scan_devices: "Scan Devices",
     stop_scan: "Stop Scan",
     connect: "Connect",
@@ -24,6 +26,12 @@ export default {
     connection_failed: "Connection Failed",
     not_connected: "Not Connected",
     language_setting: "Language Setting",
+    // Printer Permissions
+    permission_required: "Permission Required",
+    open_settings: "Open Settings",
+    bluetooth_off: "Bluetooth Off",
+    bluetooth_off_msg: "Please turn on Bluetooth to connect to printer.",
+    bluetooth_permission_msg: "Cajero needs Bluetooth access to scan for printers. Please enable it in settings.",
 
     // Payment Methods
     select_payment_method: "Select Payment Method",
@@ -241,4 +249,9 @@ export default {
     // Stock Update Modal
     update_stock_for: "Update Stock for",
     new_stock_value: "New Stock Value",
+    
+    // AI Chat
+    ai_welcome_message: "Hello! I am your AI assistant.",
+    type_message_placeholder: "Type a message...",
+    ai_connection_error: "Error: Could not connect to AI server. Please try again.",
 };

@@ -65,7 +65,7 @@ class PrinterService {
     return true;
   }
 
-  async scanDevices(onDeviceFound: (device: Device) => void) {
+  async scanDevices(onDeviceFound: (device: Device) => void, onError?: (error: any) => void) {
     const hasPermission = await this.requestPermissions();
     if (!hasPermission) {
       throw new Error('Bluetooth permissions not granted');
@@ -80,6 +80,7 @@ class PrinterService {
     manager.startDeviceScan(null, null, (error, device) => {
       if (error) {
         Logger.error('Scan error:', error);
+        if (onError) onError(error);
         return;
       }
       if (device && device.name) {

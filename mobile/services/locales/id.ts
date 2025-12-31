@@ -1,7 +1,7 @@
 export default {
     settings: "Pengaturan",
     developer: "Developer",
-    ai_settings: "AI Assistant",
+    ai_settings: "Asisten AI",
     printers: "Printer",
     language: "Bahasa",
     payment_method: "Metode Pembayaran",
@@ -14,6 +14,8 @@ export default {
     list_of_printer: "Daftar Printer",
     add_printer: "Tambah Printer",
     test_printer: "Tes Printer",
+    auto_print: "Cetak Otomatis",
+    auto_print_desc: "Cetak struk secara otomatis setelah pembayaran berhasil",
     scan_devices: "Pindai Perangkat",
     stop_scan: "Hentikan Pindai",
     connect: "Sambungkan",
@@ -24,6 +26,12 @@ export default {
     connection_failed: "Gagal Terhubung",
     not_connected: "Tidak Terhubung",
     language_setting: "Pengaturan Bahasa",
+    // Printer Permissions
+    permission_required: "Izin Diperlukan",
+    open_settings: "Buka Pengaturan",
+    bluetooth_off: "Bluetooth Off",
+    bluetooth_off_msg: "Silakan aktifkan Bluetooth untuk menghubungkan printer.",
+    bluetooth_permission_msg: "Cajero memerlukan akses Bluetooth untuk memindai printer. Silakan aktifkan di pengaturan.",
 
     // Payment Methods
     select_payment_method: "Pilih Metode Pembayaran",
@@ -236,4 +244,9 @@ export default {
     // Stock Update Modal
     update_stock_for: "Perbaharui stok untuk",
     new_stock_value: "Nilai Stok Baru",
+
+    // AI Chat
+    ai_welcome_message: "Halo! Saya asisten AI Anda.",
+    type_message_placeholder: "Ketik pesan...",
+    ai_connection_error: "Kesalahan: Tidak dapat terhubung ke server AI. Silakan coba lagi.",
 };
