@@ -40,6 +40,11 @@ import {
 } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
 import Logger from "@/services/logger";
+import { useVariantStore, type VariantDraft } from "@/store/useVariantStore";
+import { useCreateVariantMutation } from "@/services/mutations/useCreateVariantMutation";
+import { useUpdateVariantMutation } from "@/services/mutations/useUpdateVariantMutation";
+import { useDeleteVariantMutation } from "@/services/mutations/useDeleteVariantMutation";
+import { useVariantsQuery } from "@/services/queries/useVariantsQuery";
 
 const DEFAULT_TAX = 10;
 
@@ -140,6 +145,18 @@ const AddProduct = () => {
 		setSaveCallback: setSaveIngredientCallback,
 	} = useIngredientStore();
 
+	const {
+		setVariants,
+		variants: storeVariants,
+		deletedVariantIds,
+		reset: resetVariantStore,
+	} = useVariantStore();
+
+	const { mutateAsync: createVariant } = useCreateVariantMutation();
+	const { mutateAsync: updateVariant } = useUpdateVariantMutation();
+	const { mutateAsync: deleteVariant } = useDeleteVariantMutation();
+	const { data: allVariants } = useVariantsQuery();
+
 	// Local state to store tax percentage for display and calculation
 	// Frontend handles tax as %, Backend expects tax as Amount
 	const [taxRate, setTaxRate] = useState<number>(DEFAULT_TAX);
@@ -223,18 +240,39 @@ const AddProduct = () => {
 				}));
 				setValue("productIngredients", ingredients);
 
-				// Sync ingredients to store
-				// ingredients.forEach((ing) => {
-				// 	useIngredientStore.getState().selectIngredient({
-				// 		id: ing.ingredientId,
-				// 		name: ing.name,
-				// 		quantityNeeded: ing.quantityNeeded,
-				// 		measureUnitName: ing.measureUnitCode,
-				// 	} as any);
-				// });
 			}
+
+			// Sync ingredients to store
+			// ingredients.forEach((ing) => {
+			// 	useIngredientStore.getState().selectIngredient({
+			// 		id: ing.ingredientId,
+			// 		name: ing.name,
+			// 		quantityNeeded: ing.quantityNeeded,
+			// 		measureUnitName: ing.measureUnitCode,
+			// 	} as any);
+			// });
 		}
 	}, [productToEdit, categories, measureUnits, setValue, setImageUri]);
+
+	// Sync variants to store
+	useEffect(() => {
+		if (isEditing && allVariants && id) {
+			const productVariants = allVariants.filter(v => v.productId === id);
+			const mappedVariants: VariantDraft[] = productVariants.map(v => ({
+				id: v.id,
+				name: v.name,
+				isRequired: v.isRequired,
+				isMultiple: v.isMultiple,
+				options: v.options.map(opt => ({
+					id: opt.id,
+					name: opt.name,
+					stock: opt.stock,
+					priceAdjusment: opt.priceAdjusment
+				}))
+			}));
+			setVariants(mappedVariants);
+		}
+	}, [isEditing, allVariants, id, setVariants]);
 
 	useEffect(() => {
 		if (
@@ -308,6 +346,7 @@ const AddProduct = () => {
 			resetCategoryStore();
 			resetMeasureUnitStore();
 			resetIngredientStore();
+			resetVariantStore();
 		};
 	}, []);
 
@@ -351,12 +390,53 @@ const AddProduct = () => {
 			};
 
 			let result;
+			let currentProductId = id;
+
 			if (isEditing && id) {
 				result = await updateProduct({ id, data: payload });
 				Alert.alert(t("success"), t("product_updated_success"));
 			} else {
 				result = await addProduct(payload);
+				currentProductId = result.id;
 				Alert.alert(t("success"), t("product_added_success"));
+			}
+
+			// Handle Variants
+			if (currentProductId) {
+				// 1. Delete removed variants
+				if (deletedVariantIds.length > 0) {
+					await Promise.all(deletedVariantIds.map(id => deleteVariant(id)));
+				}
+
+				// 2. Create or Update variants
+				const variantPromises = storeVariants.map(async (variant) => {
+					const variantPayload = {
+						productId: currentProductId!, // Asserting non-null as we checked currentProductId
+						name: variant.name,
+						isRequired: variant.isRequired,
+						isMultiple: variant.isMultiple,
+						options: variant.options.map(opt => ({
+							name: opt.name,
+							stock: opt.stock,
+							priceAdjusment: opt.priceAdjusment,
+							// For existing options, we might need ID? 
+							// The backend update likely replaces options or updates by ID.
+							// VariantRequest DTO has list of OptionRequest. OptionRequest usually doesn't need ID for create, 
+							// but for update it might replace all? 
+							// Assuming simple full update for now.
+						}))
+					};
+
+					if (variant.isNew) {
+						return createVariant(variantPayload);
+					} else {
+						// For update, we need to pass the variant ID.
+						// My updateVariantMutation takes {id, data}.
+						return updateVariant({ id: variant.id, data: variantPayload });
+					}
+				});
+
+				await Promise.all(variantPromises);
 			}
 
 			if (shouldGoBack) {
@@ -365,6 +445,7 @@ const AddProduct = () => {
 				}
 			} else {
 				reset();
+				resetVariantStore(); // Reset store for "Add More"
 			}
 		} catch (error: any) {
 			Logger.error("Add/Update product failed:", error);
@@ -661,6 +742,22 @@ const AddProduct = () => {
 								</View>
 							)}
 						/>
+					</FormSectionCard>
+
+					<FormSectionCard title={t("variants")}>
+						<View style={$.categoryContainer}>
+							{(storeVariants && storeVariants.length > 0) && (
+								<Text style={$.selectedCategoryText}>
+									{storeVariants.length} {storeVariants.length === 1 ? t("variant") : t("variants")} {t("configured")}
+								</Text>
+							)}
+							<Button
+								onPress={() => router.push("/modal/product/manage-variants")}
+								size="lg"
+								title={t("manage_variants")}
+								variant="soft"
+							/>
+						</View>
 					</FormSectionCard>
 
 					{/* <View style={$.stockRow}>
