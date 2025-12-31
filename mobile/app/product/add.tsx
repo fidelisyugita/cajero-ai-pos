@@ -267,7 +267,13 @@ const AddProduct = () => {
 					id: opt.id,
 					name: opt.name,
 					stock: opt.stock,
-					priceAdjusment: opt.priceAdjusment
+					priceAdjusment: opt.priceAdjusment,
+                    ingredients: opt.ingredients?.map(ing => ({
+                        ingredientId: ing.ingredientId,
+                        name: ing.name,
+                        quantityNeeded: ing.quantityNeeded,
+                        measureUnit: ing.measureUnit
+                    }))
 				}))
 			}));
 			setVariants(mappedVariants);
@@ -409,6 +415,7 @@ const AddProduct = () => {
 				}
 
 				// 2. Create or Update variants
+                console.log("Saving variants. Count:", storeVariants.length);
 				const variantPromises = storeVariants.map(async (variant) => {
 					const variantPayload = {
 						productId: currentProductId!, // Asserting non-null as we checked currentProductId
@@ -419,19 +426,18 @@ const AddProduct = () => {
 							name: opt.name,
 							stock: opt.stock,
 							priceAdjusment: opt.priceAdjusment,
-							// For existing options, we might need ID? 
-							// The backend update likely replaces options or updates by ID.
-							// VariantRequest DTO has list of OptionRequest. OptionRequest usually doesn't need ID for create, 
-							// but for update it might replace all? 
-							// Assuming simple full update for now.
+                            ingredients: opt.ingredients?.map(ing => ({
+                                ingredientId: ing.ingredientId,
+                                quantityNeeded: ing.quantityNeeded
+                            })),
 						}))
 					};
+                    
+                    console.log("Processing variant:", variant.name, "isNew:", variant.isNew, "Payload:", JSON.stringify(variantPayload));
 
 					if (variant.isNew) {
 						return createVariant(variantPayload);
 					} else {
-						// For update, we need to pass the variant ID.
-						// My updateVariantMutation takes {id, data}.
 						return updateVariant({ id: variant.id, data: variantPayload });
 					}
 				});

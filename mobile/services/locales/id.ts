@@ -273,4 +273,7 @@ export default {
     price_adj: "Penyesuaian Harga",
     add_option: "Tambah Opsi",
     select_option: "Pilih Opsi",
+    option: "Opsi",
+    ingredients: "Bahan Baku",
+    ingredient: "Bahan Baku",
 };

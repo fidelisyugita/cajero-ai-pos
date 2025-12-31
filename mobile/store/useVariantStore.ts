@@ -6,6 +6,12 @@ export interface VariantOption {
 	name: string;
 	priceAdjusment: number;
 	stock: number;
+    ingredients?: {
+        ingredientId: string;
+        name: string;
+        quantityNeeded: number;
+        measureUnit?: string;
+    }[];
 }
 
 export interface VariantDraft {

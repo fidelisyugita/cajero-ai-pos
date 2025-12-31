@@ -1,9 +1,17 @@
+export interface VariantOptionIngredient {
+	ingredientId: string;
+	name: string;
+	quantityNeeded: number;
+	measureUnit: string;
+}
+
 export interface VariantOption {
 	id: string;
 	name: string;
 	priceAdjusment: number;
 	stock: number;
 	variantId: string;
+	ingredients: VariantOptionIngredient[];
 }
 
 export interface Variant {

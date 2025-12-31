@@ -18,6 +18,8 @@ import { useStoreShallow } from "@/hooks/useStoreShallow";
 import { vs } from "@/utils/Scale";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Select from "@/components/ui/Select";
+import { useIngredientsQuery } from "@/services/queries/useIngredientsQuery";
 
 const variantSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -28,6 +30,12 @@ const variantSchema = z.object({
         name: z.string().min(1, "Option name is required"),
         stock: z.coerce.number().min(0, "Stock must be positive"),
         priceAdjusment: z.coerce.number().min(0, "Price adjustment must be positive"),
+        ingredients: z.array(z.object({
+            ingredientId: z.string(),
+            name: z.string(), // Just for display/draft
+            quantityNeeded: z.coerce.number().min(0.0001, "Quantity must be greater than 0"),
+            measureUnit: z.string().optional(),
+        })).optional(),
     })).min(1, "At least one option is required"),
 });
 
@@ -49,7 +57,7 @@ const EditVariantModal = () => {
             name: "",
             isRequired: true,
             isMultiple: false,
-            options: [{ id: createTempId(), name: "", stock: 0, priceAdjusment: 0 }],
+            options: [{ id: createTempId(), name: "", stock: 0, priceAdjusment: 0, ingredients: [] }],
         },
     });
 
@@ -57,6 +65,9 @@ const EditVariantModal = () => {
         control,
         name: "options",
     });
+
+    const { data: ingredientsData } = useIngredientsQuery();
+    const ingredientOptions = ingredientsData?.map(i => ({ label: i.name, value: i.id })) || [];
 
     useEffect(() => {
         if (selectedVariant) {
@@ -68,7 +79,13 @@ const EditVariantModal = () => {
                     id: opt.id,
                     name: opt.name,
                     stock: opt.stock,
-                    priceAdjusment: opt.priceAdjusment
+                    priceAdjusment: opt.priceAdjusment,
+                    ingredients: opt.ingredients?.map(ing => ({
+                        ingredientId: ing.ingredientId,
+                        name: ing.name,
+                        quantityNeeded: ing.quantityNeeded,
+                        measureUnit: ing.measureUnit
+                    })) || []
                 }))
             });
         }
@@ -136,65 +153,19 @@ const EditVariantModal = () => {
 
                     <FormSectionCard title={t("options")} required>
                          {fields.map((field, index) => (
-                             <View key={field.id} style={$.optionRow}>
-                                <View style={$.optionInputs}>
-                                    <Controller
-                                        control={control}
-                                        name={`options.${index}.name`}
-                                        render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                            <Input
-                                                label={t("name")}
-                                                value={value}
-                                                onChangeText={onChange}
-                                                error={error?.message}
-                                                size="md"
-                                                containerStyle={{ flex: 2 }}
-                                            />
-                                        )}
-                                    />
-                                     <Controller
-                                        control={control}
-                                        name={`options.${index}.stock`}
-                                        render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                            <Input
-                                                label={t("stock")}
-                                                value={value.toString()}
-                                                onChangeText={onChange} // Zod coerce will handle string -> number
-                                                error={error?.message}
-                                                keyboardType="numeric"
-                                                size="md"
-                                                containerStyle={{ flex: 1 }}
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        control={control}
-                                        name={`options.${index}.priceAdjusment`}
-                                        render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                            <Input
-                                                label={t("price_adj")}
-                                                value={value.toString()}
-                                                onChangeText={onChange}
-                                                error={error?.message}
-                                                keyboardType="numeric"
-                                                size="md"
-                                                 containerStyle={{ flex: 1 }}
-                                            />
-                                        )}
-                                    />
-                                </View>
-                                <IconButton
-                                    Icon={IcTrash}
-                                    onPress={() => remove(index)}
-                                    size="sm"
-                                    variant="warning"
-                                    disabled={fields.length <= 1}
-                                />
-                             </View>
+                             <VariantOptionItem
+                                key={field.id}
+                                control={control}
+                                index={index}
+                                remove={() => remove(index)}
+                                canRemove={fields.length > 1}
+                                ingredientOptions={ingredientOptions}
+                                allIngredients={ingredientsData || []}
+                             />
                          ))}
                          <Button
                             leftIcon={() => <IcPlus color="white" />}
-                            onPress={() => append({ id: createTempId(), name: "", stock: 0, priceAdjusment: 0 })}
+                            onPress={() => append({ id: createTempId(), name: "", stock: 0, priceAdjusment: 0, ingredients: [] })}
                             size="sm"
                             title={t("add_option")}
                             variant="primary"
@@ -221,6 +192,133 @@ const EditVariantModal = () => {
                 />
             </ScreenModal.Footer>
         </ScreenModal>
+    );
+};
+
+const VariantOptionItem = ({ control, index, remove, canRemove, ingredientOptions, allIngredients }: any) => {
+    const { fields, append, remove: removeIngredient } = useFieldArray({
+        control,
+        name: `options.${index}.ingredients`,
+    });
+
+    return (
+        <View style={$.optionCard}>
+            <View style={$.optionHeader}>
+                <Text style={$.optionTitle}>{t("option")} {index + 1}</Text>
+                <IconButton
+                    Icon={IcTrash}
+                    onPress={remove}
+                    size="sm"
+                    variant="warning"
+                    disabled={!canRemove}
+                />
+            </View>
+            
+            <View style={$.optionRow}>
+                <View style={[$.optionInputs, { flexDirection: 'column' }]}>
+                    <Controller
+                        control={control}
+                        name={`options.${index}.name`}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => (
+                            <Input
+                                label={t("name")}
+                                value={value}
+                                onChangeText={onChange}
+                                error={error?.message}
+                                size="md"
+                            />
+                        )}
+                    />
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <Controller
+                            control={control}
+                            name={`options.${index}.stock`}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                                <Input
+                                    label={t("stock")}
+                                    value={value.toString()}
+                                    onChangeText={onChange} 
+                                    error={error?.message}
+                                    keyboardType="numeric"
+                                    size="md"
+                                    containerStyle={{ flex: 1 }}
+                                />
+                            )}
+                        />
+                        <Controller
+                            control={control}
+                            name={`options.${index}.priceAdjusment`}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                                <Input
+                                    label={t("price_adj")}
+                                    value={value.toString()}
+                                    onChangeText={onChange}
+                                    error={error?.message}
+                                    keyboardType="numeric"
+                                    size="md"
+                                        containerStyle={{ flex: 1 }}
+                                />
+                            )}
+                        />
+                    </View>
+                </View>
+            </View>
+
+            {/* Ingredients Section */}
+            <View style={$.ingredientsSection}>
+                <Text style={$.ingredientsTitle}>{t("ingredients")}</Text>
+                {fields.map((field: any, ingIndex: number) => (
+                    <View key={field.id} style={$.ingredientRow}>
+                        <Controller
+                            control={control}
+                            name={`options.${index}.ingredients.${ingIndex}.ingredientId`}
+                            render={({ field: { onChange, value } }) => (
+                                <Select
+                                    label={t("ingredient")}
+                                    options={ingredientOptions}
+                                    value={value}
+                                    onSelect={(val) => {
+                                        onChange(val);
+                                    }}
+                                    containerStyle={{ flex: 2 }}
+                                    placeholder={t("select_ingredient")}
+                                />
+                            )}
+                        />
+                        <Controller
+                            control={control}
+                            name={`options.${index}.ingredients.${ingIndex}.quantityNeeded`}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                                <Input
+                                    label={t("qty")}
+                                    value={value?.toString()}
+                                    onChangeText={onChange}
+                                    keyboardType="numeric"
+                                    size="md"
+                                    containerStyle={{ flex: 1 }}
+                                    error={error?.message}
+                                />
+                            )}
+                        />
+                         <IconButton
+                            Icon={IcTrash}
+                            onPress={() => removeIngredient(ingIndex)}
+                            size="sm"
+                            variant="warning"
+                            style={{ marginTop: 28 }} // Align with inputs
+                        />
+                    </View>
+                ))}
+                <Button
+                    leftIcon={() => <IcPlus color="white" />}
+                    onPress={() => append({ ingredientId: "", name: "", quantityNeeded: 0, measureUnit: "" })}
+                    size="sm"
+                    title={t("add_ingredient")}
+                    variant="soft"
+                    style={{ alignSelf: 'flex-start' }}
+                />
+            </View>
+        </View>
     );
 };
 
@@ -261,6 +359,42 @@ const $ = StyleSheet.create((theme) => ({
         ...theme.typography.bodySm,
         color: theme.colors.error[500],
         marginTop: theme.spacing.xs,
+    },
+    optionCard: {
+        backgroundColor: theme.colors.neutral[100],
+        padding: theme.spacing.md,
+        borderRadius: theme.radius.md,
+        borderWidth: 1,
+        borderColor: theme.colors.neutral[300],
+        gap: theme.spacing.md,
+        marginBottom: theme.spacing.md,
+    },
+    optionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    optionTitle: {
+        ...theme.typography.bodyMd,
+        fontWeight: '600',
+        color: theme.colors.neutral[700],
+    },
+    ingredientsSection: {
+        gap: theme.spacing.sm,
+        marginTop: theme.spacing.xs,
+        paddingTop: theme.spacing.sm,
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.neutral[200],
+    },
+    ingredientsTitle: {
+        ...theme.typography.bodySm,
+        fontWeight: '600',
+        color: theme.colors.neutral[500],
+    },
+    ingredientRow: {
+        flexDirection: 'row',
+        gap: theme.spacing.sm,
+        alignItems: 'flex-start',
     }
 }));
 

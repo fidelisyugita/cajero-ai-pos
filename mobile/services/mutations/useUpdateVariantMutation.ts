@@ -12,6 +12,10 @@ interface UpdateVariantData {
         name: string;
         priceAdjusment: number;
         stock: number;
+        ingredients?: {
+            ingredientId: string;
+            quantityNeeded: number;
+        }[];
     }[];
 }
 

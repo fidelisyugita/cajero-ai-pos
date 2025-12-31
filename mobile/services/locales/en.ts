@@ -278,4 +278,7 @@ export default {
     price_adj: "Price Adj.",
     add_option: "Add Option",
     select_option: "Select Option",
+    option: "Option",
+    ingredients: "Ingredients",
+    ingredient: "Ingredient",
 };
