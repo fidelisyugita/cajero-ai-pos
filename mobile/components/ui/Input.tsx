@@ -154,6 +154,7 @@ const Input = forwardRef<TextInput, InputProps>(
 			value,
 			maxValue,
 			minValue,
+			style, // Destructure style here
 			...rest
 		},
 		ref,
@@ -218,7 +219,11 @@ const Input = forwardRef<TextInput, InputProps>(
 						// If label exists and is not floating (not existing), hide placeholder to avoid overlap?
 						// Material design usually: placeholder shown when focused.
 						value={value}
-						style={stylesheet.input}
+						style={[
+							stylesheet.input,
+							rest.multiline && { textAlignVertical: "top", paddingTop: vs(24) }, 
+							style
+						]}
 						{...rest}
 					/>
 

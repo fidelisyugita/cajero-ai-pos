@@ -32,7 +32,7 @@ const BusinessProfileCard = ({
 	return (
 		<View style={$.container}>
 			<FormSectionCard title="Profile">
-				{!loading && (
+				{!loading && onEdit && (
 					<View style={$.editButton}>
 						<IconButton
 							Icon={IcEdit}

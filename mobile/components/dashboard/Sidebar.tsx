@@ -23,6 +23,8 @@ const Sidebar = () => {
 	const business = useBusinessStore((state) => state.business);
 	const user = useAuthStore((state) => state.user);
 
+	const isHighOrderRole = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
+
 	return (
 		<View style={$.container}>
 			<Logo height={vs(80)} width={vs(80)} />
@@ -38,14 +40,8 @@ const Sidebar = () => {
 			>
 				<View style={$.sidebarItems}>
 					{LIST_SIDEBAR_ITEMS.filter(tab => {
-						if (tab.label === "Assistant") {
-							// Only show Assistant for ultra users and OWNER role
-							return (
-								business?.subscriptionStatus === "ultra" && user?.roleCode === "OWNER"
-							);
-						}
-						// Attendance example (commented out in cons.ts anyway, but good practice):
-						if (tab.label === "Attendance") return false;
+						if (tab.label === "Assistant") return business?.subscriptionStatus === "ultra" && isHighOrderRole;
+						if (tab.label === "Report") return isHighOrderRole;
 
 						return true;
 					}).map(({ Icon, ...tab }) => {

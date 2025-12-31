@@ -22,6 +22,7 @@ import { vs } from "@/utils/Scale";
 import MenuListSkeleton from "./MenuListSkeleton";
 import { useCategoryStore } from "@/store/useMenuCategoryStore";
 import { useSyncStore } from "@/store/useSyncStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface MenuListProps {
 	scrollHandler?: (event: any) => void;
@@ -62,6 +63,10 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
 	const showLoader =
 		isLoading || (isSyncing && (!data?.content || data.content.length === 0));
 
+	// Authorization check
+	const user = useAuthStore((state) => state.user);
+	const canEditMenu = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
+
 	if (showLoader) {
 		return <MenuListSkeleton />;
 	}
@@ -94,7 +99,7 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
 					/>
 				}
 			/>
-			{!editable && <MenuActions />}
+			{!editable && canEditMenu && <MenuActions />}
 		</>
 	);
 };

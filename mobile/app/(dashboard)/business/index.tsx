@@ -88,7 +88,7 @@ const BusinessScreen = () => {
 							description={store?.description || "-"}
 							location={store?.location}
 							loading={isLoading}
-							onEdit={handleEditStore}
+							onEdit={(user?.roleCode === "OWNER" || user?.roleCode === "MANAGER") ? handleEditStore : undefined}
 						/>
 						<OwnerInfoCard
 							name={currentUser?.name || "-"}
@@ -96,7 +96,7 @@ const BusinessScreen = () => {
 							email={currentUser?.email || "-"}
 							loading={isLoading}
 							avatar={currentUser?.imageUrl || `https://github.com/shadcn.png`}
-							onEdit={handleEditProfile}
+							onEdit={(user?.roleCode === "OWNER" || user?.roleCode === "MANAGER") ? handleEditProfile : undefined}
 						/>
 					</View>
 
@@ -104,7 +104,7 @@ const BusinessScreen = () => {
 					<View style={$.column}>
 						<EmployeeListCard
 							employees={employees}
-							onAddEmployee={handleAddEmployee}
+							onAddEmployee={(user?.roleCode === "OWNER" || user?.roleCode === "MANAGER") ? handleAddEmployee : undefined}
 							loading={isLoading}
 						/>
 					</View>
