@@ -41,8 +41,7 @@ import {
 import { vs } from "@/utils/Scale";
 import Logger from "@/services/logger";
 
-const IMAGE_URL =
-	"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+const DEFAULT_TAX = 10;
 
 const UniIcAddImage = withUnistyles(IcAddImage, (theme) => ({
 	color: theme.colors.neutral[600],
@@ -143,7 +142,7 @@ const AddProduct = () => {
 
 	// Local state to store tax percentage for display and calculation
 	// Frontend handles tax as %, Backend expects tax as Amount
-	const [taxRate, setTaxRate] = useState<string>("");
+	const [taxRate, setTaxRate] = useState<number>(DEFAULT_TAX);
 	const [isTaxIncluded, setIsTaxIncluded] = useState<boolean>(false);
 
 	const {
@@ -195,9 +194,9 @@ const AddProduct = () => {
 			// Initialize taxRate state as percentage derived from amount
 			if (productToEdit.sellingPrice > 0 && productToEdit.tax > 0) {
 				const rate = (productToEdit.tax / productToEdit.sellingPrice) * 100;
-				setTaxRate(rate.toString());
+				setTaxRate(rate);
 			} else {
-				setTaxRate("");
+				setTaxRate(DEFAULT_TAX);
 			}
 
 			if (productToEdit.imageUrl) {
@@ -274,7 +273,7 @@ const AddProduct = () => {
 		// Tax Amount = Selling Price * (Tax Rate / 100)
 		if (sellingPrice && taxRate) {
 			const price = Number(sellingPrice);
-			const rate = parseNumber(taxRate); // Handle potential formatting
+			const rate = Number(taxRate); // Handle potential formatting
 
 			let taxAmount = 0;
 			if (isTaxIncluded) {
@@ -335,7 +334,7 @@ const AddProduct = () => {
 				measureUnitCode: data.measureUnit.code,
 
 				sellingPrice: isTaxIncluded && taxRate
-					? data.sellingPrice / (1 + parseNumber(taxRate) / 100)
+					? data.sellingPrice / (1 + taxRate / 100)
 					: data.sellingPrice,
 				commission: data.commission || 0,
 				discount: 0,
@@ -863,14 +862,16 @@ const AddProduct = () => {
 									error={error?.message}
 									keyboardType="numeric"
 									label={`${t("tax")} (%)`}
-									maxLength={5}
+									// maxLength={5}
+									maxValue={30}
+									minValue={0}
 									// Input controls the RATE (%), not the amount directly
-									onChangeText={setTaxRate}
+									onChangeText={(text: string) => setTaxRate(parseNumber(text))}
 									ref={ref}
 									returnKeyType="done"
 									size="lg"
 									// Display the rate string directly
-									value={taxRate}
+									value={taxRate.toFixed(0).toString()}
 									right={<Text style={{ paddingRight: 12, color: '#6B7280' }}>%</Text>}
 								/>
 							)}
