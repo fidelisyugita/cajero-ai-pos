@@ -59,6 +59,7 @@ public class ReportService {
       BigDecimal revenue = (BigDecimal) row[2];
       BigDecimal refund = (BigDecimal) row[3];
       BigDecimal discount = (BigDecimal) row[4];
+      BigDecimal tax = (BigDecimal) row[5];
 
       if (revenue == null)
         revenue = BigDecimal.ZERO;
@@ -66,13 +67,15 @@ public class ReportService {
         refund = BigDecimal.ZERO;
       if (discount == null)
         discount = BigDecimal.ZERO;
+      if (tax == null)
+        tax = BigDecimal.ZERO;
 
       builderMap.computeIfAbsent(date, k -> DailyReportDTO.builder().date(k))
           .totalTransaction(count)
           .totalRevenue(revenue)
           .totalRefund(refund)
           .totalDiscount(discount)
-          .totalNetRevenue(revenue.subtract(refund));
+          .totalNetRevenue(revenue.subtract(refund).subtract(tax));
     }
 
     // Process Products

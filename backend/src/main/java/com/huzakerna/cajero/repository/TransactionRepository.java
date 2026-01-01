@@ -43,7 +43,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
         COUNT(t) as count,
         SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalPrice ELSE 0 END) as revenue,
         SUM(CASE WHEN t.statusCode = 'REFUND' THEN t.totalPrice ELSE 0 END) as refund,
-        SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalDiscount ELSE 0 END) as discount
+        SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalDiscount ELSE 0 END) as discount,
+        SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalTax ELSE 0 END) as tax
       FROM Transaction t
       WHERE t.storeId = :storeId
         AND t.createdAt BETWEEN :start AND :end

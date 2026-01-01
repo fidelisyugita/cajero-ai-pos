@@ -56,7 +56,7 @@ const ManageVariantsScreen = () => {
                                 <Button
                                     onPress={() => router.back()}
                                     size="md"
-                                    title={t("save")}
+                                    title={t("back_and_save")}
                                     variant="primary"
                                 />
                             }
@@ -91,6 +91,7 @@ const ManageVariantsScreen = () => {
                             title={t("add_new_variant")}
                             variant="soft"
                             style={$.addButton}
+
                         />}
                 />
 
@@ -129,6 +130,8 @@ const $ = StyleSheet.create((theme) => ({
     },
     addButton: {
         marginVertical: theme.spacing.xl,
+        width: vs(200),
+        alignSelf: "center",
     },
     listContent: {
         paddingBottom: theme.spacing.xl,
