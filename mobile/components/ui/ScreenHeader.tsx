@@ -10,6 +10,7 @@ interface ScreenHeaderProps {
 	onBack?: () => void;
 	style?: ViewStyle;
 	rightAction?: React.ReactNode;
+	noBack?: boolean;
 }
 
 const ScreenHeader = ({
@@ -17,6 +18,7 @@ const ScreenHeader = ({
 	onBack,
 	style,
 	rightAction,
+	noBack,
 }: ScreenHeaderProps) => {
 	const router = useRouter();
 
@@ -33,13 +35,13 @@ const ScreenHeader = ({
 	return (
 		<View style={[$.container, style]}>
 			<View style={$.backTitleWrapper}>
-				<IconButton
+				{!noBack && <IconButton
 					Icon={IcArrowLeft}
 					onPress={handleBack}
 					size="md"
 					variant="neutral-no-stroke"
-				/>
-				<Text style={$.title}>{title}</Text>
+				/>}
+				<Text style={[$.title, noBack && { marginLeft: vs(40) }]}>{title}</Text>
 			</View>
 			{rightAction}
 		</View>

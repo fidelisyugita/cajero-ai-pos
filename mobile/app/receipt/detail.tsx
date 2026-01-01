@@ -211,8 +211,8 @@ const ReceiptDetailScreen = () => {
               total: formatCurrency(totalPrice),
               paymentMethod: paymentMethodCode,
               items: transactionProduct?.map((p: any) => ({
-                // name: p.productName,
-                name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
+                name: p.productName,
+                // name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
                 quantity: p.quantity,
                 price: (p.sellingPrice + (p.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * p.quantity,
                 variants: p.selectedVariants?.map((v: any) => ({

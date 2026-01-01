@@ -51,6 +51,7 @@ const ManageVariantsScreen = () => {
                     header: () => (
                         <ScreenHeader
                             title={t("manage_variants")}
+                            noBack
                             rightAction={
                                 <Button
                                     onPress={() => router.back()}

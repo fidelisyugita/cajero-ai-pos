@@ -354,7 +354,8 @@ class PrinterService {
              // Inline is simpler for variants usually.
              const variantText = `  + ${variant.groupName}: ${variant.name}`;
              const variantPrice = `(${formatCurrency(variant.price)})`;
-             encoderChain.line(this.pairText(variantText, variantPrice));
+            //  encoderChain.line(this.pairText(variantText, variantPrice));
+             encoderChain.line(`${variantText} ${variantPrice}`);
            });
         }
 
@@ -363,8 +364,8 @@ class PrinterService {
         // Or "x2" .... "10.000"
 
         // Format: "  x2              20.000"
-        const qtyStr = `  x${item.quantity}`;
-        const line2 = this.pairText(qtyStr, item.price);
+        const qtyStr = `  x${item.quantity} `;
+        const line2 = this.pairText(qtyStr, formatCurrency(Number(item.price)));
         encoderChain.line(line2);
       });
     }

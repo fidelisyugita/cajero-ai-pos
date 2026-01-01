@@ -88,9 +88,9 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
                           ))}
                         </View>
                       )}
-                      {item.quantity > 1 && (
-                        <Text style={$.itemSubText}>{item.quantity} x {typeof item.price === 'number' ? formatCurrency(item.price / item.quantity) : ''}</Text>
-                      )}
+                      {/* {item.quantity > 1 && ( */}
+                      <Text style={$.itemSubText}>{item.quantity} x {typeof item.price === 'number' ? formatCurrency(item.price / item.quantity) : ''}</Text>
+                      {/* )} */}
                     </View>
                     <Text style={$.itemText}>
                       {typeof item.price === 'number' ? formatCurrency(item.price) : item.price}
