@@ -16,9 +16,11 @@ import Animated, { useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, w
 
 const ReportScreen = () => {
     const user = useAuthStore((state) => state.user);
+
+    // Default to last 7 days
     const [dateRange, setDateRange] = useState({
-        startDate: dayjs().startOf('month').toDate(),
-        endDate: dayjs().endOf('month').toDate(),
+        startDate: dayjs().subtract(6, 'day').toDate(),
+        endDate: dayjs().toDate(),
     });
 
     const [showPicker, setShowPicker] = useState(false);
