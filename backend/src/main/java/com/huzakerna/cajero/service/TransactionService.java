@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZonedDateTime; // Add ZonedDateTime back
-import java.time.format.DateTimeFormatter; // Add parser
+// import java.time.ZonedDateTime; 
+// import java.time.format.DateTimeFormatter;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ import com.huzakerna.cajero.model.StockMovement;
 import com.huzakerna.cajero.model.StockMovementType;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
-import com.huzakerna.cajero.model.TransactionProductId; // Kept for reference or remove if strictly unused. Actually better remove it if unused to satisfy linter.
+// import com.huzakerna.cajero.model.TransactionProductId;
 // But check if TransactionProductId is used anywhere else. It was used in imports.
 // Removing it:
 
@@ -60,6 +60,7 @@ public class TransactionService {
   @Transactional
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     log.info("Adding transaction for store: {}", storeId);
+    log.info("Raw createdAt from request: {}", request.getCreatedAt()); // Debug log
     // Validate store exists
     if (storeId == null || !sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
@@ -77,12 +78,14 @@ public class TransactionService {
             .totalPrice(request.getTotalPrice())
             .totalTax(request.getTotalTax())
             .customerId(request.getCustomerId())
-            .createdAt(request.getCreatedAt() != null
-                ? ZonedDateTime.parse(request.getCreatedAt()).withZoneSameInstant(java.time.ZoneOffset.UTC)
-                    .toLocalDateTime()
-                : null) // Use client provided creation time if available, parsed from String, converted
-                        // to UTC
-                        // LocalDateTime
+            // .createdAt(request.getCreatedAt() != null
+            // ?
+            // ZonedDateTime.parse(request.getCreatedAt()).withZoneSameInstant(java.time.ZoneOffset.UTC)
+            // .toLocalDateTime()
+            // : null) // Use client provided creation time if available, parsed from
+            // String, converted
+            // to UTC
+            // LocalDateTime
             .build());
 
     // Add transaction products if any
