@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime; // Add ZonedDateTime back
+import java.time.format.DateTimeFormatter; // Add parser
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -76,8 +78,10 @@ public class TransactionService {
             .totalTax(request.getTotalTax())
             .customerId(request.getCustomerId())
             .createdAt(request.getCreatedAt() != null
-                ? request.getCreatedAt().withZoneSameInstant(java.time.ZoneOffset.UTC).toLocalDateTime()
-                : null) // Use client provided creation time if available, converted to UTC
+                ? ZonedDateTime.parse(request.getCreatedAt()).withZoneSameInstant(java.time.ZoneOffset.UTC)
+                    .toLocalDateTime()
+                : null) // Use client provided creation time if available, parsed from String, converted
+                        // to UTC
                         // LocalDateTime
             .build());
 
