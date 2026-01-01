@@ -105,9 +105,13 @@ public class TransactionService {
         calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
         calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
 
-        // Price Calculation: (Selling Price * Quantity) - Discount + Tax
+        // Price Calculation: ((Selling Price + Variant Price) * Quantity) - Discount +
+        // Tax
         // Note: Assuming Selling Price is Pre-Tax and Pre-Discount base unit price.
-        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+        BigDecimal variantTotal = calculateVariantTotal(tp.getSelectedVariants());
+        BigDecimal unitPrice = tp.getSellingPrice().add(variantTotal);
+
+        BigDecimal lineTotal = unitPrice.multiply(tp.getQuantity())
             .subtract(tp.getDiscount())
             .add(tp.getTax());
         calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
@@ -404,7 +408,10 @@ public class TransactionService {
         calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
         calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
 
-        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+        BigDecimal variantTotal = calculateVariantTotal(tp.getSelectedVariants());
+        BigDecimal unitPrice = tp.getSellingPrice().add(variantTotal);
+
+        BigDecimal lineTotal = unitPrice.multiply(tp.getQuantity())
             .subtract(tp.getDiscount())
             .add(tp.getTax());
         calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
@@ -536,5 +543,20 @@ public class TransactionService {
                 .build())
             .toList() : List.of())
         .build();
+  }
+
+  private BigDecimal calculateVariantTotal(JsonNode selectedVariants) {
+    BigDecimal total = BigDecimal.ZERO;
+    if (selectedVariants != null && selectedVariants.isArray()) {
+      for (JsonNode variant : selectedVariants) {
+        if (variant.has("price")) {
+          // Use asText() to preserve precision for BigDecimal, defaulting to "0" if
+          // missing/null
+          String priceStr = variant.get("price").asText("0");
+          total = total.add(new BigDecimal(priceStr));
+        }
+      }
+    }
+    return total;
   }
 }

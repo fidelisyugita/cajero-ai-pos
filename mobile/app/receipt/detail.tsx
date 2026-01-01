@@ -50,7 +50,7 @@ const ReceiptDetailScreen = () => {
         });
       }
 
-      Logger.log('transaction: ', transaction);
+      Logger.log('detail transaction: ', JSON.stringify(transaction, null, 2));
 
     }
   } catch (e) {
