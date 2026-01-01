@@ -1,21 +1,21 @@
 import { FlashList } from "@shopify/flash-list";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { memo } from "react";
 import { t } from "@/services/i18n";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcPlus from "@/assets/icons/plus.svg";
 import IcEdit from "@/assets/icons/edit.svg";
 import IcTrash from "@/assets/icons/trash.svg";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
-import ScreenModal from "@/components/ui/ScreenModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { useVariantStore, type VariantDraft } from "@/store/useVariantStore";
 import { useStoreShallow } from "@/hooks/useStoreShallow";
 import { vs } from "@/utils/Scale";
+import ScreenHeader from "@/components/ui/ScreenHeader";
 
-const ManageVariantsModal = () => {
+const ManageVariantsScreen = () => {
     const router = useRouter();
     const { variants, removeVariant, selectVariant } = useStoreShallow(useVariantStore, (s) => ({
         variants: s.variants,
@@ -45,48 +45,56 @@ const ManageVariantsModal = () => {
     };
 
     return (
-        <ScreenModal modalStyle={$.modal}>
-            <ScreenModal.Header title={t("manage_variants")} />
-            <ScreenModal.Body>
-                <View style={$.container}>
-                    <Button
-                        leftIcon={() => <IcPlus color="white" />}
-                        onPress={handleAddVariant}
-                        size="md"
-                        title={t("add_new_variant")}
-                        variant="primary"
-                    />
+        <View style={$.container}>
+            <Stack.Screen
+                options={{
+                    header: () => (
+                        <ScreenHeader
+                            title={t("manage_variants")}
+                            rightAction={
+                                <Button
+                                    onPress={() => router.back()}
+                                    size="md"
+                                    title={t("save")}
+                                    variant="primary"
+                                />
+                            }
+                        />
+                    ),
+                }}
+            />
 
-                    <FlashList
-                        data={variants}
-                        ItemSeparatorComponent={() => <View style={$.listSeparator} />}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <VariantItem
-                                item={item}
-                                onEdit={() => handleEditVariant(item)}
-                                onDelete={() => handleDeleteVariant(item.id)}
-                            />
-                        )}
-                        ListEmptyComponent={
-                            <EmptyState
-                                title={t("no_variants_title")}
-                                subtitle={t("no_variants_subtitle")}
-                            />
-                        }
-                    />
-                </View>
-            </ScreenModal.Body>
-            <ScreenModal.Footer>
-                <Button
-                    onPress={() => router.dismiss()}
-                    size="md"
-                    style={$.flex}
-                    title={t("done")}
-                    variant="primary"
+            <View style={$.content}>
+                <FlashList
+                    data={variants}
+                    contentContainerStyle={$.listContent}
+                    ItemSeparatorComponent={() => <View style={$.listSeparator} />}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <VariantItem
+                            item={item}
+                            onEdit={() => handleEditVariant(item)}
+                            onDelete={() => handleDeleteVariant(item.id)}
+                        />
+                    )}
+                    ListEmptyComponent={
+                        <EmptyState
+                            title={t("no_variants_title")}
+                            subtitle={t("no_variants_subtitle")}
+                        />
+                    }
+                    ListFooterComponent={
+                        <Button
+                            onPress={handleAddVariant}
+                            size="md"
+                            title={t("add_new_variant")}
+                            variant="soft"
+                            style={$.addButton}
+                        />}
                 />
-            </ScreenModal.Footer>
-        </ScreenModal>
+
+            </View>
+        </View>
     );
 };
 
@@ -109,17 +117,20 @@ const VariantItem = memo(({ item, onEdit, onDelete }: { item: VariantDraft; onEd
 VariantItem.displayName = "VariantItem";
 
 const $ = StyleSheet.create((theme) => ({
-    modal: {
-        width: vs(649),
-        height: "90%",
-    },
     container: {
+        flex: 1,
+        backgroundColor: theme.colors.neutral[100],
+    },
+    content: {
+        flex: 1,
         padding: theme.spacing.xl,
         gap: theme.spacing.lg,
-        flex: 1,
     },
-    flex: {
-        flex: 1,
+    addButton: {
+        marginVertical: theme.spacing.xl,
+    },
+    listContent: {
+        paddingBottom: theme.spacing.xl,
     },
     listSeparator: {
         height: vs(10),
@@ -152,4 +163,4 @@ const $ = StyleSheet.create((theme) => ({
     },
 }));
 
-export default ManageVariantsModal;
+export default ManageVariantsScreen;

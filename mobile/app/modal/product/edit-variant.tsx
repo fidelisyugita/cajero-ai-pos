@@ -114,7 +114,7 @@ const EditVariantModal = () => {
         <ScreenModal modalStyle={$.modal}>
             <ScreenModal.Header title={selectedVariant ? t("edit_variant") : t("add_variant")} />
             <ScreenModal.Body>
-                <ScrollView contentContainerStyle={$.container}>
+                <ScrollView contentContainerStyle={$.container} style={$.flex}>
                     <FormSectionCard title={t("variant_details")} required>
                         <Controller
                             control={control}

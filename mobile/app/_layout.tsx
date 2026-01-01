@@ -60,6 +60,12 @@ const InitialLayout = () => {
 				}}
 			/>
 			<Stack.Screen
+				name="product/manage-variants"
+				options={{
+					headerShown: true,
+				}}
+			/>
+			<Stack.Screen
 				name="expense/add"
 				options={{
 					headerShown: true,
@@ -99,6 +105,10 @@ const InitialLayout = () => {
 			/>
 			<Stack.Screen
 				name="modal/business/edit-profile"
+				options={{ presentation: "transparentModal", animation: "fade" }}
+			/>
+			<Stack.Screen
+				name="modal/product/edit-variant"
 				options={{ presentation: "transparentModal", animation: "fade" }}
 			/>
 		</Stack>
