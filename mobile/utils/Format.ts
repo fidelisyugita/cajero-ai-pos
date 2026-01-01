@@ -1,4 +1,9 @@
 export function formatCurrency(amount: number): string {
+	const numericAmount = Number(amount);
+	if (Number.isNaN(numericAmount)) {
+		return "Rp 0"; // Fallback for invalid numbers
+	}
+
 	const formatter = new Intl.NumberFormat("id-ID", {
 		style: "currency",
 		currency: "IDR",
@@ -7,7 +12,7 @@ export function formatCurrency(amount: number): string {
 		currencyDisplay: "symbol",
 	});
 
-	return formatter.format(amount).replace("Rp", "Rp ");
+	return formatter.format(numericAmount).replace("Rp", "Rp ");
 }
 
 export function parseCurrency(formattedValue: string): number {
