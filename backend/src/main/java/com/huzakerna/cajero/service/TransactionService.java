@@ -75,7 +75,10 @@ public class TransactionService {
             .totalPrice(request.getTotalPrice())
             .totalTax(request.getTotalTax())
             .customerId(request.getCustomerId())
-            .createdAt(request.getCreatedAt()) // Use client provided creation time if available
+            .createdAt(request.getCreatedAt() != null
+                ? request.getCreatedAt().withZoneSameInstant(java.time.ZoneOffset.UTC).toLocalDateTime()
+                : null) // Use client provided creation time if available, converted to UTC
+                        // LocalDateTime
             .build());
 
     // Add transaction products if any

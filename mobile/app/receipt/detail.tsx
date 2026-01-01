@@ -4,6 +4,11 @@ import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { formatCurrency } from "@/utils/Format";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import { Feather } from "@expo/vector-icons";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { t } from "@/services/i18n"; // Assuming translations are available or use keys
@@ -90,7 +95,7 @@ const ReceiptDetailScreen = () => {
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
-            <Text style={$.dateTitle}>{dayjs(createdAt).format("ddd D MMM hh:mm")}</Text>
+            <Text style={$.dateTitle}>{dayjs.utc(createdAt).local().format("ddd D MMM hh:mm")}</Text>
             <Text style={$.subTitle}>Transaction #{transaction.id}</Text>
           </View>
           <View style={[$.statusBadge, statusCode === "COMPLETED" ? $.statusSuccess : $.statusRefund]}>

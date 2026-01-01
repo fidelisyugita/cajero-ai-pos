@@ -2,6 +2,7 @@ package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime; // Add ZonedDateTime
 import java.util.List;
 import java.util.UUID;
 import jakarta.validation.constraints.DecimalMin;
@@ -46,7 +47,7 @@ public class TransactionRequest {
 
     private UUID customerId;
 
-    private LocalDateTime createdAt; // Optional: Client provided creation time
+    private ZonedDateTime createdAt; // Changed from LocalDateTime to handle Timezone correctly
 
     private UUID createdBy;
     private UUID updatedBy;

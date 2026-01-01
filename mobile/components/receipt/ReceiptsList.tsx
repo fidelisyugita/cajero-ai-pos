@@ -6,6 +6,11 @@ const FlashList = ShopifyFlashList as unknown as <T>(
 	props: FlashListProps<T> & { estimatedItemSize: number }
 ) => React.ReactElement;
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import { memo } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -125,9 +130,9 @@ const TransactionRow = memo(({ item }: { item: TransactionResponse }) => {
 		<View style={$.row}>
 			{/* Time */}
 			<View style={{ flex: COLUMNS[0].flex }}>
-				<Text style={$.timeText}>{dayjs(item.createdAt).format("HH:mm")}</Text>
+				<Text style={$.timeText}>{dayjs.utc(item.createdAt).local().format("HH:mm")}</Text>
 				<Text style={$.dateText}>
-					{dayjs(item.createdAt).format("ddd, DD MMM YYYY")}
+					{dayjs.utc(item.createdAt).local().format("ddd, DD MMM YYYY")}
 				</Text>
 			</View>
 
