@@ -128,7 +128,8 @@ public class StockMovementService {
     if (request.getIngredientId() != null) {
       updateIngredientStock(request);
     } else if (request.getVariantId() != null) {
-      updateVariantStock(request);
+      return request; // TODO: should be variant option stock movement
+      // updateVariantStock(request);
     } else if (request.getProductId() != null) {
       updateProductStock(request);
       // return request; // Comment if product update not affect stock movement

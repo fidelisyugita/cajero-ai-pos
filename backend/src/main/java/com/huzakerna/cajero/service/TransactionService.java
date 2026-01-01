@@ -265,7 +265,7 @@ public class TransactionService {
                   log.info("Deducting variant option stock: {}", quantity);
                   stockMovementService.addStockMovement(transaction.getStoreId(),
                       StockMovement.builder()
-                          .variantId(option.getId())
+                          .variantId(option.getId()) // TODO: should be variant option stock movement
                           .productId(product.getId())
                           .transactionId(transaction.getId())
                           .type(type)
