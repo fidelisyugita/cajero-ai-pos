@@ -22,6 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.huzakerna.cajero.dto.StockMovementResponse;
@@ -61,10 +64,12 @@ public class StockMovementService {
         predicates.add(cb.equal(root.get("variantId"), variantId));
       }
       if (startDate != null) {
-        predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay()));
+        predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"),
+            startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
       }
       if (endDate != null) {
-        predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(23, 59, 59)));
+        predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"),
+            endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()));
       }
       if (typeCode != null && !typeCode.isEmpty()) {
         try {

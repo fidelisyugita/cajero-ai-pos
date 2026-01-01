@@ -15,7 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
@@ -103,8 +105,10 @@ public class PettyCashService {
 
     public Page<PettyCash> getAllPettyCashs(UUID storeId, int page, int size, String sortBy, String sortDir,
             LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDate.of(1970, 1, 1).atStartOfDay();
-        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : LocalDateTime.now();
+        Instant start = startDate != null ? startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                : LocalDate.of(1970, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant end = endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
+                : Instant.now();
 
         Pageable pageable = PageRequest.of(page, size,
                 sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending());

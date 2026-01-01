@@ -1,7 +1,7 @@
 package com.huzakerna.cajero.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.huzakerna.cajero.model.StockMovementType;
@@ -24,8 +24,8 @@ public class StockMovementResponse {
   private UUID transactionId;
   private StockMovementType type;
   private BigDecimal quantity;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   // Enhanced details
   private String createdByName;

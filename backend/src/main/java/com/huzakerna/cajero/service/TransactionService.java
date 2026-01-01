@@ -2,10 +2,9 @@ package com.huzakerna.cajero.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.LocalTime;
-// import java.time.ZonedDateTime; 
-// import java.time.format.DateTimeFormatter;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -462,7 +461,7 @@ public class TransactionService {
     }
 
     // Update transaction fields
-    transaction.setDeletedAt(LocalDateTime.now());
+    transaction.setDeletedAt(Instant.now());
 
     transaction = repo.save(transaction);
 
@@ -489,9 +488,10 @@ public class TransactionService {
             : Sort.by(sortBy).ascending());
 
     // fallback to 1970 and now if null
-    LocalDateTime start = startDate != null ? startDate.atStartOfDay()
-        : LocalDate.of(1970, 1, 1).atStartOfDay();
-    LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+    Instant start = startDate != null ? startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        : LocalDate.of(1970, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+    Instant end = endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
+        : Instant.now();
 
     Page<Transaction> transactionPage = repo.findFiltered(
         storeId, statusCode, transactionTypeCode, paymentMethodCode, productId, start,
@@ -524,8 +524,8 @@ public class TransactionService {
         .createdByName(transaction.getCreatedBy() != null ? transaction.getCreatedBy().getName() : null)
         .updatedBy(transaction.getUpdatedBy() != null ? transaction.getUpdatedBy().getId() : null)
         .updatedByName(transaction.getUpdatedBy() != null ? transaction.getUpdatedBy().getName() : null)
-        .createdAt(transaction.getCreatedAt())
-        .updatedAt(transaction.getUpdatedAt())
+        .createdAt(transaction.getCreatedAt()) // Instant
+        .updatedAt(transaction.getUpdatedAt()) // Instant
         .transactionProduct(transaction.getTransactionProducts() != null ? transaction.getTransactionProducts().stream()
             .map(tp -> TransactionProductResponse.builder()
                 .id(tp.getId())

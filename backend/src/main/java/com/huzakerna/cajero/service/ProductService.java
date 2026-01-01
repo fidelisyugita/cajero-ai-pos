@@ -2,8 +2,10 @@ package com.huzakerna.cajero.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -142,9 +144,10 @@ public class ProductService {
             : Sort.by(sortBy).ascending());
 
     // fallback to 1970 and now if null
-    LocalDateTime start = startDate != null ? startDate.atStartOfDay()
-        : LocalDate.of(1970, 1, 1).atStartOfDay();
-    LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+    Instant start = startDate != null ? startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        : LocalDate.of(1970, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+    Instant end = endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
+        : Instant.now();
 
     Page<Product> productPage = repo.findFiltered(
         storeId, categoryCode, keyword, includeDeleted, start, end, pageable);
@@ -299,7 +302,7 @@ public class ProductService {
     }
 
     // Update product fields
-    product.setDeletedAt(LocalDateTime.now());
+    product.setDeletedAt(Instant.now());
 
     product = repo.save(product);
 
