@@ -25,7 +25,10 @@ import com.huzakerna.cajero.model.StockMovement;
 import com.huzakerna.cajero.model.StockMovementType;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
-import com.huzakerna.cajero.model.TransactionProductId;
+import com.huzakerna.cajero.model.TransactionProductId; // Kept for reference or remove if strictly unused. Actually better remove it if unused to satisfy linter.
+// But check if TransactionProductId is used anywhere else. It was used in imports.
+// Removing it:
+
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
@@ -135,7 +138,8 @@ public class TransactionService {
         .orElseThrow(() -> new RuntimeException("Product not found"));
 
     TransactionProduct transactionProduct = new TransactionProduct();
-    transactionProduct.setId(new TransactionProductId(transaction.getId(), productId));
+    // transactionProduct.setId(new TransactionProductId(transaction.getId(),
+    // productId)); // Auto-generated UUID now
     transactionProduct.setBuyingPrice(buyingPrice);
     transactionProduct.setSellingPrice(sellingPrice);
     transactionProduct.setNote(note);
@@ -177,19 +181,17 @@ public class TransactionService {
 
   public void removeProductFromTransaction(UUID transactionId, UUID productId) {
     log.info("Removing product {} from transaction {}", productId, transactionId);
-    TransactionProduct transactionProduct = new TransactionProduct();
-    transactionProduct.setId(new TransactionProductId(transactionId, productId));
+    // TransactionProduct transactionProduct = new TransactionProduct();
+    // transactionProduct.setId(new TransactionProductId(transactionId, productId));
 
-    tpRepo.delete(transactionProduct);
+    tpRepo.deleteByTransactionIdAndProductId(transactionId, productId);
   }
 
   public void removeProductFromTransaction(UUID transactionId, List<UUID> productIds) {
     log.info("Removing products {} from transaction {}", productIds, transactionId);
-    List<TransactionProductId> transactionProducts = productIds.stream()
-        .map(productId -> new TransactionProductId(transactionId, productId))
-        .toList();
-
-    tpRepo.deleteAllByIdInBatch(transactionProducts);
+    for (UUID productId : productIds) {
+      tpRepo.deleteByTransactionIdAndProductId(transactionId, productId);
+    }
   }
 
   // Helper to handle stock movement
@@ -324,11 +326,12 @@ public class TransactionService {
     // Track Transaction Products changes
     if (request.getTransactionProducts() != null) {
       Map<UUID, BigDecimal> oldMap = transaction.getTransactionProducts().stream()
-          .collect(java.util.stream.Collectors.toMap(tp -> tp.getProduct().getId(), TransactionProduct::getQuantity));
+          .collect(java.util.stream.Collectors.toMap(tp -> tp.getProduct().getId(), TransactionProduct::getQuantity,
+              BigDecimal::add));
 
       Map<UUID, BigDecimal> newMap = request.getTransactionProducts().stream()
           .collect(java.util.stream.Collectors.toMap(TransactionProductRequest::getProductId,
-              TransactionProductRequest::getQuantity));
+              TransactionProductRequest::getQuantity, BigDecimal::add));
 
       // 1. Modified & Added
       for (TransactionProductRequest newTp : request.getTransactionProducts()) {
@@ -372,7 +375,8 @@ public class TransactionService {
             .orElseThrow(() -> new RuntimeException("Product not found"));
 
         TransactionProduct tp = new TransactionProduct();
-        tp.setId(new TransactionProductId(transaction.getId(), p.getId()));
+        // tp.setId(new TransactionProductId(transaction.getId(), p.getId())); //
+        // Auto-generated UUID
         tp.setBuyingPrice(product.getBuyingPrice());
         tp.setSellingPrice(product.getSellingPrice());
         tp.setNote(product.getNote());
@@ -507,6 +511,7 @@ public class TransactionService {
         .updatedAt(transaction.getUpdatedAt())
         .transactionProduct(transaction.getTransactionProducts() != null ? transaction.getTransactionProducts().stream()
             .map(tp -> TransactionProductResponse.builder()
+                .id(tp.getId())
                 .productId(tp.getProduct().getId())
                 .categoryCode(tp.getProduct().getCategoryCode())
 

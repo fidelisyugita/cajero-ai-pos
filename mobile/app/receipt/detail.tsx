@@ -22,6 +22,29 @@ const ReceiptDetailScreen = () => {
   try {
     if (params.transaction) {
       transaction = JSON.parse(params.transaction as string);
+
+      // Ensure selectedVariants is always an array
+      if (transaction?.transactionProduct) {
+        transaction.transactionProduct = transaction.transactionProduct.map((p: any) => {
+          let variants = p.selectedVariants;
+          if (typeof variants === 'string') {
+            try {
+              variants = JSON.parse(variants);
+            } catch (e) {
+              console.warn("Failed to parse variants", e);
+              variants = [];
+            }
+          }
+          if (!Array.isArray(variants)) {
+            variants = [];
+          }
+          return {
+            ...p,
+            selectedVariants: variants
+          };
+        });
+      }
+
       Logger.log('transaction: ', transaction);
 
     }
