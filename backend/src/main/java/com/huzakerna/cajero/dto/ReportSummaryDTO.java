@@ -27,6 +27,7 @@ public class ReportSummaryDTO {
 
   private BigDecimal totalTax;
   private BigDecimal totalExpenses;
+  private BigDecimal totalCogs;
 
   private List<PaymentMethodStat> paymentMethods;
   private List<CommissionStat> commissions;

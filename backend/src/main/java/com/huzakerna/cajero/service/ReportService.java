@@ -116,6 +116,15 @@ public class ReportService {
           .totalExpenses(totalExpenses != null ? totalExpenses : BigDecimal.ZERO);
     }
 
+    // Process Daily COGS
+    List<Object[]> cogsStatsDaily = transactionRepository.findCogsDaily(storeId, startDateTime, endDateTime);
+    for (Object[] row : cogsStatsDaily) {
+      LocalDate date = (LocalDate) row[0];
+      BigDecimal totalCogs = (BigDecimal) row[1];
+      builderMap.computeIfAbsent(date, k -> DailyReportDTO.builder().date(k))
+          .totalCogs(totalCogs != null ? totalCogs : BigDecimal.ZERO);
+    }
+
     // Process Daily Payment Methods
     for (Object[] row : paymentStatsDaily) {
       LocalDate date = (LocalDate) row[0];
@@ -156,6 +165,7 @@ public class ReportService {
     Long totalRefundProduct = 0L;
     BigDecimal totalTax = BigDecimal.ZERO;
     BigDecimal totalExpenses = BigDecimal.ZERO;
+    BigDecimal totalCogs = BigDecimal.ZERO;
 
     for (DailyReportDTO day : dailyReports) {
       totalTransaction += day.getTotalTransaction();
@@ -175,6 +185,8 @@ public class ReportService {
         totalTax = totalTax.add(day.getTotalTax());
       if (day.getTotalExpenses() != null)
         totalExpenses = totalExpenses.add(day.getTotalExpenses());
+      if (day.getTotalCogs() != null)
+        totalCogs = totalCogs.add(day.getTotalCogs());
     }
 
     // Process Global Refund Stats for Amount (Summary)
@@ -217,6 +229,7 @@ public class ReportService {
         .totalRefundProduct(totalRefundProduct)
         .totalTax(totalTax)
         .totalExpenses(totalExpenses)
+        .totalCogs(totalCogs)
         .paymentMethods(paymentMethodStats)
         .commissions(commissionStatList)
         .build();
