@@ -29,6 +29,7 @@ public class DailyReportDTO {
 
   private BigDecimal totalTax;
   private BigDecimal totalExpenses;
+  private BigDecimal totalCogs;
 
   private List<ReportSummaryDTO.PaymentMethodStat> paymentMethods;
   private List<ReportSummaryDTO.CommissionStat> commissions;

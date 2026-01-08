@@ -3,6 +3,7 @@
     "name": "Cajero",
     "slug": "cajero",
     "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "cajero",
