@@ -108,6 +108,7 @@ const ReportScreen = () => {
         <ReportList
           data={reportData?.dailyReports || []}
           isLoading={isLoading}
+          includeCogs={includeCogs}
           // onScroll={scrollHandler}
         />
       </View>

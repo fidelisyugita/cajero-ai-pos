@@ -57,27 +57,22 @@ const ReportDetailScreen = () => {
             <Text style={$.dateTitle}>
               {dayjs(report.date).format("dddd, D MMMM YYYY")}
             </Text>
-            <View style={$.cashierFilter}>
-              {/* Placeholder for cashier filter if needed later */}
-            </View>
-          </View>
-
-          <View style={{ gap: 8 }}>
             <Button
               variant={includeCogs ? "primary" : "secondary"}
               title={includeCogs ? "COGS: ON" : "COGS: OFF"}
               onPress={() => setIncludeCogs(!includeCogs)}
               size="sm"
             />
-            <View style={$.netRevenueCard}>
-              <SummaryCard
-                label={
-                  includeCogs ? "Net Revenue (w/ COGS)" : "Total Net Revenue"
-                }
-                value={formatCurrency(adjustedNetRevenue)}
-                icon={<Feather name="pie-chart" size={24} color="#A05E5E" />}
-              />
-            </View>
+          </View>
+
+          <View style={$.netRevenueCard}>
+            <SummaryCard
+              label={
+                includeCogs ? "Net Revenue (w/ COGS)" : "Total Net Revenue"
+              }
+              value={formatCurrency(adjustedNetRevenue)}
+              icon={<Feather name="pie-chart" size={24} color="#A05E5E" />}
+            />
           </View>
         </View>
 
@@ -266,9 +261,6 @@ const $ = StyleSheet.create((theme) => ({
     ...theme.typography.heading3,
     color: theme.colors.neutral[700],
     marginBottom: theme.spacing.md,
-  },
-  cashierFilter: {
-    width: 250,
   },
   netRevenueCard: {
     // backgroundColor: '#FFE4E6', // Removed as SummaryCard handles bg

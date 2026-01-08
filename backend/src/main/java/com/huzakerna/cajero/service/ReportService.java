@@ -76,7 +76,7 @@ public class ReportService {
           .totalRefund(refund)
           .totalDiscount(discount)
           .totalTax(tax)
-          .totalNetRevenue(revenue.subtract(refund));
+          .totalNetRevenue(revenue.subtract(refund).subtract(tax));
     }
 
     // Process Products
