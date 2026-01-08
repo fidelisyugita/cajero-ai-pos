@@ -3,6 +3,8 @@ package com.huzakerna.cajero.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +29,8 @@ public class ReportService {
   private final com.huzakerna.cajero.repository.PettyCashRepository pettyCashRepository;
 
   public ReportResponse getDailyReport(UUID storeId, LocalDate startDate, LocalDate endDate) {
-    var startDateTime = startDate.atStartOfDay();
-    var endDateTime = endDate.atTime(LocalTime.MAX);
+    Instant startDateTime = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+    Instant endDateTime = endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant();
 
     // Global Stats for Summary (Reliability)
     List<Object[]> transactions = transactionRepository.findTransactionDailyStats(storeId, startDateTime, endDateTime);
@@ -57,6 +59,7 @@ public class ReportService {
       BigDecimal revenue = (BigDecimal) row[2];
       BigDecimal refund = (BigDecimal) row[3];
       BigDecimal discount = (BigDecimal) row[4];
+      BigDecimal tax = (BigDecimal) row[5];
 
       if (revenue == null)
         revenue = BigDecimal.ZERO;
@@ -64,13 +67,15 @@ public class ReportService {
         refund = BigDecimal.ZERO;
       if (discount == null)
         discount = BigDecimal.ZERO;
+      if (tax == null)
+        tax = BigDecimal.ZERO;
 
       builderMap.computeIfAbsent(date, k -> DailyReportDTO.builder().date(k))
           .totalTransaction(count)
           .totalRevenue(revenue)
           .totalRefund(refund)
           .totalDiscount(discount)
-          .totalNetRevenue(revenue.subtract(refund));
+          .totalNetRevenue(revenue.subtract(refund).subtract(tax));
     }
 
     // Process Products

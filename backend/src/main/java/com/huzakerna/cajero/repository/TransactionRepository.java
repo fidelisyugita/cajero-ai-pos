@@ -1,7 +1,7 @@
 package com.huzakerna.cajero.repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -33,8 +33,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       @Param("transactionTypeCode") String transactionTypeCode,
       @Param("paymentMethodCode") String paymentMethodCode,
       @Param("productId") UUID productId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end,
+      @Param("start") Instant start,
+      @Param("end") Instant end,
       Pageable pageable);
 
   @Query("""
@@ -43,7 +43,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
         COUNT(t) as count,
         SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalPrice ELSE 0 END) as revenue,
         SUM(CASE WHEN t.statusCode = 'REFUND' THEN t.totalPrice ELSE 0 END) as refund,
-        SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalDiscount ELSE 0 END) as discount
+        SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalDiscount ELSE 0 END) as discount,
+        SUM(CASE WHEN t.statusCode = 'COMPLETED' THEN t.totalTax ELSE 0 END) as tax
       FROM Transaction t
       WHERE t.storeId = :storeId
         AND t.createdAt BETWEEN :start AND :end
@@ -52,8 +53,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findTransactionDailyStats(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -68,8 +69,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findProductDailyStats(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -87,8 +88,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findRefundStats(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT SUM(t.totalTax)
@@ -100,8 +101,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   BigDecimal findTotalTax(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -116,8 +117,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findPaymentMethodStats(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -133,8 +134,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findCommissionStats(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   // Daily Detailed Stats
 
@@ -155,8 +156,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findRefundStatsDaily(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -171,8 +172,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findTotalTaxDaily(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -188,8 +189,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findPaymentMethodStatsDaily(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -206,8 +207,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object[]> findCommissionStatsDaily(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   // AI-Specific Helpers
 
@@ -229,8 +230,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object> findTopSellingProducts(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end,
+      @Param("start") Instant start,
+      @Param("end") Instant end,
       Pageable pageable);
 
   @Query("""
@@ -246,8 +247,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   Object findSalesSummary(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT new map(
@@ -267,8 +268,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """)
   List<Object> findFrequentDescriptions(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end,
+      @Param("start") Instant start,
+      @Param("end") Instant end,
       Pageable pageable);
 
   @Query(value = """
@@ -285,8 +286,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """, nativeQuery = true)
   List<Object[]> findPeakHours(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query(value = """
       SELECT
@@ -302,7 +303,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
       """, nativeQuery = true)
   List<Object[]> findBusyDays(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
 }

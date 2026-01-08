@@ -266,6 +266,7 @@ export default {
     no_variants_title: "Belum Ada Varian",
     no_variants_subtitle: "Tambahkan varian seperti Ukuran, Warna, dll.",
     done: "Selesai",
+    back_and_save: "Kembali dan Simpan",
     options: "Opsi",
     required: "Wajib",
     optional: "Opsional",

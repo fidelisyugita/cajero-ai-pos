@@ -31,8 +31,8 @@ public class StockMovement extends BaseEntity {
     @Column(name = "product_id")
     private UUID productId;
 
-    @Column(name = "variant_id")
-    private UUID variantId;
+    @Column(name = "variant_id") // TODO: should using variantOptionId, variant don't have stock
+    private UUID variantId; // TODO: should using variantOptionId, variant don't have stock
 
     @Column(name = "transaction_id")
     private UUID transactionId;

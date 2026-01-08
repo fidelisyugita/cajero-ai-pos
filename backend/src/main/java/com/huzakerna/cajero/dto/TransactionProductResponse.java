@@ -16,6 +16,17 @@ import lombok.Setter;
 @Builder
 public class TransactionProductResponse {
 
+    // itself
+    private UUID id;
+    private JsonNode selectedVariants;
+    private String note;
+    private BigDecimal quantity;
+    private BigDecimal buyingPrice;
+    private BigDecimal sellingPrice;
+    private BigDecimal commission;
+    private BigDecimal discount;
+    private BigDecimal tax;
+
     // from Product
     private UUID productId;
     private String categoryCode;
@@ -26,15 +37,5 @@ public class TransactionProductResponse {
     private Integer rejectCount;
     private Integer soldCount;
     private String imageUrl;
-
-    // itself
-    private JsonNode selectedVariants;
-    private String note;
-    private BigDecimal quantity;
-    private BigDecimal buyingPrice;
-    private BigDecimal sellingPrice;
-    private BigDecimal commission;
-    private BigDecimal discount;
-    private BigDecimal tax;
 
 }

@@ -1,16 +1,19 @@
 package com.huzakerna.cajero.model;
 
 import java.math.BigDecimal;
+import java.util.UUID;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,17 +31,15 @@ import lombok.Setter;
 @lombok.EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TransactionProduct {
 
-    @EmbeddedId
-    @lombok.EqualsAndHashCode.Include
-    private TransactionProductId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("transactionId")
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
 

@@ -149,7 +149,8 @@ const PaymentScreen = () => {
             tax: formatCurrency(totalTax),
             total: formatCurrency(total),
             items: items.map(item => ({
-                name: `${item.name} (${formatCurrency(item.sellingPrice)})`,
+                // name: `${item.name} (${formatCurrency(item.sellingPrice)})`,
+                name: `${item.name}`,
                 quantity: item.quantity,
                 // price: item.sellingPrice * item.quantity, // passing raw number or string formatted,
                 price: (item.sellingPrice + (item.variants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * item.quantity,
@@ -187,7 +188,8 @@ const PaymentScreen = () => {
             total: formatCurrency(total),
             paymentMethod: selectedMethod,
             items: items.map(item => ({
-                name: `${item.name} (${formatCurrency(item.sellingPrice)})`,
+                // name: `${item.name} (${formatCurrency(item.sellingPrice)})`,
+                name: `${item.name}`,
                 quantity: item.quantity,
                 // price: item.sellingPrice * item.quantity,
                 price: (item.sellingPrice + (item.variants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * item.quantity,

@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.huzakerna.cajero.model.PettyCash;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ public interface PettyCashRepository extends JpaRepository<PettyCash, UUID> {
   List<PettyCash> findByStoreId(UUID storeId);
 
   @EntityGraph(attributePaths = { "createdBy", "updatedBy" })
-  Page<PettyCash> findAllByStoreIdAndCreatedAtBetween(UUID storeId, LocalDateTime start, LocalDateTime end,
+  Page<PettyCash> findAllByStoreIdAndCreatedAtBetween(UUID storeId, Instant start, Instant end,
       Pageable pageable);
 
   @Query("""
@@ -35,8 +35,8 @@ public interface PettyCashRepository extends JpaRepository<PettyCash, UUID> {
       """)
   BigDecimal findTotalExpenses(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 
   @Query("""
       SELECT
@@ -51,6 +51,6 @@ public interface PettyCashRepository extends JpaRepository<PettyCash, UUID> {
       """)
   List<Object[]> findExpensesDaily(
       @Param("storeId") UUID storeId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+      @Param("start") Instant start,
+      @Param("end") Instant end);
 }

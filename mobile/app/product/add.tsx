@@ -694,7 +694,7 @@ const AddProduct = () => {
 								</Text>
 							)}
 							<Button
-								onPress={() => router.push("/modal/product/manage-variants")}
+								onPress={() => router.push("/product/manage-variants")}
 								size="lg"
 								title={t("manage_variants")}
 								variant="soft"

@@ -273,6 +273,7 @@ export default {
     no_variants_title: "No Variants Configured",
     no_variants_subtitle: "Add variants like Size, Color, etc.",
     done: "Done",
+    back_and_save: "Back and Save",
     options: "Options",
     required: "Required",
     optional: "Optional",

@@ -1,6 +1,6 @@
 package com.huzakerna.cajero.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -131,7 +131,7 @@ public class IngredientService {
     }
 
     // Update ingredient fields
-    ingredient.setDeletedAt(LocalDateTime.now());
+    ingredient.setDeletedAt(Instant.now());
 
     ingredient = repo.save(ingredient);
 

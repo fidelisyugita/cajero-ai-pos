@@ -264,10 +264,39 @@ export const SyncService = {
         };
 
         // Send to API
-        await api.post("/transaction", payload); // Verify endpoint: postTransaction.ts uses /transaction singular
+        const response = await api.post("/transaction", payload);
+        const backendTxn = response.data;
 
-        // Mark as synced
-        await db.update(transactions).set({ isSynced: true }).where(eq(transactions.id, txn.id));
+        await db.transaction(async (tx) => {
+          // Check if the backend ID already exists locally (e.g. from a pull sync)
+          const existing = await tx.select().from(transactions).where(eq(transactions.id, backendTxn.id));
+
+          if (existing.length > 0) {
+            // Duplicate exists. The 'local' one is redundant. Delete local.
+            await tx.delete(transactionItems).where(eq(transactionItems.transactionId, txn.id));
+            await tx.delete(transactions).where(eq(transactions.id, txn.id));
+          } else {
+            // Update local ID to match backend ID and update calculated fields
+            // First update items to point to new ID
+            await tx.update(transactionItems)
+              .set({ transactionId: backendTxn.id })
+              .where(eq(transactionItems.transactionId, txn.id));
+            
+            // Then update the transaction itself
+            await tx.update(transactions)
+              .set({ 
+                id: backendTxn.id,
+                isSynced: true,
+                // Update fields that might differ (tax, totals from backend calculation)
+                totalPrice: backendTxn.totalPrice,
+                totalTax: backendTxn.totalTax,
+                totalDiscount: backendTxn.totalDiscount,
+                totalCommission: backendTxn.totalCommission,
+                createdAt: backendTxn.createdAt ? new Date(backendTxn.createdAt) : txn.createdAt
+              })
+              .where(eq(transactions.id, txn.id));
+          }
+        });
       }
       return true;
     } catch (error) {

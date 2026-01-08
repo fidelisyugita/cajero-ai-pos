@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { formatCurrency } from "@/utils/Format";
 import dayjs from "dayjs";
+
 import { Feather } from "@expo/vector-icons";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { t } from "@/services/i18n"; // Assuming translations are available or use keys
@@ -22,7 +23,30 @@ const ReceiptDetailScreen = () => {
   try {
     if (params.transaction) {
       transaction = JSON.parse(params.transaction as string);
-      Logger.log('transaction: ', transaction);
+
+      // Ensure selectedVariants is always an array
+      if (transaction?.transactionProduct) {
+        transaction.transactionProduct = transaction.transactionProduct.map((p: any) => {
+          let variants = p.selectedVariants;
+          if (typeof variants === 'string') {
+            try {
+              variants = JSON.parse(variants);
+            } catch (e) {
+              console.warn("Failed to parse variants", e);
+              variants = [];
+            }
+          }
+          if (!Array.isArray(variants)) {
+            variants = [];
+          }
+          return {
+            ...p,
+            selectedVariants: variants
+          };
+        });
+      }
+
+      Logger.log('detail transaction: ', JSON.stringify(transaction, null, 2));
 
     }
   } catch (e) {
@@ -67,7 +91,7 @@ const ReceiptDetailScreen = () => {
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
-            <Text style={$.dateTitle}>{dayjs(createdAt).format("ddd D MMM hh:mm")}</Text>
+            <Text style={$.dateTitle}>{dayjs.utc(createdAt).local().format("ddd D MMM hh:mm")}</Text>
             <Text style={$.subTitle}>Transaction #{transaction.id}</Text>
           </View>
           <View style={[$.statusBadge, statusCode === "COMPLETED" ? $.statusSuccess : $.statusRefund]}>
@@ -183,8 +207,8 @@ const ReceiptDetailScreen = () => {
               total: formatCurrency(totalPrice),
               paymentMethod: paymentMethodCode,
               items: transactionProduct?.map((p: any) => ({
-                // name: p.productName,
-                name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
+                name: p.productName,
+                // name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
                 quantity: p.quantity,
                 price: (p.sellingPrice + (p.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * p.quantity,
                 variants: p.selectedVariants?.map((v: any) => ({

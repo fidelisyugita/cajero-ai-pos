@@ -1,6 +1,6 @@
 package com.huzakerna.cajero.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 
 import org.springframework.stereotype.Service;
@@ -223,7 +223,7 @@ public class VariantService {
     }
 
     // Update variant fields
-    variant.setDeletedAt(LocalDateTime.now());
+    variant.setDeletedAt(Instant.now());
 
     variant = repo.save(variant);
 

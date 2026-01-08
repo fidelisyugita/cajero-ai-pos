@@ -2,7 +2,8 @@ package com.huzakerna.cajero.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.LocalTime;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,10 @@ import com.huzakerna.cajero.model.StockMovement;
 import com.huzakerna.cajero.model.StockMovementType;
 import com.huzakerna.cajero.model.Transaction;
 import com.huzakerna.cajero.model.TransactionProduct;
-import com.huzakerna.cajero.model.TransactionProductId;
+// import com.huzakerna.cajero.model.TransactionProductId;
+// But check if TransactionProductId is used anywhere else. It was used in imports.
+// Removing it:
+
 import com.huzakerna.cajero.repository.ProductRepository;
 import com.huzakerna.cajero.repository.StoreRepository;
 import com.huzakerna.cajero.repository.TransactionProductRepository;
@@ -55,6 +59,7 @@ public class TransactionService {
   @Transactional
   public TransactionResponse addTransaction(UUID storeId, TransactionRequest request) {
     log.info("Adding transaction for store: {}", storeId);
+    log.info("Raw createdAt from request: {}", request.getCreatedAt()); // Debug log
     // Validate store exists
     if (storeId == null || !sRepo.existsById(storeId)) {
       throw new IllegalArgumentException("Store not found");
@@ -72,7 +77,14 @@ public class TransactionService {
             .totalPrice(request.getTotalPrice())
             .totalTax(request.getTotalTax())
             .customerId(request.getCustomerId())
-            .createdAt(request.getCreatedAt()) // Use client provided creation time if available
+            // .createdAt(request.getCreatedAt() != null
+            // ?
+            // ZonedDateTime.parse(request.getCreatedAt()).withZoneSameInstant(java.time.ZoneOffset.UTC)
+            // .toLocalDateTime()
+            // : null) // Use client provided creation time if available, parsed from
+            // String, converted
+            // to UTC
+            // LocalDateTime
             .build());
 
     // Add transaction products if any
@@ -99,9 +111,13 @@ public class TransactionService {
         calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
         calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
 
-        // Price Calculation: (Selling Price * Quantity) - Discount + Tax
+        // Price Calculation: ((Selling Price + Variant Price) * Quantity) - Discount +
+        // Tax
         // Note: Assuming Selling Price is Pre-Tax and Pre-Discount base unit price.
-        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+        BigDecimal variantTotal = calculateVariantTotal(tp.getSelectedVariants());
+        BigDecimal unitPrice = tp.getSellingPrice().add(variantTotal);
+
+        BigDecimal lineTotal = unitPrice.multiply(tp.getQuantity())
             .subtract(tp.getDiscount())
             .add(tp.getTax());
         calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
@@ -135,7 +151,8 @@ public class TransactionService {
         .orElseThrow(() -> new RuntimeException("Product not found"));
 
     TransactionProduct transactionProduct = new TransactionProduct();
-    transactionProduct.setId(new TransactionProductId(transaction.getId(), productId));
+    // transactionProduct.setId(new TransactionProductId(transaction.getId(),
+    // productId)); // Auto-generated UUID now
     transactionProduct.setBuyingPrice(buyingPrice);
     transactionProduct.setSellingPrice(sellingPrice);
     transactionProduct.setNote(note);
@@ -177,19 +194,17 @@ public class TransactionService {
 
   public void removeProductFromTransaction(UUID transactionId, UUID productId) {
     log.info("Removing product {} from transaction {}", productId, transactionId);
-    TransactionProduct transactionProduct = new TransactionProduct();
-    transactionProduct.setId(new TransactionProductId(transactionId, productId));
+    // TransactionProduct transactionProduct = new TransactionProduct();
+    // transactionProduct.setId(new TransactionProductId(transactionId, productId));
 
-    tpRepo.delete(transactionProduct);
+    tpRepo.deleteByTransactionIdAndProductId(transactionId, productId);
   }
 
   public void removeProductFromTransaction(UUID transactionId, List<UUID> productIds) {
     log.info("Removing products {} from transaction {}", productIds, transactionId);
-    List<TransactionProductId> transactionProducts = productIds.stream()
-        .map(productId -> new TransactionProductId(transactionId, productId))
-        .toList();
-
-    tpRepo.deleteAllByIdInBatch(transactionProducts);
+    for (UUID productId : productIds) {
+      tpRepo.deleteByTransactionIdAndProductId(transactionId, productId);
+    }
   }
 
   // Helper to handle stock movement
@@ -250,7 +265,7 @@ public class TransactionService {
                   log.info("Deducting variant option stock: {}", quantity);
                   stockMovementService.addStockMovement(transaction.getStoreId(),
                       StockMovement.builder()
-                          .variantId(option.getId())
+                          .variantId(option.getId()) // TODO: should be variant option stock movement
                           .productId(product.getId())
                           .transactionId(transaction.getId())
                           .type(type)
@@ -324,11 +339,12 @@ public class TransactionService {
     // Track Transaction Products changes
     if (request.getTransactionProducts() != null) {
       Map<UUID, BigDecimal> oldMap = transaction.getTransactionProducts().stream()
-          .collect(java.util.stream.Collectors.toMap(tp -> tp.getProduct().getId(), TransactionProduct::getQuantity));
+          .collect(java.util.stream.Collectors.toMap(tp -> tp.getProduct().getId(), TransactionProduct::getQuantity,
+              BigDecimal::add));
 
       Map<UUID, BigDecimal> newMap = request.getTransactionProducts().stream()
           .collect(java.util.stream.Collectors.toMap(TransactionProductRequest::getProductId,
-              TransactionProductRequest::getQuantity));
+              TransactionProductRequest::getQuantity, BigDecimal::add));
 
       // 1. Modified & Added
       for (TransactionProductRequest newTp : request.getTransactionProducts()) {
@@ -372,7 +388,8 @@ public class TransactionService {
             .orElseThrow(() -> new RuntimeException("Product not found"));
 
         TransactionProduct tp = new TransactionProduct();
-        tp.setId(new TransactionProductId(transaction.getId(), p.getId()));
+        // tp.setId(new TransactionProductId(transaction.getId(), p.getId())); //
+        // Auto-generated UUID
         tp.setBuyingPrice(product.getBuyingPrice());
         tp.setSellingPrice(product.getSellingPrice());
         tp.setNote(product.getNote());
@@ -397,7 +414,10 @@ public class TransactionService {
         calculatedTotalTax = calculatedTotalTax.add(tp.getTax());
         calculatedTotalCommission = calculatedTotalCommission.add(tp.getCommission());
 
-        BigDecimal lineTotal = tp.getSellingPrice().multiply(tp.getQuantity())
+        BigDecimal variantTotal = calculateVariantTotal(tp.getSelectedVariants());
+        BigDecimal unitPrice = tp.getSellingPrice().add(variantTotal);
+
+        BigDecimal lineTotal = unitPrice.multiply(tp.getQuantity())
             .subtract(tp.getDiscount())
             .add(tp.getTax());
         calculatedTotalPrice = calculatedTotalPrice.add(lineTotal);
@@ -441,7 +461,7 @@ public class TransactionService {
     }
 
     // Update transaction fields
-    transaction.setDeletedAt(LocalDateTime.now());
+    transaction.setDeletedAt(Instant.now());
 
     transaction = repo.save(transaction);
 
@@ -468,9 +488,10 @@ public class TransactionService {
             : Sort.by(sortBy).ascending());
 
     // fallback to 1970 and now if null
-    LocalDateTime start = startDate != null ? startDate.atStartOfDay()
-        : LocalDate.of(1970, 1, 1).atStartOfDay();
-    LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+    Instant start = startDate != null ? startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        : LocalDate.of(1970, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+    Instant end = endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
+        : Instant.now();
 
     Page<Transaction> transactionPage = repo.findFiltered(
         storeId, statusCode, transactionTypeCode, paymentMethodCode, productId, start,
@@ -503,10 +524,11 @@ public class TransactionService {
         .createdByName(transaction.getCreatedBy() != null ? transaction.getCreatedBy().getName() : null)
         .updatedBy(transaction.getUpdatedBy() != null ? transaction.getUpdatedBy().getId() : null)
         .updatedByName(transaction.getUpdatedBy() != null ? transaction.getUpdatedBy().getName() : null)
-        .createdAt(transaction.getCreatedAt())
-        .updatedAt(transaction.getUpdatedAt())
+        .createdAt(transaction.getCreatedAt()) // Instant
+        .updatedAt(transaction.getUpdatedAt()) // Instant
         .transactionProduct(transaction.getTransactionProducts() != null ? transaction.getTransactionProducts().stream()
             .map(tp -> TransactionProductResponse.builder()
+                .id(tp.getId())
                 .productId(tp.getProduct().getId())
                 .categoryCode(tp.getProduct().getCategoryCode())
 
@@ -528,5 +550,20 @@ public class TransactionService {
                 .build())
             .toList() : List.of())
         .build();
+  }
+
+  private BigDecimal calculateVariantTotal(JsonNode selectedVariants) {
+    BigDecimal total = BigDecimal.ZERO;
+    if (selectedVariants != null && selectedVariants.isArray()) {
+      for (JsonNode variant : selectedVariants) {
+        if (variant.has("price")) {
+          // Use asText() to preserve precision for BigDecimal, defaulting to "0" if
+          // missing/null
+          String priceStr = variant.get("price").asText("0");
+          total = total.add(new BigDecimal(priceStr));
+        }
+      }
+    }
+    return total;
   }
 }

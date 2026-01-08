@@ -29,11 +29,12 @@ const ScreenModal = ({ modalStyle, children }: ScreenModalProps) => {
 			behavior={Platform.OS === "ios" ? "padding" : "height"}
 			style={$.keyboardAvoidingView}
 		>
-			<Pressable style={$.transparentModal} onPress={() => router.dismiss()}>
-				<Pressable style={[$.modal, modalStyle]} onPress={(e) => e.stopPropagation()}>
+			<View style={$.container}>
+				<Pressable style={$.backdrop} onPress={() => router.dismiss()} />
+				<View style={[$.modal, modalStyle]}>
 					{children}
-				</Pressable>
-			</Pressable>
+				</View>
+			</View>
 		</KeyboardAvoidingView>
 	);
 };
@@ -57,7 +58,7 @@ const Header = ({ title, hideCloseButton }: ScreenModalHeaderProps) => {
 };
 
 const Body = ({ children }: ScreenModalBodyProps) => {
-	return children;
+	return <View style={$.body}>{children}</View>;
 };
 
 const Footer = ({ children }: ScreenModalFooterProps) => {
@@ -69,11 +70,14 @@ ScreenModal.Body = Body;
 ScreenModal.Footer = Footer;
 
 const $ = StyleSheet.create((theme, rt) => ({
-	transparentModal: {
-		backgroundColor: theme.colors.transparentModal,
+	container: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+	},
+	backdrop: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: theme.colors.transparentModal,
 	},
 	keyboardAvoidingView: {
 		flex: 1,
@@ -82,6 +86,7 @@ const $ = StyleSheet.create((theme, rt) => ({
 		backgroundColor: theme.colors.neutral[200],
 		borderRadius: theme.radius.xl,
 		overflow: "hidden",
+		zIndex: 1,
 	},
 	header: {
 		backgroundColor: theme.colors.primary[100],
@@ -106,6 +111,9 @@ const $ = StyleSheet.create((theme, rt) => ({
 		justifyContent: "space-between",
 		alignItems: "center",
 		gap: theme.spacing.lg,
+	},
+	body: {
+		flex: 1,
 	},
 }));
 

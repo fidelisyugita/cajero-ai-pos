@@ -1,6 +1,6 @@
 package com.huzakerna.cajero.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public abstract class BaseResponse {
   private UUID updatedBy;
   private String updatedByName;
 
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
-  private LocalDateTime deletedAt;
+  private Instant createdAt;
+  private Instant updatedAt;
+  private Instant deletedAt;
 }

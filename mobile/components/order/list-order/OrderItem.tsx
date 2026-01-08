@@ -25,18 +25,20 @@ const OrderItem = ({
 	onRemove,
 	onEdit,
 }: OrderItemProps) => {
-	const variantsTotal = item.variants.reduce((sum, v) => sum + v.price, 0);
-	const unitPrice = item.sellingPrice + variantsTotal;
+	const variantsTotal = item.variants.reduce((sum, v) => sum + (Number(v.price) || 0), 0);
+	const unitPrice = Number(item.sellingPrice || 0) + variantsTotal;
 	// Calculate total price: (unitPrice - discount?) * quantity.
 	// But discount in store model is simple number.
 	// We'll assume discount is total discount for the line item for now, or per unit.
 	// "Discount ... Rp 3.500" implies a fixed amount OFF.
 	// Let's assume item.discount is total discount for this line item.
-	const subtotal = unitPrice * item.quantity;
-	const discountStr = item.discount
-		? `- ${formatCurrency(item.discount)}`
+	const subtotal = unitPrice * (Number(item.quantity) || 1);
+
+	const discountVal = Number(item.discount || 0);
+	const discountStr = discountVal > 0
+		? `- ${formatCurrency(discountVal)}`
 		: null;
-	const finalPrice = subtotal - (item.discount || 0);
+	const finalPrice = subtotal - discountVal;
 
 	return (
 		<View style={[$.container, isExpanded && $.expandedContainer]}>
