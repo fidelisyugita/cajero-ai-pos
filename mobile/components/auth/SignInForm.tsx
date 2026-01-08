@@ -131,6 +131,7 @@ const SignInForm = () => {
               maxLength={100}
               onBlur={onBlur}
               onChangeText={onChange}
+              onSubmitEditing={handleSubmit(onSignIn)}
               ref={ref}
               returnKeyType="done"
               right={

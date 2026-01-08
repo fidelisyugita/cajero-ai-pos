@@ -19,6 +19,12 @@ const ReportSummary = ({
     ? summary.totalNetRevenue - (summary.totalCogs || 0)
     : summary.totalNetRevenue;
 
+  // Debug logging
+  console.log("ReportSummary - includeCogs:", includeCogs);
+  console.log("ReportSummary - totalCogs:", summary.totalCogs);
+  console.log("ReportSummary - totalNetRevenue:", summary.totalNetRevenue);
+  console.log("ReportSummary - adjustedNetRevenue:", adjustedNetRevenue);
+
   return (
     <View style={$.container}>
       <View style={$.cardsContainer}>

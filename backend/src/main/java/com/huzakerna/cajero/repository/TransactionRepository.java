@@ -212,6 +212,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
   @Query("""
       SELECT
+        SUM(tp.buyingPrice * tp.quantity)
+      FROM Transaction t
+      JOIN t.transactionProducts tp
+      WHERE t.storeId = :storeId
+        AND t.statusCode = 'COMPLETED'
+        AND t.createdAt BETWEEN :start AND :end
+        AND t.deletedAt IS NULL
+      """)
+  BigDecimal findTotalCogs(
+      @Param("storeId") UUID storeId,
+      @Param("start") Instant start,
+      @Param("end") Instant end);
+
+  @Query("""
+      SELECT
         CAST(t.createdAt AS LocalDate) as date,
         SUM(tp.buyingPrice * tp.quantity)
       FROM Transaction t

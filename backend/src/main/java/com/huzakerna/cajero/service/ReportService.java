@@ -75,7 +75,8 @@ public class ReportService {
           .totalRevenue(revenue)
           .totalRefund(refund)
           .totalDiscount(discount)
-          .totalNetRevenue(revenue.subtract(refund).subtract(tax));
+          .totalTax(tax)
+          .totalNetRevenue(revenue.subtract(refund));
     }
 
     // Process Products
@@ -117,10 +118,15 @@ public class ReportService {
     }
 
     // Process Daily COGS
+    BigDecimal totalCogsTest = transactionRepository.findTotalCogs(storeId, startDateTime, endDateTime);
+    System.out.println("TOTAL COGS (no grouping): " + totalCogsTest);
+
     List<Object[]> cogsStatsDaily = transactionRepository.findCogsDaily(storeId, startDateTime, endDateTime);
+    System.out.println("COGS Query Results: " + cogsStatsDaily.size() + " rows");
     for (Object[] row : cogsStatsDaily) {
       LocalDate date = (LocalDate) row[0];
       BigDecimal totalCogs = (BigDecimal) row[1];
+      System.out.println("COGS for " + date + ": " + totalCogs);
       builderMap.computeIfAbsent(date, k -> DailyReportDTO.builder().date(k))
           .totalCogs(totalCogs != null ? totalCogs : BigDecimal.ZERO);
     }

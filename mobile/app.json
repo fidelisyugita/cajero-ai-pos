@@ -2,7 +2,6 @@
   "expo": {
     "name": "Cajero",
     "slug": "cajero",
-    "version": "1.0.6",
     "version": "1.0.7",
     "orientation": "landscape",
     "icon": "./assets/images/icon.png",
@@ -42,7 +41,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon-light.png",
-          "imageWidth": 200,
+          "imageWidth": 400,
           "resizeMode": "contain",
           "backgroundColor": "#FEF5E2"
         }
