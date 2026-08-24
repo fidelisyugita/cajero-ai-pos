@@ -7,6 +7,8 @@ import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
 import IcEyeClose from "@/assets/icons/eye-fill-close.svg";
 import IcEyeOpen from "@/assets/icons/eye-fill-open.svg";
+import { getStore } from "@/services/endpoints/getStore";
+import { useBusinessStore } from "@/store/useBusinessStore";
 import alertService from "../../services/AlertService";
 import { t } from "../../services/i18n";
 import { useSignInOwnerMutation } from "../../services/mutations/useSignInMutation";
@@ -27,10 +29,7 @@ const signInSchema = z.object({
       message: t("email_invalid"),
     })
     .transform((v) => v.toLowerCase()),
-  password: z
-    .string()
-    .min(1, t("password_required"))
-    .min(6, t("password_min_length")),
+  password: z.string().min(1, t("password_required")).min(6, t("password_min_length")),
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
@@ -65,8 +64,6 @@ const SignInForm = () => {
       useAuthStore.setState({ user: result, isLoggedIn: true });
 
       if (result.storeId) {
-        const { getStore } = await import("@/services/endpoints/getStore");
-        const { useBusinessStore } = await import("@/store/useBusinessStore");
         const store = await getStore(result.storeId);
         useBusinessStore.getState().setBusiness(store);
       }

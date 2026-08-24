@@ -17,10 +17,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const signUpSchema = z
   .object({
-    fullName: z
-      .string()
-      .min(1, t("full_name_required"))
-      .max(100, t("full_name_max_length")),
+    fullName: z.string().min(1, t("full_name_required")).max(100, t("full_name_max_length")),
     email: z
       .string()
       .min(1, t("email_required"))
@@ -28,14 +25,12 @@ const signUpSchema = z
         message: t("email_invalid"),
       })
       .transform((v) => v.toLowerCase()),
-    password: z
-      .string()
-      .min(1, t("password_required"))
-      .min(6, t("password_min_length")),
+    password: z.string().min(1, t("password_required")).min(6, t("password_min_length")),
     confirmPassword: z.string().min(1, t("confirm_password_required")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: t("passwords_do_not_match"),
+    path: ["confirmPassword"],
   });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
@@ -59,7 +54,7 @@ const SignUpForm = () => {
     },
   });
 
-  const onSignUp = async (data: SignUpFormData) => {
+  const onSignUp = async (_data: SignUpFormData) => {
     // Implement sign-up logic here
   };
 
@@ -206,12 +201,7 @@ const SignUpForm = () => {
       </View>
 
       <View style={$.buttonWrapper}>
-        <Button
-          onPress={handleSubmit(onSignUp)}
-          size="lg"
-          title={t("sign_up")}
-          variant="primary"
-        />
+        <Button onPress={handleSubmit(onSignUp)} size="lg" title={t("sign_up")} variant="primary" />
 
         <View style={$.separatorContainer}>
           <View style={$.separatorLine} />

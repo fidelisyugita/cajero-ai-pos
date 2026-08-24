@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { t } from "@/services/i18n";
@@ -25,7 +33,7 @@ const StockUpdateModal = ({
 
   useEffect(() => {
     setStock((currentStock ?? 0).toString());
-  }, [currentStock, visible]);
+  }, [currentStock]);
 
   const handleSave = () => {
     const parsedStock = parseFloat(stock);
@@ -33,21 +41,12 @@ const StockUpdateModal = ({
   };
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={$.centeredView}
       >
-        <TouchableOpacity
-          style={$.overlay}
-          activeOpacity={1}
-          onPress={onClose}
-        />
+        <TouchableOpacity style={$.overlay} activeOpacity={1} onPress={onClose} />
         <View style={$.modalView}>
           <Text style={$.modalTitle}>
             {t("update_stock_for")} {itemName}
@@ -95,7 +94,11 @@ const $ = StyleSheet.create((theme) => ({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   modalView: {
     width: "90%",
