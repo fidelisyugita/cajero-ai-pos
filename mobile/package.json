@@ -14,6 +14,8 @@
 		"web": "expo start --web",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
+		"lint:test": "biome check app/**/__tests__/** components/**/__tests__/** db/**/__tests__/** hooks/**/__tests__/** lib/**/__tests__/** services/**/__tests__/** store/**/__tests__/** utils/**/__tests__/** jest.setup.ts jest.config.js",
+		"lint:test:fix": "biome check --write app/**/__tests__/** components/**/__tests__/** db/**/__tests__/** hooks/**/__tests__/** lib/**/__tests__/** services/**/__tests__/** store/**/__tests__/** utils/**/__tests__/** jest.setup.ts jest.config.js",
 		"format": "biome format . --write",
 		"format:check": "biome format .",
 		"build:apk": "cd android && ./gradlew assembleRelease",

@@ -127,7 +127,7 @@ describe("PrinterService", () => {
           "android.permission.BLUETOOTH_SCAN": PermissionsAndroid.RESULTS.GRANTED,
           "android.permission.BLUETOOTH_CONNECT": PermissionsAndroid.RESULTS.GRANTED,
           "android.permission.ACCESS_FINE_LOCATION": PermissionsAndroid.RESULTS.GRANTED,
-        });
+        } as any);
 
       const result = await printerService.requestPermissions();
 

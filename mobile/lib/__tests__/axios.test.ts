@@ -40,9 +40,8 @@ describe("axios api instance and interceptors", () => {
         headers,
       };
 
-      // @ts-expect-error
-      const requestHandler = api.interceptors.request.handlers[0].fulfilled;
-      const modifiedConfig = requestHandler(config);
+      const requestHandler = (api.interceptors.request as any).handlers[0].fulfilled;
+      const modifiedConfig = requestHandler(config as any);
 
       expect(headers.set).toHaveBeenCalledWith("Authorization", "Bearer access-token-123");
       expect(modifiedConfig).toBe(config);
@@ -56,17 +55,15 @@ describe("axios api instance and interceptors", () => {
         headers,
       };
 
-      // @ts-expect-error
-      const requestHandler = api.interceptors.request.handlers[0].fulfilled;
-      requestHandler(config);
+      const requestHandler = (api.interceptors.request as any).handlers[0].fulfilled;
+      requestHandler(config as any);
 
       expect(headers.set).not.toHaveBeenCalled();
     });
 
     it("rejects request error", async () => {
       const error = new Error("Network error");
-      // @ts-expect-error
-      const errorHandler = api.interceptors.request.handlers[0].rejected;
+      const errorHandler = (api.interceptors.request as any).handlers[0].rejected;
 
       await expect(errorHandler(error)).rejects.toThrow("Network error");
     });
@@ -75,10 +72,9 @@ describe("axios api instance and interceptors", () => {
   describe("response interceptor", () => {
     it("passes through successful responses untouched", () => {
       const response = { data: { message: "ok" }, status: 200 };
-      // @ts-expect-error
-      const responseHandler = api.interceptors.response.handlers[0].fulfilled;
+      const responseHandler = (api.interceptors.response as any).handlers[0].fulfilled;
 
-      expect(responseHandler(response)).toBe(response);
+      expect(responseHandler(response as any)).toBe(response);
     });
 
     it("refreshes token and retries request on 401 error", async () => {
@@ -110,8 +106,7 @@ describe("axios api instance and interceptors", () => {
         }),
       };
 
-      // @ts-expect-error
-      const errorHandler = api.interceptors.response.handlers[0].rejected;
+      const errorHandler = (api.interceptors.response as any).handlers[0].rejected;
 
       const error = {
         config: originalConfig,
@@ -150,8 +145,7 @@ describe("axios api instance and interceptors", () => {
         _retry: false,
       };
 
-      // @ts-expect-error
-      const errorHandler = api.interceptors.response.handlers[0].rejected;
+      const errorHandler = (api.interceptors.response as any).handlers[0].rejected;
 
       const error = {
         config: originalConfig,
@@ -179,8 +173,7 @@ describe("axios api instance and interceptors", () => {
         _retry: false,
       };
 
-      // @ts-expect-error
-      const errorHandler = api.interceptors.response.handlers[0].rejected;
+      const errorHandler = (api.interceptors.response as any).handlers[0].rejected;
 
       const error = {
         config: originalConfig,
@@ -193,8 +186,7 @@ describe("axios api instance and interceptors", () => {
 
     it("rejects non-401 error without refreshing token", async () => {
       const postSpy = jest.spyOn(axios, "post");
-      // @ts-expect-error
-      const errorHandler = api.interceptors.response.handlers[0].rejected;
+      const errorHandler = (api.interceptors.response as any).handlers[0].rejected;
 
       const error = {
         config: { url: "/test", headers: { set: jest.fn() } },
