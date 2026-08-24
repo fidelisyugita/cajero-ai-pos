@@ -1,17 +1,19 @@
 export function rgbaStringToHex6(rgbaString: string): string {
-	const rgbaMatch = rgbaString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
+  const rgbaMatch = rgbaString.match(
+    /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/i,
+  );
 
-	if (!rgbaMatch) {
-		throw new Error("Invalid RGBA string format");
-	}
+  if (!rgbaMatch) {
+    throw new Error("Invalid RGBA string format");
+  }
 
-	const r = Number.parseInt(rgbaMatch[1], 10);
-	const g = Number.parseInt(rgbaMatch[2], 10);
-	const b = Number.parseInt(rgbaMatch[3], 10);
+  const r = Number.parseInt(rgbaMatch[1], 10);
+  const g = Number.parseInt(rgbaMatch[2], 10);
+  const b = Number.parseInt(rgbaMatch[3], 10);
 
-	if ([r, g, b].some((value) => Number.isNaN(value) || value < 0 || value > 255)) {
-		throw new Error("Invalid RGB values. Values must be between 0-255");
-	}
+  if ([r, g, b].some((value) => Number.isNaN(value) || value < 0 || value > 255)) {
+    throw new Error("Invalid RGB values. Values must be between 0-255");
+  }
 
-	return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
