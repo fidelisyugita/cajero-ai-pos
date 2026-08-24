@@ -1,9 +1,8 @@
-import { View, ActivityIndicator, Animated } from "react-native";
+import { useEffect, useRef } from "react";
+import { ActivityIndicator, Animated, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useSyncStore } from "@/store/useSyncStore";
 import Typography from "@/components/ui/Typography";
-import { useEffect, useRef, useState } from "react";
-import { vs } from "@/utils/Scale";
+import { useSyncStore } from "@/store/useSyncStore";
 
 const SyncIndicator = () => {
   const { isSyncing } = useSyncStore();
@@ -26,10 +25,7 @@ const SyncIndicator = () => {
         }).start();
       }, 1000);
     }
-  }, [isSyncing]);
-
-  if (!isSyncing && fadeAnim._value === 0) return null; // Optimization? Need to check if _value usage is safe or use state.
-  // Actually pointerEvents="none" on container when opacity is 0 is better if we keep it mounted.
+  }, [isSyncing, fadeAnim]);
 
   return (
     <Animated.View style={[$.container, { opacity: fadeAnim }]} pointerEvents="none">
@@ -55,7 +51,7 @@ const $ = StyleSheet.create((theme) => ({
     alignItems: "center",
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    backgroundColor: theme.colors.neutral[800],
+    backgroundColor: theme.colors.neutral[700],
     borderRadius: theme.radius.full,
     gap: theme.spacing.xs,
     shadowColor: "#000",

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { StyleProp, ViewStyle } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 import IcSearch from "@/assets/icons/search.svg";
 import IcX from "@/assets/icons/x.svg";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
-import { StyleSheet } from "react-native-unistyles";
-import { ViewStyle, StyleProp } from "react-native";
 import { vs } from "@/utils/Scale";
 
 interface SearchBarProps {
@@ -14,7 +14,12 @@ interface SearchBarProps {
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-const SearchBar = ({ value, onChangeText, placeholder = "Search", containerStyle }: SearchBarProps) => {
+const SearchBar = ({
+  value,
+  onChangeText,
+  placeholder = "Search",
+  containerStyle,
+}: SearchBarProps) => {
   const [localValue, setLocalValue] = useState(value);
 
   // Sync local value with prop value when prop updates (e.g. clear)
@@ -60,10 +65,10 @@ const SearchBar = ({ value, onChangeText, placeholder = "Search", containerStyle
   );
 };
 
-const $ = StyleSheet.create((theme) => ({
+const $ = StyleSheet.create({
   searchBar: {
     width: vs(400),
   },
-}));
+});
 
 export default SearchBar;

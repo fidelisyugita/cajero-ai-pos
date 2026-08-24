@@ -1,10 +1,10 @@
-import { View, ViewStyle } from "react-native";
-import { StyleSheet, withUnistyles } from "react-native-unistyles";
-import Typography from "@/components/ui/Typography";
-import Button from "@/components/ui/Button";
+import { type StyleProp, View, type ViewStyle } from "react-native";
+import type { SvgProps } from "react-native-svg";
+import { StyleSheet } from "react-native-unistyles";
 import DefaultEmptyStateSvg from "@/assets/images/empty-state.svg";
+import Button from "@/components/ui/Button";
+import Typography from "@/components/ui/Typography";
 import { vs } from "@/utils/Scale";
-import { SvgProps } from "react-native-svg";
 
 interface EmptyStateProps {
   title: string;
@@ -12,7 +12,7 @@ interface EmptyStateProps {
   image?: React.FC<SvgProps>;
   actionLabel?: string;
   onAction?: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 const EmptyState = ({
@@ -40,12 +40,7 @@ const EmptyState = ({
       </View>
       {actionLabel && onAction && (
         <View style={$.actionContainer}>
-          <Button
-            title={actionLabel}
-            onPress={onAction}
-            variant="primary"
-            size="md"
-          />
+          <Button title={actionLabel} onPress={onAction} variant="primary" size="md" />
         </View>
       )}
     </View>

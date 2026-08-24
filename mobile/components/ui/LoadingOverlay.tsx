@@ -3,15 +3,10 @@ import { StyleSheet } from "react-native-unistyles";
 import { useLoadingStore } from "../../store/useLoadingStore";
 
 const LoadingOverlay = () => {
-  const isLoading = useLoadingStore(state => state.isLoading);
+  const isLoading = useLoadingStore((state) => state.isLoading);
 
   return (
-    <Modal
-      animationType="fade"
-      statusBarTranslucent
-      transparent
-      visible={isLoading}
-    >
+    <Modal animationType="fade" statusBarTranslucent transparent visible={isLoading}>
       <View style={$.overlay}>
         <View style={$.container}>
           <ActivityIndicator color="white" size="large" />
@@ -19,9 +14,9 @@ const LoadingOverlay = () => {
       </View>
     </Modal>
   );
-}
+};
 
-const $ = StyleSheet.create(theme => ({
+const $ = StyleSheet.create((theme) => ({
   overlay: {
     flex: 1,
     backgroundColor: theme.colors.transparentModal,

@@ -1,4 +1,3 @@
-
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -8,7 +7,11 @@ interface SegmentedControlProps<T> {
   onChange: (value: T) => void;
 }
 
-const SegmentedControl = <T extends string | number>({ options, value, onChange }: SegmentedControlProps<T>) => {
+const SegmentedControl = <T extends string | number>({
+  options,
+  value,
+  onChange,
+}: SegmentedControlProps<T>) => {
   return (
     <View style={$.container}>
       {options.map((option) => {
@@ -31,7 +34,7 @@ const SegmentedControl = <T extends string | number>({ options, value, onChange 
 const $ = StyleSheet.create((theme) => ({
   container: {
     flexDirection: "row",
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: theme.spacing.xs,
     borderRadius: theme.radius.lg,
     borderWidth: 1,

@@ -7,7 +7,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
 	(config) => {
-		// Get the latest accessToken from Zustand
 		const accessToken = useAuthStore.getState().user?.accessToken;
 		if (accessToken) {
 			config.headers.set("Authorization", `Bearer ${accessToken}`);
@@ -34,11 +33,14 @@ api.interceptors.response.use(
 
 					const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-					useAuthStore.getState().setUser({
-						...useAuthStore.getState().user!,
-						accessToken,
-						refreshToken: newRefreshToken,
-					});
+					const currentUser = useAuthStore.getState().user;
+					if (currentUser) {
+						useAuthStore.getState().setUser({
+							...currentUser,
+							accessToken,
+							refreshToken: newRefreshToken,
+						});
+					}
 
 					originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
 					return api(originalRequest);
