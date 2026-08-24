@@ -93,6 +93,7 @@ export const mockRouter = {
 };
 
 jest.mock("expo-router", () => ({
+  router: mockRouter,
   useRouter: () => mockRouter,
   useLocalSearchParams: () => ({}),
   useSegments: () => [],
