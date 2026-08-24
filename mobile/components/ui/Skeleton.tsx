@@ -14,9 +14,16 @@ interface SkeletonProps {
   height?: DimensionValue;
   borderRadius?: number;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
-const Skeleton = ({ width = "100%", height = 20, borderRadius = 4, style }: SkeletonProps) => {
+const Skeleton = ({
+  width = "100%",
+  height = 20,
+  borderRadius = 4,
+  style,
+  testID,
+}: SkeletonProps) => {
   const opacity = useSharedValue(0.3);
 
   useEffect(() => {
@@ -32,7 +39,10 @@ const Skeleton = ({ width = "100%", height = 20, borderRadius = 4, style }: Skel
   }));
 
   return (
-    <Animated.View style={[$.skeleton, { width, height, borderRadius }, animatedStyle, style]} />
+    <Animated.View
+      style={[$.skeleton, { width, height, borderRadius }, animatedStyle, style]}
+      testID={testID}
+    />
   );
 };
 

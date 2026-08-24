@@ -23,10 +23,29 @@ const EmptyState = ({
   onAction,
   style,
 }: EmptyStateProps) => {
+  let ActualImage: React.ElementType | Record<string, unknown> =
+    ImageComponent as unknown as React.ElementType;
+  while (
+    ActualImage &&
+    typeof ActualImage === "object" &&
+    "default" in ActualImage &&
+    !("$$typeof" in ActualImage)
+  ) {
+    ActualImage = (ActualImage as { default: React.ElementType }).default;
+  }
+  if (
+    !ActualImage ||
+    (typeof ActualImage !== "function" &&
+      typeof ActualImage !== "string" &&
+      !("$$typeof" in ActualImage))
+  ) {
+    ActualImage = "View" as unknown as React.ElementType;
+  }
+
   return (
     <View style={[$.container, style]}>
       <View style={$.imageContainer}>
-        <ImageComponent width={vs(200)} height={vs(200)} />
+        <ActualImage width={vs(200)} height={vs(200)} />
       </View>
       <View style={$.textContainer}>
         <Typography variant="headingSm" style={$.title}>

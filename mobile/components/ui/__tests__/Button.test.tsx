@@ -1,69 +1,76 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { Text, View } from "react-native";
+import { vs } from "@/utils/Scale";
 import Button, { type ButtonSize, type ButtonVariant } from "../Button";
 
 describe("Button component", () => {
-  it("renders correctly with default props and given title", () => {
-    render(<Button title="Click Me" />);
+  it("renders correctly with default props and given title", async () => {
+    await render(<Button title="Click Me" />);
 
     expect(screen.getByText("Click Me")).toBeTruthy();
   });
 
-  it("handles onPress event when enabled", () => {
+  it("handles onPress event when enabled", async () => {
     const handlePress = jest.fn();
-    render(<Button onPress={handlePress} title="Submit" />);
+    await render(<Button onPress={handlePress} title="Submit" />);
 
     const button = screen.getByText("Submit");
-    fireEvent.press(button);
+    await act(async () => {
+      fireEvent.press(button);
+    });
 
     expect(handlePress).toHaveBeenCalledTimes(1);
   });
 
-  it("does not trigger onPress when disabled", () => {
+  it("does not trigger onPress when disabled", async () => {
     const handlePress = jest.fn();
-    render(<Button disabled onPress={handlePress} title="Disabled Button" />);
+    await render(<Button disabled onPress={handlePress} title="Disabled Button" />);
 
     const button = screen.getByText("Disabled Button");
-    fireEvent.press(button);
+    await act(async () => {
+      fireEvent.press(button);
+    });
 
     expect(handlePress).not.toHaveBeenCalled();
   });
 
-  it("renders loading indicator and hides leftIcon when isLoading is true", () => {
+  it("renders loading indicator and hides leftIcon when isLoading is true", async () => {
     const leftIconMock = jest.fn(() => <View testID="left-icon" />);
-    render(<Button isLoading leftIcon={leftIconMock} title="Loading Button" />);
+    await render(<Button isLoading leftIcon={leftIconMock} title="Loading Button" />);
 
     expect(screen.getByText("Loading Button")).toBeTruthy();
     expect(screen.queryByTestId("left-icon")).toBeNull();
     expect(leftIconMock).not.toHaveBeenCalled();
   });
 
-  it("renders leftIcon when provided and not loading", () => {
+  it("renders leftIcon when provided and not loading", async () => {
     const leftIconMock = jest.fn((size, color) => (
       <Text testID="custom-left-icon">{`Icon:${size}:${color}`}</Text>
     ));
 
-    render(<Button leftIcon={leftIconMock} size="lg" title="With Left Icon" variant="primary" />);
+    await render(
+      <Button leftIcon={leftIconMock} size="lg" title="With Left Icon" variant="primary" />,
+    );
 
     expect(screen.getByTestId("custom-left-icon")).toBeTruthy();
-    expect(leftIconMock).toHaveBeenCalledWith(24, expect.any(String));
+    expect(leftIconMock).toHaveBeenCalledWith(vs(24), expect.any(String));
   });
 
-  it("renders rightIcon when provided", () => {
+  it("renders rightIcon when provided", async () => {
     const rightIconMock = jest.fn((size, color) => (
       <Text testID="custom-right-icon">{`RightIcon:${size}:${color}`}</Text>
     ));
 
-    render(
+    await render(
       <Button rightIcon={rightIconMock} size="sm" title="With Right Icon" variant="secondary" />,
     );
 
     expect(screen.getByTestId("custom-right-icon")).toBeTruthy();
-    expect(rightIconMock).toHaveBeenCalledWith(16, expect.any(String));
+    expect(rightIconMock).toHaveBeenCalledWith(vs(16), expect.any(String));
   });
 
-  it("renders custom right React node when provided", () => {
-    render(
+  it("renders custom right React node when provided", async () => {
+    await render(
       <Button right={<Text testID="custom-right-node">Badge</Text>} title="With Right Node" />,
     );
 
@@ -85,16 +92,16 @@ describe("Button component", () => {
 
     variants.forEach((variant) => {
       sizes.forEach((size) => {
-        it(`renders variant="${variant}" with size="${size}" without crashing`, () => {
-          render(<Button size={size} title={`${variant} ${size}`} variant={variant} />);
+        it(`renders variant="${variant}" with size="${size}" without crashing`, async () => {
+          await render(<Button size={size} title={`${variant} ${size}`} variant={variant} />);
           expect(screen.getByText(`${variant} ${size}`)).toBeTruthy();
         });
       });
     });
   });
 
-  it("handles press in and press out interactions", () => {
-    render(<Button testID="press-button" title="Press States" />);
+  it("handles press in and press out interactions", async () => {
+    await render(<Button testID="press-button" title="Press States" />);
 
     const button = screen.getByTestId("press-button");
     fireEvent(button, "pressIn");

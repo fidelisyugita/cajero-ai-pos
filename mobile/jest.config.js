@@ -6,6 +6,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
+    "\\.svg$": "<rootDir>/__mocks__/svgMock.js",
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.maestro/"],

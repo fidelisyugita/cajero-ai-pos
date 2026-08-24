@@ -196,6 +196,24 @@ const IconButton = ({ variant, size = "md", Icon, style, ...rest }: IconButtonPr
   // The original passed width/height and style.
 
   const iconSize = iconSizes[size];
+  let IconComponent: React.ElementType | Record<string, unknown> =
+    Icon as unknown as React.ElementType;
+  while (
+    IconComponent &&
+    typeof IconComponent === "object" &&
+    "default" in IconComponent &&
+    !("$$typeof" in IconComponent)
+  ) {
+    IconComponent = (IconComponent as { default: React.ElementType }).default;
+  }
+  if (
+    !IconComponent ||
+    (typeof IconComponent !== "function" &&
+      typeof IconComponent !== "string" &&
+      !("$$typeof" in IconComponent))
+  ) {
+    IconComponent = "View" as unknown as React.ElementType;
+  }
 
   return (
     <TouchableOpacity
@@ -205,7 +223,13 @@ const IconButton = ({ variant, size = "md", Icon, style, ...rest }: IconButtonPr
       style={[stylesheet.container(pressed), style]}
       {...rest}
     >
-      <Icon width={iconSize.width} height={iconSize.height} style={stylesheet.icon(pressed)} />
+      {IconComponent && (
+        <IconComponent
+          width={iconSize.width}
+          height={iconSize.height}
+          style={stylesheet.icon(pressed)}
+        />
+      )}
     </TouchableOpacity>
   );
 };

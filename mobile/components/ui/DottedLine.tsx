@@ -12,6 +12,7 @@ interface DottedLineProps {
   thickness?: number; // stroke width
   color?: string;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
 const DottedLine = ({
@@ -22,6 +23,7 @@ const DottedLine = ({
   thickness = vs(2),
   color,
   style,
+  testID = "dotted-line",
 }: DottedLineProps) => {
   const { theme } = useUnistyles();
   const strokeColor = color || theme.colors.warning[200];
@@ -36,7 +38,7 @@ const DottedLine = ({
   const y2 = orientation === "horizontal" ? thickness / 2 : length;
 
   return (
-    <View style={style}>
+    <View style={style} testID={testID}>
       <Svg height={height} width={width}>
         <Line
           stroke={strokeColor}
