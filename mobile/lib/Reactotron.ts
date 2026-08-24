@@ -1,16 +1,12 @@
 import Reactotron from "reactotron-react-native";
 
-// biome-ignore lint/correctness/useHookAtTopLevel: <explanation>
+// biome-ignore lint/correctness/useHookAtTopLevel: Reactotron plugin configuration, not a React hook
 Reactotron.configure({
 	name: "Cajero",
 })
 	.useReactNative()
 	.connect();
 
-// Optional: log Reactotron connection
-console.log("Reactotron Configured");
-
-// Extend the global console type to include 'tron'
 declare global {
 	interface Console {
 		tron: typeof Reactotron;
