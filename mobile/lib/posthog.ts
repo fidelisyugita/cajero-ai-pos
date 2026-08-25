@@ -43,6 +43,7 @@ export const posthogClient: PostHog | null = isPostHogEnabled
       host,
       customStorage: mmkvPostHogStorage,
       captureAppLifecycleEvents: true,
+      enableSessionReplay: false,
       flushAt: 20,
       flushInterval: 30000,
     })
