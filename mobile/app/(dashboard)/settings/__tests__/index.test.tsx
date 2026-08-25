@@ -19,7 +19,7 @@ jest.mock("drizzle-orm/expo-sqlite", () => ({
   })),
 }));
 
-jest.mock("expo-file-system/legacy", () => ({
+jest.mock("expo-file-system", () => ({
   documentDirectory: "/mock/document/directory/",
   deleteAsync: jest.fn(),
 }));

@@ -5,7 +5,7 @@ import Typography from "@/components/ui/Typography";
 import { db } from "@/db/drizzle";
 import { sql } from "drizzle-orm";
 import { useAuthStore } from "@/store/useAuthStore";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 import { useRouter } from "expo-router";
 import FormSectionCard from "@/components/ui/FormSectionCard";
 

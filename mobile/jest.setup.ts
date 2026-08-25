@@ -234,3 +234,20 @@ jest.mock("@sentry/react-native", () => {
     setUser: jest.fn(),
   };
 });
+
+// Mock @shopify/flash-list
+jest.mock("@shopify/flash-list", () => {
+  const React = require("react");
+  const { FlatList } = require("react-native");
+  const MockFlashList = React.forwardRef((props: any, ref: any) => {
+    return React.createElement(FlatList, { ...props, ref });
+  });
+  return {
+    __esModule: true,
+    FlashList: MockFlashList,
+    AnimatedFlashList: MockFlashList,
+    MasonryFlashList: MockFlashList,
+    default: MockFlashList,
+  };
+});
+
