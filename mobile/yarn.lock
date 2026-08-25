@@ -1100,7 +1100,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@biomejs/biome@npm:^2.1.4":
+"@biomejs/biome@npm:^2.5.10":
   version: 2.5.10
   resolution: "@biomejs/biome@npm:2.5.10"
   dependencies:
@@ -3846,16 +3846,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:~19.0.10":
-  version: 19.0.14
-  resolution: "@types/react@npm:19.0.14"
+"@types/react@npm:~19.2.18":
+  version: 19.2.18
+  resolution: "@types/react@npm:19.2.18"
   dependencies:
-    csstype: "npm:^3.0.2"
-  checksum: 10c0/e5d9ac42fc6d66c21b7020c8ae1a8190c486e63e5daf2f67b67694dd39c6264cc92a57f90b84525bf73774b90f91bd3b1d907022bcc9b36d6d4ffbcf001f8feb
+    csstype: "npm:^3.2.2"
+  checksum: 10c0/d04216172b4b4362b310017c210dfbe019fb4f4e7dffd0313e70b3acb3051d5c3e76e7e84e3cf4c6a3c824993ffadfe3949e589a6398a09d4200e7670e2962de
   languageName: node
   linkType: hard
 
-"@types/sql.js@npm:^1.4.9":
+"@types/sql.js@npm:^1.4.11":
   version: 1.4.11
   resolution: "@types/sql.js@npm:1.4.11"
   dependencies:
@@ -4567,7 +4567,7 @@ __metadata:
   resolution: "cajero@workspace:."
   dependencies:
     "@babel/core": "npm:^7.25.2"
-    "@biomejs/biome": "npm:^2.1.4"
+    "@biomejs/biome": "npm:^2.5.10"
     "@config-plugins/react-native-ble-plx": "npm:^7.0.0"
     "@expo-google-fonts/dm-sans": "npm:^0.4.1"
     "@expo/vector-icons": "npm:^14.1.0"
@@ -4582,8 +4582,8 @@ __metadata:
     "@testing-library/react-native": "npm:^14.0.1"
     "@types/events": "npm:^3"
     "@types/jest": "npm:~29.5.12"
-    "@types/react": "npm:~19.0.10"
-    "@types/sql.js": "npm:^1.4.9"
+    "@types/react": "npm:~19.2.18"
+    "@types/sql.js": "npm:^1.4.11"
     axios: "npm:^1.11.0"
     babel-plugin-inline-import: "npm:^3.0.0"
     bcryptjs: "npm:^3.0.2"
@@ -4634,7 +4634,7 @@ __metadata:
     react-native-safe-area-context: "npm:5.4.0"
     react-native-screens: "npm:~4.11.1"
     react-native-svg: "npm:15.11.2"
-    react-native-svg-transformer: "npm:^1.5.1"
+    react-native-svg-transformer: "npm:^1.5.3"
     react-native-ui-datepicker: "npm:^3.1.2"
     react-native-unistyles: "npm:3.0.7"
     react-native-web: "npm:~0.20.0"
@@ -4642,7 +4642,7 @@ __metadata:
     react-test-renderer: "npm:^19.2.8"
     reactotron-react-native: "npm:^5.1.14"
     sql.js: "npm:^1.13.0"
-    test-renderer: "npm:^1.0.0"
+    test-renderer: "npm:^1.2.0"
     typescript: "npm:~5.8.3"
     zod: "npm:^4.0.17"
     zustand: "npm:^5.0.7"
@@ -5201,7 +5201,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:^3.0.2":
+"csstype@npm:^3.2.2":
   version: 3.2.3
   resolution: "csstype@npm:3.2.3"
   checksum: 10c0/cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
@@ -9728,7 +9728,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-svg-transformer@npm:^1.5.1":
+"react-native-svg-transformer@npm:^1.5.3":
   version: 1.5.3
   resolution: "react-native-svg-transformer@npm:1.5.3"
   dependencies:
@@ -10880,7 +10880,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"test-renderer@npm:^1.0.0":
+"test-renderer@npm:^1.2.0":
   version: 1.2.0
   resolution: "test-renderer@npm:1.2.0"
   dependencies:
