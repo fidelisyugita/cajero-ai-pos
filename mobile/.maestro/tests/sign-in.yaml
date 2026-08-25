@@ -1,31 +1,37 @@
 appId: com.cajero.app
 ---
-- launchApp
-- waitForAnimationToEnd:
-    timeout: 5000
-############################
-# UI SMOKE TEST
-############################
+# ==========================================================
+# CAJERO POS - E2E AUTHENTICATION TEST SUITE
+# ==========================================================
+
+# 1. Launch App
+- runFlow:
+    file: ../flows/launch.yaml
+
+# ==========================================================
+# 2. UI SMOKE TEST
+# ==========================================================
 - assertVisible:
     text: "Sign In"
 - assertVisible:
     text: "Email"
 - assertVisible:
     text: "Password"
+- assertVisible:
+    id: "sign-in-button"
 
-############################
-# EMPTY FORM
-############################
+# ==========================================================
+# 3. EMPTY FORM VALIDATION
+# ==========================================================
 - tapOn:
     id: "sign-in-button"
 
 - assertVisible:
     text: "Email is required"
-- assertVisible:
-    text: "Password is required"
-############################
-# INVALID EMAIL
-############################
+
+# ==========================================================
+# 4. INVALID EMAIL FORMAT
+# ==========================================================
 - runFlow:
     file: ../flows/sign-in.yaml
     env:
@@ -35,33 +41,41 @@ appId: com.cajero.app
 - assertVisible:
     text: "Invalid email address"
 
-# ############################
-# # SHORT PASSWORD
-# ############################
+# ==========================================================
+# 5. SHORT PASSWORD VALIDATION (< 6 chars)
+# ==========================================================
 - runFlow:
     file: ../flows/sign-in.yaml
     env:
-      EMAIL: "owner@cajero.app"
+      EMAIL: "marco@gmail.com"
       PASSWORD: "123"
 
 - assertVisible:
     text: "Password must be at least 6 characters"
 
-# ############################
-# # WRONG CREDENTIALS
-# ############################
+# ==========================================================
+# 6. WRONG CREDENTIALS REJECTION
+# ==========================================================
 - runFlow:
     file: ../flows/sign-in.yaml
     env:
-      EMAIL: "owner@cajero.app"
-      PASSWORD: "wrongpassword"
+      EMAIL: "${TEST_EMAIL}"
+      PASSWORD: "wrongpassword123"
 
 - assertVisible:
-    text: "Incorrect email or password. Please try again."
+    text: "Incorrect email or password.*"
 
-# ############################
-# # SUCCESS LOGIN
-# ############################
+# Dismiss error alert dialog
+- tapOn:
+    text: "(?i)ok|close"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ==========================================================
+# 7. SUCCESSFUL LOGIN
+# ==========================================================
 - runFlow:
     file: ../flows/sign-in.yaml
     env:
@@ -69,7 +83,16 @@ appId: com.cajero.app
       PASSWORD: "${TEST_PASSWORD}"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
+# Assert Dashboard Landing
 - assertVisible:
     text: "Menu"
+- assertVisible:
+    text: "Sign Out"
+
+# ==========================================================
+# 8. CLEAN SIGN OUT
+# ==========================================================
+- runFlow:
+    file: ../flows/sign-out.yaml

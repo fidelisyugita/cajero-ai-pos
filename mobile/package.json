@@ -21,7 +21,11 @@
     "build:apk": "cd android && ./gradlew assembleRelease",
     "build:apk:clean": "cd android && ./gradlew clean assembleRelease",
     "bundle:android": "cd android && ./gradlew bundleRelease",
-    "maestro:sign-in": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in.yaml --env TEST_EMAIL=test@user.com --env TEST_PASSWORD=testPassword123",
+    "maestro:test": "maestro test --debug-output ./.maestro/output .maestro/tests/",
+    "maestro:sign-in": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in.yaml",
+    "maestro:validation": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in-validation.yaml",
+    "maestro:studio": "maestro studio",
+    "maestro:record": "maestro record .maestro/tests/sign-in.yaml",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

@@ -12,12 +12,14 @@ import { queryClient } from "@/lib/ReactQuery";
 import { initSentry, wrapRootComponent } from "@/lib/sentry";
 import { useSync } from "@/services/hooks/useSync";
 import { useAuthStore } from "@/store/useAuthStore";
+import { LogBox } from "react-native";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 
 initSentry();
 
 if (__DEV__) {
   require("../lib/Reactotron");
+  LogBox.ignoreLogs(["AxiosError", "Sign in failed", "Request failed with status code 401"]);
 }
 
 SplashScreen.preventAutoHideAsync();

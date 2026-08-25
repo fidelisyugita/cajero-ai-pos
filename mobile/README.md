@@ -267,10 +267,45 @@ yarn test app/(dashboard)/attendance/__tests__/index.test.tsx
 
 Automated E2E user journey flows are defined in `.maestro/`:
 
-```bash
-# Run the sign-in flow automated test
-yarn maestro:sign-in
 ```
+.maestro/
+├── config.yaml          # Global Maestro configuration & appId
+├── .env.example         # Test credentials template
+├── flows/               # Reusable subflows
+│   ├── launch.yaml      # App launcher & state reset
+│   ├── sign-in.yaml     # Sign-in action subflow
+│   └── sign-out.yaml    # Sign-out & confirmation subflow
+└── tests/               # Executable test suites
+    ├── sign-in.yaml             # Complete authentication flow
+    ├── sign-in-validation.yaml  # Form error validation tests
+    └── sign-in-success.yaml     # Isolated success login test
+```
+
+#### Running Maestro Tests
+```bash
+# Run the complete sign-in test suite
+yarn maestro:sign-in
+
+# Run isolated form validation tests
+yarn maestro:validation
+
+# Run all test suites in .maestro/tests/
+yarn maestro:test
+
+# Launch Maestro Studio (interactive visual flow inspector)
+yarn maestro:studio
+
+# Run and record an MP4 video of the flow
+yarn maestro:record
+```
+
+#### Custom Credentials
+Create `.maestro/.env` to override default test credentials:
+```bash
+cp .maestro/.env.example .maestro/.env
+# Edit TEST_EMAIL and TEST_PASSWORD in .maestro/.env
+```
+
 
 ---
 

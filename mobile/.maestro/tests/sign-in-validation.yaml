@@ -1,0 +1,42 @@
+appId: com.cajero.app
+---
+# 1. Launch App
+- runFlow:
+    file: ../flows/launch.yaml
+
+# 2. UI Smoke Test
+- assertVisible:
+    text: "Sign In"
+- assertVisible:
+    text: "Email"
+- assertVisible:
+    text: "Password"
+- assertVisible:
+    id: "sign-in-button"
+
+# 3. Empty Form Validation
+- tapOn:
+    id: "sign-in-button"
+
+- assertVisible:
+    text: "Email is required"
+
+# 4. Invalid Email Format
+- runFlow:
+    file: ../flows/sign-in.yaml
+    env:
+      EMAIL: "invalid-email-format"
+      PASSWORD: "password123"
+
+- assertVisible:
+    text: "Invalid email address"
+
+# 5. Short Password Validation (< 6 chars)
+- runFlow:
+    file: ../flows/sign-in.yaml
+    env:
+      EMAIL: "owner@cajero.app"
+      PASSWORD: "123"
+
+- assertVisible:
+    text: "Password must be at least 6 characters"

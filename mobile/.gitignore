@@ -52,6 +52,9 @@ app-example
 .env.test
 .env.production
 !.env.example
+.maestro/.env
+.maestro/.env*.local
+!.maestro/.env.example
 credentials.json
 .eas/
 *.keystore
