@@ -1,8 +1,17 @@
+import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Platform } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
-import { Feather } from "@expo/vector-icons";
+import { captureAnalyticsEvent } from "@/lib/posthog";
 import { postAIChat } from "@/services/endpoints/postAIChat";
 import { t } from "@/services/i18n";
 import { useLanguageStore } from "@/store/useLanguageStore";
@@ -14,9 +23,9 @@ interface Message {
 }
 
 const ChatInterface = () => {
-  const language = useLanguageStore((state) => state.language); // Subscribe to language changes
+  const _language = useLanguageStore((state) => state.language); // Subscribe to language changes
   const [messages, setMessages] = useState<Message[]>([
-    { id: "1", role: "assistant", content: t("ai_welcome_message") }
+    { id: "1", role: "assistant", content: t("ai_welcome_message") },
   ]);
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,34 +37,44 @@ const ChatInterface = () => {
     const userMessage: Message = { id: Date.now().toString(), role: "user", content: userText };
 
     // Optimistic update
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsGenerating(true);
 
+    captureAnalyticsEvent("ai_prompt_sent", {
+      promptLength: userText.length,
+    });
+
     // Add pending indicator
-    setMessages(prev => [...prev, { id: "pending", role: "assistant", content: "..." }]);
+    setMessages((prev) => [...prev, { id: "pending", role: "assistant", content: "..." }]);
 
     try {
       const response = await postAIChat(userText);
 
-      setMessages(prev => {
+      setMessages((prev) => {
         // Remove pending and add response
-        const filtered = prev.filter(m => m.id !== "pending");
-        return [...filtered, {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: response.text
-        }];
+        const filtered = prev.filter((m) => m.id !== "pending");
+        return [
+          ...filtered,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: response.text,
+          },
+        ];
       });
     } catch (e) {
       console.error("Chat API error:", e);
-      setMessages(prev => {
-        const filtered = prev.filter(m => m.id !== "pending");
-        return [...filtered, {
-          id: (Date.now() + 1).toString(),
-          role: "system",
-          content: t("ai_connection_error")
-        }];
+      setMessages((prev) => {
+        const filtered = prev.filter((m) => m.id !== "pending");
+        return [
+          ...filtered,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "system",
+            content: t("ai_connection_error"),
+          },
+        ];
       });
     } finally {
       setIsGenerating(false);
@@ -63,8 +82,8 @@ const ChatInterface = () => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={$.container} 
+    <KeyboardAvoidingView
+      style={$.container}
       behavior="padding"
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 80}
     >
@@ -72,14 +91,26 @@ const ChatInterface = () => {
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={[
-            $.messageBubble,
-            item.role === "user" ? $.userBubble : (item.role === "system" ? $.systemBubble : $.aiBubble)
-          ]}>
-            <Text style={[
-              $.messageText,
-              item.role === "user" ? $.userText : (item.role === "system" ? $.systemText : $.aiText)
-            ]}>
+          <View
+            style={[
+              $.messageBubble,
+              item.role === "user"
+                ? $.userBubble
+                : item.role === "system"
+                  ? $.systemBubble
+                  : $.aiBubble,
+            ]}
+          >
+            <Text
+              style={[
+                $.messageText,
+                item.role === "user"
+                  ? $.userText
+                  : item.role === "system"
+                    ? $.systemText
+                    : $.aiText,
+              ]}
+            >
               {item.content}
             </Text>
           </View>
@@ -163,7 +194,7 @@ const $ = StyleSheet.create((theme) => ({
   systemText: {
     color: theme.colors.error[600],
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputContainer: {
     flexDirection: "row",

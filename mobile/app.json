@@ -69,7 +69,8 @@
 					}
 				}
 			],
-			"./plugins/withAndroidSigning"
+			"./plugins/withAndroidSigning",
+			"./plugins/withIosXcode26Fix"
 		],
 		"experiments": {
 			"typedRoutes": true

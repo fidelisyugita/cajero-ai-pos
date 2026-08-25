@@ -119,6 +119,7 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
   useLocalSearchParams: jest.fn(() => ({})),
   useSegments: () => [],
+  usePathname: jest.fn(() => "/(dashboard)"),
   Stack: {
     Screen: () => null,
   },
@@ -198,5 +199,38 @@ jest.mock("react-native-safe-area-context", () => {
     SafeAreaView: ({ children, ...props }: any) => React.createElement(View, props, children),
     useSafeAreaInsets: () => insets,
     useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
+  };
+});
+
+// Mock posthog-react-native
+jest.mock("posthog-react-native", () => {
+  const React = require("react");
+  const mockPostHog = {
+    capture: jest.fn(),
+    identify: jest.fn(),
+    reset: jest.fn(),
+    screen: jest.fn(),
+    flush: jest.fn().mockResolvedValue(undefined),
+    debug: jest.fn(),
+  };
+
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => mockPostHog),
+    PostHog: jest.fn().mockImplementation(() => mockPostHog),
+    usePostHog: () => mockPostHog,
+    PostHogProvider: ({ children }: any) => React.createElement(React.Fragment, null, children),
+  };
+});
+
+// Mock @sentry/react-native
+jest.mock("@sentry/react-native", () => {
+  return {
+    init: jest.fn(),
+    wrap: jest.fn((component: any) => component),
+    captureException: jest.fn(),
+    captureMessage: jest.fn(),
+    addBreadcrumb: jest.fn(),
+    setUser: jest.fn(),
   };
 });

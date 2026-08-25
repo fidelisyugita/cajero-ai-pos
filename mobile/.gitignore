@@ -45,6 +45,7 @@ app-example
 *.orig.*
 
 # Environment & Secrets
+.npmrc
 .env
 .env*.local
 .env.development

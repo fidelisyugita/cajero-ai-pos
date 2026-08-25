@@ -291,4 +291,10 @@ export default {
   select_option: "Pilih Opsi",
   option: "Opsi",
   ingredient: "Bahan Baku",
+
+  // POS Error Boundary
+  pos_error_title: "Kendala Sistem Kasir",
+  pos_error_description:
+    "Terjadi kendala teknis pada tampilan kasir. Data transaksi dan keranjang belanja Anda tetap aman.",
+  pos_error_recover_button: "Pulihkan Layar Kasir",
 };
