@@ -239,14 +239,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-string-parser@npm:^7.27.1, @babel/helper-string-parser@npm:^7.29.7":
+"@babel/helper-string-parser@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/helper-string-parser@npm:7.29.7"
   checksum: 10c0/194bc0f1716e396d5ffde56ad6119745fb9557662c98611590e5e454906783a4ccb21ce93056b8eb69a4909044834e45d96e50ac695bbe9e3221648fe033c06c
   languageName: node
   linkType: hard
 
-"@babel/helper-validator-identifier@npm:^7.25.9, @babel/helper-validator-identifier@npm:^7.28.5, @babel/helper-validator-identifier@npm:^7.29.7":
+"@babel/helper-validator-identifier@npm:^7.25.9, @babel/helper-validator-identifier@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/helper-validator-identifier@npm:7.29.7"
   checksum: 10c0/4795354e7ae0dcafa72de1cd04ec51252dc1498517170beaf019e03effc5b7bf13c6b21a3949a77e07b8125be7f106ed1131350d8ebd4566ae874094a726d62b
@@ -1080,16 +1080,6 @@ __metadata:
     "@babel/types": "npm:^7.29.8"
     debug: "npm:^4.3.1"
   checksum: 10c0/87a28989c434add26d787776ac6d30f749b89cb030f2a605c89f671a516a6fa165ac0476f07e2b69feed70128b2734cae1cbbf41dfe95ccf22081bd8f8b91923
-  languageName: node
-  linkType: hard
-
-"@babel/types@npm:7.29.0":
-  version: 7.29.0
-  resolution: "@babel/types@npm:7.29.0"
-  dependencies:
-    "@babel/helper-string-parser": "npm:^7.27.1"
-    "@babel/helper-validator-identifier": "npm:^7.28.5"
-  checksum: 10c0/23cc3466e83bcbfab8b9bd0edaafdb5d4efdb88b82b3be6728bbade5ba2f0996f84f63b1c5f7a8c0d67efded28300898a5f930b171bb40b311bca2029c4e9b4f
   languageName: node
   linkType: hard
 
@@ -4639,17 +4629,16 @@ __metadata:
     react-native-keyboard-controller: "npm:^1.18.5"
     react-native-mask-text: "npm:^0.15.0"
     react-native-mmkv: "npm:^3.3.0"
-    react-native-nitro-modules: "npm:^0.27.2"
-    react-native-reanimated: "npm:^4.0.2"
+    react-native-nitro-modules: "npm:0.26.4"
+    react-native-reanimated: "npm:3.17.5"
     react-native-safe-area-context: "npm:5.4.0"
     react-native-screens: "npm:~4.11.1"
     react-native-svg: "npm:15.11.2"
     react-native-svg-transformer: "npm:^1.5.1"
     react-native-ui-datepicker: "npm:^3.1.2"
-    react-native-unistyles: "npm:^3.0.7"
+    react-native-unistyles: "npm:3.0.7"
     react-native-web: "npm:~0.20.0"
     react-native-webview: "npm:13.13.5"
-    react-native-worklets: "npm:^0.4.1"
     react-test-renderer: "npm:^19.2.8"
     reactotron-react-native: "npm:^5.1.14"
     sql.js: "npm:^1.13.0"
@@ -9626,7 +9615,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-is-edge-to-edge@npm:^1.1.6, react-native-is-edge-to-edge@npm:^1.1.7, react-native-is-edge-to-edge@npm:^1.2.1, react-native-is-edge-to-edge@npm:^1.3.1":
+"react-native-is-edge-to-edge@npm:1.1.7":
+  version: 1.1.7
+  resolution: "react-native-is-edge-to-edge@npm:1.1.7"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/b7a37437f439b1e27a4d980de01994aa71b9091dc3ed00c21172d5505fb11978cd5ed3a43f97c89d502a3a08cf26e5cea6435b8d6e93d3557a92dd43563f7021
+  languageName: node
+  linkType: hard
+
+"react-native-is-edge-to-edge@npm:^1.1.6, react-native-is-edge-to-edge@npm:^1.1.7, react-native-is-edge-to-edge@npm:^1.2.1":
   version: 1.3.1
   resolution: "react-native-is-edge-to-edge@npm:1.3.1"
   peerDependencies:
@@ -9671,27 +9670,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-modules@npm:^0.27.2":
-  version: 0.27.6
-  resolution: "react-native-nitro-modules@npm:0.27.6"
+"react-native-nitro-modules@npm:0.26.4":
+  version: 0.26.4
+  resolution: "react-native-nitro-modules@npm:0.26.4"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/37d889927e909afddd78399ce3d5ed84820e7caddcd79eb5aaf6bb31c79402c549bffd57dc0cfe3f1a6f56436ac709d068d8b13a5f9ac2875175e108da99a718
+  checksum: 10c0/40ef98a4ead41bc7753120c76c59c77f6d6695f0b4e97223e9de77fe0ab9c74849ae848a9ae58c2b6de8c1ec4f6fe6f02dd27f3aa320b667ea5f73e215961d85
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^4.0.2":
-  version: 4.6.0
-  resolution: "react-native-reanimated@npm:4.6.0"
+"react-native-reanimated@npm:3.17.5":
+  version: 3.17.5
+  resolution: "react-native-reanimated@npm:3.17.5"
   dependencies:
-    react-native-is-edge-to-edge: "npm:^1.3.1"
-    semver: "npm:^7.7.3"
+    "@babel/plugin-transform-arrow-functions": "npm:^7.0.0-0"
+    "@babel/plugin-transform-class-properties": "npm:^7.0.0-0"
+    "@babel/plugin-transform-classes": "npm:^7.0.0-0"
+    "@babel/plugin-transform-nullish-coalescing-operator": "npm:^7.0.0-0"
+    "@babel/plugin-transform-optional-chaining": "npm:^7.0.0-0"
+    "@babel/plugin-transform-shorthand-properties": "npm:^7.0.0-0"
+    "@babel/plugin-transform-template-literals": "npm:^7.0.0-0"
+    "@babel/plugin-transform-unicode-regex": "npm:^7.0.0-0"
+    "@babel/preset-typescript": "npm:^7.16.7"
+    convert-source-map: "npm:^2.0.0"
+    invariant: "npm:^2.2.4"
+    react-native-is-edge-to-edge: "npm:1.1.7"
   peerDependencies:
+    "@babel/core": ^7.0.0-0
     react: "*"
-    react-native: 0.83 - 0.87
-    react-native-worklets: 0.12.x
-  checksum: 10c0/947c9038b9c876a5e77364afd4b256327e05317537022b283aa76dc35af20b5cb4786989117fd1c3926c583595165703903e91ab3c204f90fdb6296022eff614
+    react-native: "*"
+  checksum: 10c0/22788541546cf3e818f0ad9fc9fb1cb53fd7b398d5f49078cd6adf8064957663d97de4e60de9e7894a359d2379685a9dd5d69183c3e13b5e4e78f2d49333921a
   languageName: node
   linkType: hard
 
@@ -9764,11 +9773,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-unistyles@npm:^3.0.7":
-  version: 3.3.0
-  resolution: "react-native-unistyles@npm:3.3.0"
-  dependencies:
-    "@babel/types": "npm:7.29.0"
+"react-native-unistyles@npm:3.0.7":
+  version: 3.0.7
+  resolution: "react-native-unistyles@npm:3.0.7"
   peerDependencies:
     "@react-native/normalize-colors": "*"
     react: "*"
@@ -9777,11 +9784,9 @@ __metadata:
     react-native-nitro-modules: "*"
     react-native-reanimated: "*"
   peerDependenciesMeta:
-    react-native-edge-to-edge:
-      optional: true
     react-native-reanimated:
       optional: true
-  checksum: 10c0/228582bd2833089982ce83044c22c6b61cf53c3b126465761df7087eb11594d518fa075a5d79f65aefbca88ff11d35caf87f316766eeb1ea249082e3f6a8742e
+  checksum: 10c0/a382cfbba855c8323dc411b3e950cc1bf3b308fafe98294b54a36cfe102793d6ebb4287652c98bdba993af347ca50754fa0e20345497740af2086f1846a47815
   languageName: node
   linkType: hard
 
@@ -9814,28 +9819,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/187441eac5a747acb58ae388b07611fcb13c6c8c801b7e3fc5175ea46e20cbc28db38ce777459fa4f405a3b4703e3011cd04c9218ac4a088a8a06031a8a2629c
-  languageName: node
-  linkType: hard
-
-"react-native-worklets@npm:^0.4.1":
-  version: 0.4.2
-  resolution: "react-native-worklets@npm:0.4.2"
-  dependencies:
-    "@babel/plugin-transform-arrow-functions": "npm:^7.0.0-0"
-    "@babel/plugin-transform-class-properties": "npm:^7.0.0-0"
-    "@babel/plugin-transform-classes": "npm:^7.0.0-0"
-    "@babel/plugin-transform-nullish-coalescing-operator": "npm:^7.0.0-0"
-    "@babel/plugin-transform-optional-chaining": "npm:^7.0.0-0"
-    "@babel/plugin-transform-shorthand-properties": "npm:^7.0.0-0"
-    "@babel/plugin-transform-template-literals": "npm:^7.0.0-0"
-    "@babel/plugin-transform-unicode-regex": "npm:^7.0.0-0"
-    "@babel/preset-typescript": "npm:^7.16.7"
-    convert-source-map: "npm:^2.0.0"
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/23965d7df3e5532f5eb339bfef2e35cd5a3d0c5d6e262485bee6680707b3bff74ca1803d06bb77762636443f3597a4788ac708488b53976740caab2af2998460
   languageName: node
   linkType: hard
 
@@ -10255,7 +10238,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.1.3, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.3":
+"semver@npm:^7.1.3, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0":
   version: 7.8.5
   resolution: "semver@npm:7.8.5"
   bin:

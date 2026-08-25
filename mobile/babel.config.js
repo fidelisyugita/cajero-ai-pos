@@ -10,7 +10,7 @@ module.exports = (api) => {
 		plugins: [
 			["react-native-unistyles/plugin", unistylesPluginOptions],
 			["inline-import", { extensions: [".sql"] }],
-			"react-native-worklets/plugin",
+			"react-native-reanimated/plugin",
 		],
 		presets: ["babel-preset-expo"],
 	};
