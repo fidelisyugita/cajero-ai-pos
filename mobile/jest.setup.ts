@@ -140,35 +140,41 @@ jest.mock("expo-router", () => ({
 
 // Mock react-native-mmkv
 jest.mock("react-native-mmkv", () => {
+  const createMockStorage = () => {
+    const storage = new Map<string, any>();
+    return {
+      set: jest.fn((key: string, value: any) => {
+        storage.set(key, value);
+      }),
+      getString: jest.fn((key: string) => {
+        const val = storage.get(key);
+        return typeof val === "string" ? val : undefined;
+      }),
+      getNumber: jest.fn((key: string) => {
+        const val = storage.get(key);
+        return typeof val === "number" ? val : undefined;
+      }),
+      getBoolean: jest.fn((key: string) => {
+        const val = storage.get(key);
+        return typeof val === "boolean" ? val : undefined;
+      }),
+      remove: jest.fn((key: string) => {
+        return storage.delete(key);
+      }),
+      delete: jest.fn((key: string) => {
+        return storage.delete(key);
+      }),
+      clearAll: jest.fn(() => {
+        storage.clear();
+      }),
+      contains: jest.fn((key: string) => storage.has(key)),
+      getAllKeys: jest.fn(() => Array.from(storage.keys())),
+    };
+  };
+
   return {
-    MMKV: jest.fn().mockImplementation(() => {
-      const storage = new Map<string, any>();
-      return {
-        set: jest.fn((key: string, value: any) => {
-          storage.set(key, value);
-        }),
-        getString: jest.fn((key: string) => {
-          const val = storage.get(key);
-          return typeof val === "string" ? val : undefined;
-        }),
-        getNumber: jest.fn((key: string) => {
-          const val = storage.get(key);
-          return typeof val === "number" ? val : undefined;
-        }),
-        getBoolean: jest.fn((key: string) => {
-          const val = storage.get(key);
-          return typeof val === "boolean" ? val : undefined;
-        }),
-        delete: jest.fn((key: string) => {
-          storage.delete(key);
-        }),
-        clearAll: jest.fn(() => {
-          storage.clear();
-        }),
-        contains: jest.fn((key: string) => storage.has(key)),
-        getAllKeys: jest.fn(() => Array.from(storage.keys())),
-      };
-    }),
+    createMMKV: jest.fn().mockImplementation(createMockStorage),
+    MMKV: jest.fn().mockImplementation(createMockStorage),
   };
 });
 
