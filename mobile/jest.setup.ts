@@ -119,6 +119,9 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
   useLocalSearchParams: () => ({}),
   useSegments: () => [],
+  Stack: {
+    Screen: () => null,
+  },
 }));
 
 // Mock react-native-mmkv
