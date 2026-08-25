@@ -56,6 +56,14 @@ unistyles.withUnistyles = (Component: any, mapper: any) => {
 // Mock NativeEventEmitter
 jest.mock("react-native/Libraries/EventEmitter/NativeEventEmitter");
 
+// Ensure Keyboard listener returns a subscription object with remove()
+const { Keyboard } = require("react-native");
+if (Keyboard) {
+  Keyboard.addListener = jest.fn(() => ({
+    remove: jest.fn(),
+  }));
+}
+
 // Mock Reanimated
 jest.mock("react-native-reanimated", () => {
   const React = require("react");
@@ -250,4 +258,3 @@ jest.mock("@shopify/flash-list", () => {
     default: MockFlashList,
   };
 });
-
