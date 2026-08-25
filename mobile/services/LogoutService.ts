@@ -1,7 +1,7 @@
 import { db, expoDb } from "@/db/drizzle";
 import { clearAllStorage } from "@/lib/Storage";
 import { useAuthStore } from "@/store/useAuthStore";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { DevSettings } from "react-native";
 import { router } from "expo-router";
 import Logger from "./logger";

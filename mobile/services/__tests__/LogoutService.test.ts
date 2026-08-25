@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { DevSettings } from "react-native";
 import { expoDb } from "@/db/drizzle";
@@ -13,7 +13,7 @@ jest.mock("@/db/drizzle", () => ({
   },
 }));
 
-jest.mock("expo-file-system", () => ({
+jest.mock("expo-file-system/legacy", () => ({
   documentDirectory: "file:///mock/documents/",
   deleteAsync: jest.fn().mockResolvedValue(undefined),
 }));
