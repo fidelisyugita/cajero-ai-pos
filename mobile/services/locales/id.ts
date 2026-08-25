@@ -279,6 +279,7 @@ export default {
   required: "Wajib",
   optional: "Opsional",
   edit_variant: "Ubah Varian",
+  edit_option: "Ubah Opsi",
   add_variant: "Tambah Varian",
   variant_details: "Detail Varian",
   variant_name: "Nama Varian",

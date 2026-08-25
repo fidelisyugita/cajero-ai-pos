@@ -279,6 +279,7 @@ export default {
   required: "Required",
   optional: "Optional",
   edit_variant: "Edit Variant",
+  edit_option: "Edit Option",
   add_variant: "Add Variant",
   variant_details: "Variant Details",
   variant_name: "Variant Name",
