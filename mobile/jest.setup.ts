@@ -117,7 +117,7 @@ export const mockRouter = {
 jest.mock("expo-router", () => ({
   router: mockRouter,
   useRouter: () => mockRouter,
-  useLocalSearchParams: () => ({}),
+  useLocalSearchParams: jest.fn(() => ({})),
   useSegments: () => [],
   Stack: {
     Screen: () => null,
@@ -155,5 +155,43 @@ jest.mock("react-native-mmkv", () => {
         getAllKeys: jest.fn(() => Array.from(storage.keys())),
       };
     }),
+  };
+});
+
+jest.mock("@/services/endpoints/references", () => ({
+  getTransactionTypes: jest.fn().mockResolvedValue([]),
+  getPaymentMethods: jest.fn().mockResolvedValue([]),
+  getTransactionStatuses: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock("expo-sqlite", () => ({
+  openDatabaseSync: jest.fn(() => ({
+    execSync: jest.fn(),
+    runSync: jest.fn(),
+    closeSync: jest.fn(),
+  })),
+}));
+
+jest.mock("drizzle-orm/expo-sqlite", () => ({
+  drizzle: jest.fn(() => ({
+    $client: {
+      close: jest.fn(),
+    },
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+  })),
+}));
+
+jest.mock("react-native-safe-area-context", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+  const insets = { top: 0, left: 0, right: 0, bottom: 0 };
+  return {
+    SafeAreaProvider: ({ children }: any) => React.createElement(View, null, children),
+    SafeAreaView: ({ children, ...props }: any) => React.createElement(View, props, children),
+    useSafeAreaInsets: () => insets,
+    useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
   };
 });
