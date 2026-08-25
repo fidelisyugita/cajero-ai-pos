@@ -38,7 +38,7 @@ const ScreenModal = ({ modalStyle, children }: ScreenModalProps) => {
       style={$.keyboardAvoidingView}
     >
       <View style={$.container}>
-        <Pressable style={$.backdrop} onPress={() => router.dismiss()} />
+        <Pressable style={$.backdrop} testID="modal-backdrop" onPress={() => router.dismiss()} />
         <View style={[$.modal, modalStyle]}>{children}</View>
       </View>
     </KeyboardAvoidingView>
@@ -56,6 +56,7 @@ const Header = ({ title, hideCloseButton }: ScreenModalHeaderProps) => {
           Icon={IcX}
           onPress={() => router.dismiss()}
           size="sm"
+          testID="modal-close-button"
           variant="neutral-no-stroke"
         />
       )}

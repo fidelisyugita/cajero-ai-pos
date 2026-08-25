@@ -7,16 +7,20 @@ interface SwitchProps {
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
+  testID?: string;
 }
 
-const Switch = ({ value, onValueChange, disabled }: SwitchProps) => {
+const Switch = ({ value, onValueChange, disabled, testID }: SwitchProps) => {
   $.useVariants({ active: value, disabled });
   return (
     <TouchableOpacity
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value, disabled }}
       activeOpacity={0.8}
       onPress={() => onValueChange(!value)}
       style={$.track}
       disabled={disabled}
+      testID={testID}
     >
       <Animated.View style={$.thumb(value)} />
     </TouchableOpacity>

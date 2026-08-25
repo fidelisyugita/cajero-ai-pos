@@ -17,6 +17,17 @@
     "lineWidth": 100
   },
   "javascript": {
+    "globals": [
+      "describe",
+      "it",
+      "test",
+      "expect",
+      "jest",
+      "beforeEach",
+      "afterEach",
+      "beforeAll",
+      "afterAll"
+    ],
     "formatter": {
       "quoteStyle": "double",
       "jsxQuoteStyle": "double",
@@ -81,5 +92,23 @@
         "recommended": true
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "**/__tests__/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "jest.setup.ts",
+        "jest.config.js"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
 }

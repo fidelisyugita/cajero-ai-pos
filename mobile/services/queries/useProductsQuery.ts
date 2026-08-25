@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { LocalProductService } from "../LocalProductService";
-import { GetProductsParams, Product } from "../types/Product";
+import type { GetProductsParams, Product } from "../types/Product";
 
-export const useProductsQuery = (params: GetProductsParams) => {
+export const useProductsQuery = (params: Partial<GetProductsParams> = {}) => {
 	return useQuery({
 		queryKey: ["products", params],
 		queryFn: async () => {

@@ -34,6 +34,7 @@ const ScreenHeader = ({ title, onBack, style, rightAction, noBack }: ScreenHeade
             Icon={IcArrowLeft}
             onPress={handleBack}
             size="md"
+            testID="header-back-button"
             variant="neutral-no-stroke"
           />
         )}

@@ -14,12 +14,17 @@
 		"web": "expo start --web",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
+		"lint:test": "biome check app/**/__tests__/** components/**/__tests__/** db/**/__tests__/** hooks/**/__tests__/** lib/**/__tests__/** services/**/__tests__/** store/**/__tests__/** utils/**/__tests__/** jest.setup.ts jest.config.js",
+		"lint:test:fix": "biome check --write app/**/__tests__/** components/**/__tests__/** db/**/__tests__/** hooks/**/__tests__/** lib/**/__tests__/** services/**/__tests__/** store/**/__tests__/** utils/**/__tests__/** jest.setup.ts jest.config.js",
 		"format": "biome format . --write",
 		"format:check": "biome format .",
 		"build:apk": "cd android && ./gradlew assembleRelease",
 		"build:apk:clean": "cd android && ./gradlew clean assembleRelease",
 		"bundle:android": "cd android && ./gradlew bundleRelease",
-		"maestro:sign-in": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in.yaml --env TEST_EMAIL=test@user.com --env TEST_PASSWORD=testPassword123"
+		"maestro:sign-in": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in.yaml --env TEST_EMAIL=test@user.com --env TEST_PASSWORD=testPassword123",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:coverage": "jest --coverage"
 	},
 	"dependencies": {
 		"@config-plugins/react-native-ble-plx": "^7.0.0",
@@ -90,12 +95,18 @@
 	"devDependencies": {
 		"@babel/core": "^7.25.2",
 		"@biomejs/biome": "^2.1.4",
+		"@testing-library/react-native": "^14.0.1",
 		"@types/events": "^3",
+		"@types/jest": "~29.5.12",
 		"@types/react": "~19.0.10",
 		"@types/sql.js": "^1.4.9",
 		"drizzle-kit": "^0.31.4",
+		"jest": "~29.7.0",
+		"jest-expo": "~53.0.14",
 		"react-native-svg-transformer": "^1.5.1",
+		"react-test-renderer": "^19.2.8",
 		"reactotron-react-native": "^5.1.14",
+		"test-renderer": "^1.0.0",
 		"typescript": "~5.8.3"
 	},
 	"private": true,

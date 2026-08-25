@@ -12,14 +12,14 @@ const scale = (size: number): number => (shortDimension / GUIDELINE_BASE_WIDTH) 
 const verticalScale = (size: number): number => (longDimension / GUIDELINE_BASE_HEIGHT) * size;
 
 const moderateScale = (size: number, factor: number = DEFAULT_MODERATE_FACTOR): number =>
-	size + (scale(size) - size) * factor;
+  size + (scale(size) - size) * factor;
 
 const moderateVerticalScale = (size: number, factor: number = DEFAULT_MODERATE_FACTOR): number =>
-	size + (verticalScale(size) - size) * factor;
+  size + (verticalScale(size) - size) * factor;
 
 const s = scale;
 const vs = verticalScale;
 const ms = moderateScale;
 const mvs = moderateVerticalScale;
 
-export { scale, verticalScale, moderateScale, moderateVerticalScale, s, vs, ms, mvs };
+export { moderateScale, moderateVerticalScale, ms, mvs, s, scale, verticalScale, vs };

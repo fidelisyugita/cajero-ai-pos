@@ -1,13 +1,22 @@
 import { KeyboardAvoidingView, Platform, ScrollView, type ScrollViewProps } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-interface KeyboardFormProps extends ScrollViewProps {}
+interface KeyboardFormProps extends ScrollViewProps {
+  testID?: string;
+}
 
-const KeyboardForm = ({ children, style, contentContainerStyle, ...rest }: KeyboardFormProps) => {
+const KeyboardForm = ({
+  children,
+  style,
+  contentContainerStyle,
+  testID = "keyboard-form-container",
+  ...rest
+}: KeyboardFormProps) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[$.container, style]}
+      testID={testID}
     >
       <ScrollView
         automaticallyAdjustKeyboardInsets

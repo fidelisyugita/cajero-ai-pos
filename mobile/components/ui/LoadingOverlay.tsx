@@ -6,10 +6,16 @@ const LoadingOverlay = () => {
   const isLoading = useLoadingStore((state) => state.isLoading);
 
   return (
-    <Modal animationType="fade" statusBarTranslucent transparent visible={isLoading}>
+    <Modal
+      animationType="fade"
+      statusBarTranslucent
+      testID="loading-overlay-modal"
+      transparent
+      visible={isLoading}
+    >
       <View style={$.overlay}>
         <View style={$.container}>
-          <ActivityIndicator color="white" size="large" />
+          <ActivityIndicator color="white" size="large" testID="loading-indicator" />
         </View>
       </View>
     </Modal>

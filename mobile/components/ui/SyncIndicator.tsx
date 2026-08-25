@@ -9,6 +9,7 @@ const SyncIndicator = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
     if (isSyncing) {
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -17,7 +18,7 @@ const SyncIndicator = () => {
       }).start();
     } else {
       // Delay fade out slightly
-      setTimeout(() => {
+      timer = setTimeout(() => {
         Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 300,
@@ -25,13 +26,21 @@ const SyncIndicator = () => {
         }).start();
       }, 1000);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isSyncing, fadeAnim]);
 
   return (
-    <Animated.View style={[$.container, { opacity: fadeAnim }]} pointerEvents="none">
+    <Animated.View
+      style={[$.container, { opacity: fadeAnim }]}
+      pointerEvents="none"
+      testID="sync-indicator"
+    >
       <View style={$.content}>
-        <ActivityIndicator size="small" color="white" />
-        <Typography variant="bodySm" color="white">
+        <ActivityIndicator color="white" size="small" testID="sync-spinner" />
+        <Typography color="white" variant="bodySm">
           Syncing...
         </Typography>
       </View>
