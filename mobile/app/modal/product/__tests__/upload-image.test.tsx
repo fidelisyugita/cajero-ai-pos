@@ -44,9 +44,7 @@ describe("UploadImageModal integration", () => {
       fireEvent.press(chooseBtn);
     });
 
-    expect(useImageSelectionStore.getState().imageUri).toBe(
-      "file:///mock/image.png",
-    );
+    expect(useImageSelectionStore.getState().imageUri).toBe("file:///mock/image.png");
 
     const saveBtn = screen.getByText("Save");
     await act(async () => {
