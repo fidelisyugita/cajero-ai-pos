@@ -122,6 +122,11 @@ jest.mock("expo-router", () => ({
   Stack: {
     Screen: () => null,
   },
+  Redirect: jest.fn((_props: { href: string }) => null),
+  SplashScreen: {
+    hideAsync: jest.fn().mockResolvedValue(true),
+    preventAutoHideAsync: jest.fn().mockResolvedValue(true),
+  },
 }));
 
 // Mock react-native-mmkv
