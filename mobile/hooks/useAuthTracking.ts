@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { identifyAnalyticsUser, resetAnalyticsUser } from "@/lib/posthog";
+import { clearSentryUser, setSentryUser } from "@/lib/sentry";
 import { useAuthStore } from "@/store/useAuthStore";
 
 /**
- * Synchronizes PostHog user identification lifecycle with the global authentication store.
+ * Synchronizes PostHog and Sentry user identification lifecycle with the global authentication store.
  */
 export const useAuthTracking = (): void => {
   const { isLoggedIn, user } = useAuthStore();
@@ -17,8 +18,16 @@ export const useAuthTracking = (): void => {
         roleCode: user.roleCode,
         phone: user.phone,
       });
+
+      setSentryUser({
+        id: user.id,
+        email: user.email,
+        roleCode: user.roleCode,
+        storeId: user.storeId,
+      });
     } else if (!isLoggedIn) {
       resetAnalyticsUser();
+      clearSentryUser();
     }
   }, [isLoggedIn, user]);
 };

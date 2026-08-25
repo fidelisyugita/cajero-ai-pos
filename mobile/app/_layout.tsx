@@ -6,11 +6,15 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AnalyticsProvider } from "@/components/providers/AnalyticsProvider";
+import { PosErrorBoundary } from "@/components/ui/PosErrorBoundary";
 import { DatabaseProvider } from "@/db/provider";
 import { queryClient } from "@/lib/ReactQuery";
+import { initSentry, wrapRootComponent } from "@/lib/sentry";
 import { useSync } from "@/services/hooks/useSync";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
+
+initSentry();
 
 if (__DEV__) {
   require("../lib/Reactotron");
@@ -122,8 +126,10 @@ const RootLayout = () => {
       <DatabaseProvider>
         <QueryClientProvider client={queryClient}>
           <AnalyticsProvider>
-            <StatusBar style="auto" />
-            <InitialLayout />
+            <PosErrorBoundary>
+              <StatusBar style="auto" />
+              <InitialLayout />
+            </PosErrorBoundary>
           </AnalyticsProvider>
         </QueryClientProvider>
       </DatabaseProvider>
@@ -132,4 +138,4 @@ const RootLayout = () => {
   );
 };
 
-export default RootLayout;
+export default wrapRootComponent(RootLayout);

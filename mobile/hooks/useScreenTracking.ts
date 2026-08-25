@@ -1,9 +1,10 @@
 import { usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
 import { trackAnalyticsScreen } from "@/lib/posthog";
+import { addSentryBreadcrumb } from "@/lib/sentry";
 
 /**
- * Automatically captures screen transitions in Expo Router navigation.
+ * Automatically captures screen transitions in Expo Router navigation for PostHog and Sentry breadcrumbs.
  */
 export const useScreenTracking = (): void => {
   const pathname = usePathname();
@@ -24,6 +25,13 @@ export const useScreenTracking = (): void => {
     trackAnalyticsScreen(screenName, {
       screenName,
       path: pathname,
+    });
+
+    addSentryBreadcrumb({
+      category: "navigation",
+      message: `Navigated to ${screenName}`,
+      level: "info",
+      data: { path: pathname, screenName },
     });
   }, [pathname]);
 };

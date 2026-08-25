@@ -222,3 +222,15 @@ jest.mock("posthog-react-native", () => {
     PostHogProvider: ({ children }: any) => React.createElement(React.Fragment, null, children),
   };
 });
+
+// Mock @sentry/react-native
+jest.mock("@sentry/react-native", () => {
+  return {
+    init: jest.fn(),
+    wrap: jest.fn((component: any) => component),
+    captureException: jest.fn(),
+    captureMessage: jest.fn(),
+    addBreadcrumb: jest.fn(),
+    setUser: jest.fn(),
+  };
+});

@@ -7,6 +7,7 @@ import type {
   ScreenViewProperties,
   UserTraits,
 } from "@/types/analytics";
+import { sanitizeTelemetry } from "./sanitizeTelemetry";
 
 const posthogStorage = new MMKV({ id: "cajero-posthog" });
 
@@ -58,7 +59,9 @@ export const captureAnalyticsEvent = <E extends AnalyticsEventName>(
   if (!isPostHogEnabled || !posthogClient) return;
 
   try {
-    posthogClient.capture(event, properties as Record<string, any>);
+    const sanitizedProperties = sanitizeTelemetry(properties);
+    // biome-ignore lint/suspicious/noExplicitAny: PostHog SDK capture properties definition
+    posthogClient.capture(event, sanitizedProperties as Record<string, any>);
   } catch {
     // Suppress analytics dispatch errors to avoid interrupting cashier flows
   }
@@ -71,7 +74,9 @@ export const identifyAnalyticsUser = (distinctId: string, traits?: UserTraits): 
   if (!isPostHogEnabled || !posthogClient) return;
 
   try {
-    posthogClient.identify(distinctId, traits as Record<string, any>);
+    const sanitizedTraits = traits ? sanitizeTelemetry(traits) : undefined;
+    // biome-ignore lint/suspicious/noExplicitAny: PostHog SDK identify traits definition
+    posthogClient.identify(distinctId, sanitizedTraits as Record<string, any>);
   } catch {
     // Fail silently
   }
@@ -100,7 +105,9 @@ export const trackAnalyticsScreen = (
   if (!isPostHogEnabled || !posthogClient) return;
 
   try {
-    posthogClient.screen(screenName, properties as Record<string, any>);
+    const sanitizedProperties = properties ? sanitizeTelemetry(properties) : undefined;
+    // biome-ignore lint/suspicious/noExplicitAny: PostHog SDK screen properties definition
+    posthogClient.screen(screenName, sanitizedProperties as Record<string, any>);
   } catch {
     // Fail silently
   }

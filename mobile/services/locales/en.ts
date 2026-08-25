@@ -291,4 +291,10 @@ export default {
   select_option: "Select Option",
   option: "Option",
   ingredient: "Ingredient",
+
+  // POS Error Boundary
+  pos_error_title: "POS System Alert",
+  pos_error_description:
+    "An unexpected issue occurred on the cashier display. Your active transaction and cart data remain safe.",
+  pos_error_recover_button: "Recover POS Screen",
 };
