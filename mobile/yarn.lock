@@ -2267,7 +2267,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hookform/resolvers@npm:^5.2.1":
+"@hookform/resolvers@npm:^5.9.1":
   version: 5.9.1
   resolution: "@hookform/resolvers@npm:5.9.1"
   dependencies:
@@ -3666,21 +3666,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.102.2":
-  version: 5.102.2
-  resolution: "@tanstack/query-core@npm:5.102.2"
-  checksum: 10c0/aa77d58d0f47fe1d660839d138e859cdeb814bea05f6757d5ace0dcf7da573a937899f4ff205e95073f567b10e071c1dae4bfc1c0b82325069bdf0cd867b4808
+"@tanstack/query-core@npm:5.102.3":
+  version: 5.102.3
+  resolution: "@tanstack/query-core@npm:5.102.3"
+  checksum: 10c0/9d61088808decfc62f1aaacfa4fd29889d8a70bcfda7061790f0fd263388f65d85b1df80d3656ee5f8cd1339432034cd8a488d1efa995a2bfffa07acbce4d508
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^5.84.2":
-  version: 5.102.2
-  resolution: "@tanstack/react-query@npm:5.102.2"
+"@tanstack/react-query@npm:^5.102.3":
+  version: 5.102.3
+  resolution: "@tanstack/react-query@npm:5.102.3"
   dependencies:
-    "@tanstack/query-core": "npm:5.102.2"
+    "@tanstack/query-core": "npm:5.102.3"
   peerDependencies:
     react: ^18 || ^19
-  checksum: 10c0/3f1c4044bef914860f04feea8461ec322ebe6731c725b444f18f1058dd47e5e87dc70c13137490419eca1c4cc9bb3e301c27cac5b06cd06f975c1b721340b0dc
+  checksum: 10c0/d5f3b1572085a76955044435a0d7733a66c1a1a5363a8dbe4a14a1ccb42d29a679cc60cda35a603fe6464c981f44bc48c26a47891b9557ea3ca13b801cba1f66
   languageName: node
   linkType: hard
 
@@ -4176,7 +4176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.11.0":
+"axios@npm:^1.19.0":
   version: 1.19.0
   resolution: "axios@npm:1.19.0"
   dependencies:
@@ -4401,7 +4401,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bcryptjs@npm:^3.0.2":
+"bcryptjs@npm:^3.0.3":
   version: 3.0.3
   resolution: "bcryptjs@npm:3.0.3"
   bin:
@@ -4571,26 +4571,26 @@ __metadata:
     "@config-plugins/react-native-ble-plx": "npm:^7.0.0"
     "@expo-google-fonts/dm-sans": "npm:^0.4.1"
     "@expo/vector-icons": "npm:^14.1.0"
-    "@hookform/resolvers": "npm:^5.2.1"
+    "@hookform/resolvers": "npm:^5.9.1"
     "@react-native-community/datetimepicker": "npm:8.4.1"
     "@react-navigation/bottom-tabs": "npm:^7.3.10"
     "@react-navigation/elements": "npm:^2.3.8"
     "@react-navigation/native": "npm:^7.1.6"
     "@sentry/react-native": "npm:^8.23.0"
     "@shopify/flash-list": "npm:^2.0.2"
-    "@tanstack/react-query": "npm:^5.84.2"
+    "@tanstack/react-query": "npm:^5.102.3"
     "@testing-library/react-native": "npm:^14.0.1"
     "@types/events": "npm:^3"
     "@types/jest": "npm:~29.5.12"
     "@types/react": "npm:~19.2.18"
     "@types/sql.js": "npm:^1.4.11"
-    axios: "npm:^1.11.0"
+    axios: "npm:^1.19.0"
     babel-plugin-inline-import: "npm:^3.0.0"
-    bcryptjs: "npm:^3.0.2"
+    bcryptjs: "npm:^3.0.3"
     buffer: "npm:^6.0.3"
-    dayjs: "npm:^1.11.18"
-    drizzle-kit: "npm:^0.31.4"
-    drizzle-orm: "npm:^0.44.4"
+    dayjs: "npm:^1.11.23"
+    drizzle-kit: "npm:^0.31.10"
+    drizzle-orm: "npm:^0.45.2"
     drizzle-zod: "npm:^0.8.3"
     esc-pos-encoder: "npm:^3.0.0"
     events: "npm:^3.3.0"
@@ -4621,7 +4621,7 @@ __metadata:
     posthog-react-native: "npm:^4.64.1"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
-    react-hook-form: "npm:^7.62.0"
+    react-hook-form: "npm:^7.86.0"
     react-native: "npm:0.79.5"
     react-native-ble-plx: "npm:^3.5.0"
     react-native-edge-to-edge: "npm:^1.6.2"
@@ -4641,11 +4641,11 @@ __metadata:
     react-native-webview: "npm:13.13.5"
     react-test-renderer: "npm:^19.2.8"
     reactotron-react-native: "npm:^5.1.14"
-    sql.js: "npm:^1.13.0"
+    sql.js: "npm:^1.14.2"
     test-renderer: "npm:^1.2.0"
     typescript: "npm:~5.8.3"
-    zod: "npm:^4.0.17"
-    zustand: "npm:^5.0.7"
+    zod: "npm:^4.4.3"
+    zustand: "npm:^5.0.15"
   languageName: unknown
   linkType: soft
 
@@ -5219,7 +5219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.13, dayjs@npm:^1.11.18":
+"dayjs@npm:^1.11.13, dayjs@npm:^1.11.23":
   version: 1.11.23
   resolution: "dayjs@npm:1.11.23"
   checksum: 10c0/69ab04bf19c676e44ab50cc2fca223d265f3dafd107151ef3b0f3ad74d360c37caa602abe62f87cb25d90bd9f6bee003698af47df5b0dbf10a998b7b5f3bb3f1
@@ -5443,7 +5443,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drizzle-kit@npm:^0.31.4":
+"drizzle-kit@npm:^0.31.10":
   version: 0.31.10
   resolution: "drizzle-kit@npm:0.31.10"
   dependencies:
@@ -5457,9 +5457,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drizzle-orm@npm:^0.44.4":
-  version: 0.44.7
-  resolution: "drizzle-orm@npm:0.44.7"
+"drizzle-orm@npm:^0.45.2":
+  version: 0.45.2
+  resolution: "drizzle-orm@npm:0.45.2"
   peerDependencies:
     "@aws-sdk/client-rds-data": ">=3"
     "@cloudflare/workers-types": ">=4"
@@ -5548,7 +5548,7 @@ __metadata:
       optional: true
     sqlite3:
       optional: true
-  checksum: 10c0/6adfe19179c83be397490c21573433e38ed7eff890bbb1c3b39157ec57d6b7420e9dcfebb8fe0e6ea534b29a53a33b2ec75c77dd2ac6b474b7055965ee7df00d
+  checksum: 10c0/deb4a0230a79b1ff8c61365808bdb06a78e9e32171625f1c61d791dec445fad5cd9bc4ce2e6175b0ff1be7fb913310b2fd07b94a2cbe8027581b7d99469b8060
   languageName: node
   linkType: hard
 
@@ -9541,7 +9541,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:^7.62.0":
+"react-hook-form@npm:^7.86.0":
   version: 7.86.0
   resolution: "react-hook-form@npm:7.86.0"
   peerDependencies:
@@ -10488,7 +10488,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sql.js@npm:^1.13.0":
+"sql.js@npm:^1.14.2":
   version: 1.14.2
   resolution: "sql.js@npm:1.14.2"
   checksum: 10c0/4c217404d85b7396a2c7b6037a9dc96dd05f10c94847bb8c5df70d387ff37702f51551afc97d338ff2c0d504414bb1d3631d48f2a3f33eaa45e862747135d5d5
@@ -11561,14 +11561,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^4.0.17":
+"zod@npm:^4.4.3":
   version: 4.4.3
   resolution: "zod@npm:4.4.3"
   checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
   languageName: node
   linkType: hard
 
-"zustand@npm:^5.0.7":
+"zustand@npm:^5.0.15":
   version: 5.0.15
   resolution: "zustand@npm:5.0.15"
   peerDependencies:
