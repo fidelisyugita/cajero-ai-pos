@@ -1,14 +1,12 @@
 import { Image } from "expo-image";
+import type React from "react";
 import { Text, View, type ViewStyle } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native-unistyles";
 import Logo from "@/assets/images/logo.webp";
-import { t } from "../../services/i18n";
-import { vs } from "../../utils/Scale";
-import KeyboardForm from "../ui/KeyboardForm";
+import KeyboardForm from "@/components/ui/KeyboardForm";
+import { t } from "@/services/i18n";
+import { vs } from "@/utils/Scale";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -31,7 +29,11 @@ interface BalloonProps {
 }
 
 const AuthLayout = ({ style, children }: AuthLayoutProps) => {
-  return <SafeAreaView edges={[]} style={[$.container, style]}>{children}</SafeAreaView>;
+  return (
+    <SafeAreaView edges={[]} style={[$.container, style]}>
+      {children}
+    </SafeAreaView>
+  );
 };
 
 const Intro = ({ position, children }: IntroProps) => {
@@ -99,18 +101,16 @@ const Main = ({ title, children }: MainProps) => {
       </KeyboardForm>
     </View>
   );
-}
+};
 
 const Balloon = ({ size, position }: BalloonProps) => {
-  return (
-    <View style={[$.balloon, { width: size, height: size, ...position }]} />
-  );
+  return <View style={[$.balloon, { width: size, height: size, ...position }]} />;
 };
 
 AuthLayout.Intro = Intro;
 AuthLayout.Main = Main;
 
-const $ = StyleSheet.create((theme, rt) => ({
+const $ = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.neutral[200],
@@ -160,9 +160,7 @@ const $ = StyleSheet.create((theme, rt) => ({
   },
 
   mainContainer: {
-    // paddingTop: rt.insets.top + vs(56),
     flex: 3,
-    // gap: theme.spacing.xxl,
     backgroundColor: theme.colors.neutral[200],
   },
   mainTitle: {
@@ -175,8 +173,7 @@ const $ = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.spacing.xl,
     gap: theme.spacing.xxl,
     justifyContent: "center",
-  }
-
+  },
 }));
 
 export default AuthLayout;

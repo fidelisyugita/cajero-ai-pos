@@ -7,11 +7,11 @@ import { z } from "zod";
 import IcEyeClose from "@/assets/icons/eye-fill-close.svg";
 import IcEyeOpen from "@/assets/icons/eye-fill-open.svg";
 import IcGoogle from "@/assets/icons/google.svg";
-import { t } from "../../services/i18n";
-import { vs } from "../../utils/Scale";
-import Button from "../ui/Button";
-import IconButton from "../ui/IconButton";
-import Input from "../ui/Input";
+import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import Input from "@/components/ui/Input";
+import { t } from "@/services/i18n";
+import { vs } from "@/utils/Scale";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

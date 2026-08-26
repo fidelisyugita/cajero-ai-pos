@@ -1,4 +1,5 @@
 import axios from "axios";
+import Logger from "@/services/logger";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const api = axios.create({
@@ -45,7 +46,7 @@ api.interceptors.response.use(
           originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
           return api(originalRequest);
         } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
+          Logger.error("Token refresh failed:", refreshError);
           useAuthStore.getState().setLoggedIn(false);
         }
       } else {
