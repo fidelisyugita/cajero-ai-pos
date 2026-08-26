@@ -93,6 +93,12 @@ jest.mock("react-native-reanimated", () => {
     useSharedValue: (val: any) => ({ value: val }),
     useAnimatedStyle: (fn: () => any) => fn() || {},
     useAnimatedProps: (fn: () => any) => fn() || {},
+    useAnimatedScrollHandler: (handlers: any) => {
+      if (typeof handlers === "function") return handlers;
+      return (event: any) => {
+        handlers?.onScroll?.(event);
+      };
+    },
     withTiming: (toValue: any) => toValue,
     withSpring: (toValue: any) => toValue,
     withSequence: (...animations: any[]) => animations[animations.length - 1],

@@ -1,50 +1,55 @@
-import { useRef } from "react";
+import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { View } from "react-native";
-import { t } from "@/services/i18n";
-import { useSharedValue } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 import CategoryFilter from "@/components/menu/CategoryFilter";
 import MenuList from "@/components/menu/MenuList";
-import ScreenHeader from "@/components/ui/ScreenHeader";
-import { Stack } from "expo-router";
-
 import MenuSearchBar from "@/components/menu/MenuSearchBar";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { useCollapsibleHeader } from "@/hooks/useCollapsibleHeader";
+import { t } from "@/services/i18n";
+import { useCategoryStore } from "@/store/useMenuCategoryStore";
+import { vs } from "@/utils/Scale";
+
+const HEADER_HEIGHT = vs(80);
 
 const EditListScreen = () => {
-    const scrollY = useSharedValue(0);
-    const scrollRef = useRef<any>(null);
+  const selectedCategory = useCategoryStore((s) => s.selectedCategory);
+  const searchQuery = useCategoryStore((s) => s.searchQuery);
+  const { scrollHandler, headerAnimatedStyle, reset } = useCollapsibleHeader({
+    headerHeight: HEADER_HEIGHT,
+  });
 
-    const onScroll = (event: any) => {
-        scrollY.value = event.nativeEvent.contentOffset.y;
-    };
+  useEffect(() => {
+    if (selectedCategory || searchQuery !== undefined) {
+      reset();
+    }
+  }, [selectedCategory, searchQuery, reset]);
 
-    return (
-        <View style={$.container}>
-            <Stack.Screen 
-                options={{
-                    header: () => (
-                        <ScreenHeader 
-                            rightAction={<MenuSearchBar />} 
-                            title={t("edit_product_category")} 
-                        />
-                    ),
-                    headerShown: true
-                }} 
-            />
-            <CategoryFilter editable style={$.categoryFilter} />
-            <MenuList editable scrollHandler={onScroll} />
-        </View>
-    );
+  return (
+    <View style={$.container}>
+      <Stack.Screen
+        options={{
+          header: () => (
+            <ScreenHeader rightAction={<MenuSearchBar />} title={t("edit_product_category")} />
+          ),
+          headerShown: true,
+        }}
+      />
+      <CategoryFilter editable style={[$.categoryFilter, headerAnimatedStyle]} />
+      <MenuList editable scrollHandler={scrollHandler} />
+    </View>
+  );
 };
 
 const $ = StyleSheet.create((theme) => ({
-    container: {
-        flex: 1,
-        backgroundColor: theme.colors.neutral[200],
-    },
-    categoryFilter: {
-        marginTop: theme.spacing.xl,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.neutral[200],
+  },
+  categoryFilter: {
+    marginTop: theme.spacing.xl,
+  },
 }));
 
 export default EditListScreen;
