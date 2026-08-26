@@ -11,13 +11,13 @@ export const useUpdateVariantStockMutation = () => {
         id,
         type: "VARIANT",
         newStock: stock,
-        reason
+        reason,
       });
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: async (_, _variables) => {
       // For now we just invalidate variants queries
       // If we had a local DB table for variants, we would update it here like in useUpdateProductStockMutation
-      
+
       queryClient.invalidateQueries({ queryKey: ["variants"] });
     },
     onError: (error: any) => {
@@ -26,6 +26,6 @@ export const useUpdateVariantStockMutation = () => {
         Logger.error("Error data:", error.response.data);
         Logger.error("Error status:", error.response.status);
       }
-    }
+    },
   });
 };

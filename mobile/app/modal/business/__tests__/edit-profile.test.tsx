@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import type React from "react";
 import { useUpdateUserMutation } from "@/services/mutations/useUpdateUserMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
 import EditProfileModal from "../edit-profile";

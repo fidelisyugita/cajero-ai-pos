@@ -27,10 +27,6 @@ class PrinterService {
     return this.characteristicUUID;
   }
 
-  constructor() {
-    // Lazy init to avoid NativeEventEmitter error on startup if not needed immediately
-  }
-
   private getManager(): BleManager {
     if (!this.manager) {
       this.manager = new BleManager();
@@ -87,7 +83,7 @@ class PrinterService {
         if (onError) onError(error);
         return;
       }
-      if (device && device.name) {
+      if (device?.name) {
         onDeviceFound(device);
       }
     });

@@ -5,13 +5,13 @@ import { openDatabaseSync } from "expo-sqlite";
 import migrations from "./migrations/migrations";
 
 export const expoDb = openDatabaseSync("cajero.db", {
-	enableChangeListener: true,
+  enableChangeListener: true,
 });
 export const db = drizzle(expoDb);
 
 export const initialize = (): Promise<ExpoSQLiteDatabase> => {
-	return Promise.resolve(db);
+  return Promise.resolve(db);
 };
 export const useMigrationHelper = () => {
-	return useMigrations(db, migrations);
+  return useMigrations(db, migrations);
 };

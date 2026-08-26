@@ -1,18 +1,16 @@
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { StyleSheet } from "react-native-unistyles";
-import Button from "@/components/ui/Button";
-import { formatCurrency } from "@/utils/Format";
-import dayjs from "dayjs";
-
 import { Feather } from "@expo/vector-icons";
+import dayjs from "dayjs";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, ScrollView, Text, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
+import Button from "@/components/ui/Button";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { t } from "@/services/i18n"; // Assuming translations are available or use keys
-import { printerService } from "@/services/PrinterService";
-import { Alert } from "react-native";
-import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
-import { useState } from "react";
 import Logger from "@/services/logger";
+import { printerService } from "@/services/PrinterService";
+import { formatCurrency } from "@/utils/Format";
 
 const ReceiptDetailScreen = () => {
   const params = useLocalSearchParams();
@@ -28,7 +26,7 @@ const ReceiptDetailScreen = () => {
       if (transaction?.transactionProduct) {
         transaction.transactionProduct = transaction.transactionProduct.map((p: any) => {
           let variants = p.selectedVariants;
-          if (typeof variants === 'string') {
+          if (typeof variants === "string") {
             try {
               variants = JSON.parse(variants);
             } catch (e) {
@@ -41,17 +39,21 @@ const ReceiptDetailScreen = () => {
           }
           return {
             ...p,
-            selectedVariants: variants
+            selectedVariants: variants,
           };
         });
       }
 
-      Logger.log('detail transaction: ', JSON.stringify(transaction, null, 2));
-
+      Logger.log("detail transaction: ", JSON.stringify(transaction, null, 2));
     }
   } catch (e) {
     Logger.error("Failed to parse transaction params", e);
   }
+
+  /* Preview State */
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   if (!transaction) {
     return (
@@ -68,19 +70,14 @@ const ReceiptDetailScreen = () => {
     totalPrice,
     totalDiscount,
     totalTax,
-    paymentMethodCode
+    paymentMethodCode,
   } = transaction;
-
-  /* Preview State */
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null);
-  const [isPrinting, setIsPrinting] = useState(false);
 
   return (
     <View style={$.container}>
       <Stack.Screen
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
 
@@ -91,10 +88,14 @@ const ReceiptDetailScreen = () => {
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
-            <Text style={$.dateTitle}>{dayjs.utc(createdAt).local().format("ddd D MMM hh:mm")}</Text>
+            <Text style={$.dateTitle}>
+              {dayjs.utc(createdAt).local().format("ddd D MMM hh:mm")}
+            </Text>
             <Text style={$.subTitle}>Transaction #{transaction.id}</Text>
           </View>
-          <View style={[$.statusBadge, statusCode === "COMPLETED" ? $.statusSuccess : $.statusRefund]}>
+          <View
+            style={[$.statusBadge, statusCode === "COMPLETED" ? $.statusSuccess : $.statusRefund]}
+          >
             <Text style={[$.statusText, statusCode === "COMPLETED" ? $.textSuccess : $.textRefund]}>
               {statusCode}
             </Text>
@@ -103,17 +104,19 @@ const ReceiptDetailScreen = () => {
 
         <View style={$.grid}>
           {/* Order List Card - Full Width */}
-          <View style={[$.card, { width: '100%' }]}>
+          <View style={[$.card, { width: "100%" }]}>
             <View style={$.cardHeader}>
               <Text style={$.cardTitle}>Order List</Text>
             </View>
             <View style={$.cardContent}>
               {transactionProduct?.map((item: any, index: number) => (
                 <View key={index} style={$.orderRow}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
                     <Text style={$.qtyBadge}>{item.quantity}x</Text>
                     <View>
-                      <Text style={$.itemName}>{`${item.productName} (${formatCurrency(item.sellingPrice)})`}</Text>
+                      <Text
+                        style={$.itemName}
+                      >{`${item.productName} (${formatCurrency(item.sellingPrice)})`}</Text>
                       {item.selectedVariants?.map((v: any, i: number) => (
                         <Text key={i} style={$.itemNote}>
                           + {v.groupName}: {v.name} ({formatCurrency(v.price || 0)})
@@ -124,7 +127,12 @@ const ReceiptDetailScreen = () => {
                   </View>
                   <Text style={$.itemPrice}>
                     {formatCurrency(
-                      (item.sellingPrice + (item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * item.quantity
+                      (item.sellingPrice +
+                        (item.selectedVariants?.reduce(
+                          (s: number, v: any) => s + (v.price || 0),
+                          0,
+                        ) || 0)) *
+                        item.quantity,
                     )}
                   </Text>
                 </View>
@@ -138,14 +146,21 @@ const ReceiptDetailScreen = () => {
               <Text style={$.cardTitle}>Summary</Text>
             </View>
             <View style={$.cardContent}>
-              <Row label="Subtotal" value={formatCurrency(transactionProduct?.reduce((sum: number, item: any) => {
-                const variantTotal = item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0;
-                return sum + ((item.sellingPrice + variantTotal) * item.quantity);
-              }, 0) || 0)} />
+              <Row
+                label="Subtotal"
+                value={formatCurrency(
+                  transactionProduct?.reduce((sum: number, item: any) => {
+                    const variantTotal =
+                      item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) ||
+                      0;
+                    return sum + (item.sellingPrice + variantTotal) * item.quantity;
+                  }, 0) || 0,
+                )}
+              />
               <Row
                 label="Discount"
                 value={`-${formatCurrency(totalDiscount || 0)}`}
-                valueStyle={{ color: '#D32F2F' }} // Red for deductions
+                valueStyle={{ color: "#D32F2F" }} // Red for deductions
               />
               <Row label="Tax" value={formatCurrency(totalTax || 0)} />
               <View style={$.divider} />
@@ -164,21 +179,31 @@ const ReceiptDetailScreen = () => {
             </View>
             <View style={$.cardContent}>
               <Row label="Method" value={paymentMethodCode} />
-              <Row label="Customer" value={transaction.description ? transaction.description.split(" - ")[0].replace("Order for ", "") : "-"} />
+              <Row
+                label="Customer"
+                value={
+                  transaction.description
+                    ? transaction.description.split(" - ")[0].replace("Order for ", "")
+                    : "-"
+                }
+              />
               {statusCode === "REFUND" && (
                 <>
                   <View style={$.divider} />
-                  <Row label="Refunded Amount" value={`-${formatCurrency(totalPrice)}`} valueStyle={{ color: '#D32F2F' }} />
+                  <Row
+                    label="Refunded Amount"
+                    value={`-${formatCurrency(totalPrice)}`}
+                    valueStyle={{ color: "#D32F2F" }}
+                  />
                 </>
               )}
             </View>
           </View>
-
         </View>
-      </ScrollView >
+      </ScrollView>
 
       {/* Footer */}
-      < View style={$.footer} >
+      <View style={$.footer}>
         {statusCode !== "REFUND" && (
           <Button
             variant="secondary"
@@ -198,26 +223,36 @@ const ReceiptDetailScreen = () => {
               title: "RECEIPT / STRUK (COPY)",
               transactionId: transaction.id || "",
               transactionDate: transaction.createdAt,
-              subtotal: formatCurrency(transactionProduct?.reduce((sum: number, item: any) => {
-                const variantTotal = item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0;
-                return sum + ((item.sellingPrice + variantTotal) * item.quantity);
-              }, 0) || 0),
+              subtotal: formatCurrency(
+                transactionProduct?.reduce((sum: number, item: any) => {
+                  const variantTotal =
+                    item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) ||
+                    0;
+                  return sum + (item.sellingPrice + variantTotal) * item.quantity;
+                }, 0) || 0,
+              ),
               discount: formatCurrency(totalDiscount || 0),
               tax: formatCurrency(totalTax),
               total: formatCurrency(totalPrice),
               paymentMethod: paymentMethodCode,
-              items: transactionProduct?.map((p: any) => ({
-                name: p.productName,
-                // name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
-                quantity: p.quantity,
-                price: (p.sellingPrice + (p.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) * p.quantity,
-                variants: p.selectedVariants?.map((v: any) => ({
-                  groupName: v.groupName,
-                  name: v.name,
-                  price: v.price
-                })) || []
-              })) || [],
-              footerMessage: "Thank you for your visit!"
+              items:
+                transactionProduct?.map((p: any) => ({
+                  name: p.productName,
+                  // name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
+                  quantity: p.quantity,
+                  price:
+                    (p.sellingPrice +
+                      (p.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) ||
+                        0)) *
+                    p.quantity,
+                  variants:
+                    p.selectedVariants?.map((v: any) => ({
+                      groupName: v.groupName,
+                      name: v.name,
+                      price: v.price,
+                    })) || [],
+                })) || [],
+              footerMessage: "Thank you for your visit!",
             });
             setShowPreview(true);
           }}
@@ -225,7 +260,7 @@ const ReceiptDetailScreen = () => {
           size="lg"
           leftIcon={(size, color) => <Feather name="printer" size={size} color={color} />}
         />
-      </View >
+      </View>
 
       {/* Receipt Preview Modal */}
       <ReceiptPreviewModal
@@ -246,11 +281,11 @@ const ReceiptDetailScreen = () => {
         data={previewData || { total: "0", items: [] }}
         isPrinting={isPrinting}
       />
-    </View >
+    </View>
   );
 };
 
-const Row = ({ label, value, valueStyle }: { label: string, value: string, valueStyle?: any }) => (
+const Row = ({ label, value, valueStyle }: { label: string; value: string; valueStyle?: any }) => (
   <View style={$.row}>
     <Text style={$.rowLabel}>{label}</Text>
     <Text style={[$.rowValue, valueStyle]}>{value}</Text>
@@ -301,16 +336,16 @@ const $ = StyleSheet.create((theme) => ({
   textRefund: { color: theme.colors.error[600] },
 
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     rowGap: theme.spacing.lg,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   card: {
     backgroundColor: theme.colors.neutral[100],
     borderRadius: theme.radius.md,
-    overflow: 'hidden',
-    width: '49%',
+    overflow: "hidden",
+    width: "49%",
     borderWidth: 1,
     borderColor: theme.colors.neutral[300],
   },
@@ -333,9 +368,9 @@ const $ = StyleSheet.create((theme) => ({
 
   // Order Row specific
   orderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: theme.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.neutral[200],
@@ -348,12 +383,12 @@ const $ = StyleSheet.create((theme) => ({
   itemName: {
     ...theme.typography.bodyMd,
     color: theme.colors.neutral[700],
-    fontWeight: '600',
+    fontWeight: "600",
   },
   itemNote: {
     ...theme.typography.bodySm,
     color: theme.colors.neutral[500],
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   itemPrice: {
     ...theme.typography.heading5,
@@ -362,9 +397,9 @@ const $ = StyleSheet.create((theme) => ({
 
   // Row component styles
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   rowLabel: {
     ...theme.typography.bodyMd,
@@ -382,13 +417,13 @@ const $ = StyleSheet.create((theme) => ({
     height: 1,
     backgroundColor: theme.colors.neutral[200],
     marginVertical: theme.spacing.xs,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderWidth: 1,
     borderColor: theme.colors.neutral[200],
   },
 
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: theme.spacing.xl,
     backgroundColor: theme.colors.neutral[100],
     borderTopWidth: 1,

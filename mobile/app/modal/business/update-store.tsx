@@ -2,25 +2,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { t } from "@/services/i18n";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
-import IcUpload from "@/assets/icons/upload.svg";
 import IcAddImage from "@/assets/icons/add-image.svg";
-
+import IcUpload from "@/assets/icons/upload.svg";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal"; // Using reusable modal wrapper
-import { vs } from "@/utils/Scale";
+import Logger from "@/services/logger";
 import { useUpdateStoreMutation } from "@/services/mutations/useUpdateStoreMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
-import Logger from "@/services/logger";
+import { vs } from "@/utils/Scale";
 
-
-const COLOR_OPTIONS = [
+const _COLOR_OPTIONS = [
   "#FCE7F3", // Pink 100
   "#D6BCFA", // Purple 200 (approx) - wait, taking from image
   "#FBCFE8", // Pink 200
@@ -75,14 +72,13 @@ const UpdateStoreModal = () => {
   }, [params]);
 
   const { mutateAsync: updateStore, isPending: isUpdating } = useUpdateStoreMutation();
-  // Using upload mutation directly if we want to handle upload here, 
-  // BUT product/add.tsx uses a separate modal flow. 
-  // For simplicity in this task, I'll direct user to existing upload modal if possible 
-  // or just implement a simple picker if I had `expo-image-picker`. 
+  // Using upload mutation directly if we want to handle upload here,
+  // BUT product/add.tsx uses a separate modal flow.
+  // For simplicity in this task, I'll direct user to existing upload modal if possible
+  // or just implement a simple picker if I had `expo-image-picker`.
   // Since I don't want to overcomplicate, I'll check if `useUploadImageMutation` works with a file URI from `expo-image-picker`.
 
-
-  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<StoreFormData>({
+  const { control, handleSubmit, setValue, watch } = useForm<StoreFormData>({
     resolver: zodResolver(storeSchema),
     defaultValues: {
       name: initialData.name || "",
@@ -110,7 +106,7 @@ const UpdateStoreModal = () => {
         const selectedUri = result.assets[0].uri;
 
         // Optimistically show the selected image
-        // or just wait for upload? 
+        // or just wait for upload?
         // Showing selected image immediately is better UX, but we need to know it's uploading.
         // For now, let's just upload it.
 
@@ -140,9 +136,9 @@ const UpdateStoreModal = () => {
         id: initialData.id,
         data: {
           ...initialData, // Spread existing data first to preserve other fields
-          ...data,        // Overwrite with form data
-          id: initialData.id // Ensure ID is present
-        }
+          ...data, // Overwrite with form data
+          id: initialData.id, // Ensure ID is present
+        },
       });
 
       // Success
@@ -165,7 +161,9 @@ const UpdateStoreModal = () => {
                 {/* Info Icon placeholder or similar */}
                 <Text style={{ color: "#3B82F6", fontWeight: "bold" }}>i</Text>
               </View>
-              <Text style={$.infoText}>This data will be reflected on your receipts and reports.</Text>
+              <Text style={$.infoText}>
+                This data will be reflected on your receipts and reports.
+              </Text>
             </View>
 
             <Text style={$.sectionLabel}>Upload image or Select from Color Options</Text>
@@ -173,7 +171,11 @@ const UpdateStoreModal = () => {
             <View style={$.imageSection}>
               <TouchableOpacity onPress={handleUploadPress} activeOpacity={0.8}>
                 {currentImageUrl ? (
-                  <Image source={{ uri: currentImageUrl }} style={$.imagePreview} contentFit="cover" />
+                  <Image
+                    source={{ uri: currentImageUrl }}
+                    style={$.imagePreview}
+                    contentFit="cover"
+                  />
                 ) : (
                   <View style={$.imagePlaceholder}>
                     <IcAddImage width={40} height={40} color="#9CA3AF" />

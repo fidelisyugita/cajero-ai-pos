@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { getStore } from "@/services/endpoints/getStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
-import { useEffect } from "react";
 
 export const STORE_QUERY_KEY = ["store"];
 

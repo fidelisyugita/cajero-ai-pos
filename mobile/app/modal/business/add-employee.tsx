@@ -1,18 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, View, ScrollView } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
 
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal";
-import { vs } from "@/utils/Scale";
-import { useCreateUserMutation } from "@/services/mutations/useCreateUserMutation";
 import Select from "@/components/ui/Select";
 import Logger from "@/services/logger";
+import { useCreateUserMutation } from "@/services/mutations/useCreateUserMutation";
+import { vs } from "@/utils/Scale";
 
 const employeeSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -23,7 +22,7 @@ const employeeSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(
       /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
-      "Password must contain at least one uppercase, one lowercase, and one number"
+      "Password must contain at least one uppercase, one lowercase, and one number",
     ),
   phone: z.string().optional(),
 });

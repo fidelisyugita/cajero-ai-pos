@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { StyleSheet as UnistylesSheet } from "react-native-unistyles";
 
 import Button from "@/components/ui/Button";
@@ -25,10 +25,7 @@ const DiscountModal = () => {
   // It does NOT account for item-level discounts.
   // We should subtract item discounts to get the true "subtotal before global discount"
   const subtotal = selectSubtotal(items);
-  const totalItemDiscounts = items.reduce(
-    (sum, item) => sum + (item.discount || 0),
-    0,
-  );
+  const totalItemDiscounts = items.reduce((sum, item) => sum + (item.discount || 0), 0);
   // const currentTotal = subtotal - totalItemDiscounts;
   const maxAmount = subtotal * (maxDiscountPercent / 100) - totalItemDiscounts;
 
@@ -37,7 +34,7 @@ const DiscountModal = () => {
   const handleSave = () => {
     const amount = Number(value);
 
-    if (isNaN(amount) || amount < 0) {
+    if (Number.isNaN(amount) || amount < 0) {
       Alert.alert(t("error"), t("invalid_amount"));
       return;
     }

@@ -1,10 +1,17 @@
+import type { SQL } from "drizzle-orm";
+import { and, eq, isNull, like } from "drizzle-orm";
 import { db } from "@/db/drizzle";
-import { products, categories } from "@/db/schema";
-import { eq, like, and, isNull } from "drizzle-orm";
+import { categories, products } from "@/db/schema";
 
 export const LocalProductService = {
-  async getProducts(search?: string, categoryId?: string, page = 0, size = 100, includeDeleted = false) {
-    let conditions = undefined;
+  async getProducts(
+    search?: string,
+    categoryId?: string,
+    page = 0,
+    size = 100,
+    includeDeleted = false,
+  ) {
+    let conditions: SQL | undefined;
 
     if (search) conditions = like(products.name, `%${search}%`);
     if (categoryId) {
@@ -17,14 +24,15 @@ export const LocalProductService = {
       conditions = conditions ? and(conditions, notDeletedCondition) : notDeletedCondition;
     }
 
-    const rows = await db.select()
+    const rows = await db
+      .select()
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
       .where(conditions)
       .limit(size)
       .offset(page * size);
 
-    return rows.map(row => ({
+    return rows.map((row) => ({
       ...row.products,
       categoryCode: row.products.categoryId,
       categoryName: row.categories?.name,
@@ -41,14 +49,10 @@ export const LocalProductService = {
   },
 
   async softDeleteProduct(id: string) {
-    return await db.update(products)
-      .set({ deletedAt: new Date() })
-      .where(eq(products.id, id));
+    return await db.update(products).set({ deletedAt: new Date() }).where(eq(products.id, id));
   },
 
   async restoreProduct(id: string) {
-    return await db.update(products)
-      .set({ deletedAt: null })
-      .where(eq(products.id, id));
-  }
+    return await db.update(products).set({ deletedAt: null }).where(eq(products.id, id));
+  },
 };

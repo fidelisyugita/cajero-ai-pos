@@ -19,27 +19,28 @@ import { DMSans_900Black_Italic } from "@expo-google-fonts/dm-sans/900Black_Ital
 import { useFonts } from "expo-font";
 
 const useCustomFonts = (): { loaded: boolean } => {
-	const [loaded] = useFonts({
-		Black: DMSans_900Black,
-		"Black-Italic": DMSans_900Black_Italic,
-		Bold: DMSans_700Bold,
-		"Bold-Italic": DMSans_700Bold_Italic,
-		ExtraBold: DMSans_800ExtraBold,
-		"ExtraBold-Italic": DMSans_800ExtraBold_Italic,
-		ExtraLight: DMSans_200ExtraLight,
-		"ExtraLight-Italic": DMSans_200ExtraLight_Italic,
-		Light: DMSans_300Light,
-		"Light-Italic": DMSans_300Light_Italic,
-		Medium: DMSans_500Medium,
-		"Medium-Italic": DMSans_500Medium_Italic,
-		Regular: DMSans_400Regular,
-		"Regular-Italic": DMSans_400Regular_Italic,
-		SemiBold: DMSans_600SemiBold,
-		"SemiBold-Italic": DMSans_600SemiBold_Italic,
-		Thin: DMSans_100Thin,
-		"Thin-Italic": DMSans_100Thin_Italic,
-	});
+  const [loaded] = useFonts({
+    Black: DMSans_900Black,
+    "Black-Italic": DMSans_900Black_Italic,
+    Bold: DMSans_700Bold,
+    "Bold-Italic": DMSans_700Bold_Italic,
+    ExtraBold: DMSans_800ExtraBold,
+    "ExtraBold-Italic": DMSans_800ExtraBold_Italic,
+    ExtraLight: DMSans_200ExtraLight,
+    "ExtraLight-Italic": DMSans_200ExtraLight_Italic,
+    Light: DMSans_300Light,
+    "Light-Italic": DMSans_300Light_Italic,
+    Medium: DMSans_500Medium,
+    "Medium-Italic": DMSans_500Medium_Italic,
+    Regular: DMSans_400Regular,
+    "Regular-Italic": DMSans_400Regular_Italic,
+    SemiBold: DMSans_600SemiBold,
+    "SemiBold-Italic": DMSans_600SemiBold_Italic,
+    Thin: DMSans_100Thin,
+    "Thin-Italic": DMSans_100Thin_Italic,
+  });
 
-	return { loaded };
+  return { loaded };
 };
+
 export { useCustomFonts };

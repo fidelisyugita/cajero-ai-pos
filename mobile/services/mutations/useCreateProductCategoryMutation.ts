@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postProductCategory } from "../endpoints/postProductCategory";
-import { CreateProductCategoryRequest } from "../types/ProductCategory";
+import type { CreateProductCategoryRequest } from "../types/ProductCategory";
 
 export const useCreateProductCategoryMutation = () => {
   const queryClient = useQueryClient();

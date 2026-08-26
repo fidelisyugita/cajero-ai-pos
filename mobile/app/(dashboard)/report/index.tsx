@@ -1,25 +1,15 @@
+import { Feather } from "@expo/vector-icons";
+import dayjs from "dayjs";
+import { useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Header from "@/components/dashboard/Header";
-import ReportList from "@/components/report/ReportList";
-import { useReportsQuery } from "@/services/queries/useReportsQuery";
-import dayjs from "dayjs";
-import { useState } from "react";
-import Button from "@/components/ui/Button";
 import DateRangeModal from "@/components/report/DateRangeModal";
-import { Feather } from "@expo/vector-icons";
-import { useAuthStore } from "@/store/useAuthStore";
+import ReportList from "@/components/report/ReportList";
 import ReportSummary from "@/components/report/ReportSummary";
-import Text from "@/components/ui/Typography";
-
-import Animated, {
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
+import Button from "@/components/ui/Button";
+import { useReportsQuery } from "@/services/queries/useReportsQuery";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const ReportScreen = () => {
   const user = useAuthStore((state) => state.user);
@@ -62,11 +52,9 @@ const ReportScreen = () => {
         <Button
           variant="secondary"
           title={`${dayjs(dateRange.startDate).format("DD/MM/YYYY")} - ${dayjs(
-            dateRange.endDate
+            dateRange.endDate,
           ).format("DD/MM/YYYY")}`}
-          rightIcon={(size, color) => (
-            <Feather name="calendar" size={size} color={color} />
-          )}
+          rightIcon={(size, color) => <Feather name="calendar" size={size} color={color} />}
           onPress={() => setShowPicker(true)}
           size="sm"
         />
@@ -79,9 +67,7 @@ const ReportScreen = () => {
         <Button
           title="Export"
           variant="primary"
-          leftIcon={(size, color) => (
-            <Feather name="download" size={size} color={color} />
-          )}
+          leftIcon={(size, color) => <Feather name="download" size={size} color={color} />}
           size="sm"
         />
       </Header>
@@ -89,9 +75,7 @@ const ReportScreen = () => {
       <DateRangeModal
         visible={showPicker}
         onClose={() => setShowPicker(false)}
-        onApply={(start, end) =>
-          setDateRange({ startDate: start, endDate: end })
-        }
+        onApply={(start, end) => setDateRange({ startDate: start, endDate: end })}
         initialStart={dateRange.startDate}
         initialEnd={dateRange.endDate}
         minDate={user?.createdAt ? new Date(user.createdAt) : undefined}

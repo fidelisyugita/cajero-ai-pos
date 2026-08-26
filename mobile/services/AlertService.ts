@@ -17,12 +17,7 @@ export type ConfirmOptions = RNAlertOptions & {
 };
 
 export class AlertService {
-  show(
-    title: string,
-    message?: string,
-    buttons?: RNAlertButton[],
-    options?: RNAlertOptions,
-  ) {
+  show(title: string, message?: string, buttons?: RNAlertButton[], options?: RNAlertOptions) {
     Alert.alert(title, message, buttons, options);
   }
 

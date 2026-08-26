@@ -17,7 +17,6 @@ export const LogoutService = {
 
       // 3. Close SQLite Database
       try {
-        // @ts-expect-error - close isn't always typed correctly in some versions
         await expoDb.closeSync();
       } catch (e) {
         Logger.log("Error closing DB", e);

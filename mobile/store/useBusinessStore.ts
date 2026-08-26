@@ -11,7 +11,7 @@ export interface Business {
   email?: string;
   website?: string;
   logoUrl?: string;
-  subscriptionStatus?: 'free' | 'pro' | 'ultra' | 'past_due';
+  subscriptionStatus?: "free" | "pro" | "ultra" | "past_due";
   subscriptionPlanId?: string;
   subscriptionExpiresAt?: string;
   maxDiscount?: number;

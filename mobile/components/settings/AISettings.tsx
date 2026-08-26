@@ -1,25 +1,21 @@
-import { View, Text, ScrollView } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import FormSectionCard from "@/components/ui/FormSectionCard";
-import { Feather } from "@expo/vector-icons";
 import { useBusinessStore } from "@/store/useBusinessStore";
-import { useRouter } from "expo-router";
 
 const AISettings = () => {
-  const router = useRouter();
+  const _router = useRouter();
   const { business } = useBusinessStore();
 
   // Subscription Check
-  const isUltra = business?.subscriptionStatus === 'ultra';
+  const isUltra = business?.subscriptionStatus === "ultra";
 
   // Render Upgrade Prompt if not Pro
   if (!isUltra) {
     return (
-      <FormSectionCard
-        title="AI Assistant"
-        style={{ flex: 1 }}
-        contentStyle={$.container}
-      >
+      <FormSectionCard title="AI Assistant" style={{ flex: 1 }} contentStyle={$.container}>
         <View style={$.upgradeContainer}>
           <View style={$.iconContainer}>
             <Feather name="cpu" size={48} color="#2196F3" />
@@ -34,19 +30,16 @@ const AISettings = () => {
   }
 
   return (
-    <FormSectionCard
-      title="Artificial Intelligence"
-      style={{ flex: 1 }}
-      contentStyle={$.container}
-    >
+    <FormSectionCard title="Artificial Intelligence" style={{ flex: 1 }} contentStyle={$.container}>
       <ScrollView style={$.section}>
         <View style={$.upgradeContainer}>
-          <View style={[$.iconContainer, { backgroundColor: '#E8F5E9' }]}>
+          <View style={[$.iconContainer, { backgroundColor: "#E8F5E9" }]}>
             <Feather name="cloud-lightning" size={48} color="#4CAF50" />
           </View>
           <Text style={$.upgradeTitle}>AI Online Active</Text>
           <Text style={$.upgradeDescription}>
-            Your AI assistant is now powered by cloud (Groq). Fast, powerful, and no downloads required.
+            Your AI assistant is now powered by cloud (Groq). Fast, powerful, and no downloads
+            required.
           </Text>
 
           <View style={$.infoRow}>
@@ -69,8 +62,8 @@ const $ = StyleSheet.create((theme) => ({
   },
   upgradeContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
     gap: theme.spacing.md,
   },
@@ -78,33 +71,33 @@ const $ = StyleSheet.create((theme) => ({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#E3F2FD',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#E3F2FD",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: theme.spacing.md,
   },
   upgradeTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.colors.neutral[800],
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: theme.colors.neutral[700],
+    textAlign: "center",
   },
   upgradeDescription: {
     ...theme.typography.bodyMd,
     color: theme.colors.neutral[600],
-    textAlign: 'center',
+    textAlign: "center",
     maxWidth: 300,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.sm,
     marginTop: theme.spacing.md,
   },
   infoText: {
     ...theme.typography.bodySm,
     color: theme.colors.neutral[700],
-    fontWeight: '500',
+    fontWeight: "500",
   },
 }));
 

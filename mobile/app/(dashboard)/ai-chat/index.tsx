@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ChatInterface from "@/components/ai/ChatInterface";
 import Header from "@/components/dashboard/Header";

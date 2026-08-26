@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { putIngredient } from "../endpoints/putIngredient";
-import type { CreateIngredientRequest } from "../types/Ingredient";
 import Logger from "../logger";
+import type { CreateIngredientRequest } from "../types/Ingredient";
 
 export const useUpdateIngredientMutation = () => {
   const queryClient = useQueryClient();
@@ -13,6 +13,6 @@ export const useUpdateIngredientMutation = () => {
     },
     onError: (error) => {
       Logger.error("Failed to update ingredient:", error);
-    }
+    },
   });
 };

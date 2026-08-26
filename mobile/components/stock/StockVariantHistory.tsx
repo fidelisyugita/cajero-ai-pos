@@ -1,18 +1,21 @@
-import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback } from "react-native";
+import {
+  type FlashListProps,
+  AnimatedFlashList as ShopifyAnimatedFlashList,
+} from "@shopify/flash-list";
+import type React from "react";
+import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useStockMovementsQuery } from "@/services/queries/useStockMovementsQuery";
-import { AnimatedFlashList as ShopifyAnimatedFlashList, type FlashListProps } from "@shopify/flash-list";
-import React from "react";
 
 // Workaround for missing estimatedItemSize in FlashList props type definition
 const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number }
+  props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
-import dayjs from "dayjs";
-import type { Variant, VariantOption } from "@/services/types/Variant";
-import type { StockMovement } from "@/services/types/StockMovement";
 
+import dayjs from "dayjs";
 import { useProductQuery } from "@/services/queries/useProductQuery";
+import type { StockMovement } from "@/services/types/StockMovement";
+import type { Variant, VariantOption } from "@/services/types/Variant";
 
 interface StockVariantHistoryProps {
   variant: Variant;
@@ -25,7 +28,7 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useStockMovementsQuery({
     variantId: option.id,
     size: 20,
-    sort: 'createdAt,desc'
+    sort: "createdAt,desc",
   });
 
   const movements = data?.pages.flatMap((page: any) => page.content) || [];
@@ -37,7 +40,8 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
           <View style={$.modalContent}>
             <View style={$.header}>
               <Text style={$.title}>
-                Stock History: {product?.name ? `${product.name} - ` : ""}{variant.name} - {option.name}
+                Stock History: {product?.name ? `${product.name} - ` : ""}
+                {variant.name} - {option.name}
               </Text>
               <TouchableOpacity onPress={onClose}>
                 <Text style={$.closeButton}>Close</Text>
@@ -64,15 +68,35 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
               renderItem={({ item }: { item: StockMovement }) => (
                 <View style={$.row}>
                   <Text style={$.cell}>{dayjs(item.createdAt).format("DD/MM/YY HH:mm")}</Text>
-                  <Text style={[$.cell, { flex: 1.5 }]}>{product?.name || '-'}</Text>
-                  <Text style={[$.cell, { color: item.type === 'IN' ? 'green' : (['OUT', 'SOLD', 'WASTE', 'EXPIRED'].includes(item.type) ? 'red' : 'black') }]}>{item.type}</Text>
+                  <Text style={[$.cell, { flex: 1.5 }]}>{product?.name || "-"}</Text>
+                  <Text
+                    style={[
+                      $.cell,
+                      {
+                        color:
+                          item.type === "IN"
+                            ? "green"
+                            : ["OUT", "SOLD", "WASTE", "EXPIRED"].includes(item.type)
+                              ? "red"
+                              : "black",
+                      },
+                    ]}
+                  >
+                    {item.type}
+                  </Text>
                   <Text style={$.cell}>{item.quantity}</Text>
-                  <Text style={$.cell}>{item.createdByName || '-'}</Text>
-                  <Text style={[$.cell, { flex: 2 }]} numberOfLines={2}>{item.transactionDescription || '-'}</Text>
+                  <Text style={$.cell}>{item.createdByName || "-"}</Text>
+                  <Text style={[$.cell, { flex: 2 }]} numberOfLines={2}>
+                    {item.transactionDescription || "-"}
+                  </Text>
                 </View>
               )}
               ListEmptyComponent={<Text style={$.emptyText}>No history found.</Text>}
-              ListFooterComponent={isFetchingNextPage ? <Text style={{ textAlign: 'center', padding: 10 }}>Loading more...</Text> : null}
+              ListFooterComponent={
+                isFetchingNextPage ? (
+                  <Text style={{ textAlign: "center", padding: 10 }}>Loading more...</Text>
+                ) : null
+              }
             />
           </View>
         </TouchableWithoutFeedback>
@@ -136,7 +160,7 @@ const $ = StyleSheet.create((theme) => ({
     textAlign: "center",
     marginTop: theme.spacing.xl,
     color: theme.colors.neutral[500],
-  }
+  },
 }));
 
 export default StockVariantHistory;

@@ -24,8 +24,8 @@ export const useCollapsibleHeader = ({
           },
     ) => {
       const currentY =
-        ('nativeEvent' in event ? event.nativeEvent?.contentOffset?.y : undefined) ??
-        ('contentOffset' in event ? event.contentOffset?.y : undefined) ??
+        ("nativeEvent" in event ? event.nativeEvent?.contentOffset?.y : undefined) ??
+        ("contentOffset" in event ? event.contentOffset?.y : undefined) ??
         0;
       const diff = currentY - lastScrollY.value;
 

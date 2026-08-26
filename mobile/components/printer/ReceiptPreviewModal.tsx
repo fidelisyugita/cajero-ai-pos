@@ -1,12 +1,11 @@
-import React from "react";
-import { View, Text, Modal, ScrollView, StyleSheet as RNStyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import dayjs from "dayjs";
+import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { t } from "@/services/i18n";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { formatCurrency } from "@/utils/Format";
-import dayjs from "dayjs";
-import { Feather } from "@expo/vector-icons";
 
 interface ReceiptItem {
   name: string;
@@ -34,7 +33,13 @@ interface ReceiptPreviewModalProps {
   isPrinting?: boolean;
 }
 
-const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: ReceiptPreviewModalProps) => {
+const ReceiptPreviewModal = ({
+  visible,
+  onClose,
+  onPrint,
+  data,
+  isPrinting,
+}: ReceiptPreviewModalProps) => {
   const business = useBusinessStore((state) => state.business);
 
   // Fallback/Default values
@@ -43,12 +48,7 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
   const phone = business?.phone || "-";
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={$.overlay}>
         <View style={$.container}>
           {/* Header */}
@@ -62,7 +62,6 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
           {/* Receipt Preview Area directly mimicking thermal paper */}
           <ScrollView contentContainerStyle={$.scrollContent}>
             <View style={$.receiptPaper}>
-
               {/* Business Header */}
               <View style={$.receiptHeader}>
                 <Text style={$.receiptBusinessName}>{businessName}</Text>
@@ -70,7 +69,9 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
                 <Text style={$.receiptText}>{phone}</Text>
                 <View style={$.dashLine} />
                 <Text style={$.receiptTitle}>{data.title || "RECEIPT"}</Text>
-                <Text style={$.receiptText}>{dayjs(data.transactionDate || new Date()).format("DD/MM/YYYY HH:mm")}</Text>
+                <Text style={$.receiptText}>
+                  {dayjs(data.transactionDate || new Date()).format("DD/MM/YYYY HH:mm")}
+                </Text>
                 {data.transactionId && <Text style={$.receiptText}>#{data.transactionId}</Text>}
                 <View style={$.dashLine} />
               </View>
@@ -84,16 +85,23 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
                       {item.variants && item.variants.length > 0 && (
                         <View style={{ paddingLeft: 8 }}>
                           {item.variants.map((v, i) => (
-                            <Text key={i} style={$.itemSubText}>+ {v.groupName}: {v.name} ({formatCurrency(v.price)})</Text>
+                            <Text key={i} style={$.itemSubText}>
+                              + {v.groupName}: {v.name} ({formatCurrency(v.price)})
+                            </Text>
                           ))}
                         </View>
                       )}
                       {/* {item.quantity > 1 && ( */}
-                      <Text style={$.itemSubText}>{item.quantity} x {typeof item.price === 'number' ? formatCurrency(item.price / item.quantity) : ''}</Text>
+                      <Text style={$.itemSubText}>
+                        {item.quantity} x{" "}
+                        {typeof item.price === "number"
+                          ? formatCurrency(item.price / item.quantity)
+                          : ""}
+                      </Text>
                       {/* )} */}
                     </View>
                     <Text style={$.itemText}>
-                      {typeof item.price === 'number' ? formatCurrency(item.price) : item.price}
+                      {typeof item.price === "number" ? formatCurrency(item.price) : item.price}
                     </Text>
                   </View>
                 ))}
@@ -123,8 +131,10 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
                 )}
                 <View style={[$.dashLine, { marginVertical: 8 }]} />
                 <View style={$.totalRow}>
-                  <Text style={[$.receiptText, { fontWeight: 'bold', fontSize: 16 }]}>TOTAL</Text>
-                  <Text style={[$.receiptText, { fontWeight: 'bold', fontSize: 16 }]}>{data.total}</Text>
+                  <Text style={[$.receiptText, { fontWeight: "bold", fontSize: 16 }]}>TOTAL</Text>
+                  <Text style={[$.receiptText, { fontWeight: "bold", fontSize: 16 }]}>
+                    {data.total}
+                  </Text>
                 </View>
                 {data.paymentMethod && (
                   <View style={[$.totalRow, { marginTop: 4 }]}>
@@ -140,7 +150,6 @@ const ReceiptPreviewModal = ({ visible, onClose, onPrint, data, isPrinting }: Re
               <View style={$.receiptFooter}>
                 <Text style={$.receiptText}>{data.footerMessage || "Thank you!"}</Text>
               </View>
-
             </View>
           </ScrollView>
 
@@ -202,7 +211,7 @@ const $ = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     padding: theme.spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   // Thermal Receipt Styling
@@ -226,26 +235,26 @@ const $ = StyleSheet.create((theme) => ({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 4,
-    color: '#000',
+    color: "#000",
   },
   receiptTitle: {
     fontSize: 14,
     fontWeight: "bold",
     marginVertical: 4,
-    color: '#000',
+    color: "#000",
   },
   receiptText: {
     fontSize: 12,
     color: "#333",
     textAlign: "center",
-    fontFamily: 'monospace', // Monospace for alignment look
+    fontFamily: "monospace", // Monospace for alignment look
   },
   dashLine: {
     width: "100%",
     height: 1,
     borderBottomWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#333',
+    borderStyle: "dashed",
+    borderColor: "#333",
     marginVertical: 8,
   },
   itemsContainer: {
@@ -259,12 +268,12 @@ const $ = StyleSheet.create((theme) => ({
   itemText: {
     fontSize: 12,
     color: "#333",
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   itemSubText: {
     fontSize: 10,
     color: "#666",
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   totalsContainer: {
     width: "100%",

@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import type React from "react";
 import useImageSelectionStore from "@/store/useImageSelectionStore";
 import UploadImageModal from "../upload-image";
 
