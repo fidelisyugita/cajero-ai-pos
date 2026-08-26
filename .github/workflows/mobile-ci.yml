@@ -4,16 +4,19 @@ on:
   push:
     branches:
       - main
-      - dev-mobile
-      - "feat/**"
-      - "fix/**"
     paths:
       - "mobile/**"
-      - ".github/workflows/dev-mobile.yml"
+      - ".github/workflows/mobile-ci.yml"
   pull_request:
+    branches:
+      - main
     paths:
       - "mobile/**"
-      - ".github/workflows/dev-mobile.yml"
+      - ".github/workflows/mobile-ci.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   mobile-ci:
@@ -63,4 +66,3 @@ jobs:
 
       - name: Jest Unit Tests
         run: yarn test --ci --maxWorkers=2
-
