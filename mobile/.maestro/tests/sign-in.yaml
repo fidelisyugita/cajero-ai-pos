@@ -47,7 +47,7 @@ appId: com.cajero.app
 - runFlow:
     file: ../flows/sign-in.yaml
     env:
-      EMAIL: "marco@gmail.com"
+      EMAIL: "${TEST_EMAIL}"
       PASSWORD: "123"
 
 - assertVisible:
