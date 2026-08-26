@@ -70,7 +70,7 @@ const SignInForm = () => {
 
       router.replace("/(dashboard)");
     } catch (error) {
-      console.error("Sign in failed:", error);
+      console.warn("Sign in failed:", error);
       alertService.error(t("sign_in_failed"), t("incorrect_email_or_password"));
     } finally {
       hideLoading();
@@ -108,9 +108,6 @@ const SignInForm = () => {
               testID="email-input"
             />
           )}
-          rules={{
-            required: true,
-          }}
         />
 
         <Controller
@@ -128,6 +125,7 @@ const SignInForm = () => {
               maxLength={100}
               onBlur={onBlur}
               onChangeText={onChange}
+              onSubmitEditing={handleSubmit(onSignIn)}
               ref={ref}
               returnKeyType="done"
               right={
@@ -143,9 +141,6 @@ const SignInForm = () => {
               testID="password-input"
             />
           )}
-          rules={{
-            required: true,
-          }}
         />
         {/* <Button size="md" title="Forgot Password?" variant="link" /> */}
       </View>

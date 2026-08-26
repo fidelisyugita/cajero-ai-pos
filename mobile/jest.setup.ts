@@ -56,6 +56,14 @@ unistyles.withUnistyles = (Component: any, mapper: any) => {
 // Mock NativeEventEmitter
 jest.mock("react-native/Libraries/EventEmitter/NativeEventEmitter");
 
+// Ensure Keyboard listener returns a subscription object with remove()
+const { Keyboard } = require("react-native");
+if (Keyboard) {
+  Keyboard.addListener = jest.fn(() => ({
+    remove: jest.fn(),
+  }));
+}
+
 // Mock Reanimated
 jest.mock("react-native-reanimated", () => {
   const React = require("react");
@@ -132,35 +140,41 @@ jest.mock("expo-router", () => ({
 
 // Mock react-native-mmkv
 jest.mock("react-native-mmkv", () => {
+  const createMockStorage = () => {
+    const storage = new Map<string, any>();
+    return {
+      set: jest.fn((key: string, value: any) => {
+        storage.set(key, value);
+      }),
+      getString: jest.fn((key: string) => {
+        const val = storage.get(key);
+        return typeof val === "string" ? val : undefined;
+      }),
+      getNumber: jest.fn((key: string) => {
+        const val = storage.get(key);
+        return typeof val === "number" ? val : undefined;
+      }),
+      getBoolean: jest.fn((key: string) => {
+        const val = storage.get(key);
+        return typeof val === "boolean" ? val : undefined;
+      }),
+      remove: jest.fn((key: string) => {
+        return storage.delete(key);
+      }),
+      delete: jest.fn((key: string) => {
+        return storage.delete(key);
+      }),
+      clearAll: jest.fn(() => {
+        storage.clear();
+      }),
+      contains: jest.fn((key: string) => storage.has(key)),
+      getAllKeys: jest.fn(() => Array.from(storage.keys())),
+    };
+  };
+
   return {
-    MMKV: jest.fn().mockImplementation(() => {
-      const storage = new Map<string, any>();
-      return {
-        set: jest.fn((key: string, value: any) => {
-          storage.set(key, value);
-        }),
-        getString: jest.fn((key: string) => {
-          const val = storage.get(key);
-          return typeof val === "string" ? val : undefined;
-        }),
-        getNumber: jest.fn((key: string) => {
-          const val = storage.get(key);
-          return typeof val === "number" ? val : undefined;
-        }),
-        getBoolean: jest.fn((key: string) => {
-          const val = storage.get(key);
-          return typeof val === "boolean" ? val : undefined;
-        }),
-        delete: jest.fn((key: string) => {
-          storage.delete(key);
-        }),
-        clearAll: jest.fn(() => {
-          storage.clear();
-        }),
-        contains: jest.fn((key: string) => storage.has(key)),
-        getAllKeys: jest.fn(() => Array.from(storage.keys())),
-      };
-    }),
+    createMMKV: jest.fn().mockImplementation(createMockStorage),
+    MMKV: jest.fn().mockImplementation(createMockStorage),
   };
 });
 
@@ -232,5 +246,21 @@ jest.mock("@sentry/react-native", () => {
     captureMessage: jest.fn(),
     addBreadcrumb: jest.fn(),
     setUser: jest.fn(),
+  };
+});
+
+// Mock @shopify/flash-list
+jest.mock("@shopify/flash-list", () => {
+  const React = require("react");
+  const { FlatList } = require("react-native");
+  const MockFlashList = React.forwardRef((props: any, ref: any) => {
+    return React.createElement(FlatList, { ...props, ref });
+  });
+  return {
+    __esModule: true,
+    FlashList: MockFlashList,
+    AnimatedFlashList: MockFlashList,
+    MasonryFlashList: MockFlashList,
+    default: MockFlashList,
   };
 });

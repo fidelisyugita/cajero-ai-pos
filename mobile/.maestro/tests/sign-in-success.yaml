@@ -1,0 +1,26 @@
+appId: com.cajero.app
+---
+# 1. Launch App with fresh state
+- runFlow:
+    file: ../flows/launch.yaml
+
+# 2. Perform Sign In with valid credentials
+- runFlow:
+    file: ../flows/sign-in.yaml
+    env:
+      EMAIL: "${TEST_EMAIL}"
+      PASSWORD: "${TEST_PASSWORD}"
+
+# 3. Wait for Dashboard to load
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# 4. Assert Dashboard & Menu screen visible
+- assertVisible:
+    text: "Menu"
+- assertVisible:
+    text: "Sign Out"
+
+# 5. Clean Sign Out
+- runFlow:
+    file: ../flows/sign-out.yaml

@@ -1,0 +1,23 @@
+appId: com.cajero.app
+---
+# 1. Tap Sign Out in the dashboard sidebar
+- tapOn:
+    text: "Sign Out"
+
+# 2. Wait for confirmation dialog
+- assertVisible:
+    text: "Are you sure you want to sign out.*"
+
+# 3. Tap the confirmation button on the dialog (below the message text)
+- tapOn:
+    text: "(?i)sign out|delete & sign out"
+    below: "Are you sure you want to sign out.*"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# 4. Assert return to Sign In screen
+- extendedWaitUntil:
+    visible:
+      id: "sign-in-button"
+    timeout: 10000

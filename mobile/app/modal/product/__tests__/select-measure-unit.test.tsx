@@ -60,9 +60,7 @@ describe("SelectMeasureUnitModal integration", () => {
       fireEvent.press(pcsItem);
     });
 
-    expect(
-      useMeasureUnitStore.getState().selectedMeasureUnit?.code,
-    ).toBe("PCS");
+    expect(useMeasureUnitStore.getState().selectedMeasureUnit?.code).toBe("PCS");
 
     const selectBtn = screen.getByText("Select");
     await act(async () => {

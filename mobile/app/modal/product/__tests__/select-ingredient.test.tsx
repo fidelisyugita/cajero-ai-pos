@@ -72,11 +72,9 @@ describe("SelectIngredientModal integration", () => {
       fireEvent.press(milkItem);
     });
 
-    expect(
-      useIngredientStore
-        .getState()
-        .selectedIngredient?.some((i) => i.id === "ing-1"),
-    ).toBe(true);
+    expect(useIngredientStore.getState().selectedIngredient?.some((i) => i.id === "ing-1")).toBe(
+      true,
+    );
 
     const saveBtn = screen.getByText("Save");
     await act(async () => {

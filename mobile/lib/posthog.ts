@@ -1,6 +1,6 @@
 import type { PostHogCustomStorage } from "posthog-react-native";
 import PostHog from "posthog-react-native";
-import { MMKV } from "react-native-mmkv";
+import { createMMKV } from "react-native-mmkv";
 import type {
   AnalyticsEventMap,
   AnalyticsEventName,
@@ -9,7 +9,7 @@ import type {
 } from "@/types/analytics";
 import { sanitizeTelemetry } from "./sanitizeTelemetry";
 
-const posthogStorage = new MMKV({ id: "cajero-posthog" });
+const posthogStorage = createMMKV({ id: "cajero-posthog" });
 
 export const mmkvPostHogStorage: PostHogCustomStorage = {
   getItem: (key: string) => {

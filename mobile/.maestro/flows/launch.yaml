@@ -1,0 +1,57 @@
+appId: com.cajero.app
+---
+- openLink: "cajero://"
+
+# 1. If Expo Dev Launcher is displayed, tap on the development server to connect to Metro
+- runFlow:
+    when:
+      visible:
+        text: "DEVELOPMENT SERVERS"
+    commands:
+      - tapOn:
+          text: "http://.*"
+      - waitForAnimationToEnd:
+          timeout: 10000
+
+# 2. If Expo Dev Menu onboarding appears ("Continue"), dismiss it
+- runFlow:
+    when:
+      visible:
+        text: "Continue"
+    commands:
+      - tapOn:
+          text: "Continue"
+      - waitForAnimationToEnd:
+          timeout: 2000
+
+# 3. If Developer Menu overlay is showing ("Reload" / "Go home"), press back to dismiss overlay
+- runFlow:
+    when:
+      visible:
+        text: "Reload"
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 3000
+
+# 4. If LogBox error overlay is showing ("Dismiss"), dismiss it
+- runFlow:
+    when:
+      visible:
+        text: "Dismiss"
+    commands:
+      - tapOn:
+          text: "Dismiss"
+
+# 5. If already logged in on Dashboard, sign out to ensure tests start at Sign In screen
+- runFlow:
+    when:
+      visible:
+        text: "Sign Out"
+    file: sign-out.yaml
+
+# 6. Ensure Sign In screen is ready
+- extendedWaitUntil:
+    visible:
+      text: "Sign In"
+    timeout: 15000

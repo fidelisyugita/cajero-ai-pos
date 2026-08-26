@@ -59,9 +59,7 @@ describe("EditVariantModal integration", () => {
       fireEvent.press(saveBtn);
     });
 
-    expect(
-      useVariantStore.getState().variants.some((v) => v.name === "Size"),
-    ).toBe(true);
+    expect(useVariantStore.getState().variants.some((v) => v.name === "Size")).toBe(true);
     expect(router.back).toHaveBeenCalled();
   });
 });
