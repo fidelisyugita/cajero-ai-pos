@@ -1,0 +1,53 @@
+name: Mobile CI (Lint & Test)
+
+on:
+  push:
+    branches:
+      - main
+      - dev-mobile
+      - "feat/**"
+      - "fix/**"
+    paths:
+      - "mobile/**"
+      - ".github/workflows/dev-mobile.yml"
+  pull_request:
+    paths:
+      - "mobile/**"
+      - ".github/workflows/dev-mobile.yml"
+
+jobs:
+  mobile-ci:
+    name: Lint, Typecheck & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+          cache-dependency-path: mobile/yarn.lock
+
+      - name: Enable Corepack & Yarn Berry
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Biome Linter Check
+        run: yarn lint
+
+      - name: Biome Formatter Check
+        run: yarn format:check
+
+      - name: TypeScript Type Check
+        run: yarn tsc --noEmit
+
+      - name: Jest Unit Tests
+        run: yarn test --ci --maxWorkers=2
