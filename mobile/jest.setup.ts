@@ -184,6 +184,30 @@ jest.mock("react-native-mmkv", () => {
   };
 });
 
+jest.mock("expo-secure-store", () => {
+  const store = new Map<string, string>();
+  return {
+    getItem: jest.fn((key: string) => store.get(key) ?? null),
+    setItem: jest.fn((key: string, value: string) => {
+      store.set(key, value);
+    }),
+    deleteItemAsync: jest.fn((key: string) => {
+      store.delete(key);
+      return Promise.resolve();
+    }),
+    getItemAsync: jest.fn((key: string) => Promise.resolve(store.get(key) ?? null)),
+    setItemAsync: jest.fn((key: string, value: string) => {
+      store.set(key, value);
+      return Promise.resolve();
+    }),
+  };
+});
+
+jest.mock("expo-crypto", () => ({
+  randomUUID: jest.fn(() => "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"),
+  getRandomBytes: jest.fn((byteCount: number) => new Uint8Array(byteCount)),
+}));
+
 jest.mock("@/services/endpoints/references", () => ({
   getTransactionTypes: jest.fn().mockResolvedValue([]),
   getPaymentMethods: jest.fn().mockResolvedValue([]),

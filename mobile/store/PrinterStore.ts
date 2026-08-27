@@ -1,6 +1,6 @@
-import { createMMKV } from "react-native-mmkv";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { createEncryptedMMKV } from "@/lib/Storage";
 
 export interface PrinterDevice {
   id: string;
@@ -19,20 +19,7 @@ interface PrinterState {
   setIsAutoPrintEnabled: (enabled: boolean) => void;
 }
 
-const storage = createMMKV({ id: "printer-storage" });
-
-const mmkvStorage = {
-  getItem: (name: string) => {
-    const value = storage.getString(name);
-    return value ?? null;
-  },
-  setItem: (name: string, value: string) => {
-    storage.set(name, value);
-  },
-  removeItem: (name: string) => {
-    storage.remove(name);
-  },
-};
+const mmkvStorage = createEncryptedMMKV("printer-storage");
 
 export const usePrinterStore = create<PrinterState>()(
   persist(
@@ -49,7 +36,11 @@ export const usePrinterStore = create<PrinterState>()(
     }),
     {
       name: "printer-storage",
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => ({
+        getItem: mmkvStorage.getItem,
+        setItem: mmkvStorage.setItem,
+        removeItem: mmkvStorage.removeItem,
+      })),
       partialize: (state) => ({
         connectedDevice: state.connectedDevice,
         isAutoPrintEnabled: state.isAutoPrintEnabled,

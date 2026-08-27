@@ -12,14 +12,14 @@ const withAndroidSigning = (config) => {
 };
 
 function addSigningConfig(buildGradle) {
-  const storeFile = process.env.EXPO_PUBLIC_UPLOAD_STORE_FILE;
-  const storePassword = process.env.EXPO_PUBLIC_UPLOAD_STORE_PASSWORD;
-  const keyAlias = process.env.EXPO_PUBLIC_UPLOAD_KEY_ALIAS;
-  const keyPassword = process.env.EXPO_PUBLIC_UPLOAD_KEY_PASSWORD;
+  const storeFile = process.env.ANDROID_UPLOAD_STORE_FILE;
+  const storePassword = process.env.ANDROID_UPLOAD_STORE_PASSWORD;
+  const keyAlias = process.env.ANDROID_UPLOAD_KEY_ALIAS;
+  const keyPassword = process.env.ANDROID_UPLOAD_KEY_PASSWORD;
 
   if (!storeFile) {
     console.warn(
-      "⚠️  EXPO_PUBLIC_UPLOAD_STORE_FILE is not defined. Release build will use debug keystore.",
+      "⚠️  ANDROID_UPLOAD_STORE_FILE is not defined. Release build will use debug keystore.",
     );
     return buildGradle;
   }
