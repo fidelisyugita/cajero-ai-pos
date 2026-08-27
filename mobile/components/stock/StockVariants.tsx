@@ -1,27 +1,27 @@
-import { FlashList as ShopifyFlashList, type FlashListProps } from "@shopify/flash-list";
+import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
 import React, { useState } from "react";
 
 // Workaround for missing estimatedItemSize in FlashList props type definition
 const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number }
+  props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
-import IconButton from "@/components/ui/IconButton";
-import { useVariantsQuery } from "@/services/queries/useVariantsQuery";
-import { useProductsQuery } from "@/services/queries/useProductsQuery";
-import type { Variant, VariantOption } from "@/services/types/Variant";
 import Button from "@/components/ui/Button";
-import { t } from "@/services/i18n";
 import EmptyState from "@/components/ui/EmptyState";
+import IconButton from "@/components/ui/IconButton";
 import Skeleton from "@/components/ui/Skeleton";
-import StockUpdateModal from "./StockUpdateModal";
-import { useUpdateVariantStockMutation } from "@/services/mutations/useUpdateVariantStockMutation";
-import StockVariantHistory from "./StockVariantHistory";
-import SaveVariantOptionModal from "./SaveVariantOptionModal";
+import { t } from "@/services/i18n";
 import { useUpdateVariantMutation } from "@/services/mutations/useUpdateVariantMutation";
+import { useUpdateVariantStockMutation } from "@/services/mutations/useUpdateVariantStockMutation";
+import { useProductsQuery } from "@/services/queries/useProductsQuery";
+import { useVariantsQuery } from "@/services/queries/useVariantsQuery";
+import type { Variant, VariantOption } from "@/services/types/Variant";
+import SaveVariantOptionModal from "./SaveVariantOptionModal";
+import StockUpdateModal from "./StockUpdateModal";
+import StockVariantHistory from "./StockVariantHistory";
 
 const COLUMNS = [
   { label: "Product Name", flex: 2 },
@@ -51,25 +51,34 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
   const { data: productsData, isLoading: isProductsLoading } = useProductsQuery({
     page: 0,
     size: 1000,
-    sortBy: 'name',
-    sortDir: 'asc'
+    sortBy: "name",
+    sortDir: "asc",
   });
 
   const isLoading = isVariantsLoading || isProductsLoading;
 
-  const [selectedHistory, setSelectedHistory] = useState<{ variant: Variant, option: VariantOption } | null>(null);
-  const [editingItem, setEditingItem] = useState<{ variant: Variant, option: VariantOption } | null>(null);
-  const [editDetailTarget, setEditDetailTarget] = useState<{ variant: Variant, option: VariantOption } | null>(null);
+  const [selectedHistory, setSelectedHistory] = useState<{
+    variant: Variant;
+    option: VariantOption;
+  } | null>(null);
+  const [editingItem, setEditingItem] = useState<{
+    variant: Variant;
+    option: VariantOption;
+  } | null>(null);
+  const [editDetailTarget, setEditDetailTarget] = useState<{
+    variant: Variant;
+    option: VariantOption;
+  } | null>(null);
   const updateVariantStockMutation = useUpdateVariantStockMutation();
   const updateVariantMutation = useUpdateVariantMutation();
 
   const flattenedVariants: FlattenedVariant[] = React.useMemo(() => {
     if (!variants || !productsData) return [];
 
-    const productMap = new Map(productsData.content.map(p => [p.id, p]));
+    const productMap = new Map(productsData.content.map((p) => [p.id, p]));
 
     const flat: FlattenedVariant[] = [];
-    variants.forEach(variant => {
+    variants.forEach((variant) => {
       const product = productMap.get(variant.productId);
       const productName = product?.name || "Unknown Product";
 
@@ -77,7 +86,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
       const variantMatches = variant.name.toLowerCase().includes(searchQuery.toLowerCase());
       const productMatches = productName.toLowerCase().includes(searchQuery.toLowerCase());
 
-      variant.options.forEach(option => {
+      variant.options.forEach((option) => {
         const optionMatches = option.name.toLowerCase().includes(searchQuery.toLowerCase());
 
         if (searchQuery === "" || variantMatches || optionMatches || productMatches) {
@@ -88,7 +97,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
             productName: productName,
             stock: option.stock,
             option: option,
-            variant: variant
+            variant: variant,
           });
         }
       });
@@ -99,7 +108,6 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
       return a.name.localeCompare(b.name);
     });
   }, [variants, productsData, searchQuery]);
-
 
   const handleUpdateStock = (newStock: number) => {
     if (!editingItem) return;
@@ -114,7 +122,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
         onSuccess: () => {
           setEditingItem(null);
         },
-      }
+      },
     );
   };
 
@@ -127,17 +135,18 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
     if (!variantToUpdate) return;
 
     // Construct valid UpdateVariantData
-    const updatedOptions = variantToUpdate.options.map(opt => {
+    const updatedOptions = variantToUpdate.options.map((opt) => {
       if (opt.id === optionToUpdate.id) {
         return {
           id: opt.id,
           name: data.name,
           priceAdjusment: data.priceAdjusment,
           stock: opt.stock,
-          ingredients: opt.ingredients?.map(ing => ({
-            ingredientId: ing.ingredientId,
-            quantityNeeded: ing.quantityNeeded
-          })) || []
+          ingredients:
+            opt.ingredients?.map((ing) => ({
+              ingredientId: ing.ingredientId,
+              quantityNeeded: ing.quantityNeeded,
+            })) || [],
         };
       }
       return {
@@ -145,10 +154,11 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
         name: opt.name,
         priceAdjusment: opt.priceAdjusment,
         stock: opt.stock,
-        ingredients: opt.ingredients?.map(ing => ({
-          ingredientId: ing.ingredientId,
-          quantityNeeded: ing.quantityNeeded
-        })) || []
+        ingredients:
+          opt.ingredients?.map((ing) => ({
+            ingredientId: ing.ingredientId,
+            quantityNeeded: ing.quantityNeeded,
+          })) || [],
       };
     });
 
@@ -160,14 +170,14 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
           description: variantToUpdate.description,
           isRequired: variantToUpdate.isRequired,
           isMultiple: variantToUpdate.isMultiple,
-          options: updatedOptions
-        }
+          options: updatedOptions,
+        },
       },
       {
         onSuccess: () => {
           setEditDetailTarget(null);
-        }
-      }
+        },
+      },
     );
   };
 
@@ -175,22 +185,14 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
     <View style={$.container}>
       <View style={$.header}>
         {COLUMNS.map((col) => (
-          <Skeleton
-            key={col.label}
-            style={{ flex: col.flex, marginRight: 10 }}
-            height={20}
-          />
+          <Skeleton key={col.label} style={{ flex: col.flex, marginRight: 10 }} height={20} />
         ))}
       </View>
       <View style={$.listContent}>
         {[...Array(10)].map((_, index) => (
           <View key={index} style={$.row}>
             {COLUMNS.map((col, cIndex) => (
-              <Skeleton
-                key={cIndex}
-                style={{ flex: col.flex, marginRight: 10 }}
-                height={20}
-              />
+              <Skeleton key={cIndex} style={{ flex: col.flex, marginRight: 10 }} height={20} />
             ))}
           </View>
         ))}
@@ -221,8 +223,12 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
         renderItem={({ item }) => (
           <VariantRow
             item={item}
-            onHistoryPress={() => setSelectedHistory({ variant: item.variant, option: item.option })}
-            onStockUpdatePress={() => setEditingItem({ variant: item.variant, option: item.option })}
+            onHistoryPress={() =>
+              setSelectedHistory({ variant: item.variant, option: item.option })
+            }
+            onStockUpdatePress={() =>
+              setEditingItem({ variant: item.variant, option: item.option })
+            }
             onEditPress={() => setEditDetailTarget({ variant: item.variant, option: item.option })}
           />
         )}
@@ -247,7 +253,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
           onClose={() => setEditingItem(null)}
           onSave={handleUpdateStock}
           currentStock={editingItem.option.stock}
-          itemName={flattenedVariants.find(f => f.id === editingItem.option.id)?.name || ""}
+          itemName={flattenedVariants.find((f) => f.id === editingItem.option.id)?.name || ""}
           isLoading={updateVariantStockMutation.isPending}
         />
       )}
@@ -264,24 +270,39 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
   );
 };
 
-const VariantRow = ({ item, onHistoryPress, onStockUpdatePress, onEditPress }: { item: FlattenedVariant; onHistoryPress: () => void; onStockUpdatePress: () => void; onEditPress: () => void }) => {
+const VariantRow = ({
+  item,
+  onHistoryPress,
+  onStockUpdatePress,
+  onEditPress,
+}: {
+  item: FlattenedVariant;
+  onHistoryPress: () => void;
+  onStockUpdatePress: () => void;
+  onEditPress: () => void;
+}) => {
   let status = "In Stock";
   let statusVariant: "active" | "inactive" | "warning" = "active";
 
   if (item.stock <= 0) {
     status = "Out of Stock";
     statusVariant = "inactive";
-  } else if (item.stock < 10) { // Arbitrary low stock threshold for variants
+  } else if (item.stock < 10) {
+    // Arbitrary low stock threshold for variants
     status = "Low Stock";
     statusVariant = "warning";
   }
 
   return (
     <View style={$.row}>
-      <Text style={[$.cellText, { flex: COLUMNS[0].flex }]} numberOfLines={1}>{item.productName}</Text>
-      <Text style={[$.cellText, { flex: COLUMNS[1].flex }]} numberOfLines={1}>{item.name}</Text>
-      <View style={{ flex: COLUMNS[2].flex, flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-        <Text style={{ fontWeight: 'bold', ...$.cellText, paddingRight: 0 }}>{item.stock}</Text>
+      <Text style={[$.cellText, { flex: COLUMNS[0].flex }]} numberOfLines={1}>
+        {item.productName}
+      </Text>
+      <Text style={[$.cellText, { flex: COLUMNS[1].flex }]} numberOfLines={1}>
+        {item.name}
+      </Text>
+      <View style={{ flex: COLUMNS[2].flex, flexDirection: "row", gap: 4, alignItems: "center" }}>
+        <Text style={{ fontWeight: "bold", ...$.cellText, paddingRight: 0 }}>{item.stock}</Text>
         <IconButton
           Icon={IcEdit}
           onPress={onStockUpdatePress}
@@ -300,25 +321,26 @@ const VariantRow = ({ item, onHistoryPress, onStockUpdatePress, onEditPress }: {
           variant="neutral"
           onPress={onEditPress}
         /> */}
-        <Button
-          size="sm"
-          title="History"
-          variant="neutral"
-          onPress={onHistoryPress}
-        />
+        <Button size="sm" title="History" variant="neutral" onPress={onHistoryPress} />
       </View>
     </View>
   );
 };
 
-const StatusBadge = ({ variant, label }: { variant: "active" | "inactive" | "warning", label: string }) => {
+const StatusBadge = ({
+  variant,
+  label,
+}: {
+  variant: "active" | "inactive" | "warning";
+  label: string;
+}) => {
   $.useVariants({ status: variant });
   return (
     <View style={$.badge}>
       <Text style={$.badgeText}>{label}</Text>
     </View>
   );
-}
+};
 
 const $ = StyleSheet.create((theme) => ({
   container: {
@@ -399,10 +421,10 @@ const $ = StyleSheet.create((theme) => ({
     },
   },
   actionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.md,
-  }
+  },
 }));
 
 export default StockVariants;

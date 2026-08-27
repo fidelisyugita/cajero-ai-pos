@@ -1,28 +1,24 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { t } from "@/services/i18n";
-import ScreenHeader from "@/components/ui/ScreenHeader";
-import Button from "@/components/ui/Button";
-import Select from "@/components/ui/Select";
-import { formatCurrency } from "@/utils/Format";
-import dayjs from "dayjs";
-import { useState } from "react";
-import IcExport from "@/assets/icons/upload.svg"; // Reusing upload icon as export for now or create new
-import { type DailyReport } from "@/services/types/Report";
-import { SummaryCard } from "@/components/report/ReportSummary";
 import { Feather } from "@expo/vector-icons";
+import dayjs from "dayjs";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { SummaryCard } from "@/components/report/ReportSummary";
+import Button from "@/components/ui/Button";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { t } from "@/services/i18n";
+import type { DailyReport } from "@/services/types/Report";
+import { formatCurrency } from "@/utils/Format";
 
 const ReportDetailScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
 
   // Parse the report data string back to object
-  const report: DailyReport = params.report
-    ? JSON.parse(params.report as string)
-    : null;
+  const report: DailyReport = params.report ? JSON.parse(params.report as string) : null;
 
-  const [selectedCashier, setSelectedCashier] = useState("all");
+  const [_selectedCashier, _setSelectedCashier] = useState("all");
   const [includeCogs, setIncludeCogs] = useState(false);
 
   // Calculate adjusted net revenue when COGS is included
@@ -54,9 +50,7 @@ const ReportDetailScreen = () => {
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
-            <Text style={$.dateTitle}>
-              {dayjs(report.date).format("dddd, D MMMM YYYY")}
-            </Text>
+            <Text style={$.dateTitle}>{dayjs(report.date).format("dddd, D MMMM YYYY")}</Text>
             <View style={$.cashierFilter}>
               {/* Placeholder for cashier filter if needed later */}
             </View>
@@ -71,9 +65,7 @@ const ReportDetailScreen = () => {
             />
             <View style={$.netRevenueCard}>
               <SummaryCard
-                label={
-                  includeCogs ? "Net Revenue (w/ COGS)" : "Total Net Revenue"
-                }
+                label={includeCogs ? "Net Revenue (w/ COGS)" : "Total Net Revenue"}
                 value={formatCurrency(adjustedNetRevenue)}
                 icon={<Feather name="pie-chart" size={24} color="#A05E5E" />}
               />
@@ -92,19 +84,13 @@ const ReportDetailScreen = () => {
                 label={t("total_transaction")}
                 value={(report.totalTransaction || 0).toString()}
               />
-              <Row
-                label={t("total_item_sold")}
-                value={(report.totalProductSold || 0).toString()}
-              />
+              <Row label={t("total_item_sold")} value={(report.totalProductSold || 0).toString()} />
               <Row
                 label={t("total_revenue")}
                 value={formatCurrency(report.totalRevenue)}
                 valueStyle={$.totalValue}
               />
-              <Row
-                label={t("total_discount")}
-                value={formatCurrency(report.totalDiscount || 0)}
-              />
+              <Row label={t("total_discount")} value={formatCurrency(report.totalDiscount || 0)} />
             </View>
           </View>
 
@@ -152,10 +138,7 @@ const ReportDetailScreen = () => {
               <Text style={$.cardTitle}>{t("tax")}</Text>
             </View>
             <View style={$.cardContent}>
-              <Row
-                label={t("total_tax")}
-                value={formatCurrency(report.totalTax)}
-              />
+              <Row label={t("total_tax")} value={formatCurrency(report.totalTax)} />
             </View>
           </View>
 
@@ -165,10 +148,7 @@ const ReportDetailScreen = () => {
               <Text style={$.cardTitle}>{t("expenses")}</Text>
             </View>
             <View style={$.cardContent}>
-              <Row
-                label={t("total_expenses")}
-                value={formatCurrency(report.totalExpenses)}
-              />
+              <Row label={t("total_expenses")} value={formatCurrency(report.totalExpenses)} />
             </View>
           </View>
 
@@ -179,10 +159,7 @@ const ReportDetailScreen = () => {
                 <Text style={$.cardTitle}>COGS</Text>
               </View>
               <View style={$.cardContent}>
-                <Row
-                  label="Total COGS"
-                  value={formatCurrency(report.totalCogs)}
-                />
+                <Row label="Total COGS" value={formatCurrency(report.totalCogs)} />
               </View>
             </View>
           )}
@@ -230,15 +207,7 @@ const ReportDetailScreen = () => {
   );
 };
 
-const Row = ({
-  label,
-  value,
-  valueStyle,
-}: {
-  label: string;
-  value: string;
-  valueStyle?: any;
-}) => (
+const Row = ({ label, value, valueStyle }: { label: string; value: string; valueStyle?: any }) => (
   <View style={$.row}>
     <Text style={$.rowLabel}>{label}</Text>
     <Text style={[$.rowValue, valueStyle]}>{value}</Text>

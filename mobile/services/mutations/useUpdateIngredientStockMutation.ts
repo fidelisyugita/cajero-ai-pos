@@ -10,13 +10,13 @@ export const useUpdateIngredientStockMutation = () => {
         id,
         type: "INGREDIENT",
         newStock: stock,
-        reason
+        reason,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ingredients"] });
     },
     onError: (error) => {
       Logger.error("Failed to update ingredient stock:", error);
-    }
+    },
   });
 };

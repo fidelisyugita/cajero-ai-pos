@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Modal, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { useEffect, useState } from "react";
+import { KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { t } from "@/services/i18n";
-import { Ingredient } from "@/services/types/Ingredient";
 import { useMeasureUnitsQuery } from "@/services/queries/useMeasureUnitsQuery";
+import type { Ingredient } from "@/services/types/Ingredient";
 
 interface SaveIngredientModalProps {
   visible: boolean;
@@ -45,27 +45,19 @@ const SaveIngredientModal = ({
     });
   };
 
-  const measureUnitOptions = measureUnits?.map((mu) => ({
-    label: mu.code, // using code as label since name might be descriptive
-    value: mu.code,
-  })) || [];
+  const measureUnitOptions =
+    measureUnits?.map((mu) => ({
+      label: mu.code, // using code as label since name might be descriptive
+      value: mu.code,
+    })) || [];
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={$.centeredView}
       >
-        <TouchableOpacity
-          style={$.overlay}
-          activeOpacity={1}
-          onPress={onClose}
-        />
+        <TouchableOpacity style={$.overlay} activeOpacity={1} onPress={onClose} />
         <View style={$.modalView}>
           <Text style={$.modalTitle}>{t("edit_ingredient")}</Text>
 
@@ -97,12 +89,7 @@ const SaveIngredientModal = ({
           </View>
 
           <View style={$.buttonContainer}>
-            <Button
-              title={t("cancel")}
-              variant="secondary"
-              onPress={onClose}
-              style={$.flex}
-            />
+            <Button title={t("cancel")} variant="secondary" onPress={onClose} style={$.flex} />
             <Button
               title={t("save")}
               variant="primary"

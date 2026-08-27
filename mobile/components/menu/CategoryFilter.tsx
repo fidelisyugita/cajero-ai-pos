@@ -7,7 +7,7 @@ const FlashList = ShopifyFlashList as unknown as <T>(
 ) => React.ReactElement;
 
 import { memo, useMemo } from "react";
-import { Alert, type StyleProp, TouchableOpacity, View, type ViewStyle } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";

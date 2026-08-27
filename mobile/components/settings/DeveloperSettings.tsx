@@ -1,13 +1,12 @@
-import { View, Alert, DevSettings } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
-import Button from "@/components/ui/Button";
-import Typography from "@/components/ui/Typography";
-import { db } from "@/db/drizzle";
-import { sql } from "drizzle-orm";
-import { useAuthStore } from "@/store/useAuthStore";
 import * as FileSystem from "expo-file-system/legacy";
 import { useRouter } from "expo-router";
+import { Alert, DevSettings, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import Button from "@/components/ui/Button";
 import FormSectionCard from "@/components/ui/FormSectionCard";
+import Typography from "@/components/ui/Typography";
+import { db } from "@/db/drizzle";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const DeveloperSettings = () => {
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
@@ -29,13 +28,13 @@ const DeveloperSettings = () => {
             try {
               // Close database connection first
               try {
-                // @ts-ignore - invalid type definition for close
+                // @ts-expect-error - invalid type definition for close
                 await db.$client.close();
-              } catch (e) {
+              } catch (_e) {
                 // ignore
               }
 
-              const dbDir = FileSystem.documentDirectory + "SQLite";
+              const dbDir = `${FileSystem.documentDirectory}SQLite`;
               await FileSystem.deleteAsync(dbDir, { idempotent: true });
 
               Alert.alert("Success", "Database reset complete. Reloading app...", [
@@ -45,28 +44,24 @@ const DeveloperSettings = () => {
                     setLoggedIn(false);
                     try {
                       DevSettings.reload();
-                    } catch (e) {
+                    } catch (_e) {
                       router.replace("/(auth)/sign-in");
                     }
                   },
                 },
               ]);
             } catch (error: any) {
-              Alert.alert("Error", "Failed to reset database: " + error.message);
+              Alert.alert("Error", `Failed to reset database: ${error.message}`);
               console.error(error);
             }
           },
         },
-      ]
+      ],
     );
   };
 
   return (
-    <FormSectionCard
-      title="Developer Options"
-      style={{ flex: 1 }}
-      contentStyle={$.container}
-    >
+    <FormSectionCard title="Developer Options" style={{ flex: 1 }} contentStyle={$.container}>
       <View style={$.section}>
         <Typography variant="bodyMd" style={$.description}>
           Use these options to fix local data issues during development.
@@ -78,13 +73,10 @@ const DeveloperSettings = () => {
           </View>
           <View style={$.cardContent}>
             <Typography variant="bodySm" style={{ marginBottom: 16 }}>
-              If you see "missing column" errors, your local database schema is stale. Resetting it will clear local data and fetch fresh data from the server.
+              If you see "missing column" errors, your local database schema is stale. Resetting it
+              will clear local data and fetch fresh data from the server.
             </Typography>
-            <Button
-              title="Reset Database"
-              variant="warning"
-              onPress={handleResetDatabase}
-            />
+            <Button title="Reset Database" variant="warning" onPress={handleResetDatabase} />
           </View>
         </View>
       </View>

@@ -1,14 +1,21 @@
-import api from "@/lib/axios";
-import { db } from "@/db/drizzle";
-import { categories, products, productIngredients, syncStatus, transactions, transactionItems } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { db } from "@/db/drizzle";
+import {
+  categories,
+  productIngredients,
+  products,
+  syncStatus,
+  transactionItems,
+  transactions,
+} from "@/db/schema";
+import api from "@/lib/axios";
 
 // Helper for UUID generation
 const generateUUID = () => {
-  // @ts-ignore
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    var r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 };
@@ -31,33 +38,16 @@ export const SyncService = {
       // Upsert to Local DB
       await db.transaction(async (tx) => {
         for (const p of backendProducts) {
-          await tx.insert(products).values({
-            id: p.id,
-            name: p.name,
-            description: p.description,
-            sellingPrice: p.sellingPrice,
-            buyingPrice: p.buyingPrice,
-            stock: p.stock,
-            categoryId: p.categoryCode, // Backend uses categoryCode
-            imageUrl: p.imageUrl,
-            barcode: p.barcode,
-            tax: p.tax,
-            commission: p.commission,
-            discount: p.discount,
-            measureUnitCode: p.measureUnitCode,
-            measureUnitName: p.measureUnitName,
-            createdAt: p.createdAt ? new Date(p.createdAt) : null,
-            updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
-            deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
-          }).onConflictDoUpdate({
-            target: products.id,
-            set: {
+          await tx
+            .insert(products)
+            .values({
+              id: p.id,
               name: p.name,
               description: p.description,
               sellingPrice: p.sellingPrice,
               buyingPrice: p.buyingPrice,
               stock: p.stock,
-              categoryId: p.categoryCode,
+              categoryId: p.categoryCode, // Backend uses categoryCode
               imageUrl: p.imageUrl,
               barcode: p.barcode,
               tax: p.tax,
@@ -65,10 +55,30 @@ export const SyncService = {
               discount: p.discount,
               measureUnitCode: p.measureUnitCode,
               measureUnitName: p.measureUnitName,
+              createdAt: p.createdAt ? new Date(p.createdAt) : null,
               updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
               deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
-            }
-          });
+            })
+            .onConflictDoUpdate({
+              target: products.id,
+              set: {
+                name: p.name,
+                description: p.description,
+                sellingPrice: p.sellingPrice,
+                buyingPrice: p.buyingPrice,
+                stock: p.stock,
+                categoryId: p.categoryCode,
+                imageUrl: p.imageUrl,
+                barcode: p.barcode,
+                tax: p.tax,
+                commission: p.commission,
+                discount: p.discount,
+                measureUnitCode: p.measureUnitCode,
+                measureUnitName: p.measureUnitName,
+                updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
+                deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
+              },
+            });
 
           // Sync Ingredients
           if (p.ingredients) {
@@ -90,7 +100,9 @@ export const SyncService = {
         }
       });
 
-      await db.insert(syncStatus).values({ tableName: "products", lastSync: new Date() })
+      await db
+        .insert(syncStatus)
+        .values({ tableName: "products", lastSync: new Date() })
         .onConflictDoUpdate({ target: syncStatus.tableName, set: { lastSync: new Date() } });
 
       return true;
@@ -110,22 +122,25 @@ export const SyncService = {
 
       await db.transaction(async (tx) => {
         for (const c of backendCategories) {
-          await tx.insert(categories).values({
-            id: c.code, // Backend uses code as ID for categories in response?
-            name: c.name,
-            description: c.description,
-            createdAt: c.createdAt ? new Date(c.createdAt) : null,
-            updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
-            deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
-          }).onConflictDoUpdate({
-            target: categories.id,
-            set: {
+          await tx
+            .insert(categories)
+            .values({
+              id: c.code, // Backend uses code as ID for categories in response?
               name: c.name,
               description: c.description,
+              createdAt: c.createdAt ? new Date(c.createdAt) : null,
               updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
               deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
-            }
-          });
+            })
+            .onConflictDoUpdate({
+              target: categories.id,
+              set: {
+                name: c.name,
+                description: c.description,
+                updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
+                deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
+              },
+            });
         }
       });
       return true;
@@ -150,31 +165,34 @@ export const SyncService = {
           // Check if exists? Or onConflictDoUpdate.
           // If we trust backend as source of truth for history.
 
-          await tx.insert(transactions).values({
-            id: t.id,
-            storeId: t.storeId,
-            customerId: t.customerId || null,
-            totalPrice: t.totalPrice,
-            totalTax: t.totalTax,
-            totalDiscount: t.totalDiscount,
-            totalCommission: t.totalCommission,
-            paymentMethodCode: t.paymentMethodCode,
-            transactionTypeCode: t.transactionTypeCode,
-            statusCode: t.statusCode,
-            isIn: t.in, // mapped from 'is_in' to 'in' in backend response usually, check backend DTO.
-            // TransactionResponse in backend has `in` boolean field.
-            description: t.description,
-            isSynced: true, // From backend means it is synced
-            createdAt: t.createdAt ? new Date(t.createdAt) : null,
-          }).onConflictDoUpdate({
-            target: transactions.id,
-            set: {
-              statusCode: t.statusCode, // Update status if changed
+          await tx
+            .insert(transactions)
+            .values({
+              id: t.id,
+              storeId: t.storeId,
               customerId: t.customerId || null,
+              totalPrice: t.totalPrice,
+              totalTax: t.totalTax,
+              totalDiscount: t.totalDiscount,
+              totalCommission: t.totalCommission,
+              paymentMethodCode: t.paymentMethodCode,
+              transactionTypeCode: t.transactionTypeCode,
+              statusCode: t.statusCode,
+              isIn: t.in, // mapped from 'is_in' to 'in' in backend response usually, check backend DTO.
+              // TransactionResponse in backend has `in` boolean field.
               description: t.description,
-              isSynced: true
-            }
-          });
+              isSynced: true, // From backend means it is synced
+              createdAt: t.createdAt ? new Date(t.createdAt) : null,
+            })
+            .onConflictDoUpdate({
+              target: transactions.id,
+              set: {
+                statusCode: t.statusCode, // Update status if changed
+                customerId: t.customerId || null,
+                description: t.description,
+                isSynced: true,
+              },
+            });
 
           // Insert Items
           // We need to clear existing for this transaction to avoid dups or handle carefully.
@@ -198,13 +216,15 @@ export const SyncService = {
                 discount: item.discount,
                 note: item.note,
                 selectedVariants: JSON.stringify(item.selectedVariants),
-                productName: item.name
+                productName: item.name,
               });
             }
           }
         }
       });
-      await db.insert(syncStatus).values({ tableName: "transactions", lastSync: new Date() })
+      await db
+        .insert(syncStatus)
+        .values({ tableName: "transactions", lastSync: new Date() })
         .onConflictDoUpdate({ target: syncStatus.tableName, set: { lastSync: new Date() } });
 
       return true;
@@ -223,7 +243,10 @@ export const SyncService = {
       const unsynced = await db.select().from(transactions).where(eq(transactions.isSynced, false));
 
       for (const txn of unsynced) {
-        const items = await db.select().from(transactionItems).where(eq(transactionItems.transactionId, txn.id));
+        const items = await db
+          .select()
+          .from(transactionItems)
+          .where(eq(transactionItems.transactionId, txn.id));
 
         const payload = {
           storeId: txn.storeId,
@@ -238,9 +261,9 @@ export const SyncService = {
           // Map 'isIn' to 'in' if backend expects 'in' (common with Lombok/Jackson boolean isIn)
           in: txn.isIn,
           description: txn.description,
-          transactionProducts: items.map(i => {
+          transactionProducts: items.map((i) => {
             let parsedVariants = i.selectedVariants;
-            if (typeof i.selectedVariants === 'string') {
+            if (typeof i.selectedVariants === "string") {
               try {
                 parsedVariants = JSON.parse(i.selectedVariants);
               } catch (e) {
@@ -257,10 +280,10 @@ export const SyncService = {
               discount: i.discount || 0,
               tax: i.tax || 0,
               note: i.note,
-              selectedVariants: parsedVariants
+              selectedVariants: parsedVariants,
             };
           }),
-          createdAt: txn.createdAt ? txn.createdAt.toISOString() : undefined // Send local creation time
+          createdAt: txn.createdAt ? txn.createdAt.toISOString() : undefined, // Send local creation time
         };
 
         // Send to API
@@ -269,7 +292,10 @@ export const SyncService = {
 
         await db.transaction(async (tx) => {
           // Check if the backend ID already exists locally (e.g. from a pull sync)
-          const existing = await tx.select().from(transactions).where(eq(transactions.id, backendTxn.id));
+          const existing = await tx
+            .select()
+            .from(transactions)
+            .where(eq(transactions.id, backendTxn.id));
 
           if (existing.length > 0) {
             // Duplicate exists. The 'local' one is redundant. Delete local.
@@ -278,13 +304,15 @@ export const SyncService = {
           } else {
             // Update local ID to match backend ID and update calculated fields
             // First update items to point to new ID
-            await tx.update(transactionItems)
+            await tx
+              .update(transactionItems)
               .set({ transactionId: backendTxn.id })
               .where(eq(transactionItems.transactionId, txn.id));
-            
+
             // Then update the transaction itself
-            await tx.update(transactions)
-              .set({ 
+            await tx
+              .update(transactions)
+              .set({
                 id: backendTxn.id,
                 isSynced: true,
                 // Update fields that might differ (tax, totals from backend calculation)
@@ -292,7 +320,7 @@ export const SyncService = {
                 totalTax: backendTxn.totalTax,
                 totalDiscount: backendTxn.totalDiscount,
                 totalCommission: backendTxn.totalCommission,
-                createdAt: backendTxn.createdAt ? new Date(backendTxn.createdAt) : txn.createdAt
+                createdAt: backendTxn.createdAt ? new Date(backendTxn.createdAt) : txn.createdAt,
               })
               .where(eq(transactions.id, txn.id));
           }
@@ -323,5 +351,5 @@ export const SyncService = {
       Logger.error("Failed to get unsynced count", e);
       return 0;
     }
-  }
+  },
 };

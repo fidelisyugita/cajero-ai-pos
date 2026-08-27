@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPettyCash, CreatePettyCashRequest } from "../endpoints/createPettyCash";
+import { type CreatePettyCashRequest, createPettyCash } from "../endpoints/createPettyCash";
 
 export const useCreatePettyCashMutation = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (data: CreatePettyCashRequest) => createPettyCash(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["petty-cash"] });
-        },
-    });
+  return useMutation({
+    mutationFn: (data: CreatePettyCashRequest) => createPettyCash(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["petty-cash"] });
+    },
+  });
 };

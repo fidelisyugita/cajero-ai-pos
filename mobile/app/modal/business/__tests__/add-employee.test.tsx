@@ -1,6 +1,5 @@
-import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 import { router } from "expo-router";
-import type React from "react";
 import { useCreateUserMutation } from "@/services/mutations/useCreateUserMutation";
 import AddEmployeeModal from "../add-employee";
 

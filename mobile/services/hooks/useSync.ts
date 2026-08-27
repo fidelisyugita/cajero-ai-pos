@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { SyncService } from "../SyncService";
+import { queryClient } from "@/lib/ReactQuery";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSyncStore } from "@/store/useSyncStore";
-import { queryClient } from "@/lib/ReactQuery";
 import Logger from "../logger";
+import { SyncService } from "../SyncService";
 
 export const useSync = () => {
   const { isLoggedIn } = useAuthStore();
@@ -33,5 +33,5 @@ export const useSync = () => {
     // Interval sync (only if logged in)
     const interval = setInterval(sync, 5 * 60 * 1000); // 5 mins
     return () => clearInterval(interval);
-  }, [isLoggedIn]); // Re-run when login status changes
+  }, [isLoggedIn, setLastSyncTime, setIsSyncing]); // Re-run when login status changes
 };

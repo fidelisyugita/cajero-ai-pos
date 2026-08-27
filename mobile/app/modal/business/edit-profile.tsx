@@ -2,9 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, View, ScrollView, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
 import IcAddImage from "@/assets/icons/add-image.svg";
@@ -12,11 +11,11 @@ import IcAddImage from "@/assets/icons/add-image.svg";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal";
-import { vs } from "@/utils/Scale";
+import Logger from "@/services/logger";
 import { useUpdateUserMutation } from "@/services/mutations/useUpdateUserMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
-import { User } from "@/services/types/User";
-import Logger from "@/services/logger";
+import type { User } from "@/services/types/User";
+import { vs } from "@/utils/Scale";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -27,7 +26,7 @@ const profileSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(
       /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
-      "Password must contain at least one uppercase, one lowercase, and one number"
+      "Password must contain at least one uppercase, one lowercase, and one number",
     )
     .optional()
     .or(z.literal("")),
@@ -44,30 +43,18 @@ const EditProfileModal = () => {
   const { mutateAsync: updateUser, isPending } = useUpdateUserMutation();
   const { mutateAsync: uploadImage, isPending: isUploadingImage } = useUploadImageMutation();
 
-  const { control, handleSubmit, reset, setValue, watch } = useForm<ProfileFormData>({
+  const { control, handleSubmit, setValue, watch } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
+    values: {
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
       password: "",
-      imageUrl: "",
+      imageUrl: user?.imageUrl || "",
     },
   });
 
   const currentImageUrl = watch("imageUrl");
-
-  useEffect(() => {
-    if (user) {
-      reset({
-        name: user.name,
-        email: user.email,
-        phone: user.phone || "",
-        password: "", // Don't pre-fill password
-        imageUrl: user.imageUrl || "",
-      });
-    }
-  }, [userData]);
 
   const handleUploadPress = async () => {
     try {
@@ -103,7 +90,7 @@ const EditProfileModal = () => {
       // Filter out empty password if not changing it
       const payload: any = { ...data };
       if (!payload.password) {
-        delete payload.password;
+        payload.password = undefined;
       }
 
       await updateUser({ id: user.id, data: payload });
@@ -121,11 +108,18 @@ const EditProfileModal = () => {
       <ScreenModal.Body>
         <View style={$.container}>
           <ScrollView contentContainerStyle={$.scrollContent}>
-
             <View style={$.imageSection}>
-              <TouchableOpacity onPress={handleUploadPress} activeOpacity={0.8} disabled={isUploadingImage}>
+              <TouchableOpacity
+                onPress={handleUploadPress}
+                activeOpacity={0.8}
+                disabled={isUploadingImage}
+              >
                 {currentImageUrl ? (
-                  <Image source={{ uri: currentImageUrl }} style={$.imagePreview} contentFit="cover" />
+                  <Image
+                    source={{ uri: currentImageUrl }}
+                    style={$.imagePreview}
+                    contentFit="cover"
+                  />
                 ) : (
                   <View style={$.imagePlaceholder}>
                     {isUploadingImage ? (
@@ -136,7 +130,11 @@ const EditProfileModal = () => {
                   </View>
                 )}
               </TouchableOpacity>
-              {isUploadingImage && <View style={$.uploadingBadge}><View style={$.loadingDot} /></View>}
+              {isUploadingImage && (
+                <View style={$.uploadingBadge}>
+                  <View style={$.loadingDot} />
+                </View>
+              )}
             </View>
 
             <View style={$.form}>
@@ -165,7 +163,7 @@ const EditProfileModal = () => {
                     size="lg"
                     keyboardType="email-address"
                     autoCapitalize="none"
-                  // readOnly? Assuming user can change email
+                    // readOnly? Assuming user can change email
                   />
                 )}
               />
@@ -279,9 +277,9 @@ const $ = StyleSheet.create((theme) => ({
     borderRadius: 10,
   },
   uploadingBadge: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
-    right: '50%',
+    right: "50%",
     marginRight: -vs(50), // Align with edge of image
     backgroundColor: theme.colors.primary[500],
     width: 20,
@@ -293,7 +291,7 @@ const $ = StyleSheet.create((theme) => ({
   loadingDot: {
     width: 8,
     height: 8,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 4,
   },
 }));

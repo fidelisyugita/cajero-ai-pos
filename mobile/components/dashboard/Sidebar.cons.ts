@@ -16,50 +16,50 @@ import IcBusiness0 from "@/assets/icons/store-0.svg";
 import IcBusiness1 from "@/assets/icons/store-1.svg";
 
 export const LIST_SIDEBAR_ITEMS = [
-	{
-		Icon: [IcMenu0, IcMenu1],
-		label: "Menu",
-		path: "/(dashboard)/menu",
-	},
-	{
-		Icon: [IcReceipts0, IcReceipts1],
-		label: "Receipts",
-		path: "/(dashboard)/receipt",
-	},
-	{
-		Icon: [IcStock0, IcStock1],
-		label: "Stock",
-		path: "/(dashboard)/stock",
-	},
-	{
-		Icon: [IcExpenses0, IcExpenses1],
-		label: "Expenses",
-		path: "/(dashboard)/expense",
-	},
-	{
-		Icon: [IcReport0, IcReport1],
-		label: "Report",
-		path: "/(dashboard)/report",
-	},
-	{
-		Icon: [IcBusiness0, IcBusiness1],
-		label: "Business",
-		path: "/(dashboard)/business",
-	},
-	// Attendance is not implemented yet
-	// {
-	// 	Icon: [IcAttendance0, IcAttendance1],
-	// 	label: "Attendance",
-	// 	path: "/(dashboard)/attendance",
-	// },
-	{
-		Icon: [IcAttendance0, IcAttendance1],
-		label: "Assistant",
-		path: "/(dashboard)/ai-chat",
-	},
-	{
-		Icon: [IcSettings0, IcSettings1],
-		label: "Settings",
-		path: "/(dashboard)/settings",
-	},
+  {
+    Icon: [IcMenu0, IcMenu1],
+    label: "Menu",
+    path: "/(dashboard)/menu",
+  },
+  {
+    Icon: [IcReceipts0, IcReceipts1],
+    label: "Receipts",
+    path: "/(dashboard)/receipt",
+  },
+  {
+    Icon: [IcStock0, IcStock1],
+    label: "Stock",
+    path: "/(dashboard)/stock",
+  },
+  {
+    Icon: [IcExpenses0, IcExpenses1],
+    label: "Expenses",
+    path: "/(dashboard)/expense",
+  },
+  {
+    Icon: [IcReport0, IcReport1],
+    label: "Report",
+    path: "/(dashboard)/report",
+  },
+  {
+    Icon: [IcBusiness0, IcBusiness1],
+    label: "Business",
+    path: "/(dashboard)/business",
+  },
+  // Attendance is not implemented yet
+  // {
+  // 	Icon: [IcAttendance0, IcAttendance1],
+  // 	label: "Attendance",
+  // 	path: "/(dashboard)/attendance",
+  // },
+  {
+    Icon: [IcAttendance0, IcAttendance1],
+    label: "Assistant",
+    path: "/(dashboard)/ai-chat",
+  },
+  {
+    Icon: [IcSettings0, IcSettings1],
+    label: "Settings",
+    path: "/(dashboard)/settings",
+  },
 ];

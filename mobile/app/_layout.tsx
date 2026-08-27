@@ -4,6 +4,7 @@ import { useCustomFonts } from "@/config/useCustomFonts";
 import "react-native-reanimated";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
+import { LogBox } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AnalyticsProvider } from "@/components/providers/AnalyticsProvider";
 import { PosErrorBoundary } from "@/components/ui/PosErrorBoundary";
@@ -12,7 +13,6 @@ import { queryClient } from "@/lib/ReactQuery";
 import { initSentry, wrapRootComponent } from "@/lib/sentry";
 import { useSync } from "@/services/hooks/useSync";
 import { useAuthStore } from "@/store/useAuthStore";
-import { LogBox } from "react-native";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 
 initSentry();
@@ -49,7 +49,13 @@ const InitialLayout = () => {
       // Using replace to avoid back button issues.
       router.replace("/(auth)/sign-in");
     }
-  }, [isLoggedIn, segments, loaded]);
+  }, [
+    isLoggedIn,
+    segments,
+    loaded, // If not logged in and not in auth group, redirect to sign-in.
+    // Using replace to avoid back button issues.
+    router.replace,
+  ]);
 
   if (!loaded) {
     return <Slot />;

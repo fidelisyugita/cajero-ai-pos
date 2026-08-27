@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Modal, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { useEffect, useState } from "react";
+import { KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -39,21 +39,12 @@ const SaveVariantOptionModal = ({
   };
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={$.centeredView}
       >
-        <TouchableOpacity
-          style={$.overlay}
-          activeOpacity={1}
-          onPress={onClose}
-        />
+        <TouchableOpacity style={$.overlay} activeOpacity={1} onPress={onClose} />
         <View style={$.modalView}>
           <Text style={$.modalTitle}>{t("edit_option") || "Edit Option"}</Text>
 
@@ -62,7 +53,7 @@ const SaveVariantOptionModal = ({
               label={t("name")}
               value={name}
               onChangeText={setName}
-              placeholder={t("option_name") || "Option Name"}
+              placeholder={t("option") || "Option Name"}
             />
 
             <Input
@@ -75,12 +66,7 @@ const SaveVariantOptionModal = ({
           </View>
 
           <View style={$.buttonContainer}>
-            <Button
-              title={t("cancel")}
-              variant="secondary"
-              onPress={onClose}
-              style={$.flex}
-            />
+            <Button title={t("cancel")} variant="secondary" onPress={onClose} style={$.flex} />
             <Button
               title={t("save")}
               variant="primary"

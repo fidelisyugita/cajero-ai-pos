@@ -1,19 +1,15 @@
-import { View, Text } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { ReportSummary as ReportSummaryType } from "@/services/types/Report";
+import type { ReportSummary as ReportSummaryType } from "@/services/types/Report";
 import { formatCurrency } from "@/utils/Format";
-import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
-import Button from "@/components/ui/Button";
 
 interface ReportSummaryProps {
   summary: ReportSummaryType;
   includeCogs?: boolean;
 }
 
-const ReportSummary = ({
-  summary,
-  includeCogs = false,
-}: ReportSummaryProps) => {
+const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => {
   // Calculate adjusted net revenue when COGS is included
   const adjustedNetRevenue = includeCogs
     ? summary.totalNetRevenue - (summary.totalCogs || 0)

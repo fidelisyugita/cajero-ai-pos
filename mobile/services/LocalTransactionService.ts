@@ -1,15 +1,17 @@
+import { and, eq, like, or, sql } from "drizzle-orm";
 import { db } from "@/db/drizzle";
-import { transactions, transactionItems, products, productIngredients } from "@/db/schema";
-import { TransactionRequest } from "./types/Transaction";
+import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
-import { eq, sql, and, like, or } from "drizzle-orm";
-// We need a way to generate UUIDs. 
+import type { TransactionRequest } from "./types/Transaction";
+
+// We need a way to generate UUIDs.
 // Since we are in Expo/RN, we can use crypto.randomUUID if available or a fallback.
 const generateUUID = () => {
   // Simple fallback if crypto not available globally in context
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    var r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 };
@@ -44,9 +46,11 @@ export const LocalTransactionService = {
 
       // Insert Items
       for (const item of request.transactionProducts) {
-
         // Fetch product name from DB to store in snapshot
-        const productRes = await tx.select({ name: products.name }).from(products).where(eq(products.id, item.productId));
+        const productRes = await tx
+          .select({ name: products.name })
+          .from(products)
+          .where(eq(products.id, item.productId));
         const productName = productRes[0]?.name || "Unknown Product";
 
         await tx.insert(transactionItems).values({
@@ -67,7 +71,7 @@ export const LocalTransactionService = {
         // Update Stock (Optimistic)
         // We decrement stock in `products` table
         await tx.run(
-          sql`UPDATE ${products} SET stock = stock - ${item.quantity} WHERE id = ${item.productId}`
+          sql`UPDATE ${products} SET stock = stock - ${item.quantity} WHERE id = ${item.productId}`,
         );
       }
     });
@@ -104,16 +108,16 @@ export const LocalTransactionService = {
 
     if (params.search) {
       const searchPattern = `%${params.search}%`;
-      conditions.push(or(
-        like(transactions.id, searchPattern),
-        like(transactions.description, searchPattern)
-      ));
+      conditions.push(
+        or(like(transactions.id, searchPattern), like(transactions.description, searchPattern)),
+      );
     }
 
     // Combine conditions
     const finalCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const result = await db.select()
+    const result = await db
+      .select()
       .from(transactions)
       .where(finalCondition)
       .limit(size)
@@ -125,7 +129,7 @@ export const LocalTransactionService = {
     // But the UI shows "Total Order" count. So we might need a join or subquery?
     // Or just lazy load? Or better: check if `transactions` table has simplified counts.
     // It has `totalPrice`, `totalTax` etc.
-    // The UI shows `item.transactionProduct?.length`. 
+    // The UI shows `item.transactionProduct?.length`.
     // We didn't store transactionProduct list in `transactions` table JSON.
     // We stored `transactionItems` separately.
     // We can do a left join or just fetch items count query.
@@ -135,16 +139,21 @@ export const LocalTransactionService = {
     // Or use `with` / `join`.
     // Drizzle specific:
 
-    return Promise.all(result.map(async (txn) => {
-      const items = await db.select().from(transactionItems).where(eq(transactionItems.transactionId, txn.id));
-      return {
-        ...txn,
-        transactionProduct: items, // Map to expected structure if needed, but length usage is key
-        id: txn.id,
-        createdAt: txn.createdAt ? new Date(txn.createdAt).toISOString() : "",
-        updatedAt: "", // Not tracked in local list query mostly
-      };
-    }));
+    return Promise.all(
+      result.map(async (txn) => {
+        const items = await db
+          .select()
+          .from(transactionItems)
+          .where(eq(transactionItems.transactionId, txn.id));
+        return {
+          ...txn,
+          transactionProduct: items, // Map to expected structure if needed, but length usage is key
+          id: txn.id,
+          createdAt: txn.createdAt ? new Date(txn.createdAt).toISOString() : "",
+          updatedAt: "", // Not tracked in local list query mostly
+        };
+      }),
+    );
   },
   async getTransactionById(id: string) {
     const result = await db.select().from(transactions).where(eq(transactions.id, id));
@@ -152,10 +161,11 @@ export const LocalTransactionService = {
     const txn = result[0];
 
     // Join with products table to ensure we have the name if the snapshot is missing
-    const items = await db.select({
-      item: transactionItems,
-      product: products
-    })
+    const items = await db
+      .select({
+        item: transactionItems,
+        product: products,
+      })
       .from(transactionItems)
       .leftJoin(products, eq(transactionItems.productId, products.id))
       .where(eq(transactionItems.transactionId, id));

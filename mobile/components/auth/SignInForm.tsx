@@ -7,17 +7,18 @@ import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
 import IcEyeClose from "@/assets/icons/eye-fill-close.svg";
 import IcEyeOpen from "@/assets/icons/eye-fill-open.svg";
+import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import Input from "@/components/ui/Input";
+import alertService from "@/services/AlertService";
 import { getStore } from "@/services/endpoints/getStore";
+import { t } from "@/services/i18n";
+import Logger from "@/services/logger";
+import { useSignInOwnerMutation } from "@/services/mutations/useSignInMutation";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
-import alertService from "../../services/AlertService";
-import { t } from "../../services/i18n";
-import { useSignInOwnerMutation } from "../../services/mutations/useSignInMutation";
-import { useAuthStore } from "../../store/useAuthStore";
-import { useLoadingStore } from "../../store/useLoadingStore";
-import { vs } from "../../utils/Scale";
-import Button from "../ui/Button";
-import IconButton from "../ui/IconButton";
-import Input from "../ui/Input";
+import { useLoadingStore } from "@/store/useLoadingStore";
+import { vs } from "@/utils/Scale";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -70,7 +71,7 @@ const SignInForm = () => {
 
       router.replace("/(dashboard)");
     } catch (error) {
-      console.warn("Sign in failed:", error);
+      Logger.warn("Sign in failed:", error);
       alertService.error(t("sign_in_failed"), t("incorrect_email_or_password"));
     } finally {
       hideLoading();
@@ -142,7 +143,6 @@ const SignInForm = () => {
             />
           )}
         />
-        {/* <Button size="md" title="Forgot Password?" variant="link" /> */}
       </View>
 
       <View style={$.buttonWrapper}>
@@ -153,21 +153,6 @@ const SignInForm = () => {
           title={t("sign_in")}
           variant="primary"
         />
-
-        {/* <View style={$.separatorContainer}>
-          <View style={$.separatorLine} />
-          <Text style={$.or}>{t("or")}</Text>
-          <View style={$.separatorLine} />
-        </View>
-
-        <Button
-          isLoading={false}
-          leftIcon={() => <IcGoogle height={vs(24)} width={vs(24)} />}
-          onPress={() => onGoogleSignIn()}
-          size="lg"
-          title={t("sign_in_google")}
-          variant="secondary"
-        /> */}
       </View>
     </>
   );

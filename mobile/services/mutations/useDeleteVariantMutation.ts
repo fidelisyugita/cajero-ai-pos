@@ -3,17 +3,17 @@ import api from "@/lib/axios";
 import type { Variant } from "@/services/types/Variant";
 
 const deleteVariant = async (id: string): Promise<Variant> => {
-    const response = await api.delete<Variant>(`/variant/${id}`);
-    return response.data;
+  const response = await api.delete<Variant>(`/variant/${id}`);
+  return response.data;
 };
 
 export const useDeleteVariantMutation = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: deleteVariant,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["variants"] });
-        },
-    });
+  return useMutation({
+    mutationFn: deleteVariant,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["variants"] });
+    },
+  });
 };

@@ -3,13 +3,13 @@ import en from "./locales/en";
 import id from "./locales/id";
 
 const translations = {
-	en,
-	id,
+  en,
+  id,
 };
 
 export const t = (key: keyof typeof en) => {
-	const language = useLanguageStore.getState().language;
-	return translations[language][key] || key;
+  const language = useLanguageStore.getState().language;
+  return translations[language][key] || key;
 };
 
 // Hook version if needed for reactivity in some cases, though usually direct store access + t() works if component re-renders on store change.

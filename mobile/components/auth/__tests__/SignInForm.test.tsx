@@ -3,6 +3,7 @@ import { mockRouter } from "@/jest.setup";
 import alertService from "@/services/AlertService";
 import { getStore } from "@/services/endpoints/getStore";
 import * as useSignInMutationModule from "@/services/mutations/useSignInMutation";
+import type { AuthUser } from "@/services/types/Auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { useLoadingStore } from "@/store/useLoadingStore";
@@ -32,7 +33,7 @@ describe("SignInForm component", () => {
 
     jest.spyOn(useSignInMutationModule, "useSignInOwnerMutation").mockReturnValue({
       mutateAsync: mockMutateAsync,
-    } as any);
+    } as unknown as ReturnType<typeof useSignInMutationModule.useSignInOwnerMutation>);
 
     (getStore as jest.Mock).mockResolvedValue({
       id: "store-123",
@@ -109,12 +110,18 @@ describe("SignInForm component", () => {
   });
 
   it("handles successful sign in with store fetch and dashboard navigation", async () => {
-    const mockUser = {
+    const mockUser: AuthUser = {
       id: "user-1",
       email: "owner@cajero.app",
       name: "Owner User",
+      phone: null,
       storeId: "store-123",
-      role: "OWNER",
+      roleCode: "OWNER",
+      imageUrl: null,
+      accessToken: "mock-token",
+      refreshToken: "mock-refresh-token",
+      createdAt: null,
+      updatedAt: null,
     };
     mockMutateAsync.mockResolvedValueOnce(mockUser);
 
@@ -146,11 +153,18 @@ describe("SignInForm component", () => {
   });
 
   it("handles successful sign in when user has no storeId", async () => {
-    const mockUserWithoutStore = {
+    const mockUserWithoutStore: AuthUser = {
       id: "user-2",
       email: "nostore@cajero.app",
       name: "New Owner",
-      role: "OWNER",
+      phone: null,
+      storeId: "",
+      roleCode: "OWNER",
+      imageUrl: null,
+      accessToken: "mock-token",
+      refreshToken: "mock-refresh-token",
+      createdAt: null,
+      updatedAt: null,
     };
     mockMutateAsync.mockResolvedValueOnce(mockUserWithoutStore);
 
