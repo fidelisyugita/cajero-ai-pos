@@ -2,19 +2,8 @@ import { and, eq, like, or, sql } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
+import { generateUUID } from "@/utils/Uuid";
 import type { TransactionRequest } from "./types/Transaction";
-
-// We need a way to generate UUIDs.
-// Since we are in Expo/RN, we can use crypto.randomUUID if available or a fallback.
-const generateUUID = () => {
-  // Simple fallback if crypto not available globally in context
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    var r = (Math.random() * 16) | 0,
-      v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
 
 export const LocalTransactionService = {
   async createTransaction(request: TransactionRequest) {

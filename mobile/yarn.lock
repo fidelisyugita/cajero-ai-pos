@@ -4637,6 +4637,7 @@ __metadata:
     expo-blur: "npm:~57.0.2"
     expo-build-properties: "npm:~57.0.14"
     expo-constants: "npm:~57.0.14"
+    expo-crypto: "npm:^57.0.2"
     expo-dev-client: "npm:~57.0.15"
     expo-drizzle-studio-plugin: "npm:^0.2.1"
     expo-file-system: "npm:~57.0.5"
@@ -4647,6 +4648,7 @@ __metadata:
     expo-linear-gradient: "npm:~57.0.1"
     expo-linking: "npm:~57.0.7"
     expo-router: "npm:~57.0.16"
+    expo-secure-store: "npm:^57.0.2"
     expo-splash-screen: "npm:~57.0.8"
     expo-sqlite: "npm:~57.0.1"
     expo-status-bar: "npm:~57.0.1"
@@ -6100,6 +6102,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-crypto@npm:^57.0.2":
+  version: 57.0.2
+  resolution: "expo-crypto@npm:57.0.2"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/7656f05f6f3cd35c2c12529535d0b55f428d82596fad107bfe68438c5e303233d1dd82da6c8c429587ace94d47ea1aade333f25a76bb01020784b21adf75a000
+  languageName: node
+  linkType: hard
+
 "expo-dev-client@npm:~57.0.15":
   version: 57.0.15
   resolution: "expo-dev-client@npm:57.0.15"
@@ -6394,6 +6405,15 @@ __metadata:
     react-server-dom-webpack:
       optional: true
   checksum: 10c0/df41ac2bf81ede35c0cf9bbddf70ea5f2008d52ee6629bfa28219e84900277d3df116794bf1653e9da0fc5c92cdd003644a37466060b69b4c3746e7c142684f8
+  languageName: node
+  linkType: hard
+
+"expo-secure-store@npm:^57.0.2":
+  version: 57.0.2
+  resolution: "expo-secure-store@npm:57.0.2"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/93f8a7e110530b6a5ec0cc06eeb4ae0a3f7383b2c2da05222fc5923930a5784fc5bcc05d6d2422415d1fdb86d43026487bfff3eff170b336792772e9614a1f98
   languageName: node
   linkType: hard
 
