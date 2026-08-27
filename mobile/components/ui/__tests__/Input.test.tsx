@@ -9,10 +9,77 @@ describe("Input component", () => {
     expect(screen.getByPlaceholderText("Enter username")).toBeTruthy();
   });
 
-  it("renders label when provided and defaults placeholder to label if none given", async () => {
+  it("renders label and defaults placeholder to label if none given", async () => {
     await render(<Input label="Email Address" />);
 
     expect(screen.getByText("Email Address")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Email Address")).toBeTruthy();
+  });
+
+  it("does not float label on focus alone when input is empty", async () => {
+    await render(<Input label="Email Address" testID="email-input" />);
+
+    const input = screen.getByTestId("email-input");
+    expect(screen.getByPlaceholderText("Email Address")).toBeTruthy();
+
+    await act(async () => {
+      fireEvent(input, "focus");
+    });
+
+    // Still retains placeholder when focused without content
+    expect(screen.getByPlaceholderText("Email Address")).toBeTruthy();
+  });
+
+  it("floats label when text is typed and returns to placeholder when cleared while focused", async () => {
+    await render(<Input label="Email Address" testID="email-input" />);
+
+    const input = screen.getByTestId("email-input");
+
+    // Focus input - label does not float
+    await act(async () => {
+      fireEvent(input, "focus");
+    });
+    expect(screen.getByPlaceholderText("Email Address")).toBeTruthy();
+
+    // Type text into input
+    await act(async () => {
+      fireEvent.changeText(input, "test@example.com");
+    });
+
+    // Clear text while still focused
+    await act(async () => {
+      fireEvent.changeText(input, "");
+    });
+
+    // Label should immediately return as placeholder inside input
+    expect(screen.getByPlaceholderText("Email Address")).toBeTruthy();
+  });
+
+  it("shows custom placeholder when empty if both label and placeholder are provided", async () => {
+    await render(
+      <Input label="Email Address" placeholder="name@example.com" testID="email-input" />,
+    );
+
+    expect(screen.getByPlaceholderText("name@example.com")).toBeTruthy();
+
+    const input = screen.getByTestId("email-input");
+    await act(async () => {
+      fireEvent(input, "focus");
+    });
+
+    // When focused and empty, continues to show the custom placeholder
+    expect(screen.getByPlaceholderText("name@example.com")).toBeTruthy();
+  });
+
+  it("handles controlled value correctly when value is provided vs empty", async () => {
+    const { rerender } = await render(
+      <Input label="Email Address" testID="email-input" value="user@test.com" />,
+    );
+
+    expect(screen.getByText("Email Address")).toBeTruthy();
+
+    await rerender(<Input label="Email Address" testID="email-input" value="" />);
+
     expect(screen.getByPlaceholderText("Email Address")).toBeTruthy();
   });
 

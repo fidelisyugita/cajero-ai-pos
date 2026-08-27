@@ -1,4 +1,4 @@
-import { forwardRef, memo, useState } from "react";
+import { forwardRef, memo, useEffect, useState } from "react";
 import {
   type StyleProp,
   Text,
@@ -91,16 +91,29 @@ const stylesheet = StyleSheet.create((theme) => ({
   },
   labelContainer: {
     position: "absolute",
+    top: -vs(9),
     left: vs(16),
     paddingHorizontal: vs(6),
     zIndex: 4,
+    backgroundColor: "transparent",
+  },
+  labelBackgroundBottom: {
+    position: "absolute",
+    top: "35%",
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: theme.colors.neutral[100],
     variants: {
       error: { true: { backgroundColor: theme.colors.error[100] } },
+      disabled: {
+        true: { backgroundColor: theme.colors.neutral[100] },
+      },
     },
   },
   // Label styles separate from animation to avoid complex dynamic Unistyle functions if prone to errors
   labelBase: {
+    ...theme.typography.bodySm,
     color: theme.colors.neutral[600],
     variants: {
       error: { true: { color: theme.colors.error[500] } },
@@ -121,25 +134,25 @@ interface AnimatedLabelProps {
 
 // Separated Label component to handle Reanimated style properly
 const AnimatedLabel = ({ label, isValueExisting, styles }: AnimatedLabelProps) => {
-  // We can use Reanimated for smooth transitions instead of CSS transitions which Unistyles supports but might be tricky in pure React Native without valid props support
   // Calculate value outside of worklet to avoid crash (vs is not a worklet)
-  const translateYValue = -vs(30);
+  const translateYOffset = vs(4);
 
   const animStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          translateY: withTiming(isValueExisting ? translateYValue : 0, {
-            duration: 300,
+          translateY: withTiming(isValueExisting ? 0 : translateYOffset, {
+            duration: 200,
           }),
         },
       ],
-      opacity: withTiming(isValueExisting ? 1 : 0, { duration: 300 }),
+      opacity: withTiming(isValueExisting ? 1 : 0, { duration: 200 }),
     };
   });
 
   return (
-    <Animated.View style={[styles.labelContainer, animStyle]}>
+    <Animated.View pointerEvents="none" style={[styles.labelContainer, animStyle]}>
+      <View style={styles.labelBackgroundBottom} />
       <Animated.Text style={styles.labelBase}>{label}</Animated.Text>
     </Animated.View>
   );
@@ -153,6 +166,7 @@ const Input = forwardRef<TextInput, InputProps>(
   (
     {
       containerStyle,
+      defaultValue,
       editable = true,
       error,
       size = "md",
@@ -164,22 +178,29 @@ const Input = forwardRef<TextInput, InputProps>(
       value,
       maxValue,
       minValue,
-      style, // Destructure style here
+      style,
       ...rest
     },
     ref,
   ) => {
     const [isFocused, setIsFocused] = useState<boolean>(false);
+    const [hasText, setHasText] = useState<boolean>(Boolean(value ?? defaultValue));
 
-    const [hasText, setHasText] = useState(!!value);
+    useEffect(() => {
+      if (value !== undefined) {
+        setHasText(Boolean(value));
+      } else if (defaultValue !== undefined) {
+        setHasText(Boolean(defaultValue));
+      }
+    }, [value, defaultValue]);
 
-    const isValueExisting = hasText || !!value || isFocused;
-    // Should show label if focused too? Usually yes for floating labels.
-    // Added isFocused check for floating label behavior.
+    const isControlled = value !== undefined;
+    const hasContent = isControlled ? Boolean(value) : hasText;
 
-    if (!placeholder) {
-      placeholder = label;
-    }
+    const isFloating = Boolean(label) && hasContent;
+    const isValueExisting = hasContent || isFocused;
+
+    const activePlaceholder = !isFloating ? placeholder || label || "" : placeholder || "";
 
     stylesheet.useVariants({
       size,
@@ -194,13 +215,14 @@ const Input = forwardRef<TextInput, InputProps>(
       <View style={[stylesheet.container, containerStyle]}>
         <View style={stylesheet.outline}>
           {!!label && (
-            <AnimatedLabel label={label} isValueExisting={isValueExisting} styles={stylesheet} />
+            <AnimatedLabel label={label} isValueExisting={isFloating} styles={stylesheet} />
           )}
 
           {left}
 
           <UniTextInput
             ref={ref}
+            defaultValue={defaultValue}
             disableFullscreenUI={true}
             editable={editable}
             onBlur={(e) => {
@@ -215,15 +237,13 @@ const Input = forwardRef<TextInput, InputProps>(
                 }
               }
               onChangeText?.(text);
-              setHasText(!!text);
+              setHasText(Boolean(text));
             }}
             onFocus={(e) => {
               setIsFocused(true);
               rest.onFocus?.(e);
             }}
-            placeholder={!isValueExisting ? placeholder : ""}
-            // If label exists and is not floating (not existing), hide placeholder to avoid overlap?
-            // Material design usually: placeholder shown when focused.
+            placeholder={activePlaceholder}
             value={value}
             style={[
               stylesheet.input,
