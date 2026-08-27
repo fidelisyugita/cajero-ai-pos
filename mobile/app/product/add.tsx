@@ -91,9 +91,6 @@ const AddProduct = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isEditing = !!id;
 
-  // const [isStockManagementEnabled, setIsStockManagementEnabled] =
-  // 	useState<boolean>(false);
-
   const { mutateAsync: addProduct } = useCreateProductMutation();
   const { mutateAsync: updateProduct } = useUpdateProductMutation();
   const { mutateAsync: deleteProduct } = useDeleteProductMutation();

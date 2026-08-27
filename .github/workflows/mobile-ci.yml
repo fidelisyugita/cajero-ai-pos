@@ -58,6 +58,9 @@ jobs:
       - name: Biome Linter Check
         run: yarn lint
 
+      - name: Code Hygiene & Comment Density Check
+        run: yarn lint:hygiene
+
       - name: Biome Formatter Check
         run: yarn format:check
 
