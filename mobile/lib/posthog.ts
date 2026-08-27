@@ -57,7 +57,7 @@ export const captureAnalyticsEvent = <E extends AnalyticsEventName>(
   event: E,
   properties: AnalyticsEventMap[E],
 ): void => {
-  if (!isPostHogEnabled || !posthogClient) return;
+  if (!(isPostHogEnabled && posthogClient)) return;
 
   try {
     const sanitizedProperties = sanitizeTelemetry(properties);
@@ -72,7 +72,7 @@ export const captureAnalyticsEvent = <E extends AnalyticsEventName>(
  * Identify the authenticated cashier or store owner in PostHog.
  */
 export const identifyAnalyticsUser = (distinctId: string, traits?: UserTraits): void => {
-  if (!isPostHogEnabled || !posthogClient) return;
+  if (!(isPostHogEnabled && posthogClient)) return;
 
   try {
     const sanitizedTraits = traits ? sanitizeTelemetry(traits) : undefined;
@@ -87,7 +87,7 @@ export const identifyAnalyticsUser = (distinctId: string, traits?: UserTraits): 
  * Reset PostHog user identity on logout.
  */
 export const resetAnalyticsUser = (): void => {
-  if (!isPostHogEnabled || !posthogClient) return;
+  if (!(isPostHogEnabled && posthogClient)) return;
 
   try {
     posthogClient.reset();
@@ -103,7 +103,7 @@ export const trackAnalyticsScreen = (
   screenName: string,
   properties?: Partial<ScreenViewProperties>,
 ): void => {
-  if (!isPostHogEnabled || !posthogClient) return;
+  if (!(isPostHogEnabled && posthogClient)) return;
 
   try {
     const sanitizedProperties = properties ? sanitizeTelemetry(properties) : undefined;

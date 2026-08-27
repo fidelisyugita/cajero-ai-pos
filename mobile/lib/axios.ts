@@ -17,6 +17,30 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+async function refreshAuthTokens(refreshToken: string): Promise<string | null> {
+  try {
+    const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/auth/refreshtoken`, {
+      refreshToken,
+    });
+
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser) {
+      useAuthStore.getState().setUser({
+        ...currentUser,
+        accessToken,
+        refreshToken: newRefreshToken,
+      });
+    }
+
+    return accessToken;
+  } catch (refreshError) {
+    Logger.error("Token refresh failed:", refreshError);
+    useAuthStore.getState().setLoggedIn(false);
+    return null;
+  }
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -25,32 +49,15 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       const refreshToken = useAuthStore.getState().user?.refreshToken;
 
-      if (refreshToken) {
-        try {
-          const response = await axios.post(
-            `${process.env.EXPO_PUBLIC_API_URL}/auth/refreshtoken`,
-            { refreshToken },
-          );
-
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-          const currentUser = useAuthStore.getState().user;
-          if (currentUser) {
-            useAuthStore.getState().setUser({
-              ...currentUser,
-              accessToken,
-              refreshToken: newRefreshToken,
-            });
-          }
-
-          originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
-          return api(originalRequest);
-        } catch (refreshError) {
-          Logger.error("Token refresh failed:", refreshError);
-          useAuthStore.getState().setLoggedIn(false);
-        }
-      } else {
+      if (!refreshToken) {
         useAuthStore.getState().setLoggedIn(false);
+        return Promise.reject(error);
+      }
+
+      const newAccessToken = await refreshAuthTokens(refreshToken);
+      if (newAccessToken) {
+        originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
+        return api(originalRequest);
       }
     }
     return Promise.reject(error);

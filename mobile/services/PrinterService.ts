@@ -256,10 +256,7 @@ class PrinterService {
 
   async writeData(base64Data: string) {
     if (
-      !this.connectedDevice ||
-      !this.serviceUUID ||
-      !this.characteristicUUID ||
-      !this.writeMethod
+      !(this.connectedDevice && this.serviceUUID && this.characteristicUUID && this.writeMethod)
     ) {
       throw new Error("Printer not capable of writing");
     }
@@ -330,7 +327,7 @@ class PrinterService {
   }
 
   private async ensureConnection(): Promise<void> {
-    if (!this.connectedDevice || !this.serviceUUID || !this.characteristicUUID) {
+    if (!(this.connectedDevice && this.serviceUUID && this.characteristicUUID)) {
       const storedDevice = usePrinterStore.getState().connectedDevice;
       if (storedDevice) {
         await this.connectToDevice(storedDevice.id);
@@ -452,7 +449,7 @@ class PrinterService {
 
   // For test print
   async testPrint() {
-    if (!this.connectedDevice || !this.serviceUUID || !this.characteristicUUID) {
+    if (!(this.connectedDevice && this.serviceUUID && this.characteristicUUID)) {
       const storedDevice = usePrinterStore.getState().connectedDevice;
       if (storedDevice) {
         await this.connectToDevice(storedDevice.id);

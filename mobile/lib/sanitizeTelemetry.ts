@@ -44,6 +44,33 @@ export const isSensitiveKey = (key: string): boolean => {
   return SENSITIVE_KEY_PATTERNS.some((pattern) => pattern.test(key));
 };
 
+function sanitizeError(error: Error): Error {
+  const sanitizedError = new Error(sanitizeString(error.message));
+  sanitizedError.name = error.name;
+  if (error.stack) {
+    sanitizedError.stack = sanitizeString(error.stack);
+  }
+  return sanitizedError;
+}
+
+function sanitizeObject(
+  record: Record<string, unknown>,
+  seen: WeakSet<object>,
+  depth: number,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(record)) {
+    if (isSensitiveKey(key)) {
+      result[key] = "[REDACTED]";
+    } else {
+      result[key] = sanitizeTelemetry(value, seen, depth + 1);
+    }
+  }
+
+  return result;
+}
+
 /**
  * Deeply sanitizes any telemetry payload (object, array, primitive) before transmitting.
  */
@@ -76,24 +103,8 @@ export const sanitizeTelemetry = <T>(
   }
 
   if (data instanceof Error) {
-    const sanitizedError = new Error(sanitizeString(data.message));
-    sanitizedError.name = data.name;
-    if (data.stack) {
-      sanitizedError.stack = sanitizeString(data.stack);
-    }
-    return sanitizedError as unknown as T;
+    return sanitizeError(data) as unknown as T;
   }
 
-  const result: Record<string, unknown> = {};
-  const record = data as Record<string, unknown>;
-
-  for (const [key, value] of Object.entries(record)) {
-    if (isSensitiveKey(key)) {
-      result[key] = "[REDACTED]";
-    } else {
-      result[key] = sanitizeTelemetry(value, seen, depth + 1);
-    }
-  }
-
-  return result as T;
+  return sanitizeObject(data as Record<string, unknown>, seen, depth) as T;
 };

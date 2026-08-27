@@ -93,13 +93,34 @@
         "noExcessiveCognitiveComplexity": {
           "level": "error",
           "options": {
-            "maxAllowedComplexity": 15
+            "maxAllowedComplexity": 10
           }
-        }
+        },
+        "useSimplifiedLogicExpression": "error",
+        "noUselessTernary": "error",
+        "noUselessFragments": "error",
+        "noUselessSwitchCase": "error",
+        "noUselessThisAlias": "error",
+        "useFlatMap": "error"
       }
     }
   },
   "overrides": [
+    {
+      "includes": ["app/**", "components/**"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": {
+              "level": "error",
+              "options": {
+                "maxAllowedComplexity": 15
+              }
+            }
+          }
+        }
+      }
+    },
     {
       "includes": [
         "**/__tests__/**",

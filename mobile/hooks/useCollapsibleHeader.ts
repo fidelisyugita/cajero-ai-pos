@@ -7,6 +7,23 @@ interface UseCollapsibleHeaderOptions {
   scrollThreshold?: number;
 }
 
+type ScrollEventPayload =
+  | NativeSyntheticEvent<NativeScrollEvent>
+  | {
+      contentOffset?: { y?: number };
+      nativeEvent?: { contentOffset?: { y?: number } };
+    };
+
+function extractScrollY(event: ScrollEventPayload): number {
+  if ("nativeEvent" in event && event.nativeEvent?.contentOffset?.y !== undefined) {
+    return event.nativeEvent.contentOffset.y;
+  }
+  if ("contentOffset" in event && event.contentOffset?.y !== undefined) {
+    return event.contentOffset.y;
+  }
+  return 0;
+}
+
 export const useCollapsibleHeader = ({
   headerHeight = 80,
   scrollThreshold = 10,
@@ -15,18 +32,8 @@ export const useCollapsibleHeader = ({
   const lastScrollY = useSharedValue(0);
 
   const scrollHandler = useCallback(
-    (
-      event:
-        | NativeSyntheticEvent<NativeScrollEvent>
-        | {
-            contentOffset?: { y?: number };
-            nativeEvent?: { contentOffset?: { y?: number } };
-          },
-    ) => {
-      const currentY =
-        ("nativeEvent" in event ? event.nativeEvent?.contentOffset?.y : undefined) ??
-        ("contentOffset" in event ? event.contentOffset?.y : undefined) ??
-        0;
+    (event: ScrollEventPayload) => {
+      const currentY = extractScrollY(event);
       const diff = currentY - lastScrollY.value;
 
       // If at the very top (or pull-to-refresh / overscroll), always show header

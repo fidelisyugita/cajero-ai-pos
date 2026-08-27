@@ -89,7 +89,7 @@ const AddMeasureUnit = () => {
   const { mutate: createMeasureUnit, isPending } = useCreateMeasureUnitMutation();
 
   const handleAdd = () => {
-    if (!newMeasureUnitName || !newMeasureUnitCode) return;
+    if (!(newMeasureUnitName && newMeasureUnitCode)) return;
     createMeasureUnit(
       {
         name: newMeasureUnitName,
@@ -126,7 +126,7 @@ const AddMeasureUnit = () => {
           size="lg"
         />
         <IconButton
-          disabled={!newMeasureUnitName || !newMeasureUnitCode || isPending}
+          disabled={!(newMeasureUnitName && newMeasureUnitCode) || isPending}
           Icon={IcPlus}
           onPress={handleAdd}
           size="lg"
