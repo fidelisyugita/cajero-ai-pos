@@ -73,7 +73,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
   const updateVariantMutation = useUpdateVariantMutation();
 
   const flattenedVariants: FlattenedVariant[] = React.useMemo(() => {
-    if (!variants || !productsData) return [];
+    if (!(variants && productsData)) return [];
 
     const productMap = new Map(productsData.content.map((p) => [p.id, p]));
 

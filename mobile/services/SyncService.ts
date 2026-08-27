@@ -13,10 +13,213 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { generateUUID } from "@/utils/Uuid";
 import Logger from "./logger";
 
+async function syncProductIngredients(
+  tx: any,
+  productId: string,
+  ingredients: any[],
+): Promise<void> {
+  await tx.delete(productIngredients).where(eq(productIngredients.productId, productId));
+  for (const ing of ingredients) {
+    await tx.insert(productIngredients).values({
+      productId,
+      ingredientId: ing.ingredientId,
+      name: ing.name,
+      stock: ing.stock,
+      measureUnitCode: ing.measureUnitCode,
+      measureUnitName: ing.measureUnitName,
+      quantityNeeded: ing.quantityNeeded,
+    });
+  }
+}
+
+async function upsertSingleProduct(tx: any, p: any): Promise<void> {
+  const createdAt = p.createdAt ? new Date(p.createdAt) : null;
+  const updatedAt = p.updatedAt ? new Date(p.updatedAt) : null;
+  const deletedAt = p.deletedAt ? new Date(p.deletedAt) : null;
+
+  await tx
+    .insert(products)
+    .values({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      sellingPrice: p.sellingPrice,
+      buyingPrice: p.buyingPrice,
+      stock: p.stock,
+      categoryId: p.categoryCode,
+      imageUrl: p.imageUrl,
+      barcode: p.barcode,
+      tax: p.tax,
+      commission: p.commission,
+      discount: p.discount,
+      measureUnitCode: p.measureUnitCode,
+      measureUnitName: p.measureUnitName,
+      createdAt,
+      updatedAt,
+      deletedAt,
+    })
+    .onConflictDoUpdate({
+      target: products.id,
+      set: {
+        name: p.name,
+        description: p.description,
+        sellingPrice: p.sellingPrice,
+        buyingPrice: p.buyingPrice,
+        stock: p.stock,
+        categoryId: p.categoryCode,
+        imageUrl: p.imageUrl,
+        barcode: p.barcode,
+        tax: p.tax,
+        commission: p.commission,
+        discount: p.discount,
+        measureUnitCode: p.measureUnitCode,
+        measureUnitName: p.measureUnitName,
+        updatedAt,
+        deletedAt,
+      },
+    });
+
+  if (p.ingredients) {
+    await syncProductIngredients(tx, p.id, p.ingredients);
+  }
+}
+
+async function upsertSingleCategory(tx: any, c: any): Promise<void> {
+  const createdAt = c.createdAt ? new Date(c.createdAt) : null;
+  const updatedAt = c.updatedAt ? new Date(c.updatedAt) : null;
+  const deletedAt = c.deletedAt ? new Date(c.deletedAt) : null;
+
+  await tx
+    .insert(categories)
+    .values({
+      id: c.code,
+      name: c.name,
+      description: c.description,
+      createdAt,
+      updatedAt,
+      deletedAt,
+    })
+    .onConflictDoUpdate({
+      target: categories.id,
+      set: {
+        name: c.name,
+        description: c.description,
+        updatedAt,
+        deletedAt,
+      },
+    });
+}
+
+async function syncTransactionItems(tx: any, transactionId: string, items: any[]): Promise<void> {
+  await tx.delete(transactionItems).where(eq(transactionItems.transactionId, transactionId));
+  for (const item of items) {
+    await tx.insert(transactionItems).values({
+      id: item.id || generateUUID(),
+      transactionId,
+      productId: item.productId,
+      quantity: item.quantity,
+      sellingPrice: item.sellingPrice,
+      buyingPrice: item.buyingPrice,
+      tax: item.tax,
+      commission: item.commission,
+      discount: item.discount,
+      note: item.note,
+      selectedVariants: JSON.stringify(item.selectedVariants),
+      productName: item.name,
+    });
+  }
+}
+
+async function upsertSingleTransaction(tx: any, t: any): Promise<void> {
+  await tx
+    .insert(transactions)
+    .values({
+      id: t.id,
+      storeId: t.storeId,
+      customerId: t.customerId || null,
+      totalPrice: t.totalPrice,
+      totalTax: t.totalTax,
+      totalDiscount: t.totalDiscount,
+      totalCommission: t.totalCommission,
+      paymentMethodCode: t.paymentMethodCode,
+      transactionTypeCode: t.transactionTypeCode,
+      statusCode: t.statusCode,
+      isIn: t.in,
+      description: t.description,
+      isSynced: true,
+      createdAt: t.createdAt ? new Date(t.createdAt) : null,
+    })
+    .onConflictDoUpdate({
+      target: transactions.id,
+      set: {
+        statusCode: t.statusCode,
+        customerId: t.customerId || null,
+        description: t.description,
+        isSynced: true,
+      },
+    });
+
+  if (t.transactionProduct) {
+    await syncTransactionItems(tx, t.id, t.transactionProduct);
+  }
+}
+
+function parseSelectedVariants(rawVariants: unknown): unknown {
+  if (typeof rawVariants !== "string") return rawVariants;
+  try {
+    return JSON.parse(rawVariants);
+  } catch (e) {
+    Logger.error("Failed to parse selectedVariants", e);
+    return null;
+  }
+}
+
+function mapTransactionProduct(item: any) {
+  return {
+    productId: item.productId,
+    quantity: item.quantity,
+    sellingPrice: item.sellingPrice,
+    buyingPrice: item.buyingPrice || 0,
+    commission: item.commission || 0,
+    discount: item.discount || 0,
+    tax: item.tax || 0,
+    note: item.note,
+    selectedVariants: parseSelectedVariants(item.selectedVariants),
+  };
+}
+
+async function handlePostPushSync(tx: any, localTxnId: string, backendTxn: any): Promise<void> {
+  const existing = await tx.select().from(transactions).where(eq(transactions.id, backendTxn.id));
+
+  if (existing.length > 0) {
+    await tx.delete(transactionItems).where(eq(transactionItems.transactionId, localTxnId));
+    await tx.delete(transactions).where(eq(transactions.id, localTxnId));
+    return;
+  }
+
+  await tx
+    .update(transactionItems)
+    .set({ transactionId: backendTxn.id })
+    .where(eq(transactionItems.transactionId, localTxnId));
+
+  await tx
+    .update(transactions)
+    .set({
+      id: backendTxn.id,
+      totalPrice: backendTxn.totalPrice,
+      totalTax: backendTxn.totalTax,
+      totalDiscount: backendTxn.totalDiscount,
+      totalCommission: backendTxn.totalCommission,
+      isSynced: true,
+      createdAt: backendTxn.createdAt ? new Date(backendTxn.createdAt) : new Date(),
+    })
+    .where(eq(transactions.id, localTxnId));
+}
+
 export const SyncService = {
   async syncProducts() {
     const { isLoggedIn, user } = useAuthStore.getState();
-    if (!isLoggedIn || !user?.accessToken) return false;
+    if (!(isLoggedIn && user?.accessToken)) return false;
 
     try {
       // Fetch from API
@@ -28,65 +231,7 @@ export const SyncService = {
       // Upsert to Local DB
       await db.transaction(async (tx) => {
         for (const p of backendProducts) {
-          await tx
-            .insert(products)
-            .values({
-              id: p.id,
-              name: p.name,
-              description: p.description,
-              sellingPrice: p.sellingPrice,
-              buyingPrice: p.buyingPrice,
-              stock: p.stock,
-              categoryId: p.categoryCode, // Backend uses categoryCode
-              imageUrl: p.imageUrl,
-              barcode: p.barcode,
-              tax: p.tax,
-              commission: p.commission,
-              discount: p.discount,
-              measureUnitCode: p.measureUnitCode,
-              measureUnitName: p.measureUnitName,
-              createdAt: p.createdAt ? new Date(p.createdAt) : null,
-              updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
-              deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
-            })
-            .onConflictDoUpdate({
-              target: products.id,
-              set: {
-                name: p.name,
-                description: p.description,
-                sellingPrice: p.sellingPrice,
-                buyingPrice: p.buyingPrice,
-                stock: p.stock,
-                categoryId: p.categoryCode,
-                imageUrl: p.imageUrl,
-                barcode: p.barcode,
-                tax: p.tax,
-                commission: p.commission,
-                discount: p.discount,
-                measureUnitCode: p.measureUnitCode,
-                measureUnitName: p.measureUnitName,
-                updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
-                deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
-              },
-            });
-
-          // Sync Ingredients
-          if (p.ingredients) {
-            // Clear existing to avoid stale data
-            await tx.delete(productIngredients).where(eq(productIngredients.productId, p.id));
-
-            for (const ing of p.ingredients) {
-              await tx.insert(productIngredients).values({
-                productId: p.id,
-                ingredientId: ing.ingredientId,
-                name: ing.name,
-                stock: ing.stock, // stock of ingredient at that time?
-                measureUnitCode: ing.measureUnitCode,
-                measureUnitName: ing.measureUnitName,
-                quantityNeeded: ing.quantityNeeded,
-              });
-            }
-          }
+          await upsertSingleProduct(tx, p);
         }
       });
 
@@ -104,7 +249,7 @@ export const SyncService = {
 
   async syncCategories() {
     const { isLoggedIn, user } = useAuthStore.getState();
-    if (!isLoggedIn || !user?.accessToken) return false;
+    if (!(isLoggedIn && user?.accessToken)) return false;
 
     try {
       const response = await api.get("/product-category");
@@ -112,25 +257,7 @@ export const SyncService = {
 
       await db.transaction(async (tx) => {
         for (const c of backendCategories) {
-          await tx
-            .insert(categories)
-            .values({
-              id: c.code, // Backend uses code as ID for categories in response?
-              name: c.name,
-              description: c.description,
-              createdAt: c.createdAt ? new Date(c.createdAt) : null,
-              updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
-              deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
-            })
-            .onConflictDoUpdate({
-              target: categories.id,
-              set: {
-                name: c.name,
-                description: c.description,
-                updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
-                deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
-              },
-            });
+          await upsertSingleCategory(tx, c);
         }
       });
       return true;
@@ -142,74 +269,15 @@ export const SyncService = {
 
   async syncTransactions() {
     const { isLoggedIn, user } = useAuthStore.getState();
-    if (!isLoggedIn || !user?.accessToken) return false;
+    if (!(isLoggedIn && user?.accessToken)) return false;
 
     try {
-      // Fetch recent transactions (e.g. last 100 or via date range of last week/month)
-      // For simplicity, let's fetch last 100.
       const response = await api.get("/transaction?size=100&sort=createdAt,desc");
       const backendTransactions = response.data.content;
 
       await db.transaction(async (tx) => {
         for (const t of backendTransactions) {
-          // Check if exists? Or onConflictDoUpdate.
-          // If we trust backend as source of truth for history.
-
-          await tx
-            .insert(transactions)
-            .values({
-              id: t.id,
-              storeId: t.storeId,
-              customerId: t.customerId || null,
-              totalPrice: t.totalPrice,
-              totalTax: t.totalTax,
-              totalDiscount: t.totalDiscount,
-              totalCommission: t.totalCommission,
-              paymentMethodCode: t.paymentMethodCode,
-              transactionTypeCode: t.transactionTypeCode,
-              statusCode: t.statusCode,
-              isIn: t.in, // mapped from 'is_in' to 'in' in backend response usually, check backend DTO.
-              // TransactionResponse in backend has `in` boolean field.
-              description: t.description,
-              isSynced: true, // From backend means it is synced
-              createdAt: t.createdAt ? new Date(t.createdAt) : null,
-            })
-            .onConflictDoUpdate({
-              target: transactions.id,
-              set: {
-                statusCode: t.statusCode, // Update status if changed
-                customerId: t.customerId || null,
-                description: t.description,
-                isSynced: true,
-              },
-            });
-
-          // Insert Items
-          // We need to clear existing for this transaction to avoid dups or handle carefully.
-          // Easiest is delete and re-insert for items of this transaction, or ignore if exists.
-          // transactionProduct is the list in response.
-
-          if (t.transactionProduct) {
-            // Delete existing items for this transaction to ensure fresh state
-            await tx.delete(transactionItems).where(eq(transactionItems.transactionId, t.id));
-
-            for (const item of t.transactionProduct) {
-              await tx.insert(transactionItems).values({
-                id: item.id || generateUUID(), // Item ID might be missing or we generate one
-                transactionId: t.id,
-                productId: item.productId,
-                quantity: item.quantity,
-                sellingPrice: item.sellingPrice,
-                buyingPrice: item.buyingPrice,
-                tax: item.tax,
-                commission: item.commission,
-                discount: item.discount,
-                note: item.note,
-                selectedVariants: JSON.stringify(item.selectedVariants),
-                productName: item.name,
-              });
-            }
-          }
+          await upsertSingleTransaction(tx, t);
         }
       });
       await db
@@ -226,10 +294,9 @@ export const SyncService = {
 
   async pushTransactions() {
     const { isLoggedIn, user } = useAuthStore.getState();
-    if (!isLoggedIn || !user?.accessToken) return false;
+    if (!(isLoggedIn && user?.accessToken)) return false;
 
     try {
-      // Get unsynced transactions
       const unsynced = await db.select().from(transactions).where(eq(transactions.isSynced, false));
 
       for (const txn of unsynced) {
@@ -240,7 +307,7 @@ export const SyncService = {
 
         const payload = {
           storeId: txn.storeId,
-          customerId: txn.customerId || undefined, // Backend might expect undefined if null
+          customerId: txn.customerId || undefined,
           totalPrice: txn.totalPrice,
           totalTax: txn.totalTax,
           totalDiscount: txn.totalDiscount,
@@ -248,74 +315,20 @@ export const SyncService = {
           paymentMethodCode: txn.paymentMethodCode,
           transactionTypeCode: txn.transactionTypeCode,
           statusCode: txn.statusCode,
-          // Map 'isIn' to 'in' if backend expects 'in' (common with Lombok/Jackson boolean isIn)
           in: txn.isIn,
           description: txn.description,
-          transactionProducts: items.map((i) => {
-            let parsedVariants = i.selectedVariants;
-            if (typeof i.selectedVariants === "string") {
-              try {
-                parsedVariants = JSON.parse(i.selectedVariants);
-              } catch (e) {
-                Logger.error("Failed to parse selectedVariants", e);
-                parsedVariants = null;
-              }
-            }
-            return {
-              productId: i.productId,
-              quantity: i.quantity,
-              sellingPrice: i.sellingPrice,
-              buyingPrice: i.buyingPrice || 0,
-              commission: i.commission || 0,
-              discount: i.discount || 0,
-              tax: i.tax || 0,
-              note: i.note,
-              selectedVariants: parsedVariants,
-            };
-          }),
-          createdAt: txn.createdAt ? txn.createdAt.toISOString() : undefined, // Send local creation time
+          transactionProducts: items.map(mapTransactionProduct),
+          createdAt: txn.createdAt ? txn.createdAt.toISOString() : undefined,
         };
 
-        // Send to API
         const response = await api.post("/transaction", payload);
         const backendTxn = response.data;
 
         await db.transaction(async (tx) => {
-          // Check if the backend ID already exists locally (e.g. from a pull sync)
-          const existing = await tx
-            .select()
-            .from(transactions)
-            .where(eq(transactions.id, backendTxn.id));
-
-          if (existing.length > 0) {
-            // Duplicate exists. The 'local' one is redundant. Delete local.
-            await tx.delete(transactionItems).where(eq(transactionItems.transactionId, txn.id));
-            await tx.delete(transactions).where(eq(transactions.id, txn.id));
-          } else {
-            // Update local ID to match backend ID and update calculated fields
-            // First update items to point to new ID
-            await tx
-              .update(transactionItems)
-              .set({ transactionId: backendTxn.id })
-              .where(eq(transactionItems.transactionId, txn.id));
-
-            // Then update the transaction itself
-            await tx
-              .update(transactions)
-              .set({
-                id: backendTxn.id,
-                isSynced: true,
-                // Update fields that might differ (tax, totals from backend calculation)
-                totalPrice: backendTxn.totalPrice,
-                totalTax: backendTxn.totalTax,
-                totalDiscount: backendTxn.totalDiscount,
-                totalCommission: backendTxn.totalCommission,
-                createdAt: backendTxn.createdAt ? new Date(backendTxn.createdAt) : txn.createdAt,
-              })
-              .where(eq(transactions.id, txn.id));
-          }
+          await handlePostPushSync(tx, txn.id, backendTxn);
         });
       }
+
       return true;
     } catch (error) {
       Logger.error("Push transactions failed:", error);

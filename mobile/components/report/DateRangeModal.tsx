@@ -101,7 +101,7 @@ const DateRangeModal = ({
               variant="primary"
               size="md"
               style={{ width: "100%" }}
-              disabled={!range.startDate || !range.endDate}
+              disabled={!(range.startDate && range.endDate)}
             />
           </View>
         </Pressable>
