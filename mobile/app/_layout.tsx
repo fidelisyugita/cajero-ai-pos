@@ -4,7 +4,6 @@ import { useCustomFonts } from "@/config/useCustomFonts";
 import "react-native-reanimated";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
-import { LogBox } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AnalyticsProvider } from "@/components/providers/AnalyticsProvider";
 import { PosErrorBoundary } from "@/components/ui/PosErrorBoundary";
@@ -19,7 +18,6 @@ initSentry();
 
 if (__DEV__) {
   require("../lib/Reactotron");
-  LogBox.ignoreLogs(["AxiosError", "Sign in failed", "Request failed with status code 401"]);
 }
 
 SplashScreen.preventAutoHideAsync();
