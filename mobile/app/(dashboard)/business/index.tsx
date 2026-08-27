@@ -13,6 +13,38 @@ import { useUsersQuery } from "@/services/queries/useUsersQuery";
 import { useAuthStore } from "@/store/useAuthStore";
 import Header from "../../../components/dashboard/Header";
 
+function formatRoleName(roleCode?: string): string {
+  switch (roleCode) {
+    case "OWNER":
+      return "Owner";
+    case "MANAGER":
+      return "Manager";
+    case "STAFF":
+      return "Staff";
+    default:
+      return "Cashier";
+  }
+}
+
+function mapUsersToEmployees(
+  users?: Array<{ id: string; name: string; roleCode?: string; email: string; imageUrl?: string }>,
+  currentUserId?: string,
+): Employee[] {
+  if (!users) return [];
+  return users
+    .filter((u) => u.id !== currentUserId)
+    .map((u) => ({
+      id: u.id,
+      name: u.name,
+      role: formatRoleName(u.roleCode),
+      email: u.email,
+      status: "Active",
+      avatar:
+        u.imageUrl ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`,
+    }));
+}
+
 const BusinessScreen = () => {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -20,33 +52,9 @@ const BusinessScreen = () => {
   const { data: users, isLoading: isUsersLoading } = useUsersQuery();
 
   const isLoading = isStoreLoading || isUsersLoading;
-
-  // Identify Profile (Current User)
   const currentUser = user;
-
-  // Employees are everyone except the current user (if manager) or everyone if super admin?
-  // User said "it not Owner, since it based on user login".
-  // Let's list everyone EXCEPT the current logged in user.
-  const employees: Employee[] =
-    users
-      ?.filter((u) => u.id !== user?.id)
-      .map((u) => ({
-        id: u.id,
-        name: u.name,
-        role:
-          u.roleCode === "OWNER"
-            ? "Owner"
-            : u.roleCode === "MANAGER"
-              ? "Manager"
-              : u.roleCode === "STAFF"
-                ? "Staff"
-                : "Cashier",
-        email: u.email,
-        status: "Active",
-        avatar:
-          u.imageUrl ||
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`,
-      })) || [];
+  const canManage = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
+  const employees = mapUsersToEmployees(users, user?.id);
 
   const handleAddEmployee = () => {
     router.push("/modal/business/add-employee");
@@ -64,7 +72,7 @@ const BusinessScreen = () => {
 
     router.push({
       pathname: "/modal/business/update-store",
-      params: { storeData: storeData },
+      params: { storeData },
     });
   };
 
@@ -93,31 +101,15 @@ const BusinessScreen = () => {
               description={store?.description || "-"}
               location={store?.location}
               loading={isLoading}
-              onEdit={
-                user?.roleCode === "OWNER" || user?.roleCode === "MANAGER"
-                  ? handleEditStore
-                  : undefined
-              }
+              onEdit={canManage ? handleEditStore : undefined}
             />
             <OwnerInfoCard
               name={currentUser?.name || "-"}
-              role={
-                currentUser?.roleCode === "OWNER"
-                  ? "Owner"
-                  : currentUser?.roleCode === "MANAGER"
-                    ? "Manager"
-                    : currentUser?.roleCode === "STAFF"
-                      ? "Staff"
-                      : "Cashier"
-              }
+              role={formatRoleName(currentUser?.roleCode)}
               email={currentUser?.email || "-"}
               loading={isLoading}
-              avatar={currentUser?.imageUrl || `https://github.com/shadcn.png`}
-              onEdit={
-                user?.roleCode === "OWNER" || user?.roleCode === "MANAGER"
-                  ? handleEditProfile
-                  : undefined
-              }
+              avatar={currentUser?.imageUrl || "https://github.com/shadcn.png"}
+              onEdit={canManage ? handleEditProfile : undefined}
             />
           </View>
 
@@ -125,11 +117,7 @@ const BusinessScreen = () => {
           <View style={$.column}>
             <EmployeeListCard
               employees={employees}
-              onAddEmployee={
-                user?.roleCode === "OWNER" || user?.roleCode === "MANAGER"
-                  ? handleAddEmployee
-                  : undefined
-              }
+              onAddEmployee={canManage ? handleAddEmployee : undefined}
               loading={isLoading}
             />
           </View>

@@ -89,7 +89,13 @@
         "noAccumulatingSpread": "warn"
       },
       "complexity": {
-        "recommended": true
+        "recommended": true,
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 15
+          }
+        }
       }
     }
   },
@@ -106,6 +112,9 @@
         "rules": {
           "suspicious": {
             "noExplicitAny": "off"
+          },
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
           }
         }
       }

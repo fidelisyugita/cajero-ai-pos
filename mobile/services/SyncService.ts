@@ -13,6 +13,103 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { generateUUID } from "@/utils/Uuid";
 import Logger from "./logger";
 
+async function syncProductIngredients(
+  tx: any,
+  productId: string,
+  ingredients: any[],
+): Promise<void> {
+  await tx.delete(productIngredients).where(eq(productIngredients.productId, productId));
+  for (const ing of ingredients) {
+    await tx.insert(productIngredients).values({
+      productId,
+      ingredientId: ing.ingredientId,
+      name: ing.name,
+      stock: ing.stock,
+      measureUnitCode: ing.measureUnitCode,
+      measureUnitName: ing.measureUnitName,
+      quantityNeeded: ing.quantityNeeded,
+    });
+  }
+}
+
+async function upsertSingleProduct(tx: any, p: any): Promise<void> {
+  const createdAt = p.createdAt ? new Date(p.createdAt) : null;
+  const updatedAt = p.updatedAt ? new Date(p.updatedAt) : null;
+  const deletedAt = p.deletedAt ? new Date(p.deletedAt) : null;
+
+  await tx
+    .insert(products)
+    .values({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      sellingPrice: p.sellingPrice,
+      buyingPrice: p.buyingPrice,
+      stock: p.stock,
+      categoryId: p.categoryCode,
+      imageUrl: p.imageUrl,
+      barcode: p.barcode,
+      tax: p.tax,
+      commission: p.commission,
+      discount: p.discount,
+      measureUnitCode: p.measureUnitCode,
+      measureUnitName: p.measureUnitName,
+      createdAt,
+      updatedAt,
+      deletedAt,
+    })
+    .onConflictDoUpdate({
+      target: products.id,
+      set: {
+        name: p.name,
+        description: p.description,
+        sellingPrice: p.sellingPrice,
+        buyingPrice: p.buyingPrice,
+        stock: p.stock,
+        categoryId: p.categoryCode,
+        imageUrl: p.imageUrl,
+        barcode: p.barcode,
+        tax: p.tax,
+        commission: p.commission,
+        discount: p.discount,
+        measureUnitCode: p.measureUnitCode,
+        measureUnitName: p.measureUnitName,
+        updatedAt,
+        deletedAt,
+      },
+    });
+
+  if (p.ingredients) {
+    await syncProductIngredients(tx, p.id, p.ingredients);
+  }
+}
+
+async function upsertSingleCategory(tx: any, c: any): Promise<void> {
+  const createdAt = c.createdAt ? new Date(c.createdAt) : null;
+  const updatedAt = c.updatedAt ? new Date(c.updatedAt) : null;
+  const deletedAt = c.deletedAt ? new Date(c.deletedAt) : null;
+
+  await tx
+    .insert(categories)
+    .values({
+      id: c.code,
+      name: c.name,
+      description: c.description,
+      createdAt,
+      updatedAt,
+      deletedAt,
+    })
+    .onConflictDoUpdate({
+      target: categories.id,
+      set: {
+        name: c.name,
+        description: c.description,
+        updatedAt,
+        deletedAt,
+      },
+    });
+}
+
 export const SyncService = {
   async syncProducts() {
     const { isLoggedIn, user } = useAuthStore.getState();
@@ -28,65 +125,7 @@ export const SyncService = {
       // Upsert to Local DB
       await db.transaction(async (tx) => {
         for (const p of backendProducts) {
-          await tx
-            .insert(products)
-            .values({
-              id: p.id,
-              name: p.name,
-              description: p.description,
-              sellingPrice: p.sellingPrice,
-              buyingPrice: p.buyingPrice,
-              stock: p.stock,
-              categoryId: p.categoryCode, // Backend uses categoryCode
-              imageUrl: p.imageUrl,
-              barcode: p.barcode,
-              tax: p.tax,
-              commission: p.commission,
-              discount: p.discount,
-              measureUnitCode: p.measureUnitCode,
-              measureUnitName: p.measureUnitName,
-              createdAt: p.createdAt ? new Date(p.createdAt) : null,
-              updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
-              deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
-            })
-            .onConflictDoUpdate({
-              target: products.id,
-              set: {
-                name: p.name,
-                description: p.description,
-                sellingPrice: p.sellingPrice,
-                buyingPrice: p.buyingPrice,
-                stock: p.stock,
-                categoryId: p.categoryCode,
-                imageUrl: p.imageUrl,
-                barcode: p.barcode,
-                tax: p.tax,
-                commission: p.commission,
-                discount: p.discount,
-                measureUnitCode: p.measureUnitCode,
-                measureUnitName: p.measureUnitName,
-                updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
-                deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
-              },
-            });
-
-          // Sync Ingredients
-          if (p.ingredients) {
-            // Clear existing to avoid stale data
-            await tx.delete(productIngredients).where(eq(productIngredients.productId, p.id));
-
-            for (const ing of p.ingredients) {
-              await tx.insert(productIngredients).values({
-                productId: p.id,
-                ingredientId: ing.ingredientId,
-                name: ing.name,
-                stock: ing.stock, // stock of ingredient at that time?
-                measureUnitCode: ing.measureUnitCode,
-                measureUnitName: ing.measureUnitName,
-                quantityNeeded: ing.quantityNeeded,
-              });
-            }
-          }
+          await upsertSingleProduct(tx, p);
         }
       });
 
@@ -112,25 +151,7 @@ export const SyncService = {
 
       await db.transaction(async (tx) => {
         for (const c of backendCategories) {
-          await tx
-            .insert(categories)
-            .values({
-              id: c.code, // Backend uses code as ID for categories in response?
-              name: c.name,
-              description: c.description,
-              createdAt: c.createdAt ? new Date(c.createdAt) : null,
-              updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
-              deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
-            })
-            .onConflictDoUpdate({
-              target: categories.id,
-              set: {
-                name: c.name,
-                description: c.description,
-                updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
-                deletedAt: c.deletedAt ? new Date(c.deletedAt) : null,
-              },
-            });
+          await upsertSingleCategory(tx, c);
         }
       });
       return true;

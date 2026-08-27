@@ -278,7 +278,7 @@ const AddProduct = () => {
     }
   }, [sellingPrice, taxRate, isTaxIncluded, setValue, getValues]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset stores on unmount
   useEffect(() => {
     return () => {
       resetImageSelectionStore();
@@ -289,83 +289,81 @@ const AddProduct = () => {
     };
   }, []);
 
-  const processSubmit = async (data: ProductFormData, shouldGoBack: boolean) => {
-    try {
-      let uploadedImageUrl = data.imageUrl;
+  const resolveImageUrl = async (imageUrl?: string): Promise<string> => {
+    if (!imageUrl) return "";
+    if (imageUrl.startsWith("http")) return imageUrl;
+    return (await uploadImage({ fileUri: imageUrl, type: "product" })) || "";
+  };
 
-      if (data.imageUrl && !data.imageUrl.startsWith("http")) {
-        uploadedImageUrl = await uploadImage({
-          fileUri: data.imageUrl,
-          type: "product",
-        });
-      }
+  const buildProductPayload = (data: ProductFormData, uploadedImageUrl: string) => ({
+    barcode: data.code || "",
+    name: data.name,
+    description: data.description || "",
+    categoryCode: data.category.code,
+    imageUrl: uploadedImageUrl,
+    sellingPrice:
+      isTaxIncluded && taxRate ? data.sellingPrice / (1 + taxRate / 100) : data.sellingPrice,
+    commission: data.commission || 0,
+    discount: 0,
+    tax: data.tax || 0,
+    stock: data.stock || 0,
+    buyingPrice: data.buyingPrice || 0,
+    ingredients:
+      data.productIngredients
+        ?.filter((ing) => !!ing)
+        .map((ing) => ({
+          ingredientId: ing?.ingredientId,
+          quantityNeeded: ing?.quantityNeeded,
+        })) || [],
+  });
 
-      const payload = {
-        barcode: data.code || "",
-        name: data.name,
-        description: data.description || "",
-        categoryCode: data.category.code,
-        imageUrl: uploadedImageUrl || "",
-
-        sellingPrice:
-          isTaxIncluded && taxRate ? data.sellingPrice / (1 + taxRate / 100) : data.sellingPrice,
-        commission: data.commission || 0,
-        discount: 0,
-        tax: data.tax || 0,
-        stock: data.stock || 0,
-        buyingPrice: data.buyingPrice || 0,
-        ingredients:
-          data.productIngredients
-            ?.filter((ing) => !!ing)
-            .map((ing) => ({
-              ingredientId: ing?.ingredientId,
-              quantityNeeded: ing?.quantityNeeded,
-            })) || [],
+  const syncProductVariants = async (productId: string) => {
+    if (deletedVariantIds.length > 0) {
+      await Promise.all(deletedVariantIds.map((id) => deleteVariant(id)));
+    }
+    const variantPromises = storeVariants.map(async (variant) => {
+      const variantPayload = {
+        productId,
+        name: variant.name,
+        isRequired: variant.isRequired,
+        isMultiple: variant.isMultiple,
+        options: variant.options.map((opt) => ({
+          name: opt.name,
+          stock: opt.stock,
+          priceAdjusment: opt.priceAdjusment,
+          ingredients: opt.ingredients?.map((ing) => ({
+            ingredientId: ing.ingredientId,
+            quantityNeeded: ing.quantityNeeded,
+          })),
+        })),
       };
 
-      let result: { id: string } | undefined;
-      let currentProductId = id;
+      if (variant.isNew) {
+        return createVariant(variantPayload);
+      }
+      return updateVariant({ id: variant.id, data: variantPayload });
+    });
 
+    await Promise.all(variantPromises);
+  };
+
+  const processSubmit = async (data: ProductFormData, shouldGoBack: boolean) => {
+    try {
+      const uploadedImageUrl = await resolveImageUrl(data.imageUrl);
+      const payload = buildProductPayload(data, uploadedImageUrl);
+
+      let currentProductId = id;
       if (isEditing && id) {
-        result = await updateProduct({ id, data: payload });
+        await updateProduct({ id, data: payload });
         Alert.alert(t("success"), t("product_updated_success"));
       } else {
-        result = await addProduct(payload);
+        const result = await addProduct(payload);
         currentProductId = result.id;
         Alert.alert(t("success"), t("product_added_success"));
       }
 
-      // Handle Variants
       if (currentProductId) {
-        // 1. Delete removed variants
-        if (deletedVariantIds.length > 0) {
-          await Promise.all(deletedVariantIds.map((id) => deleteVariant(id)));
-        }
-        const variantPromises = storeVariants.map(async (variant) => {
-          const variantPayload = {
-            productId: currentProductId!, // Asserting non-null as we checked currentProductId
-            name: variant.name,
-            isRequired: variant.isRequired,
-            isMultiple: variant.isMultiple,
-            options: variant.options.map((opt) => ({
-              name: opt.name,
-              stock: opt.stock,
-              priceAdjusment: opt.priceAdjusment,
-              ingredients: opt.ingredients?.map((ing) => ({
-                ingredientId: ing.ingredientId,
-                quantityNeeded: ing.quantityNeeded,
-              })),
-            })),
-          };
-
-          if (variant.isNew) {
-            return createVariant(variantPayload);
-          } else {
-            return updateVariant({ id: variant.id, data: variantPayload });
-          }
-        });
-
-        await Promise.all(variantPromises);
+        await syncProductVariants(currentProductId);
       }
 
       if (shouldGoBack) {
@@ -374,7 +372,7 @@ const AddProduct = () => {
         }
       } else {
         reset();
-        resetVariantStore(); // Reset store for "Add More"
+        resetVariantStore();
       }
     } catch (error: any) {
       Logger.error("Add/Update product failed:", error);

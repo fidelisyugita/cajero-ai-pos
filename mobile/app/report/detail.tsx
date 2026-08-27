@@ -11,21 +11,48 @@ import { t } from "@/services/i18n";
 import type { DailyReport } from "@/services/types/Report";
 import { formatCurrency } from "@/utils/Format";
 
+function calculateAdjustedNetRevenue(report: DailyReport | null, includeCogs: boolean): number {
+  if (!report) return 0;
+  if (includeCogs) {
+    return report.totalNetRevenue - (report.totalCogs || 0);
+  }
+  return report.totalNetRevenue || 0;
+}
+
+const CommissionCard = ({ commissions }: { commissions: DailyReport["commissions"] }) => {
+  return (
+    <View style={$.card}>
+      <View style={$.cardHeader}>
+        <Text style={$.cardTitle}>{t("commission")}</Text>
+      </View>
+      <View style={$.cardContent}>
+        {commissions.length > 0 ? (
+          commissions.map((c) => (
+            <Row
+              key={c.cashierName}
+              label={`Total Commission (${c.cashierName})`}
+              value={formatCurrency(c.totalCommission)}
+            />
+          ))
+        ) : (
+          <Row label={t("total_commission")} value={formatCurrency(0)} />
+        )}
+      </View>
+    </View>
+  );
+};
+
 const ReportDetailScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
 
   // Parse the report data string back to object
-  const report: DailyReport = params.report ? JSON.parse(params.report as string) : null;
+  const report: DailyReport | null = params.report ? JSON.parse(params.report as string) : null;
 
   const [_selectedCashier, _setSelectedCashier] = useState("all");
   const [includeCogs, setIncludeCogs] = useState(false);
 
-  // Calculate adjusted net revenue when COGS is included
-  const adjustedNetRevenue =
-    includeCogs && report
-      ? report.totalNetRevenue - (report.totalCogs || 0)
-      : report?.totalNetRevenue || 0;
+  const adjustedNetRevenue = calculateAdjustedNetRevenue(report, includeCogs);
 
   if (!report) {
     return (
@@ -34,6 +61,8 @@ const ReportDetailScreen = () => {
       </View>
     );
   }
+
+  const hasCogs = report.totalCogs != null && report.totalCogs > 0;
 
   return (
     <View style={$.container}>
@@ -152,37 +181,20 @@ const ReportDetailScreen = () => {
             </View>
           </View>
 
-          {/* COGS Card - Only show when data is available */}
-          {report.totalCogs != null && report.totalCogs > 0 && (
+          {/* COGS Card */}
+          {hasCogs && (
             <View style={$.card}>
               <View style={$.cardHeader}>
                 <Text style={$.cardTitle}>COGS</Text>
               </View>
               <View style={$.cardContent}>
-                <Row label="Total COGS" value={formatCurrency(report.totalCogs)} />
+                <Row label="Total COGS" value={formatCurrency(report.totalCogs!)} />
               </View>
             </View>
           )}
 
           {/* Commission Card */}
-          <View style={$.card}>
-            <View style={$.cardHeader}>
-              <Text style={$.cardTitle}>{t("commission")}</Text>
-            </View>
-            <View style={$.cardContent}>
-              {report.commissions.length > 0 ? (
-                report.commissions.map((c) => (
-                  <Row
-                    key={c.cashierName}
-                    label={`Total Commission (${c.cashierName})`}
-                    value={formatCurrency(c.totalCommission)}
-                  />
-                ))
-              ) : (
-                <Row label={t("total_commission")} value={formatCurrency(0)} />
-              )}
-            </View>
-          </View>
+          <CommissionCard commissions={report.commissions} />
         </View>
       </ScrollView>
 
@@ -198,9 +210,8 @@ const ReportDetailScreen = () => {
           variant="primary"
           title={t("export")}
           onPress={() => {}}
-          style={[$.footerButton, { backgroundColor: "#7F1D1D" }]} // Dark red from design
+          style={[$.footerButton, { backgroundColor: "#7F1D1D" }]}
           size="lg"
-          // leftIcon={(size, color) => <IcExport width={size} height={size} color={color} />}
         />
       </View>
     </View>

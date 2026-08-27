@@ -94,6 +94,110 @@ class PrinterService {
     usePrinterStore.getState().setIsScanning(false);
   }
 
+  private findCharacteristicInService(
+    serviceUuid: string,
+    characteristics: {
+      uuid: string;
+      isWritableWithResponse: boolean;
+      isWritableWithoutResponse: boolean;
+    }[],
+    isPriority: boolean,
+  ): {
+    candidate: {
+      serviceUUID: string;
+      characteristicUUID: string;
+      writeMethod: "withResponse" | "withoutResponse";
+    };
+    isPriority: boolean;
+  } | null {
+    for (const char of characteristics) {
+      Logger.log(
+        `  [PrinterService] Char: ${char.uuid} | W_Resp: ${char.isWritableWithResponse} | W_NoResp: ${char.isWritableWithoutResponse}`,
+      );
+
+      const method: "withResponse" | "withoutResponse" | null = char.isWritableWithResponse
+        ? "withResponse"
+        : char.isWritableWithoutResponse
+          ? "withoutResponse"
+          : null;
+
+      if (method) {
+        return {
+          candidate: {
+            serviceUUID: serviceUuid,
+            characteristicUUID: char.uuid,
+            writeMethod: method,
+          },
+          isPriority,
+        };
+      }
+    }
+    return null;
+  }
+
+  private async findWritableCharacteristic(device: Device): Promise<{
+    serviceUUID: string;
+    characteristicUUID: string;
+    writeMethod: "withResponse" | "withoutResponse";
+  } | null> {
+    const services = await device.services();
+    const PRINTER_SERVICES = ["000018f0", "e7810a71", "49535343"];
+    const IGNORED_SERVICES = ["00001800", "00001801", "0000180a", "00001804", "0000180f"];
+
+    let fallback: {
+      serviceUUID: string;
+      characteristicUUID: string;
+      writeMethod: "withResponse" | "withoutResponse";
+    } | null = null;
+
+    for (const service of services) {
+      const uuid = service.uuid.toLowerCase();
+      Logger.log(`[PrinterService] Found Service: ${uuid}`);
+
+      if (IGNORED_SERVICES.some((ignored) => uuid.includes(ignored))) {
+        Logger.log(`[PrinterService] Skipping ignored service: ${uuid}`);
+        continue;
+      }
+
+      const characteristics = await service.characteristics();
+      const isPriority = PRINTER_SERVICES.some((ps) => uuid.includes(ps));
+      const match = this.findCharacteristicInService(service.uuid, characteristics, isPriority);
+
+      if (match?.isPriority) {
+        Logger.log(`[PrinterService] Priority Printer Service Found: ${uuid}`);
+        return match.candidate;
+      }
+
+      if (match && !fallback) {
+        fallback = match.candidate;
+      }
+    }
+
+    return fallback;
+  }
+
+  private async requestDeviceMtu(device: Device): Promise<void> {
+    if (Platform.OS !== "android") return;
+    try {
+      await device.requestMTU(512);
+      Logger.log("[PrinterService] MTU request sent");
+    } catch (e) {
+      Logger.warn("MTU request failed, sticking to default", e);
+    }
+  }
+
+  private setupDisconnectionListener(device: Device): void {
+    device.onDisconnected((_error, disconnectedDevice) => {
+      usePrinterStore.getState().setIsConnected(false);
+      this.connectedDevice = null;
+      this.writeMethod = null;
+
+      captureAnalyticsEvent("printer_disconnected", {
+        printerName: disconnectedDevice?.name || undefined,
+      });
+    });
+  }
+
   async connectToDevice(deviceId: string): Promise<void> {
     try {
       this.stopScan();
@@ -102,101 +206,20 @@ class PrinterService {
 
       await device.discoverAllServicesAndCharacteristics();
 
-      // Find writable characteristic
-      const services = await device.services();
-
-      // Known printer service UUIDs (short 16-bit UUIDs are often returned as full 128-bit)
-      // 18f0 is a common proprietary service for printing.
-      const PRINTER_SERVICES = ["000018f0", "e7810a71", "49535343"];
-
-      // Services to explicitly IGNORE
-      const IGNORED_SERVICES = [
-        "00001800", // Generic Access
-        "00001801", // Generic Attribute
-        "0000180a", // Device Information
-        "00001804", // Tx Power
-        "0000180f", // Battery Service
-      ];
-
-      let fallbackService: {
-        uuid: string;
-        charUuid: string;
-        method: "withResponse" | "withoutResponse";
-      } | null = null;
-      let selectedService: {
-        uuid: string;
-        charUuid: string;
-        method: "withResponse" | "withoutResponse";
-      } | null = null;
-
-      for (const service of services) {
-        const uuid = service.uuid.toLowerCase();
-        Logger.log(`[PrinterService] Found Service: ${uuid}`);
-
-        if (IGNORED_SERVICES.some((ignored) => uuid.includes(ignored))) {
-          Logger.log(`[PrinterService] Skipping ignored service: ${uuid}`);
-          continue;
-        }
-
-        const characteristics = await service.characteristics();
-        for (const char of characteristics) {
-          Logger.log(
-            `  [PrinterService] Char: ${char.uuid} | W_Resp: ${char.isWritableWithResponse} | W_NoResp: ${char.isWritableWithoutResponse}`,
-          );
-
-          let method: "withResponse" | "withoutResponse" | null = null;
-          // Prefer withResponse for better reliability/debugging, even if slower
-          if (char.isWritableWithResponse) method = "withResponse";
-          else if (char.isWritableWithoutResponse) method = "withoutResponse";
-
-          if (method) {
-            const potentialService = { uuid: service.uuid, charUuid: char.uuid, method };
-
-            // If this is a known printer service, select it immediately
-            if (PRINTER_SERVICES.some((ps) => uuid.includes(ps))) {
-              Logger.log(`[PrinterService] Priority Printer Service Found: ${uuid}`);
-              selectedService = potentialService;
-              break;
-            }
-
-            // Otherwise keep as fallback (first one found)
-            if (!fallbackService) {
-              fallbackService = potentialService;
-            }
-          }
-        }
-        if (selectedService) break;
-      }
-
-      // Apply selection
-      const finalSelection = selectedService || fallbackService;
-
-      if (finalSelection) {
-        this.serviceUUID = finalSelection.uuid;
-        this.characteristicUUID = finalSelection.charUuid;
-        this.writeMethod = finalSelection.method;
-        Logger.log(
-          `[PrinterService] Final Selection: Service ${this.serviceUUID}, Char ${this.characteristicUUID}, Method: ${this.writeMethod}`,
-        );
-      } else {
-        // If we found nothing, let's look at the logs to see what happened.
-        // Maybe we were too aggressive with filtering?
+      const selection = await this.findWritableCharacteristic(device);
+      if (!selection) {
         Logger.warn("[PrinterService] No suitable characteristic found after filtering.");
-      }
-
-      if (!this.characteristicUUID) {
         throw new Error("No writable characteristic found");
       }
 
-      // Negotiate MTU on Android for better performance (iOS handles this auto)
-      if (Platform.OS === "android") {
-        try {
-          await device.requestMTU(512);
-          Logger.log("[PrinterService] MTU request sent");
-        } catch (e) {
-          Logger.warn("MTU request failed, sticking to default", e);
-        }
-      }
+      this.serviceUUID = selection.serviceUUID;
+      this.characteristicUUID = selection.characteristicUUID;
+      this.writeMethod = selection.writeMethod;
+      Logger.log(
+        `[PrinterService] Final Selection: Service ${this.serviceUUID}, Char ${this.characteristicUUID}, Method: ${this.writeMethod}`,
+      );
+
+      await this.requestDeviceMtu(device);
 
       usePrinterStore.getState().setConnectedDevice({ id: device.id, name: device.name });
       usePrinterStore.getState().setIsConnected(true);
@@ -206,16 +229,7 @@ class PrinterService {
         address: device.id,
       });
 
-      // Handle disconnection
-      device.onDisconnected((_error, disconnectedDevice) => {
-        usePrinterStore.getState().setIsConnected(false);
-        this.connectedDevice = null;
-        this.writeMethod = null;
-
-        captureAnalyticsEvent("printer_disconnected", {
-          printerName: disconnectedDevice?.name || undefined,
-        });
-      });
+      this.setupDisconnectionListener(device);
     } catch (error: unknown) {
       Logger.error("Connection error:", error);
       const errorMessage = error instanceof Error ? error.message : "Printer connection failed";
@@ -315,6 +329,77 @@ class PrinterService {
     return leftPart + " ".repeat(padding) + right;
   }
 
+  private async ensureConnection(): Promise<void> {
+    if (!this.connectedDevice || !this.serviceUUID || !this.characteristicUUID) {
+      const storedDevice = usePrinterStore.getState().connectedDevice;
+      if (storedDevice) {
+        await this.connectToDevice(storedDevice.id);
+      } else {
+        throw new Error("Printer not connected");
+      }
+    }
+  }
+
+  private buildReceiptItems(
+    encoderChain: any,
+    items: {
+      name: string;
+      quantity: number;
+      price: string;
+      variants?: { groupName: string; name: string; price: number }[];
+    }[],
+  ): void {
+    items.forEach((item) => {
+      encoderChain.line(item.name);
+
+      if (item.variants && item.variants.length > 0) {
+        item.variants.forEach((variant) => {
+          const variantText = `  + ${variant.groupName}: ${variant.name}`;
+          const variantPrice = `(${formatCurrency(variant.price)})`;
+          encoderChain.line(`${variantText} ${variantPrice}`);
+        });
+      }
+
+      const qtyStr = `  x${item.quantity} `;
+      const line2 = this.pairText(qtyStr, formatCurrency(Number(item.price)));
+      encoderChain.line(line2);
+    });
+  }
+
+  private buildReceiptTotals(
+    encoderChain: any,
+    data: {
+      subtotal?: string;
+      discount?: string;
+      tax?: string;
+      total: string;
+      paymentMethod?: string;
+      footerMessage?: string;
+    },
+  ): void {
+    if (data.subtotal) encoderChain.line(this.pairText("Subtotal:", data.subtotal));
+    if (data.discount) encoderChain.line(this.pairText("Discount:", data.discount));
+    if (data.tax) encoderChain.line(this.pairText("Tax:", data.tax));
+
+    encoderChain
+      .newline()
+      .bold(true)
+      .line(this.pairText("TOTAL:", data.total || "0"))
+      .bold(false)
+      .newline();
+
+    if (data.paymentMethod) {
+      encoderChain.line(this.centerText(`Payment: ${data.paymentMethod}`));
+    }
+
+    encoderChain
+      .newline()
+      .line(this.centerText(data.footerMessage || "Thank you!"))
+      .newline()
+      .newline()
+      .cut();
+  }
+
   async printReceipt(data: {
     title?: string;
     total: string;
@@ -330,103 +415,33 @@ class PrinterService {
     paymentMethod?: string;
     footerMessage?: string;
   }) {
-    if (!this.connectedDevice || !this.serviceUUID || !this.characteristicUUID) {
-      // Try to reconnect if stored
-      const storedDevice = usePrinterStore.getState().connectedDevice;
-      if (storedDevice) {
-        await this.connectToDevice(storedDevice.id);
-      } else {
-        throw new Error("Printer not connected");
-      }
-    }
+    await this.ensureConnection();
 
     const encoder = new EscPosEncoder();
-
-    // Get business name from store directly to ensure latest
     const business = useBusinessStore.getState().business;
     Logger.log("[PrinterService] Printing Receipt with Business Info:", business);
     const businessName = business?.name || "CAJERO POS";
-
     const DIVIDER = "-".repeat(this.WIDTH);
 
-    // Initial commands - We stay LEFT aligned and manually pad for consistency
-    const encoderChain = encoder
-      .initialize()
-      .codepage("cp437") // Standard for US/EU
-      // .text('\x1B\x40') // REMOVED: Cause of '?@' garbage
-      .align("left"); // Always left, we handle positioning strings manually
+    const encoderChain = encoder.initialize().codepage("cp437").align("left");
 
-    // Header
     encoderChain.bold(true).line(this.centerText(businessName)).bold(false);
     if (business?.address) encoderChain.line(this.centerText(business.address));
     if (business?.phone) encoderChain.line(this.centerText(business.phone));
 
-    // Title
     if (data.title) {
       encoderChain.newline().bold(true).line(this.centerText(data.title)).bold(false);
     }
 
-    // Divider
     encoderChain.line(DIVIDER);
 
-    // Items
     if (data.items) {
-      data.items.forEach((item) => {
-        // Line 1: Item Name
-        encoderChain.line(item.name);
-
-        // Print Variants if any
-        if (item.variants && item.variants.length > 0) {
-          item.variants.forEach((variant) => {
-            // Indent with "  + "
-            // Format: "  + Large (2.000)"
-            // We can use pairText if we want price on right, or just inline.
-            // Inline is simpler for variants usually.
-            const variantText = `  + ${variant.groupName}: ${variant.name}`;
-            const variantPrice = `(${formatCurrency(variant.price)})`;
-            //  encoderChain.line(this.pairText(variantText, variantPrice));
-            encoderChain.line(`${variantText} ${variantPrice}`);
-          });
-        }
-
-        // Line 2: Qty and Price (Right aligned or Paired?)
-        // Let's use Pair: "x2" on left (indented?), "10.000" on right?
-        // Or "x2" .... "10.000"
-
-        // Format: "  x2              20.000"
-        const qtyStr = `  x${item.quantity} `;
-        const line2 = this.pairText(qtyStr, formatCurrency(Number(item.price)));
-        encoderChain.line(line2);
-      });
+      this.buildReceiptItems(encoderChain, data.items);
     }
 
     encoderChain.line(DIVIDER);
 
-    // Totals - Using pairText to put Label on Left, Value on Right
-    if (data.subtotal) encoderChain.line(this.pairText("Subtotal:", data.subtotal));
-    if (data.discount) encoderChain.line(this.pairText("Discount:", data.discount));
-    if (data.tax) encoderChain.line(this.pairText("Tax:", data.tax));
-
-    // Total - Right aligned (actually paired with "TOTAL:")
-    encoderChain
-      .newline()
-      .bold(true)
-      .line(this.pairText("TOTAL:", data.total || "0"))
-      .bold(false)
-      .newline();
-
-    // Payment
-    if (data.paymentMethod) {
-      encoderChain.line(this.centerText(`Payment: ${data.paymentMethod}`));
-    }
-
-    // Footer
-    encoderChain
-      .newline()
-      .line(this.centerText(data.footerMessage || "Thank you!"))
-      .newline()
-      .newline()
-      .cut();
+    this.buildReceiptTotals(encoderChain, data);
 
     const buffer = Buffer.from(encoderChain.encode());
     const base64Data = buffer.toString("base64");
