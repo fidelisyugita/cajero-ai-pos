@@ -205,6 +205,7 @@ jest.mock("expo-secure-store", () => {
 
 jest.mock("expo-crypto", () => ({
   randomUUID: jest.fn(() => "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"),
+  getRandomBytes: jest.fn((byteCount: number) => new Uint8Array(byteCount)),
 }));
 
 jest.mock("@/services/endpoints/references", () => ({

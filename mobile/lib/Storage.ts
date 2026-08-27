@@ -1,3 +1,4 @@
+import * as Crypto from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { createMMKV } from "react-native-mmkv";
 import type { StateStorage } from "zustand/middleware";
@@ -7,8 +8,7 @@ const MMKV_ENCRYPTION_KEY_ALIAS = "cajero_mmkv_key";
 function getOrCreateEncryptionKey(): string {
   let key = SecureStore.getItem(MMKV_ENCRYPTION_KEY_ALIAS);
   if (!key) {
-    const bytes = new Uint8Array(32);
-    crypto.getRandomValues(bytes);
+    const bytes = Crypto.getRandomBytes(32);
     key = Array.from(bytes)
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
