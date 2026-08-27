@@ -45,17 +45,9 @@ const InitialLayout = () => {
     if (isLoggedIn && inAuthGroup) {
       router.replace("/(dashboard)");
     } else if (!isLoggedIn && segments[0] !== "(auth)") {
-      // If not logged in and not in auth group, redirect to sign-in.
-      // Using replace to avoid back button issues.
       router.replace("/(auth)/sign-in");
     }
-  }, [
-    isLoggedIn,
-    segments,
-    loaded, // If not logged in and not in auth group, redirect to sign-in.
-    // Using replace to avoid back button issues.
-    router.replace,
-  ]);
+  }, [isLoggedIn, segments, loaded, router.replace]);
 
   if (!loaded) {
     return <Slot />;
@@ -63,6 +55,7 @@ const InitialLayout = () => {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
       <Stack.Screen name="(dashboard)" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="+not-found" />
