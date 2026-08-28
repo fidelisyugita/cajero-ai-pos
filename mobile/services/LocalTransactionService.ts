@@ -2,7 +2,7 @@ import { and, eq, like, or, sql } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
-import { nowDate, nowIso, toDayjs } from "@/utils/Date";
+import { nowDate, toDayjs } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
 import type { TransactionRequest } from "./types/Transaction";
 

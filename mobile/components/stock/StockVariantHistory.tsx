@@ -5,17 +5,16 @@ import {
 import type React from "react";
 import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { useProductQuery } from "@/services/queries/useProductQuery";
 import { useStockMovementsQuery } from "@/services/queries/useStockMovementsQuery";
+import type { StockMovement } from "@/services/types/StockMovement";
+import type { Variant, VariantOption } from "@/services/types/Variant";
+import { formatCustomDate } from "@/utils/Date";
 
 // Workaround for missing estimatedItemSize in FlashList props type definition
 const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
-
-import { formatCustomDate } from "@/utils/Date";
-import { useProductQuery } from "@/services/queries/useProductQuery";
-import type { StockMovement } from "@/services/types/StockMovement";
-import type { Variant, VariantOption } from "@/services/types/Variant";
 
 interface StockVariantHistoryProps {
   variant: Variant;
