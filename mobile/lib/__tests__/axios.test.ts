@@ -130,8 +130,125 @@ describe("axios api instance and interceptors", () => {
       postSpy.mockRestore();
     });
 
+    it("deduplicates concurrent 401 requests and reuses the single refresh token response", async () => {
+      useAuthStore.setState({
+        user: mockUser,
+        isLoggedIn: true,
+      });
+
+      let resolveRefresh: (value: any) => void = () => {};
+      const refreshPromise = new Promise((resolve) => {
+        resolveRefresh = resolve;
+      });
+
+      const postSpy = jest.spyOn(axios, "post").mockImplementationOnce(() => refreshPromise as any);
+
+      const headers1 = { set: jest.fn() };
+      const config1: any = {
+        url: "/endpoint-1",
+        method: "get",
+        headers: headers1,
+        _retry: false,
+        adapter: jest.fn().mockResolvedValue({ data: "data-1", status: 200 }),
+      };
+
+      const headers2 = { set: jest.fn() };
+      const config2: any = {
+        url: "/endpoint-2",
+        method: "get",
+        headers: headers2,
+        _retry: false,
+        adapter: jest.fn().mockResolvedValue({ data: "data-2", status: 200 }),
+      };
+
+      const errorHandler = (api.interceptors.response as any).handlers[0].rejected;
+
+      // Trigger first 401
+      const req1Promise = errorHandler({
+        config: config1,
+        response: { status: 401 },
+      });
+
+      // Trigger second concurrent 401 while first is in flight
+      const req2Promise = errorHandler({
+        config: config2,
+        response: { status: 401 },
+      });
+
+      expect(postSpy).toHaveBeenCalledTimes(1);
+
+      // Now resolve the single refresh call
+      resolveRefresh({
+        data: {
+          accessToken: "concurrent-new-token",
+          refreshToken: "concurrent-new-refresh",
+        },
+      });
+
+      const [res1, res2] = await Promise.all([req1Promise, req2Promise]);
+
+      expect(postSpy).toHaveBeenCalledTimes(1);
+      expect(headers1.set).toHaveBeenCalledWith("Authorization", "Bearer concurrent-new-token");
+      expect(headers2.set).toHaveBeenCalledWith("Authorization", "Bearer concurrent-new-token");
+      expect(res1.data).toBe("data-1");
+      expect(res2.data).toBe("data-2");
+
+      postSpy.mockRestore();
+    });
+
+    it("rejects queued concurrent requests if refresh token request fails", async () => {
+      useAuthStore.setState({
+        user: mockUser,
+        isLoggedIn: true,
+      });
+
+      let rejectRefresh: (reason: any) => void = () => {};
+      const refreshPromise = new Promise((_, reject) => {
+        rejectRefresh = reject;
+      });
+
+      const postSpy = jest.spyOn(axios, "post").mockImplementationOnce(() => refreshPromise as any);
+
+      const config1: any = {
+        url: "/endpoint-1",
+        headers: { set: jest.fn() },
+        _retry: false,
+      };
+
+      const config2: any = {
+        url: "/endpoint-2",
+        headers: { set: jest.fn() },
+        _retry: false,
+      };
+
+      const error1 = {
+        config: config1,
+        response: { status: 401 },
+      };
+
+      const error2 = {
+        config: config2,
+        response: { status: 401 },
+      };
+
+      const errorHandler = (api.interceptors.response as any).handlers[0].rejected;
+
+      const req1Promise = errorHandler(error1);
+      const req2Promise = errorHandler(error2);
+
+      const refreshErr = new Error("Token revoked");
+      rejectRefresh(refreshErr);
+
+      await expect(req1Promise).rejects.toEqual(error1);
+      await expect(req2Promise).rejects.toEqual(error1);
+
+      expect(useAuthStore.getState().isLoggedIn).toBe(false);
+      expect(useAuthStore.getState().user).toBeUndefined();
+
+      postSpy.mockRestore();
+    });
+
     it("logs out user if refresh token request fails on 401", async () => {
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       useAuthStore.setState({
         user: mockUser,
         isLoggedIn: true,
@@ -155,10 +272,9 @@ describe("axios api instance and interceptors", () => {
       await expect(errorHandler(error)).rejects.toEqual(error);
 
       expect(useAuthStore.getState().isLoggedIn).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Token refresh failed:", expect.any(Error));
+      expect(useAuthStore.getState().user).toBeUndefined();
 
       postSpy.mockRestore();
-      consoleErrorSpy.mockRestore();
     });
 
     it("logs out user on 401 if user has no refreshToken", async () => {
@@ -182,6 +298,7 @@ describe("axios api instance and interceptors", () => {
 
       await expect(errorHandler(error)).rejects.toEqual(error);
       expect(useAuthStore.getState().isLoggedIn).toBe(false);
+      expect(useAuthStore.getState().user).toBeUndefined();
     });
 
     it("rejects non-401 error without refreshing token", async () => {

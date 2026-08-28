@@ -3,41 +3,50 @@ import { router } from "expo-router";
 import { DevSettings } from "react-native";
 import { expoDb } from "@/db/drizzle";
 import { clearAllStorage } from "@/lib/Storage";
+import { postLogout } from "@/services/endpoints/postLogout";
 import Logger from "@/services/logger";
 import { useAuthStore } from "@/store/useAuthStore";
 
+const revokeServerSession = async (refreshToken?: string): Promise<void> => {
+  if (!refreshToken) return;
+  try {
+    await postLogout({ refreshToken }, { timeout: 3500 });
+  } catch (error) {
+    Logger.warn("Remote logout failed, proceeding with local cleanup:", error);
+  }
+};
+
+const cleanLocalDatabase = async (): Promise<void> => {
+  try {
+    await expoDb.closeSync();
+  } catch (error) {
+    Logger.log("Error closing DB", error);
+  }
+
+  const dbDir = `${FileSystem.documentDirectory}SQLite`;
+  await FileSystem.deleteAsync(dbDir, { idempotent: true });
+};
+
+const reloadOrRedirect = (): void => {
+  try {
+    DevSettings.reload();
+  } catch (_e) {
+    router.replace("/(auth)/sign-in");
+  }
+};
+
 export const LogoutService = {
   performLogout: async () => {
+    const refreshToken = useAuthStore.getState().user?.refreshToken;
+
     try {
-      // 1. Clear Zustand storage (MMKV)
+      await revokeServerSession(refreshToken);
       clearAllStorage();
-
-      // 2. Clear Auth Store state in memory
       useAuthStore.setState({ isLoggedIn: false, user: undefined });
-
-      // 3. Close SQLite Database
-      try {
-        await expoDb.closeSync();
-      } catch (e) {
-        Logger.log("Error closing DB", e);
-      }
-
-      // 4. Delete SQLite Database File
-      const dbDir = `${FileSystem.documentDirectory}SQLite`;
-      await FileSystem.deleteAsync(dbDir, { idempotent: true });
-
-      // 5. Reload App to ensure fresh state
-      // DevSettings.reload() works in development builds.
-      // In production, we might just redirect, but reloading is safer for full clear.
-      try {
-        DevSettings.reload();
-      } catch (_e) {
-        // Fallback for production if reload fails or isn't available
-        router.replace("/(auth)/sign-in");
-      }
+      await cleanLocalDatabase();
+      reloadOrRedirect();
     } catch (error) {
       Logger.error("Logout failed", error);
-      // Force redirect even if cleanup fails
       useAuthStore.setState({ isLoggedIn: false, user: undefined });
       router.replace("/(auth)/sign-in");
     }
