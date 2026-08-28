@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
@@ -6,13 +5,12 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { t } from "@/services/i18n";
 import { useOrderStore } from "@/store/useOrderStore";
+import { formatFullDate } from "@/utils/Date";
 import IcArrowCircleRight from "../../../assets/icons/arrow-circle-right.svg";
 import IcTable from "../../../assets/icons/table.svg";
 import IcUser from "../../../assets/icons/user.svg";
 import { vs } from "../../../utils/Scale";
 import ListOrder from "../list-order";
-
-const today = dayjs().format("dddd, D MMMM YYYY");
 
 const UniIcUser = withUnistyles(IcUser, (theme) => ({
   color: theme.colors.neutral[600],
@@ -23,6 +21,7 @@ const UniIcTable = withUnistyles(IcTable, (theme) => ({
 }));
 
 const MenuOrder = () => {
+  const today = formatFullDate();
   const router = useRouter();
   const customerName = useOrderStore((state) => state.customerName);
   const tableNumber = useOrderStore((state) => state.tableNumber);

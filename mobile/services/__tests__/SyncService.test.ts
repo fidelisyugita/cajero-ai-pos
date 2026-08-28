@@ -2,6 +2,7 @@ import { db } from "@/db/drizzle";
 import api from "@/lib/axios";
 import type { SignInResponse } from "@/services/types/Auth";
 import { useAuthStore } from "@/store/useAuthStore";
+import { toDate } from "@/utils/Date";
 import Logger from "../logger";
 import { SyncService } from "../SyncService";
 
@@ -267,7 +268,7 @@ describe("SyncService", () => {
         isIn: true,
         description: "Table 4",
         isSynced: false,
-        createdAt: new Date("2026-08-24T12:00:00.000Z"),
+        createdAt: toDate("2026-08-24T12:00:00.000Z"),
       };
 
       const unsyncedItem = {

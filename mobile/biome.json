@@ -81,7 +81,24 @@
         "useImportType": "error",
         "noNonNullAssertion": "warn",
         "useConst": "error",
-        "useSelfClosingElements": "error"
+        "useSelfClosingElements": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "dayjs": "Do not import dayjs directly. Use centralized date helpers from @/utils/Date instead.",
+              "moment": "Do not use moment. Use centralized date helpers from @/utils/Date instead.",
+              "date-fns": "Do not use date-fns. Use centralized date helpers from @/utils/Date instead.",
+              "luxon": "Do not use luxon. Use centralized date helpers from @/utils/Date instead."
+            },
+            "patterns": [
+              {
+                "group": ["dayjs/**", "date-fns/**"],
+                "message": "Do not import date sub-modules directly. Use @/utils/Date instead."
+              }
+            ]
+          }
+        }
       },
       "performance": {
         "recommended": true,
@@ -106,6 +123,16 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["utils/Date.ts", "index.ts", "jest.setup.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
     {
       "includes": ["app/**", "components/**"],
       "linter": {

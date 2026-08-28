@@ -12,7 +12,7 @@ const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
-import dayjs from "dayjs";
+import { formatCustomDate } from "@/utils/Date";
 import type { Ingredient } from "@/services/types/Ingredient";
 
 import type { StockMovement } from "@/services/types/StockMovement";
@@ -63,9 +63,7 @@ const StockIngredientHistory = ({ ingredient, onClose }: StockIngredientHistoryP
               onEndReachedThreshold={0.5}
               renderItem={({ item }: { item: StockMovement }) => (
                 <View style={$.row}>
-                  <Text style={$.cell}>
-                    {dayjs.utc(item.createdAt).local().format("DD/MM/YY HH:mm")}
-                  </Text>
+                  <Text style={$.cell}>{formatCustomDate(item.createdAt, "DD/MM/YY HH:mm")}</Text>
                   <Text style={[$.cell, { color: item.type === "IN" ? "green" : "red" }]}>
                     {item.type}
                   </Text>

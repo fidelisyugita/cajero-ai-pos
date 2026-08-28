@@ -2,6 +2,7 @@ import { and, eq, like, or, sql } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
+import { nowDate, nowIso, toDayjs } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
 import type { TransactionRequest } from "./types/Transaction";
 
@@ -11,7 +12,7 @@ export const LocalTransactionService = {
     if (!user) throw new Error("User not logged in");
 
     const transactionId = generateUUID();
-    const now = new Date();
+    const now = nowDate();
 
     await db.transaction(async (tx) => {
       // Insert Transaction
@@ -83,16 +84,12 @@ export const LocalTransactionService = {
 
     // Date handling
     if (startDate) {
-      // Ensure start of day
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      conditions.push(sql`${transactions.createdAt} >= ${start.getTime()}`);
+      const startMs = toDayjs(startDate).startOf("day").valueOf();
+      conditions.push(sql`${transactions.createdAt} >= ${startMs}`);
     }
     if (endDate) {
-      // Ensure end of day
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      conditions.push(sql`${transactions.createdAt} <= ${end.getTime()}`);
+      const endMs = toDayjs(endDate).endOf("day").valueOf();
+      conditions.push(sql`${transactions.createdAt} <= ${endMs}`);
     }
 
     if (params.search) {
@@ -114,20 +111,6 @@ export const LocalTransactionService = {
       .orderBy(sql`${transactions.createdAt} DESC`); // Default sort desc
 
     // Map to TransactionResponse (simplified for list)
-    // Note: transactionItems are not fetched here generally for lists unless needed.
-    // But the UI shows "Total Order" count. So we might need a join or subquery?
-    // Or just lazy load? Or better: check if `transactions` table has simplified counts.
-    // It has `totalPrice`, `totalTax` etc.
-    // The UI shows `item.transactionProduct?.length`.
-    // We didn't store transactionProduct list in `transactions` table JSON.
-    // We stored `transactionItems` separately.
-    // We can do a left join or just fetch items count query.
-    // For performance in list, getting count is better.
-
-    // Let's keep it simple: Just return transactions for now and maybe fallback count to 0 or fetch separately.
-    // Or use `with` / `join`.
-    // Drizzle specific:
-
     return Promise.all(
       result.map(async (txn) => {
         const items = await db
@@ -138,7 +121,7 @@ export const LocalTransactionService = {
           ...txn,
           transactionProduct: items, // Map to expected structure if needed, but length usage is key
           id: txn.id,
-          createdAt: txn.createdAt ? new Date(txn.createdAt).toISOString() : "",
+          createdAt: txn.createdAt ? toDayjs(txn.createdAt).toISOString() : "",
           updatedAt: "", // Not tracked in local list query mostly
         };
       }),
@@ -180,7 +163,7 @@ export const LocalTransactionService = {
       ...txn,
       transactionProduct: mappedItems,
       id: txn.id,
-      createdAt: txn.createdAt ? new Date(txn.createdAt).toISOString() : "",
+      createdAt: txn.createdAt ? toDayjs(txn.createdAt).toISOString() : "",
       // Mapped fields
       in: txn.isIn,
     };

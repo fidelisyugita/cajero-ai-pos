@@ -6,7 +6,6 @@ const FlashList = ShopifyFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { memo } from "react";
 import { Text, View } from "react-native";
@@ -17,6 +16,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import { t } from "@/services/i18n";
 import { useTransactionsQuery } from "@/services/queries/useTransactionsQuery";
 import type { TransactionResponse } from "@/services/types/Transaction";
+import { formatDayDateYear, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 const COLUMNS = [
@@ -118,10 +118,8 @@ const TransactionRow = memo(({ item }: { item: TransactionResponse }) => {
     <View style={$.row}>
       {/* Time */}
       <View style={{ flex: COLUMNS[0].flex }}>
-        <Text style={$.timeText}>{dayjs.utc(item.createdAt).local().format("HH:mm")}</Text>
-        <Text style={$.dateText}>
-          {dayjs.utc(item.createdAt).local().format("ddd, DD MMM YYYY")}
-        </Text>
+        <Text style={$.timeText}>{formatTime(item.createdAt)}</Text>
+        <Text style={$.dateText}>{formatDayDateYear(item.createdAt)}</Text>
       </View>
 
       {/* Transaction Number/ID */}

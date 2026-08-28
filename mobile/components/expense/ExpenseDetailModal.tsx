@@ -1,9 +1,9 @@
 import { Feather } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IconButton from "@/components/ui/IconButton";
 import type { PettyCash } from "@/services/types/PettyCash";
+import { formatDateTimeNamed } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 interface ExpenseDetailModalProps {
@@ -54,9 +54,7 @@ const ExpenseDetailModal = ({ visible, onClose, expense }: ExpenseDetailModalPro
 
               <View style={$.row}>
                 <Text style={$.label}>Date</Text>
-                <Text style={$.value}>
-                  {dayjs.utc(expense.createdAt).local().format("DD MMM YYYY, HH:mm")}
-                </Text>
+                <Text style={$.value}>{formatDateTimeNamed(expense.createdAt)}</Text>
               </View>
 
               <View style={$.divider} />

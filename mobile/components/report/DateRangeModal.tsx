@@ -1,19 +1,19 @@
 import { Feather } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import DateTimePicker, { type DateType } from "react-native-ui-datepicker";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { t } from "@/services/i18n";
+import { type DateInput, formatDate, toDate, toDayjs } from "@/utils/Date";
 
 interface DateRangeModalProps {
   visible: boolean;
   onClose: () => void;
   onApply: (start: Date, end: Date) => void;
-  initialStart: Date;
-  initialEnd: Date;
-  minDate?: Date | null;
+  initialStart?: DateInput;
+  initialEnd?: DateInput;
+  minDate?: DateInput;
 }
 
 const DateRangeModal = ({
@@ -27,23 +27,27 @@ const DateRangeModal = ({
   const { theme } = useUnistyles();
   // We use a range object for react-native-ui-datepicker
   const [range, setRange] = useState<{ startDate: DateType; endDate: DateType }>({
-    startDate: dayjs(initialStart),
-    endDate: dayjs(initialEnd),
+    startDate: toDayjs(initialStart),
+    endDate: toDayjs(initialEnd),
   });
 
   useEffect(() => {
     if (visible) {
       setRange({
-        startDate: dayjs(initialStart),
-        endDate: dayjs(initialEnd),
+        startDate: toDayjs(initialStart),
+        endDate: toDayjs(initialEnd),
       });
     }
   }, [visible, initialStart, initialEnd]);
 
   const handleApply = () => {
     if (range.startDate && range.endDate) {
-      onApply(dayjs(range.startDate as any).toDate(), dayjs(range.endDate as any).toDate());
-      onClose();
+      const startDate = toDate(range.startDate as any);
+      const endDate = toDate(range.endDate as any);
+      if (startDate && endDate) {
+        onApply(startDate, endDate);
+        onClose();
+      }
     }
   };
 
@@ -62,14 +66,14 @@ const DateRangeModal = ({
             <View style={$.dateBox}>
               <Text style={$.dateLabel}>Start Date</Text>
               <Text style={$.dateValue}>
-                {range.startDate ? dayjs(range.startDate as any).format("DD MMM YYYY") : "-"}
+                {range.startDate ? formatDate(range.startDate as any) : "-"}
               </Text>
             </View>
             <Feather name="arrow-right" size={20} color="#666" />
             <View style={$.dateBox}>
               <Text style={$.dateLabel}>End Date</Text>
               <Text style={$.dateValue}>
-                {range.endDate ? dayjs(range.endDate as any).format("DD MMM YYYY") : "-"}
+                {range.endDate ? formatDate(range.endDate as any) : "-"}
               </Text>
             </View>
           </View>
@@ -80,7 +84,7 @@ const DateRangeModal = ({
               startDate={range.startDate}
               endDate={range.endDate}
               onChange={(params) => setRange(params)}
-              minDate={minDate ? dayjs(minDate) : undefined}
+              minDate={minDate ? toDayjs(minDate) : undefined}
               styles={{
                 selected: { backgroundColor: theme.colors.pressed[1] },
                 range_start: { backgroundColor: theme.colors.pressed[1] },

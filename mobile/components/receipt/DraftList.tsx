@@ -6,7 +6,6 @@ const FlashList = ShopifyFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { memo } from "react";
 import { Alert, Text, View } from "react-native";
@@ -16,6 +15,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { t } from "@/services/i18n";
 import { type DraftOrder, useDraftStore } from "@/store/useDraftStore";
 import { useOrderStore } from "@/store/useOrderStore";
+import { formatDayDate, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 const COLUMNS = [
@@ -143,8 +143,8 @@ const DraftRow = memo(({ item }: { item: DraftOrder }) => {
     <View style={$.row}>
       {/* Time */}
       <View style={{ flex: COLUMNS[0].flex }}>
-        <Text style={$.timeText}>{dayjs(item.savedAt).format("HH:mm")}</Text>
-        <Text style={$.dateText}>{dayjs(item.savedAt).format("ddd, DD MMM")}</Text>
+        <Text style={$.timeText}>{formatTime(item.savedAt)}</Text>
+        <Text style={$.dateText}>{formatDayDate(item.savedAt)}</Text>
       </View>
 
       {/* Draft ID */}

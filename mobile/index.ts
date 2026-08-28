@@ -14,6 +14,8 @@ import utc from "dayjs/plugin/utc";
 import weekday from "dayjs/plugin/weekday";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import jalaliday from "jalaliday";
+import "dayjs/locale/id";
+import "dayjs/locale/en";
 
 dayjs.extend(calendar);
 dayjs.extend(jalaliday);

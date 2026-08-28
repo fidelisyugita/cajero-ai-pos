@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { products } from "@/db/schema";
+import { nowDate } from "@/utils/Date";
 import { updateProduct } from "../endpoints/updateProduct";
 import Logger from "../logger";
 import type { CreateProductRequest } from "../types/Product";
@@ -25,7 +26,7 @@ export const useUpdateProductMutation = () => {
             name: updatedProduct.name,
             sellingPrice: updatedProduct.sellingPrice,
             buyingPrice: updatedProduct.buyingPrice,
-            updatedAt: new Date(),
+            updatedAt: nowDate(),
           })
           .where(eq(products.id, updatedProduct.id));
       } catch (e) {

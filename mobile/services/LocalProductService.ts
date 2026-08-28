@@ -2,6 +2,7 @@ import type { SQL } from "drizzle-orm";
 import { and, eq, isNull, like } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { categories, products } from "@/db/schema";
+import { nowDate } from "@/utils/Date";
 
 export const LocalProductService = {
   async getProducts(
@@ -49,7 +50,7 @@ export const LocalProductService = {
   },
 
   async softDeleteProduct(id: string) {
-    return await db.update(products).set({ deletedAt: new Date() }).where(eq(products.id, id));
+    return await db.update(products).set({ deletedAt: nowDate() }).where(eq(products.id, id));
   },
 
   async restoreProduct(id: string) {

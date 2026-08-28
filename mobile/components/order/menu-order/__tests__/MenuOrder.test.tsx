@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
-import dayjs from "dayjs";
 import { mockRouter } from "@/jest.setup";
 import { useOrderStore } from "@/store/useOrderStore";
+import { formatFullDate } from "@/utils/Date";
 import MenuOrder from "../MenuOrder";
 
 describe("MenuOrder component", () => {
@@ -18,7 +18,7 @@ describe("MenuOrder component", () => {
   it("renders header with current date and localized title", async () => {
     await render(<MenuOrder />);
 
-    const today = dayjs().format("dddd, D MMMM YYYY");
+    const today = formatFullDate();
     expect(screen.getByText("Current Order")).toBeTruthy();
     expect(screen.getByText(today)).toBeTruthy();
   });

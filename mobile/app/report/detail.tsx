@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -9,6 +8,7 @@ import Button from "@/components/ui/Button";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { t } from "@/services/i18n";
 import type { DailyReport } from "@/services/types/Report";
+import { formatFullDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 function calculateAdjustedNetRevenue(report: DailyReport | null, includeCogs: boolean): number {
@@ -79,7 +79,7 @@ const ReportDetailScreen = () => {
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
-            <Text style={$.dateTitle}>{dayjs(report.date).format("dddd, D MMMM YYYY")}</Text>
+            <Text style={$.dateTitle}>{formatFullDate(report.date)}</Text>
             <View style={$.cashierFilter}>
               {/* Placeholder for cashier filter if needed later */}
             </View>

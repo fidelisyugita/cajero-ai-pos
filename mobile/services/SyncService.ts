@@ -10,6 +10,7 @@ import {
 } from "@/db/schema";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/useAuthStore";
+import { nowDate, toDate } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
 import Logger from "./logger";
 
@@ -33,9 +34,9 @@ async function syncProductIngredients(
 }
 
 async function upsertSingleProduct(tx: any, p: any): Promise<void> {
-  const createdAt = p.createdAt ? new Date(p.createdAt) : null;
-  const updatedAt = p.updatedAt ? new Date(p.updatedAt) : null;
-  const deletedAt = p.deletedAt ? new Date(p.deletedAt) : null;
+  const createdAt = toDate(p.createdAt);
+  const updatedAt = toDate(p.updatedAt);
+  const deletedAt = toDate(p.deletedAt);
 
   await tx
     .insert(products)
@@ -85,9 +86,9 @@ async function upsertSingleProduct(tx: any, p: any): Promise<void> {
 }
 
 async function upsertSingleCategory(tx: any, c: any): Promise<void> {
-  const createdAt = c.createdAt ? new Date(c.createdAt) : null;
-  const updatedAt = c.updatedAt ? new Date(c.updatedAt) : null;
-  const deletedAt = c.deletedAt ? new Date(c.deletedAt) : null;
+  const createdAt = toDate(c.createdAt);
+  const updatedAt = toDate(c.updatedAt);
+  const deletedAt = toDate(c.deletedAt);
 
   await tx
     .insert(categories)
@@ -147,7 +148,7 @@ async function upsertSingleTransaction(tx: any, t: any): Promise<void> {
       isIn: t.in,
       description: t.description,
       isSynced: true,
-      createdAt: t.createdAt ? new Date(t.createdAt) : null,
+      createdAt: toDate(t.createdAt),
     })
     .onConflictDoUpdate({
       target: transactions.id,
@@ -211,7 +212,7 @@ async function handlePostPushSync(tx: any, localTxnId: string, backendTxn: any):
       totalDiscount: backendTxn.totalDiscount,
       totalCommission: backendTxn.totalCommission,
       isSynced: true,
-      createdAt: backendTxn.createdAt ? new Date(backendTxn.createdAt) : new Date(),
+      createdAt: toDate(backendTxn.createdAt) || nowDate(),
     })
     .where(eq(transactions.id, localTxnId));
 }
@@ -237,8 +238,8 @@ export const SyncService = {
 
       await db
         .insert(syncStatus)
-        .values({ tableName: "products", lastSync: new Date() })
-        .onConflictDoUpdate({ target: syncStatus.tableName, set: { lastSync: new Date() } });
+        .values({ tableName: "products", lastSync: nowDate() })
+        .onConflictDoUpdate({ target: syncStatus.tableName, set: { lastSync: nowDate() } });
 
       return true;
     } catch (error) {
@@ -282,8 +283,8 @@ export const SyncService = {
       });
       await db
         .insert(syncStatus)
-        .values({ tableName: "transactions", lastSync: new Date() })
-        .onConflictDoUpdate({ target: syncStatus.tableName, set: { lastSync: new Date() } });
+        .values({ tableName: "transactions", lastSync: nowDate() })
+        .onConflictDoUpdate({ target: syncStatus.tableName, set: { lastSync: nowDate() } });
 
       return true;
     } catch (error) {

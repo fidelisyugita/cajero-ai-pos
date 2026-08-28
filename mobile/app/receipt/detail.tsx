@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
@@ -10,6 +9,7 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 import { t } from "@/services/i18n"; // Assuming translations are available or use keys
 import Logger from "@/services/logger";
 import { printerService } from "@/services/PrinterService";
+import { formatCustomDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 const ReceiptDetailScreen = () => {
@@ -88,9 +88,7 @@ const ReceiptDetailScreen = () => {
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
-            <Text style={$.dateTitle}>
-              {dayjs.utc(createdAt).local().format("ddd D MMM hh:mm")}
-            </Text>
+            <Text style={$.dateTitle}>{formatCustomDate(createdAt, "ddd D MMM HH:mm")}</Text>
             <Text style={$.subTitle}>Transaction #{transaction.id}</Text>
           </View>
           <View

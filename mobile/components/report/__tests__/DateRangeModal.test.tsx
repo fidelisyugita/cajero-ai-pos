@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
-import dayjs from "dayjs";
+import { formatDate, toDate } from "@/utils/Date";
 import DateRangeModal from "../DateRangeModal";
 
 jest.mock("react-native-ui-datepicker", () => {
   const React = require("react");
   const { View, Button } = require("react-native");
+  const { toDate: mockToDate } = require("@/utils/Date");
   return (props: any) => {
     return React.createElement(
       View,
@@ -14,8 +15,8 @@ jest.mock("react-native-ui-datepicker", () => {
         title: "Change Dates",
         onPress: () =>
           props.onChange?.({
-            startDate: new Date("2026-08-01T00:00:00Z"),
-            endDate: new Date("2026-08-15T00:00:00Z"),
+            startDate: mockToDate("2026-08-01T00:00:00Z"),
+            endDate: mockToDate("2026-08-15T00:00:00Z"),
           }),
       }),
     );
@@ -23,8 +24,8 @@ jest.mock("react-native-ui-datepicker", () => {
 });
 
 describe("DateRangeModal component", () => {
-  const initialStart = new Date("2026-08-10T00:00:00Z");
-  const initialEnd = new Date("2026-08-20T00:00:00Z");
+  const initialStart = toDate("2026-08-10T00:00:00Z")!;
+  const initialEnd = toDate("2026-08-20T00:00:00Z")!;
   const mockOnClose = jest.fn();
   const mockOnApply = jest.fn();
 
@@ -44,8 +45,8 @@ describe("DateRangeModal component", () => {
     );
 
     expect(screen.getByText("Select Date Range")).toBeTruthy();
-    expect(screen.getByText(dayjs(initialStart).format("DD MMM YYYY"))).toBeTruthy();
-    expect(screen.getByText(dayjs(initialEnd).format("DD MMM YYYY"))).toBeTruthy();
+    expect(screen.getByText(formatDate(initialStart))).toBeTruthy();
+    expect(screen.getByText(formatDate(initialEnd))).toBeTruthy();
   });
 
   it("updates dates when date picker fires onChange and calls onApply on Apply press", async () => {
@@ -70,8 +71,8 @@ describe("DateRangeModal component", () => {
     });
 
     expect(mockOnApply).toHaveBeenCalledWith(
-      new Date("2026-08-01T00:00:00Z"),
-      new Date("2026-08-15T00:00:00Z"),
+      toDate("2026-08-01T00:00:00Z"),
+      toDate("2026-08-15T00:00:00Z"),
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
