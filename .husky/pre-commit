@@ -1,0 +1,7 @@
+# Run Biome lint+format on staged mobile files (via lint-staged)
+echo "🔍 Checking staged mobile files with Biome..."
+yarn lint-staged
+
+# Run comment hygiene check — blocks commit on violation
+echo "🧹 Running comment hygiene check..."
+cd mobile && yarn lint:hygiene
