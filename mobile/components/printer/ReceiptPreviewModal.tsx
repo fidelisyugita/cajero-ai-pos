@@ -1,10 +1,10 @@
 import { Feather } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import { t } from "@/services/i18n";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { formatDateTime, nowDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 interface ReceiptItem {
@@ -70,7 +70,7 @@ const ReceiptPreviewModal = ({
                 <View style={$.dashLine} />
                 <Text style={$.receiptTitle}>{data.title || "RECEIPT"}</Text>
                 <Text style={$.receiptText}>
-                  {dayjs(data.transactionDate || new Date()).format("DD/MM/YYYY HH:mm")}
+                  {formatDateTime(data.transactionDate || nowDate())}
                 </Text>
                 {data.transactionId && <Text style={$.receiptText}>#{data.transactionId}</Text>}
                 <View style={$.dashLine} />

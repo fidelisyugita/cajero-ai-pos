@@ -3,6 +3,7 @@ import { Alert } from "react-native";
 import { mockRouter } from "@/jest.setup";
 import { type DraftOrder, useDraftStore } from "@/store/useDraftStore";
 import { useOrderStore } from "@/store/useOrderStore";
+import { toDayjs } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 import DraftList from "../DraftList";
 
@@ -10,7 +11,7 @@ describe("DraftList component", () => {
   const sampleDrafts: DraftOrder[] = [
     {
       id: "DRAFT-101",
-      savedAt: new Date("2026-08-25T14:30:00.000Z").getTime(),
+      savedAt: toDayjs("2026-08-25T14:30:00.000Z").valueOf(),
       customerName: "Bob Smith",
       tableNumber: "5",
       discount: 2000,
@@ -30,7 +31,7 @@ describe("DraftList component", () => {
     },
     {
       id: "DRAFT-102",
-      savedAt: new Date("2026-08-25T15:00:00.000Z").getTime(),
+      savedAt: toDayjs("2026-08-25T15:00:00.000Z").valueOf(),
       customerName: "Charlie Brown",
       tableNumber: "",
       discount: 0,

@@ -6,16 +6,14 @@ import type React from "react";
 import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useStockMovementsQuery } from "@/services/queries/useStockMovementsQuery";
+import type { Ingredient } from "@/services/types/Ingredient";
+import type { StockMovement } from "@/services/types/StockMovement";
+import { formatCustomDate } from "@/utils/Date";
 
 // Workaround for missing estimatedItemSize in FlashList props type definition
 const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
-
-import dayjs from "dayjs";
-import type { Ingredient } from "@/services/types/Ingredient";
-
-import type { StockMovement } from "@/services/types/StockMovement";
 
 interface StockIngredientHistoryProps {
   ingredient: Ingredient | null;
@@ -63,9 +61,7 @@ const StockIngredientHistory = ({ ingredient, onClose }: StockIngredientHistoryP
               onEndReachedThreshold={0.5}
               renderItem={({ item }: { item: StockMovement }) => (
                 <View style={$.row}>
-                  <Text style={$.cell}>
-                    {dayjs.utc(item.createdAt).local().format("DD/MM/YY HH:mm")}
-                  </Text>
+                  <Text style={$.cell}>{formatCustomDate(item.createdAt, "DD/MM/YY HH:mm")}</Text>
                   <Text style={[$.cell, { color: item.type === "IN" ? "green" : "red" }]}>
                     {item.type}
                   </Text>

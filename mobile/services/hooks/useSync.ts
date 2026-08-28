@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { queryClient } from "@/lib/ReactQuery";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSyncStore } from "@/store/useSyncStore";
+import { nowDate } from "@/utils/Date";
 import Logger from "../logger";
 import { SyncService } from "../SyncService";
 
@@ -17,7 +18,7 @@ export const useSync = () => {
       setIsSyncing(true);
       try {
         await SyncService.syncAll();
-        setLastSyncTime(new Date());
+        setLastSyncTime(nowDate());
         Logger.log("Sync completed");
         queryClient.invalidateQueries({ queryKey: ["products"] });
         queryClient.invalidateQueries({ queryKey: ["product-categories"] });

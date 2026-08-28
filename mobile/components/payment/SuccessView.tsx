@@ -1,7 +1,7 @@
-import dayjs from "dayjs";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
+import { formatDayDateTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
 
@@ -32,7 +32,7 @@ const SuccessView = ({
 
         <Text style={$.title}>Payment Success!</Text>
         <Text style={$.subtitle}>Transaction No. {transactionNumber}</Text>
-        <Text style={$.date}>{dayjs().format("ddd, D MMM YYYY - HH:mm")}</Text>
+        <Text style={$.date}>{formatDayDateTime()}</Text>
 
         <View style={$.divider} />
 

@@ -11,6 +11,8 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import weekday from "dayjs/plugin/weekday";
 import weekOfYear from "dayjs/plugin/weekOfYear";
+import "dayjs/locale/id";
+import "dayjs/locale/en";
 import "./config/Unistyles";
 
 dayjs.extend(localeData);

@@ -18,6 +18,7 @@ import { usePrinterStore } from "@/store/PrinterStore";
 import { useDraftStore } from "@/store/useDraftStore";
 import { selectSubtotal, useOrderStore } from "@/store/useOrderStore";
 import { useReferenceStore } from "@/store/useReferenceStore";
+import { nowDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 const PaymentScreen = () => {
@@ -145,7 +146,7 @@ const PaymentScreen = () => {
               })),
               footerMessage: "Thank you for your visit!",
               transactionId: data.id || "2023-0001",
-              transactionDate: new Date(), // Use current time or data.createdAt
+              transactionDate: nowDate(),
             };
 
             // Fire and forget print (or handle error quietly/toast)
@@ -237,7 +238,7 @@ const PaymentScreen = () => {
       })),
       footerMessage: "Thank you for your visit!",
       transactionId: lastTransactionNumber,
-      transactionDate: new Date(),
+      transactionDate: nowDate(),
     });
     setShowPreview(true);
   };

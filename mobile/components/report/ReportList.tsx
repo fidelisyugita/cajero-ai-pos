@@ -10,7 +10,6 @@ const FlashList = ShopifyFlashList as unknown as <T>(
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { memo } from "react";
 import { Text, View } from "react-native";
@@ -20,6 +19,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
 import { t } from "@/services/i18n";
 import type { DailyReport } from "@/services/types/Report";
+import { formatDate, formatDayName } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 interface ReportListProps {
@@ -99,8 +99,8 @@ const ReportRow = memo(({ item }: { item: DailyReport }) => {
     <View style={$.row}>
       {/* Time */}
       <View style={{ flex: COLUMNS[0].flex }}>
-        <Text style={$.timeText}>{dayjs(item.date).format("dddd")}</Text>
-        <Text style={$.dateText}>{dayjs(item.date).format("DD MMM YYYY")}</Text>
+        <Text style={$.timeText}>{formatDayName(item.date)}</Text>
+        <Text style={$.dateText}>{formatDate(item.date)}</Text>
       </View>
 
       {/* Transactions */}

@@ -1,6 +1,7 @@
 import { db } from "@/db/drizzle";
 import type { SignInResponse } from "@/services/types/Auth";
 import { useAuthStore } from "@/store/useAuthStore";
+import { toDate } from "@/utils/Date";
 import { LocalTransactionService } from "../LocalTransactionService";
 
 const mockUser: SignInResponse = {
@@ -144,7 +145,7 @@ describe("LocalTransactionService", () => {
           storeId: "store-123",
           totalPrice: 50000,
           isIn: true,
-          createdAt: new Date("2026-08-24T10:00:00.000Z"),
+          createdAt: toDate("2026-08-24T10:00:00.000Z"),
         },
       ];
 
@@ -202,7 +203,7 @@ describe("LocalTransactionService", () => {
         storeId: "store-123",
         totalPrice: 45000,
         isIn: true,
-        createdAt: new Date("2026-08-24T12:00:00.000Z"),
+        createdAt: toDate("2026-08-24T12:00:00.000Z"),
       };
 
       const mockJoinedItems = [

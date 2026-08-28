@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -10,22 +9,23 @@ import ReportSummary from "@/components/report/ReportSummary";
 import Button from "@/components/ui/Button";
 import { useReportsQuery } from "@/services/queries/useReportsQuery";
 import { useAuthStore } from "@/store/useAuthStore";
+import { type Dayjs, formatApiDate, formatDateRange, toDayjs } from "@/utils/Date";
 
 const ReportScreen = () => {
   const user = useAuthStore((state) => state.user);
 
   // Default to last 7 days
-  const [dateRange, setDateRange] = useState({
-    startDate: dayjs().subtract(6, "day").toDate(),
-    endDate: dayjs().toDate(),
+  const [dateRange, setDateRange] = useState<{ startDate: Dayjs; endDate: Dayjs }>({
+    startDate: toDayjs().subtract(6, "day"),
+    endDate: toDayjs(),
   });
 
   const [showPicker, setShowPicker] = useState(false);
   const [includeCogs, setIncludeCogs] = useState(false);
 
   const { data: reportData, isLoading } = useReportsQuery({
-    startDate: dayjs(dateRange.startDate).format("YYYY-MM-DD"),
-    endDate: dayjs(dateRange.endDate).format("YYYY-MM-DD"),
+    startDate: formatApiDate(dateRange.startDate),
+    endDate: formatApiDate(dateRange.endDate),
   });
 
   // const scrollY = useSharedValue(0);
@@ -51,9 +51,7 @@ const ReportScreen = () => {
         {/* <Text style={$.headerTitle}>Report</Text> */}
         <Button
           variant="secondary"
-          title={`${dayjs(dateRange.startDate).format("DD/MM/YYYY")} - ${dayjs(
-            dateRange.endDate,
-          ).format("DD/MM/YYYY")}`}
+          title={formatDateRange(dateRange.startDate, dateRange.endDate)}
           rightIcon={(size, color) => <Feather name="calendar" size={size} color={color} />}
           onPress={() => setShowPicker(true)}
           size="sm"
@@ -75,10 +73,10 @@ const ReportScreen = () => {
       <DateRangeModal
         visible={showPicker}
         onClose={() => setShowPicker(false)}
-        onApply={(start, end) => setDateRange({ startDate: start, endDate: end })}
+        onApply={(start, end) => setDateRange({ startDate: toDayjs(start), endDate: toDayjs(end) })}
         initialStart={dateRange.startDate}
         initialEnd={dateRange.endDate}
-        minDate={user?.createdAt ? new Date(user.createdAt) : undefined}
+        minDate={user?.createdAt}
       />
 
       {/* Report Summary Section */}

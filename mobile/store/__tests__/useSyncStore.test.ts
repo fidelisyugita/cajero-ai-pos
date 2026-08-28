@@ -1,3 +1,4 @@
+import { toDate } from "@/utils/Date";
 import { useSyncStore } from "../useSyncStore";
 
 describe("useSyncStore", () => {
@@ -23,7 +24,7 @@ describe("useSyncStore", () => {
   });
 
   it("should update lastSyncTime with Date instance", () => {
-    const syncDate = new Date("2026-08-24T12:00:00Z");
+    const syncDate = toDate("2026-08-24T12:00:00Z")!;
     useSyncStore.getState().setLastSyncTime(syncDate);
     expect(useSyncStore.getState().lastSyncTime).toEqual(syncDate);
   });

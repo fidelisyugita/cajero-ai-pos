@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { toDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 import ReceiptPreviewModal from "../ReceiptPreviewModal";
 
@@ -12,7 +13,7 @@ describe("ReceiptPreviewModal component", () => {
     total: "Rp 49.500",
     paymentMethod: "CASH",
     footerMessage: "Thank you for visiting us!",
-    transactionDate: new Date("2026-08-25T10:30:00Z"),
+    transactionDate: toDate("2026-08-25T10:30:00Z")!,
     transactionId: "TRX-10023",
     items: [
       {

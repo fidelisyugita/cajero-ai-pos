@@ -6,7 +6,6 @@ const FlashList = ShopifyFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
-import dayjs from "dayjs";
 import { memo } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -17,6 +16,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import { t } from "@/services/i18n";
 import { usePettyCashQuery } from "@/services/queries/usePettyCashQuery";
 import type { PettyCash } from "@/services/types/PettyCash";
+import { formatDayDate, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
 const COLUMNS = [
@@ -126,8 +126,8 @@ const ExpenseRow = memo(({ item, onPress }: { item: PettyCash; onPress: () => vo
     <View style={$.row}>
       {/* Time */}
       <View style={{ flex: COLUMNS[0].flex }}>
-        <Text style={$.timeText}>{dayjs.utc(item.createdAt).local().format("HH:mm")}</Text>
-        <Text style={$.dateText}>{dayjs.utc(item.createdAt).local().format("ddd, DD MMM")}</Text>
+        <Text style={$.timeText}>{formatTime(item.createdAt)}</Text>
+        <Text style={$.dateText}>{formatDayDate(item.createdAt)}</Text>
       </View>
 
       {/* Description */}

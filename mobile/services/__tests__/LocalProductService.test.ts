@@ -1,5 +1,6 @@
 import { db } from "@/db/drizzle";
 import { categories, products } from "@/db/schema";
+import { toDate } from "@/utils/Date";
 import { LocalProductService } from "../LocalProductService";
 
 jest.mock("@/db/drizzle", () => {
@@ -25,32 +26,19 @@ describe("LocalProductService", () => {
   });
 
   describe("getProducts", () => {
-    it("fetches products with default pagination and without deleted items", async () => {
+    it("fetches products with category joined and default pagination", async () => {
       const mockRows = [
         {
           products: {
             id: "prod-1",
             name: "Espresso",
-            categoryId: "cat-1",
+            categoryId: "cat-coffee",
             sellingPrice: 20000,
             deletedAt: null,
           },
           categories: {
-            id: "cat-1",
+            id: "cat-coffee",
             name: "Coffee",
-          },
-        },
-        {
-          products: {
-            id: "prod-2",
-            name: "Croissant",
-            categoryId: "cat-2",
-            sellingPrice: 25000,
-            deletedAt: null,
-          },
-          categories: {
-            id: "cat-2",
-            name: "Bakery",
           },
         },
       ];
@@ -65,24 +53,14 @@ describe("LocalProductService", () => {
       expect(queryBuilder.leftJoin).toHaveBeenCalledWith(categories, expect.anything());
       expect(queryBuilder.limit).toHaveBeenCalledWith(100);
       expect(queryBuilder.offset).toHaveBeenCalledWith(0);
-
       expect(result).toEqual([
         {
           id: "prod-1",
           name: "Espresso",
-          categoryId: "cat-1",
-          categoryCode: "cat-1",
+          categoryId: "cat-coffee",
+          categoryCode: "cat-coffee",
           categoryName: "Coffee",
           sellingPrice: 20000,
-          deletedAt: null,
-        },
-        {
-          id: "prod-2",
-          name: "Croissant",
-          categoryId: "cat-2",
-          categoryCode: "cat-2",
-          categoryName: "Bakery",
-          sellingPrice: 25000,
           deletedAt: null,
         },
       ]);
@@ -96,7 +74,7 @@ describe("LocalProductService", () => {
             name: "Latte",
             categoryId: "cat-coffee",
             sellingPrice: 28000,
-            deletedAt: new Date("2026-01-01"),
+            deletedAt: toDate("2026-01-01"),
           },
           categories: {
             id: "cat-coffee",

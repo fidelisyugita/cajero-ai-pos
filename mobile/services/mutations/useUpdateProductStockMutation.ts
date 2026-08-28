@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { products } from "@/db/schema";
+import { nowDate } from "@/utils/Date";
 import { stockUpdate } from "../endpoints/stockUpdate";
 import Logger from "../logger";
 
@@ -25,7 +26,7 @@ export const useUpdateProductStockMutation = () => {
           .update(products)
           .set({
             stock: variables.stock,
-            updatedAt: new Date(),
+            updatedAt: nowDate(),
           })
           .where(eq(products.id, variables.id));
       } catch (e) {
