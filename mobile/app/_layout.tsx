@@ -4,7 +4,6 @@ import { useCustomFonts } from "@/config/useCustomFonts";
 import "react-native-reanimated";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
-import { LogBox } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AnalyticsProvider } from "@/components/providers/AnalyticsProvider";
 import { PosErrorBoundary } from "@/components/ui/PosErrorBoundary";
@@ -19,7 +18,6 @@ initSentry();
 
 if (__DEV__) {
   require("../lib/Reactotron");
-  LogBox.ignoreLogs(["AxiosError", "Sign in failed", "Request failed with status code 401"]);
 }
 
 SplashScreen.preventAutoHideAsync();
@@ -45,17 +43,9 @@ const InitialLayout = () => {
     if (isLoggedIn && inAuthGroup) {
       router.replace("/(dashboard)");
     } else if (!isLoggedIn && segments[0] !== "(auth)") {
-      // If not logged in and not in auth group, redirect to sign-in.
-      // Using replace to avoid back button issues.
       router.replace("/(auth)/sign-in");
     }
-  }, [
-    isLoggedIn,
-    segments,
-    loaded, // If not logged in and not in auth group, redirect to sign-in.
-    // Using replace to avoid back button issues.
-    router.replace,
-  ]);
+  }, [isLoggedIn, segments, loaded, router.replace]);
 
   if (!loaded) {
     return <Slot />;
@@ -63,6 +53,7 @@ const InitialLayout = () => {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
       <Stack.Screen name="(dashboard)" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="+not-found" />

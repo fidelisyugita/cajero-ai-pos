@@ -1,10 +1,17 @@
-import { Slot } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Sidebar from "@/components/dashboard/Sidebar";
 import SyncIndicator from "@/components/ui/SyncIndicator";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const DashboardLayout = () => {
+  const { isLoggedIn } = useAuthStore();
+
+  if (!isLoggedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
   return (
     <View style={styles.container}>
       <Sidebar />

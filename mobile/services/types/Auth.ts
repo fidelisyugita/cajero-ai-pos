@@ -22,4 +22,8 @@ export interface SignInResponse {
   updatedAt: string | null;
 }
 
+export interface LogoutRequest {
+  refreshToken: string;
+}
+
 export type AuthUser = SignInResponse;
