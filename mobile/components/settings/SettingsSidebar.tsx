@@ -1,9 +1,9 @@
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { t } from "@/services/i18n";
 import { useLanguageStore } from "@/store/useLanguageStore";
+import { getAppVersion } from "@/utils/AppInfo";
 import { vs } from "@/utils/Scale";
 
 export type SettingsTab = "printers" | "language" | "payment" | "developer" | "ai";
@@ -75,7 +75,7 @@ const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {
         </TouchableOpacity>
         <View style={$.versionContainer}>
           <Text style={$.versionLabel}>{t("app_version")}</Text>
-          <Text style={$.versionValue}>{Constants.expoConfig?.version ?? "1.0.0"}</Text>
+          <Text style={$.versionValue}>{getAppVersion()}</Text>
         </View>
       </View>
     </View>

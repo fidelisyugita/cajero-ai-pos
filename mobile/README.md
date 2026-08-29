@@ -34,6 +34,7 @@
   - [Unit & Integration Testing with Jest](#unit--integration-testing-with-jest)
   - [End-to-End Testing with Maestro](#end-to-end-testing-with-maestro)
 - [Building for Production](#-building-for-production)
+- [Version Management & Release Bumping](#-version-management--release-bumping)
 - [Project Directory Structure](#-project-directory-structure)
 - [Hardware & Troubleshooting](#-hardware--troubleshooting)
 
@@ -307,12 +308,30 @@ cp .maestro/.env.example .maestro/.env
 ```
 
 
----
-
 ## 📦 Building for Production
 
-### Android APK (Release)
-Assemble a standalone `.apk` for direct installation on POS terminals:
+### EAS CLI Local Builds (Recommended)
+You can compile native Android builds locally without consuming EAS cloud credits using `eas build --local`. Ensure Android SDK, Java 17+, and Gradle environment are configured locally.
+
+| Build Profile | Output Type | Command | Output File | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Preview** | Standalone APK | `yarn build:eas:preview` | `builds/cajero-preview.apk` | Sideloadable APK for manual QA and testing on physical POS terminals |
+| **Development** | Dev Client APK | `yarn build:eas:dev` | `builds/cajero-dev.apk` | Custom Expo Dev Client APK with native modules and debugging enabled |
+| **Production** | Google Play Bundle (AAB) | `yarn build:eas:prod` | `builds/cajero-prod.aab` | Signed Android App Bundle for Google Play Store console upload |
+| **Production APK** | Standalone Release APK | `yarn build:eas:prod:apk` | `builds/cajero-prod.apk` | Release APK compiled with production optimization |
+
+#### EAS Credentials Management
+All local build profiles in `eas.json` are configured with `credentialsSource: "local"`. By default, local builds will use local keystores / `credentials.json` or fallback to Android debug credentials for offline builds. To view or configure credentials:
+```bash
+yarn eas:credentials
+```
+
+---
+
+### Direct Gradle Builds (Alternative)
+
+#### Android APK (Release)
+Assemble a standalone `.apk` directly via Gradle wrapper:
 ```bash
 yarn build:apk
 ```
@@ -323,12 +342,40 @@ Clean and assemble:
 yarn build:apk:clean
 ```
 
-### Android App Bundle (AAB)
-Generate an Android App Bundle (`.aab`) for Google Play Console distribution:
+#### Android App Bundle (AAB)
+Generate an Android App Bundle (`.aab`) directly via Gradle wrapper:
 ```bash
 yarn bundle:android
 ```
 *Output location*: `android/app/build/outputs/bundle/release/app-release.aab`
+
+---
+
+## 🏷️ Version Management & Release Bumping
+
+Marketing versioning follows standard [Semantic Versioning (SemVer)](https://semver.org/) (`MAJOR.MINOR.PATCH`). 
+
+### Single Source of Truth
+- `mobile/package.json` (`"version": "1.0.7"`) acts as the single source of truth.
+- `mobile/app.config.ts` dynamically injects the version into Expo's configuration at build time.
+- Runtime screens, telemetry (Sentry & PostHog), and services access the version via the `@/utils/AppInfo` utility helper (`getAppVersion()`, `getBuildNumber()`, `getAppEnvironment()`).
+
+### Bumping Marketing Version
+Use automated scripts to bump the version and synchronize `package.json` and `app.json` (including Android `versionCode`):
+
+```bash
+# Bump patch version (e.g. 1.0.7 -> 1.0.8) for bug fixes
+yarn bump:patch
+
+# Bump minor version (e.g. 1.0.7 -> 1.1.0) for new features
+yarn bump:minor
+
+# Bump major version (e.g. 1.0.7 -> 2.0.0) for major releases
+yarn bump:major
+
+# Test without writing changes (dry run)
+node ./scripts/bump-version.js --dry-run patch
+```
 
 ---
 

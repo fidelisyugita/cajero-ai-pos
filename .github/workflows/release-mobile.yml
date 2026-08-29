@@ -1,0 +1,115 @@
+name: Release Mobile App
+
+on:
+  push:
+    tags:
+      - "mobile-v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag name (e.g. mobile-v1.1.0)"
+        required: true
+        type: string
+      draft:
+        description: "Create release as draft"
+        required: false
+        type: boolean
+        default: false
+      prerelease:
+        description: "Mark release as prerelease"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-mobile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify Mobile Codebase
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack & Yarn Berry
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.3 --activate
+
+      - name: Get Yarn Cache Directory
+        id: yarn-cache-dir
+        run: echo "cache_dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.cache_dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('mobile/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Biome Linter Check
+        run: yarn lint
+
+      - name: Code Hygiene & Comment Density Check
+        run: yarn lint:hygiene
+
+      - name: Biome Formatter Check
+        run: yarn format:check
+
+      - name: TypeScript Type Check
+        run: yarn tsc --noEmit
+
+      - name: Jest Unit Tests
+        run: yarn test --ci --maxWorkers=2
+
+  create-release:
+    name: Create GitHub Release
+    needs: [verify]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Tag Name
+        id: tag-info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag_name }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
+          VERSION="${TAG#mobile-v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag-info.outputs.tag_name }}
+          name: "Mobile App v${{ steps.tag-info.outputs.version }}"
+          generate_release_notes: true
+          draft: ${{ inputs.draft || false }}
+          prerelease: ${{ inputs.prerelease || false }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
