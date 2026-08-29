@@ -3,9 +3,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 /**
- * Returns formatted release tag for the mobile workspace.
- * @param {string} version - e.g. "1.1.0"
- * @returns {string} - e.g. "mobile-v1.1.0"
+ * Returns formatted release tag for the mobile workspace (e.g. mobile-v1.1.0).
+ * @param {string} version - Semantic version string (e.g. "1.1.0")
+ * @returns {string} - Formatted release tag (e.g. "mobile-v1.1.0")
  */
 function formatReleaseTag(version) {
   if (!version || typeof version !== "string") {
