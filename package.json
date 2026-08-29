@@ -11,7 +11,9 @@
     "backend": "cd backend && ./gradlew bootRun",
     "frontend": "cd frontend && npm run dev",
     "test:all": "npm-run-all test:backend test:frontend",
-    "clean:docker": "./clean-start.sh"
+    "clean:docker": "./clean-start.sh",
+    "release:notes": "node ./scripts/generate-release-notes.js",
+    "tag:mobile": "cd mobile && yarn tag:release"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",

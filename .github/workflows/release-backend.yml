@@ -1,13 +1,13 @@
-name: Release Mobile App
+name: Release Backend API
 
 on:
   push:
     tags:
-      - "mobile-v*"
+      - "backend-v*"
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Release tag name (e.g. mobile-v1.1.0)"
+        description: "Release tag name (e.g. backend-v1.0.0)"
         required: true
         type: string
       draft:
@@ -25,60 +25,33 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-mobile-${{ github.ref }}
+  group: release-backend-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   verify:
-    name: Verify Mobile Codebase
+    name: Verify Backend Codebase
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./mobile
+        working-directory: ./backend
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          node-version: 20
+          java-version: "17"
+          distribution: "temurin"
+          cache: "gradle"
 
-      - name: Enable Corepack & Yarn Berry
-        run: |
-          corepack enable
-          corepack prepare yarn@4.9.3 --activate
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-      - name: Get Yarn Cache Directory
-        id: yarn-cache-dir
-        run: echo "cache_dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.yarn-cache-dir.outputs.cache_dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('mobile/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Biome Linter Check
-        run: yarn lint
-
-      - name: Code Hygiene & Comment Density Check
-        run: yarn lint:hygiene
-
-      - name: Biome Formatter Check
-        run: yarn format:check
-
-      - name: TypeScript Type Check
-        run: yarn tsc --noEmit
-
-      - name: Jest Unit Tests
-        run: yarn test --ci --maxWorkers=2
+      - name: Run Gradle Tests
+        run: ./gradlew test
 
   create-release:
     name: Create GitHub Release
@@ -105,7 +78,7 @@ jobs:
             TAG="${GITHUB_REF#refs/tags/}"
           fi
           echo "tag_name=$TAG" >> $GITHUB_OUTPUT
-          VERSION="${TAG#mobile-v}"
+          VERSION="${TAG#backend-v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Generate Rich Release Notes
@@ -113,7 +86,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node ./scripts/generate-release-notes.js \
-            --workspace mobile \
+            --workspace backend \
             --tag "${{ steps.tag-info.outputs.tag_name }}" \
             --output ./release-notes.md
 
@@ -122,7 +95,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.tag-info.outputs.tag_name }}"
-          TITLE="Mobile App v${{ steps.tag-info.outputs.version }}"
+          TITLE="Backend API v${{ steps.tag-info.outputs.version }}"
           FLAGS=""
           if [ "${{ inputs.draft }}" = "true" ]; then
             FLAGS="$FLAGS --draft"

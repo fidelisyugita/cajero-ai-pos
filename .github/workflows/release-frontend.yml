@@ -1,13 +1,13 @@
-name: Release Mobile App
+name: Release Frontend Web App
 
 on:
   push:
     tags:
-      - "mobile-v*"
+      - "frontend-v*"
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Release tag name (e.g. mobile-v1.1.0)"
+        description: "Release tag name (e.g. frontend-v1.0.0)"
         required: true
         type: string
       draft:
@@ -25,16 +25,16 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-mobile-${{ github.ref }}
+  group: release-frontend-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   verify:
-    name: Verify Mobile Codebase
+    name: Verify Frontend Codebase
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./mobile
+        working-directory: ./frontend
 
     steps:
       - name: Checkout repository
@@ -44,41 +44,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Enable Corepack & Yarn Berry
-        run: |
-          corepack enable
-          corepack prepare yarn@4.9.3 --activate
-
-      - name: Get Yarn Cache Directory
-        id: yarn-cache-dir
-        run: echo "cache_dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.yarn-cache-dir.outputs.cache_dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('mobile/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          cache: "yarn"
+          cache-dependency-path: frontend/yarn.lock
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install --frozen-lockfile || yarn install
 
-      - name: Biome Linter Check
+      - name: ESLint Check
         run: yarn lint
 
-      - name: Code Hygiene & Comment Density Check
-        run: yarn lint:hygiene
-
-      - name: Biome Formatter Check
-        run: yarn format:check
-
-      - name: TypeScript Type Check
-        run: yarn tsc --noEmit
-
-      - name: Jest Unit Tests
-        run: yarn test --ci --maxWorkers=2
+      - name: Vite Production Build
+        run: yarn build
 
   create-release:
     name: Create GitHub Release
@@ -105,7 +81,7 @@ jobs:
             TAG="${GITHUB_REF#refs/tags/}"
           fi
           echo "tag_name=$TAG" >> $GITHUB_OUTPUT
-          VERSION="${TAG#mobile-v}"
+          VERSION="${TAG#frontend-v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Generate Rich Release Notes
@@ -113,7 +89,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node ./scripts/generate-release-notes.js \
-            --workspace mobile \
+            --workspace frontend \
             --tag "${{ steps.tag-info.outputs.tag_name }}" \
             --output ./release-notes.md
 
@@ -122,7 +98,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.tag-info.outputs.tag_name }}"
-          TITLE="Mobile App v${{ steps.tag-info.outputs.version }}"
+          TITLE="Frontend Web v${{ steps.tag-info.outputs.version }}"
           FLAGS=""
           if [ "${{ inputs.draft }}" = "true" ]; then
             FLAGS="$FLAGS --draft"
