@@ -63,14 +63,22 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": true,
+            "useLegacyPackaging": true
           }
         }
       ],
       "./plugins/withAndroidSigning",
       "./plugins/withIosXcode26Fix",
       "@react-native-community/datetimepicker",
-      "@sentry/react-native",
+      [
+        "@sentry/react-native",
+        {
+          "organization": "cajero",
+          "project": "cajero-mobile",
+          "disableAutoUpload": true
+        }
+      ],
       "expo-asset",
       "expo-font",
       "expo-image",
