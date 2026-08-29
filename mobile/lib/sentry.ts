@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/react-native";
 import type React from "react";
+import { getAppEnvironment, getAppVersion, getBuildNumber } from "@/utils/AppInfo";
 import { sanitizeString, sanitizeTelemetry } from "./sanitizeTelemetry";
 
 const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN?.trim() || "";
@@ -135,11 +136,9 @@ export const handleBeforeBreadcrumb = (breadcrumb: Sentry.Breadcrumb): Sentry.Br
 export const initSentry = (): void => {
   if (!isSentryEnabled) return;
 
-  const appEnv =
-    process.env.EXPO_PUBLIC_APP_ENV ||
-    (process.env.NODE_ENV === "production" ? "production" : "staging");
-  const appVersion = process.env.EXPO_PUBLIC_APP_VERSION || "1.0.0";
-  const buildNumber = process.env.EXPO_PUBLIC_BUILD_NUMBER || "1";
+  const appEnv = getAppEnvironment();
+  const appVersion = getAppVersion();
+  const buildNumber = getBuildNumber();
 
   Sentry.init({
     dsn,

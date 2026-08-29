@@ -34,6 +34,7 @@
   - [Unit & Integration Testing with Jest](#unit--integration-testing-with-jest)
   - [End-to-End Testing with Maestro](#end-to-end-testing-with-maestro)
 - [Building for Production](#-building-for-production)
+- [Version Management & Release Bumping](#-version-management--release-bumping)
 - [Project Directory Structure](#-project-directory-structure)
 - [Hardware & Troubleshooting](#-hardware--troubleshooting)
 
@@ -347,6 +348,34 @@ Generate an Android App Bundle (`.aab`) directly via Gradle wrapper:
 yarn bundle:android
 ```
 *Output location*: `android/app/build/outputs/bundle/release/app-release.aab`
+
+---
+
+## 🏷️ Version Management & Release Bumping
+
+Marketing versioning follows standard [Semantic Versioning (SemVer)](https://semver.org/) (`MAJOR.MINOR.PATCH`). 
+
+### Single Source of Truth
+- `mobile/package.json` (`"version": "1.0.7"`) acts as the single source of truth.
+- `mobile/app.config.ts` dynamically injects the version into Expo's configuration at build time.
+- Runtime screens, telemetry (Sentry & PostHog), and services access the version via the `@/utils/AppInfo` utility helper (`getAppVersion()`, `getBuildNumber()`, `getAppEnvironment()`).
+
+### Bumping Marketing Version
+Use automated scripts to bump the version and synchronize `package.json` and `app.json` (including Android `versionCode`):
+
+```bash
+# Bump patch version (e.g. 1.0.7 -> 1.0.8) for bug fixes
+yarn bump:patch
+
+# Bump minor version (e.g. 1.0.7 -> 1.1.0) for new features
+yarn bump:minor
+
+# Bump major version (e.g. 1.0.7 -> 2.0.0) for major releases
+yarn bump:major
+
+# Test without writing changes (dry run)
+node ./scripts/bump-version.js --dry-run patch
+```
 
 ---
 
