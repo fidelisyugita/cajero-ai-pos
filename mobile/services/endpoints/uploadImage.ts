@@ -18,7 +18,7 @@ export const uploadImage = async (
     uri: fileUri,
     name: filename || "image.jpg",
     type: mimeType,
-  } as any);
+  } as unknown as Blob);
 
   if (id) {
     formData.append("id", id);

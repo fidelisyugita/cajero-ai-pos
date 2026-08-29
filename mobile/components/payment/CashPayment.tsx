@@ -76,11 +76,7 @@ const CashPayment = ({
 
       <View style={$.quickAmounts}>
         {suggestions.map((amt, index) => (
-          <TouchableOpacity
-            key={index}
-            style={$.quickButton}
-            onPress={() => onChangePaidAmount(amt)}
-          >
+          <TouchableOpacity key={amt} style={$.quickButton} onPress={() => onChangePaidAmount(amt)}>
             <Text style={$.quickButtonText}>{index === 0 ? "Exact" : formatCurrency(amt)}</Text>
           </TouchableOpacity>
         ))}

@@ -27,7 +27,7 @@ const StockProductHistory = ({ product, onClose }: StockProductHistoryProps) => 
     sort: "createdAt,desc",
   });
 
-  const movements = data?.pages.flatMap((page: any) => page.content) || [];
+  const movements = data?.pages.flatMap((page) => page.content) || [];
 
   if (!product) return null;
 

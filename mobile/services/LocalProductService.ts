@@ -37,7 +37,7 @@ export const LocalProductService = {
       ...row.products,
       categoryCode: row.products.categoryId,
       categoryName: row.categories?.name,
-    })) as any;
+    }));
   },
 
   async getProductById(id: string) {

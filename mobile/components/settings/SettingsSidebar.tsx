@@ -13,7 +13,21 @@ interface SettingsSidebarProps {
   onTabChange: (tab: SettingsTab) => void;
 }
 
-const MENU_ITEMS: { id: SettingsTab; labelKey: string; icon: any; iconName: string }[] = [
+type MenuItem =
+  | {
+      id: SettingsTab;
+      labelKey: Parameters<typeof t>[0];
+      icon: typeof Feather;
+      iconName: keyof typeof Feather.glyphMap;
+    }
+  | {
+      id: SettingsTab;
+      labelKey: Parameters<typeof t>[0];
+      icon: typeof MaterialIcons;
+      iconName: keyof typeof MaterialIcons.glyphMap;
+    };
+
+const MENU_ITEMS: MenuItem[] = [
   { id: "printers", labelKey: "printers", icon: Feather, iconName: "printer" },
   { id: "language", labelKey: "language", icon: MaterialIcons, iconName: "language" },
   // { id: "ai", labelKey: "ai_settings", icon: Feather, iconName: "cpu" },   // disabled for now
@@ -29,17 +43,26 @@ const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {
       <View style={$.menuContainer}>
         {MENU_ITEMS.map((item) => {
           const isActive = activeTab === item.id;
-          const IconComponent = item.icon;
           return (
             <TouchableOpacity
               key={item.id}
               style={[$.menuItem, isActive && $.menuItemActive]}
               onPress={() => onTabChange(item.id)}
             >
-              <IconComponent name={item.iconName} size={20} color={isActive ? "#000" : "#555"} />
-              <Text style={[$.menuLabel, isActive && $.menuLabelActive]}>
-                {t(item.labelKey as any)}
-              </Text>
+              {item.icon === Feather ? (
+                <Feather
+                  name={item.iconName as keyof typeof Feather.glyphMap}
+                  size={20}
+                  color={isActive ? "#000" : "#555"}
+                />
+              ) : (
+                <MaterialIcons
+                  name={item.iconName as keyof typeof MaterialIcons.glyphMap}
+                  size={20}
+                  color={isActive ? "#000" : "#555"}
+                />
+              )}
+              <Text style={[$.menuLabel, isActive && $.menuLabelActive]}>{t(item.labelKey)}</Text>
             </TouchableOpacity>
           );
         })}

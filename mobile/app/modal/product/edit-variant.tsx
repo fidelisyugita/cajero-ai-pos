@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Controller, type Resolver, useFieldArray, useForm } from "react-hook-form";
+import type { Control, Resolver } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
@@ -174,7 +175,6 @@ const EditVariantModal = () => {
                 remove={() => remove(index)}
                 canRemove={fields.length > 1}
                 ingredientOptions={ingredientOptions}
-                allIngredients={ingredientsData || []}
               />
             ))}
             <Button
@@ -206,7 +206,7 @@ const EditVariantModal = () => {
           variant="secondary"
         />
         <Button
-          onPress={handleSubmit(onSubmit as any)}
+          onPress={handleSubmit(onSubmit)}
           size="md"
           style={$.flex}
           title={t("save")}
@@ -223,8 +223,13 @@ const VariantOptionItem = ({
   remove,
   canRemove,
   ingredientOptions,
-  allIngredients,
-}: any) => {
+}: {
+  control: Control<VariantFormData>;
+  index: number;
+  remove: () => void;
+  canRemove: boolean;
+  ingredientOptions: Array<{ label: string; value: string }>;
+}) => {
   const {
     fields,
     append,
@@ -304,7 +309,7 @@ const VariantOptionItem = ({
       {ingredientOptions.length > 0 && (
         <View style={$.ingredientsSection}>
           <Text style={$.ingredientsTitle}>{t("ingredients")}</Text>
-          {fields.map((field: any, ingIndex: number) => (
+          {fields.map((field, ingIndex) => (
             <View key={field.id} style={$.ingredientRow}>
               <Controller
                 control={control}

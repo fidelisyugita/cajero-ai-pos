@@ -36,11 +36,14 @@ export const useUpdateProductMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["product", updatedProduct.id] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       Logger.error("Failed to update product:", error);
-      if (error.response) {
-        Logger.error("Error data:", error.response.data);
-        Logger.error("Error status:", error.response.status);
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const axiosErr = error as { response?: { data?: unknown; status?: number } };
+        if (axiosErr.response) {
+          Logger.error("Error data:", axiosErr.response.data);
+          Logger.error("Error status:", axiosErr.response.status);
+        }
       }
     },
   });

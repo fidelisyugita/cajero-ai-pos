@@ -78,14 +78,14 @@ const ReceiptPreviewModal = ({
 
               {/* Items */}
               <View style={$.itemsContainer}>
-                {data.items.map((item, index) => (
-                  <View key={index} style={$.itemRow}>
+                {data.items.map((item) => (
+                  <View key={`${item.name}-${item.price}`} style={$.itemRow}>
                     <View style={{ flex: 1 }}>
                       <Text style={$.itemText}>{item.name}</Text>
                       {item.variants && item.variants.length > 0 && (
                         <View style={{ paddingLeft: 8 }}>
-                          {item.variants.map((v, i) => (
-                            <Text key={i} style={$.itemSubText}>
+                          {item.variants.map((v) => (
+                            <Text key={`${v.groupName}-${v.name}`} style={$.itemSubText}>
                               + {v.groupName}: {v.name} ({formatCurrency(v.price)})
                             </Text>
                           ))}

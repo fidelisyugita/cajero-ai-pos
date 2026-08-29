@@ -42,8 +42,8 @@ const DateRangeModal = ({
 
   const handleApply = () => {
     if (range.startDate && range.endDate) {
-      const startDate = toDate(range.startDate as any);
-      const endDate = toDate(range.endDate as any);
+      const startDate = toDate(range.startDate as DateInput);
+      const endDate = toDate(range.endDate as DateInput);
       if (startDate && endDate) {
         onApply(startDate, endDate);
         onClose();
@@ -66,14 +66,14 @@ const DateRangeModal = ({
             <View style={$.dateBox}>
               <Text style={$.dateLabel}>Start Date</Text>
               <Text style={$.dateValue}>
-                {range.startDate ? formatDate(range.startDate as any) : "-"}
+                {range.startDate ? formatDate(range.startDate as DateInput) : "-"}
               </Text>
             </View>
             <Feather name="arrow-right" size={20} color="#666" />
             <View style={$.dateBox}>
               <Text style={$.dateLabel}>End Date</Text>
               <Text style={$.dateValue}>
-                {range.endDate ? formatDate(range.endDate as any) : "-"}
+                {range.endDate ? formatDate(range.endDate as DateInput) : "-"}
               </Text>
             </View>
           </View>

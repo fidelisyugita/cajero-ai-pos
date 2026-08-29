@@ -14,7 +14,11 @@ import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import DottedLine from "@/components/ui/DottedLine";
 import { t } from "@/services/i18n";
-import { selectSubtotal, useOrderStore } from "@/store/useOrderStore";
+import {
+  type OrderItem as OrderItemType,
+  selectSubtotal,
+  useOrderStore,
+} from "@/store/useOrderStore";
 import { formatCurrency } from "@/utils/Format";
 import OrderItem from "./OrderItem";
 
@@ -34,7 +38,7 @@ const ListOrder = () => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: OrderItemType) => {
     router.push({
       pathname: "/modal/order/add-item",
       params: {

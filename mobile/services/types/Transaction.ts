@@ -1,4 +1,5 @@
 import type { PageResponse } from "./Page";
+import type { SelectedVariant } from "./Receipt";
 
 export interface TransactionStatusRef {
   code: string;
@@ -20,7 +21,7 @@ export interface PaymentMethodRef {
 
 export interface TransactionProductRequest {
   productId: string;
-  selectedVariants: any; // JsonNode in backend
+  selectedVariants: SelectedVariant[] | string | null; // JsonNode in backend
   note?: string;
   quantity: number;
   buyingPrice: number;
@@ -46,22 +47,24 @@ export interface TransactionRequest {
 
 export interface TransactionProductResponse {
   productId: string;
-  categoryCode: string;
-  measureUnitCode: string;
-  name: string;
-  description: string;
-  stock: number;
-  rejectCount: number;
-  soldCount: number;
-  imageUrl: string;
-  selectedVariants: any; // JsonNode
-  note: string;
+  categoryCode?: string;
+  measureUnitCode?: string;
+  name?: string;
+  productName?: string;
+  description?: string;
+  stock?: number;
+  rejectCount?: number;
+  soldCount?: number;
+  imageUrl?: string;
+  selectedVariants: SelectedVariant[] | string | null; // JsonNode
+  note?: string;
   quantity: number;
-  buyingPrice: number;
-  sellingPrice: number;
-  commission: number;
-  discount: number;
-  tax: number;
+  buyingPrice?: number;
+  sellingPrice?: number;
+  price?: number;
+  commission?: number;
+  discount?: number;
+  tax?: number;
 }
 
 export interface TransactionResponse {

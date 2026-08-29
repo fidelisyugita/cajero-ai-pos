@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import FormSectionCard from "@/components/ui/FormSectionCard";
 import Typography from "@/components/ui/Typography";
 import { db } from "@/db/drizzle";
+import Logger from "@/services/logger";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const DeveloperSettings = () => {
@@ -50,9 +51,10 @@ const DeveloperSettings = () => {
                   },
                 },
               ]);
-            } catch (error: any) {
-              Alert.alert("Error", `Failed to reset database: ${error.message}`);
-              console.error(error);
+            } catch (error: unknown) {
+              const msg = error instanceof Error ? error.message : String(error);
+              Alert.alert("Error", `Failed to reset database: ${msg}`);
+              Logger.error("Failed to reset database", error);
             }
           },
         },

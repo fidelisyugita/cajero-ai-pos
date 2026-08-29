@@ -96,22 +96,14 @@ const AddProduct = () => {
   const { mutateAsync: deleteProduct } = useDeleteProductMutation();
   const { mutateAsync: restoreProduct } = useRestoreProductMutation();
   const { mutateAsync: uploadImage } = useUploadImageMutation();
-  const { data: productToEdit } = useProductQuery(id!, isEditing);
+  const { data: productToEdit } = useProductQuery(id ?? "", isEditing);
   const { data: categories } = useProductCategoriesQuery();
 
-  const { reset: resetImageSelectionStore, setImageUri } = useImageSelectionStore();
-  const { reset: resetCategoryStore, setSaveCallback: setSaveCategoryCallback } =
-    useCategoryStore();
+  const { setImageUri } = useImageSelectionStore();
+  const { setSaveCallback: setSaveCategoryCallback } = useCategoryStore();
+  const { setSaveCallback: setSaveIngredientCallback } = useIngredientStore();
 
-  const { reset: resetIngredientStore, setSaveCallback: setSaveIngredientCallback } =
-    useIngredientStore();
-
-  const {
-    setVariants,
-    variants: storeVariants,
-    deletedVariantIds,
-    reset: resetVariantStore,
-  } = useVariantStore();
+  const { setVariants, variants: storeVariants, deletedVariantIds } = useVariantStore();
 
   const { mutateAsync: createVariant } = useCreateVariantMutation();
   const { mutateAsync: updateVariant } = useUpdateVariantMutation();
@@ -275,14 +267,13 @@ const AddProduct = () => {
     }
   }, [sellingPrice, taxRate, isTaxIncluded, setValue, getValues]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset stores on unmount
+  // Cleanup stores on unmount
   useEffect(() => {
     return () => {
-      resetImageSelectionStore();
-      resetCategoryStore();
-
-      resetIngredientStore();
-      resetVariantStore();
+      useImageSelectionStore.getState().reset();
+      useCategoryStore.getState().reset();
+      useIngredientStore.getState().reset();
+      useVariantStore.getState().reset();
     };
   }, []);
 
@@ -369,11 +360,12 @@ const AddProduct = () => {
         }
       } else {
         reset();
-        resetVariantStore();
+        useVariantStore.getState().reset();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error("Add/Update product failed:", error);
-      Alert.alert(t("failed"), error.message);
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      Alert.alert(t("failed"), msg);
     }
   };
 
@@ -432,7 +424,7 @@ const AddProduct = () => {
         .map((i) => ({
           id: i?.ingredientId,
           name: i?.name || "",
-          measureUnitName: i?.unit || (i as any).measureUnitCode || "", // Fallback just in case
+          measureUnitName: i?.unit ?? "",
           quantityNeeded: i?.quantityNeeded,
         }));
 
@@ -449,8 +441,12 @@ const AddProduct = () => {
     const updatedIngredients = currentIngredients.filter((i) => i?.ingredientId !== ingredientId);
     setValue("productIngredients", updatedIngredients);
 
-    // Also remove from store to keep sync
-    useIngredientStore.getState().selectIngredient({ id: ingredientId } as any);
+    // Also remove from store to keep sync (toggles out the ingredient by id)
+    useIngredientStore.getState().selectIngredient({
+      id: ingredientId,
+      name: "",
+      measureUnitName: "",
+    });
   };
 
   const handleDelete = () => {
@@ -470,9 +466,10 @@ const AddProduct = () => {
                 router.back();
               }
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             Logger.error("Hide product failed:", error);
-            Alert.alert(t("failed"), error.message);
+            const msg = error instanceof Error ? error.message : "Unknown error";
+            Alert.alert(t("failed"), msg);
           }
         },
       },
@@ -496,9 +493,10 @@ const AddProduct = () => {
                 router.back();
               }
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             Logger.error("Unhide product failed:", error);
-            Alert.alert(t("failed"), error.message);
+            const msg = error instanceof Error ? error.message : "Unknown error";
+            Alert.alert(t("failed"), msg);
           }
         },
       },
@@ -556,7 +554,7 @@ const AddProduct = () => {
             <Controller
               control={control}
               name="imageUrl"
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
+              render={({ field: { value } }) => (
                 <>
                   {value ? (
                     <Image contentFit="cover" source={value} style={$.image} />
@@ -584,7 +582,7 @@ const AddProduct = () => {
             <Controller
               control={control}
               name="category"
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
+              render={({ field: { value } }) => (
                 <View style={$.categoryContainer}>
                   {!!value && <Text style={$.selectedCategoryText}>{value?.name}</Text>}
                   <Button
@@ -799,7 +797,7 @@ const AddProduct = () => {
             <Controller
               control={control}
               name="productIngredients"
-              render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
+              render={({ field: { value } }) => (
                 <>
                   {value && value.length > 0 && (
                     <View style={$.ingredientListContainer}>

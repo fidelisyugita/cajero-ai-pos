@@ -4,6 +4,7 @@ import type React from "react";
 import { LocalTransactionService } from "../../LocalTransactionService";
 import Logger from "../../logger";
 import { SyncService } from "../../SyncService";
+import type { TransactionRequest } from "../../types/Transaction";
 import { useCreateTransactionMutation } from "../useCreateTransactionMutation";
 
 jest.mock("../../LocalTransactionService", () => ({
@@ -50,10 +51,27 @@ describe("useCreateTransactionMutation", () => {
   });
 
   it("successfully creates transaction, triggers background sync, and invalidates queries", async () => {
-    const mockTransactionData = {
-      items: [{ productId: "p-1", quantity: 2, price: 10000 }],
-      paymentMethodCode: "CASH",
+    const mockTransactionData: TransactionRequest = {
       totalPrice: 20000,
+      totalTax: 2000,
+      totalDiscount: 0,
+      totalCommission: 0,
+      paymentMethodCode: "CASH",
+      transactionTypeCode: "SALE",
+      statusCode: "COMPLETED",
+      isIn: true,
+      transactionProducts: [
+        {
+          productId: "p-1",
+          quantity: 2,
+          sellingPrice: 10000,
+          buyingPrice: 5000,
+          commission: 0,
+          discount: 0,
+          tax: 1000,
+          selectedVariants: null,
+        },
+      ],
     };
     const mockResult = { id: "trx-101", ...mockTransactionData };
 
@@ -66,7 +84,7 @@ describe("useCreateTransactionMutation", () => {
       wrapper: createWrapper(queryClient),
     });
 
-    let mutationResult: any;
+    let mutationResult: unknown;
     await act(async () => {
       mutationResult = await result.current.mutateAsync(mockTransactionData);
     });
@@ -79,8 +97,19 @@ describe("useCreateTransactionMutation", () => {
   });
 
   it("handles pushTransactions failure without throwing an error in mutation", async () => {
-    const mockTransactionData = { id: "trx-102", totalPrice: 15000 };
-    (LocalTransactionService.createTransaction as jest.Mock).mockResolvedValue(mockTransactionData);
+    const mockTransactionData: TransactionRequest = {
+      totalPrice: 15000,
+      totalTax: 1500,
+      totalDiscount: 0,
+      totalCommission: 0,
+      paymentMethodCode: "CASH",
+      transactionTypeCode: "SALE",
+      statusCode: "COMPLETED",
+      isIn: true,
+      transactionProducts: [],
+    };
+    const mockResult = { id: "trx-102", ...mockTransactionData };
+    (LocalTransactionService.createTransaction as jest.Mock).mockResolvedValue(mockResult);
     const syncError = new Error("Network unreachable");
     (SyncService.pushTransactions as jest.Mock).mockRejectedValue(syncError);
 
@@ -88,12 +117,12 @@ describe("useCreateTransactionMutation", () => {
       wrapper: createWrapper(queryClient),
     });
 
-    let mutationResult: any;
+    let mutationResult: unknown;
     await act(async () => {
       mutationResult = await result.current.mutateAsync(mockTransactionData);
     });
 
-    expect(mutationResult).toEqual(mockTransactionData);
+    expect(mutationResult).toEqual(mockResult);
 
     await waitFor(() => {
       expect(Logger.error).toHaveBeenCalledWith("Push transaction failed", syncError);
@@ -101,6 +130,17 @@ describe("useCreateTransactionMutation", () => {
   });
 
   it("fails when LocalTransactionService.createTransaction throws", async () => {
+    const mockTransactionData: TransactionRequest = {
+      totalPrice: 15000,
+      totalTax: 1500,
+      totalDiscount: 0,
+      totalCommission: 0,
+      paymentMethodCode: "CASH",
+      transactionTypeCode: "SALE",
+      statusCode: "COMPLETED",
+      isIn: true,
+      transactionProducts: [],
+    };
     const dbError = new Error("DB write failure");
     (LocalTransactionService.createTransaction as jest.Mock).mockRejectedValue(dbError);
 
@@ -109,7 +149,9 @@ describe("useCreateTransactionMutation", () => {
     });
 
     await act(async () => {
-      await expect(result.current.mutateAsync({ id: "fail" })).rejects.toThrow("DB write failure");
+      await expect(result.current.mutateAsync(mockTransactionData)).rejects.toThrow(
+        "DB write failure",
+      );
     });
   });
 });

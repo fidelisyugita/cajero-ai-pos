@@ -30,7 +30,7 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
     sort: "createdAt,desc",
   });
 
-  const movements = data?.pages.flatMap((page: any) => page.content) || [];
+  const movements = data?.pages.flatMap((page) => page.content) || [];
 
   return (
     <Modal visible={true} animationType="slide" transparent onRequestClose={onClose}>

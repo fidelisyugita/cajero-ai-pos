@@ -1,4 +1,4 @@
-import { Image } from "expo-image";
+import { Image, type ImageSource } from "expo-image";
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -17,7 +17,7 @@ const LanguageSettings = () => {
     setTempLanguage(language);
   }, [language]);
 
-  const languages: { code: "en" | "id"; label: string; icon: any }[] = [
+  const languages: { code: "en" | "id"; label: string; icon: ImageSource }[] = [
     { code: "en", label: "English", icon: require("@/assets/images/flags/us.png") },
     { code: "id", label: "Indonesian", icon: require("@/assets/images/flags/id.png") },
   ];

@@ -16,11 +16,11 @@ export const useTransactionsQuery = (params: GetTransactionsParams = {}) => {
       // Adapting to PageResponse-like structure or just array?
       // LocalTransactionService returns array.
       return {
-        content: transactions as any as TransactionResponse[], // Local service returns partial structure matching response
+        content: transactions as unknown as TransactionResponse[], // Local service returns partial structure matching response
         totalElements: 0, // Not calculated
         totalPages: 100, // Dummy
         size: transactions.length,
-        number: pageParam,
+        number: pageParam as number,
       };
     },
     initialPageParam: 0,

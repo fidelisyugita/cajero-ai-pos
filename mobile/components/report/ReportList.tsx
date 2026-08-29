@@ -39,6 +39,19 @@ const COLUMNS = [
 ];
 
 const ReportList = ({ data, isLoading, onScroll }: ReportListProps) => {
+  const SKELETON_ROWS = [
+    "sk-1",
+    "sk-2",
+    "sk-3",
+    "sk-4",
+    "sk-5",
+    "sk-6",
+    "sk-7",
+    "sk-8",
+    "sk-9",
+    "sk-10",
+  ];
+
   const renderSkeleton = () => (
     <View style={$.container}>
       <View style={$.header}>
@@ -47,10 +60,14 @@ const ReportList = ({ data, isLoading, onScroll }: ReportListProps) => {
         ))}
       </View>
       <View style={$.listContent}>
-        {[...Array(10)].map((_, index) => (
-          <View key={index} style={$.row}>
-            {COLUMNS.map((col, cIndex) => (
-              <Skeleton key={cIndex} style={{ flex: col.flex, marginRight: 10 }} height={20} />
+        {SKELETON_ROWS.map((rowKey) => (
+          <View key={rowKey} style={$.row}>
+            {COLUMNS.map((col) => (
+              <Skeleton
+                key={`${rowKey}-${col.label}`}
+                style={{ flex: col.flex, marginRight: 10 }}
+                height={20}
+              />
             ))}
           </View>
         ))}
@@ -77,8 +94,8 @@ const ReportList = ({ data, isLoading, onScroll }: ReportListProps) => {
         contentContainerStyle={[$.listContent, (!data || data.length === 0) && { flex: 1 }]}
         data={data || []}
         estimatedItemSize={60}
-        keyExtractor={(item: any) => item.date}
-        renderItem={({ item }: { item: any }) => <ReportRow item={item} />}
+        keyExtractor={(item) => (item as DailyReport).date}
+        renderItem={({ item }) => <ReportRow item={item as DailyReport} />}
         ItemSeparatorComponent={() => <View style={$.separator} />}
         ListEmptyComponent={
           <EmptyState

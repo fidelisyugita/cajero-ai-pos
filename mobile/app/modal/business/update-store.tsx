@@ -144,9 +144,10 @@ const UpdateStoreModal = () => {
       // Success
       if (router.canGoBack()) router.back();
       Alert.alert("Success", "Store profile updated successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error("Failed to update store", error);
-      Alert.alert("Error", error.message || "Failed to update store");
+      const msg = error instanceof Error ? error.message : "Failed to update store";
+      Alert.alert("Error", msg);
     }
   };
 

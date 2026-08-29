@@ -14,7 +14,7 @@ import ScreenModal from "@/components/ui/ScreenModal";
 import Logger from "@/services/logger";
 import { useUpdateUserMutation } from "@/services/mutations/useUpdateUserMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
-import type { User } from "@/services/types/User";
+import type { CreateUserRequest, User } from "@/services/types/User";
 import { vs } from "@/utils/Scale";
 
 const profileSchema = z.object({
@@ -88,7 +88,7 @@ const EditProfileModal = () => {
 
     try {
       // Filter out empty password if not changing it
-      const payload: any = { ...data };
+      const payload: Partial<CreateUserRequest> = { ...data };
       if (!payload.password) {
         payload.password = undefined;
       }
@@ -96,9 +96,10 @@ const EditProfileModal = () => {
       await updateUser({ id: user.id, data: payload });
       if (router.canGoBack()) router.back();
       Alert.alert("Success", "Profile updated successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error("Failed to update profile", error);
-      Alert.alert("Error", error.message || "Failed to update profile");
+      const msg = error instanceof Error ? error.message : "Failed to update profile";
+      Alert.alert("Error", msg);
     }
   };
 
