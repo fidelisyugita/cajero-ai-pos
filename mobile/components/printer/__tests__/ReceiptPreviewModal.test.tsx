@@ -13,7 +13,7 @@ describe("ReceiptPreviewModal component", () => {
     total: "Rp 49.500",
     paymentMethod: "CASH",
     footerMessage: "Thank you for visiting us!",
-    transactionDate: toDate("2026-08-25T10:30:00Z")!,
+    transactionDate: toDate("2026-08-25T10:30:00Z") ?? new Date("2026-08-25T10:30:00Z"),
     transactionId: "TRX-10023",
     items: [
       {

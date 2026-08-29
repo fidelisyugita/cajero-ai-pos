@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
+import type { StyleProp, TextStyle } from "react-native";
 import { ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { SummaryCard } from "@/components/report/ReportSummary";
@@ -188,7 +189,7 @@ const ReportDetailScreen = () => {
                 <Text style={$.cardTitle}>COGS</Text>
               </View>
               <View style={$.cardContent}>
-                <Row label="Total COGS" value={formatCurrency(report.totalCogs!)} />
+                <Row label="Total COGS" value={formatCurrency(report.totalCogs ?? 0)} />
               </View>
             </View>
           )}
@@ -218,7 +219,15 @@ const ReportDetailScreen = () => {
   );
 };
 
-const Row = ({ label, value, valueStyle }: { label: string; value: string; valueStyle?: any }) => (
+const Row = ({
+  label,
+  value,
+  valueStyle,
+}: {
+  label: string;
+  value: string;
+  valueStyle?: StyleProp<TextStyle>;
+}) => (
   <View style={$.row}>
     <Text style={$.rowLabel}>{label}</Text>
     <Text style={[$.rowValue, valueStyle]}>{value}</Text>

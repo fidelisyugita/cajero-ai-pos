@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
+import type { StyleProp, TextStyle } from "react-native";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
@@ -9,6 +10,8 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 import { t } from "@/services/i18n"; // Assuming translations are available or use keys
 import Logger from "@/services/logger";
 import { printerService } from "@/services/PrinterService";
+import type { ReceiptData, SelectedVariant } from "@/services/types/Receipt";
+import type { TransactionProductResponse, TransactionResponse } from "@/services/types/Transaction";
 import { formatCustomDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
@@ -17,31 +20,33 @@ const ReceiptDetailScreen = () => {
   const router = useRouter();
 
   // Parse transaction from params if available, otherwise we might fail or need fallback (but user insisted on no fetch)
-  let transaction: any = null;
+  let transaction: TransactionResponse | null = null;
   try {
     if (params.transaction) {
-      transaction = JSON.parse(params.transaction as string);
+      transaction = JSON.parse(params.transaction as string) as TransactionResponse;
 
       // Ensure selectedVariants is always an array
       if (transaction?.transactionProduct) {
-        transaction.transactionProduct = transaction.transactionProduct.map((p: any) => {
-          let variants = p.selectedVariants;
-          if (typeof variants === "string") {
-            try {
-              variants = JSON.parse(variants);
-            } catch (e) {
-              console.warn("Failed to parse variants", e);
+        transaction.transactionProduct = transaction.transactionProduct.map(
+          (p: TransactionProductResponse) => {
+            let variants = p.selectedVariants;
+            if (typeof variants === "string") {
+              try {
+                variants = JSON.parse(variants) as SelectedVariant[];
+              } catch (e) {
+                Logger.warn("Failed to parse variants", e);
+                variants = [];
+              }
+            }
+            if (!Array.isArray(variants)) {
               variants = [];
             }
-          }
-          if (!Array.isArray(variants)) {
-            variants = [];
-          }
-          return {
-            ...p,
-            selectedVariants: variants,
-          };
-        });
+            return {
+              ...p,
+              selectedVariants: variants,
+            };
+          },
+        );
       }
 
       Logger.log("detail transaction: ", JSON.stringify(transaction, null, 2));
@@ -52,7 +57,7 @@ const ReceiptDetailScreen = () => {
 
   /* Preview State */
   const [showPreview, setShowPreview] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<ReceiptData | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
   if (!transaction) {
@@ -107,34 +112,36 @@ const ReceiptDetailScreen = () => {
               <Text style={$.cardTitle}>Order List</Text>
             </View>
             <View style={$.cardContent}>
-              {transactionProduct?.map((item: any, index: number) => (
-                <View key={index} style={$.orderRow}>
-                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                    <Text style={$.qtyBadge}>{item.quantity}x</Text>
-                    <View>
-                      <Text
-                        style={$.itemName}
-                      >{`${item.productName} (${formatCurrency(item.sellingPrice)})`}</Text>
-                      {item.selectedVariants?.map((v: any, i: number) => (
-                        <Text key={i} style={$.itemNote}>
-                          + {v.groupName}: {v.name} ({formatCurrency(v.price || 0)})
-                        </Text>
-                      ))}
-                      {item.note && <Text style={$.itemNote}>{item.note}</Text>}
+              {transactionProduct?.map((item: TransactionProductResponse) => {
+                const itemVariants = Array.isArray(item.selectedVariants)
+                  ? (item.selectedVariants as SelectedVariant[])
+                  : [];
+                const itemName = item.name || item.productName || "Item";
+                const itemBasePrice = item.sellingPrice ?? item.price ?? 0;
+                const variantTotal =
+                  itemVariants.reduce((s: number, v: SelectedVariant) => s + (v.price || 0), 0) ||
+                  0;
+                const itemTotal = (itemBasePrice + variantTotal) * item.quantity;
+                return (
+                  <View key={item.productId + String(itemBasePrice)} style={$.orderRow}>
+                    <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                      <Text style={$.qtyBadge}>{item.quantity}x</Text>
+                      <View>
+                        <Text
+                          style={$.itemName}
+                        >{`${itemName} (${formatCurrency(itemBasePrice)})`}</Text>
+                        {itemVariants.map((v: SelectedVariant) => (
+                          <Text key={`${v.groupName}-${v.name}`} style={$.itemNote}>
+                            + {v.groupName}: {v.name} ({formatCurrency(v.price || 0)})
+                          </Text>
+                        ))}
+                        {item.note && <Text style={$.itemNote}>{item.note}</Text>}
+                      </View>
                     </View>
+                    <Text style={$.itemPrice}>{formatCurrency(itemTotal)}</Text>
                   </View>
-                  <Text style={$.itemPrice}>
-                    {formatCurrency(
-                      (item.sellingPrice +
-                        (item.selectedVariants?.reduce(
-                          (s: number, v: any) => s + (v.price || 0),
-                          0,
-                        ) || 0)) *
-                        item.quantity,
-                    )}
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
 
@@ -147,11 +154,16 @@ const ReceiptDetailScreen = () => {
               <Row
                 label="Subtotal"
                 value={formatCurrency(
-                  transactionProduct?.reduce((sum: number, item: any) => {
-                    const variantTotal =
-                      item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) ||
-                      0;
-                    return sum + (item.sellingPrice + variantTotal) * item.quantity;
+                  transactionProduct?.reduce((sum: number, item: TransactionProductResponse) => {
+                    const itemVariants = Array.isArray(item.selectedVariants)
+                      ? (item.selectedVariants as SelectedVariant[])
+                      : [];
+                    const variantTotal = itemVariants.reduce(
+                      (s: number, v: SelectedVariant) => s + (v.price || 0),
+                      0,
+                    );
+                    const itemBasePrice = item.sellingPrice ?? item.price ?? 0;
+                    return sum + (itemBasePrice + variantTotal) * item.quantity;
                   }, 0) || 0,
                 )}
               />
@@ -217,39 +229,53 @@ const ReceiptDetailScreen = () => {
           variant="primary"
           title={t("print_receipt")}
           onPress={() => {
+            if (!transactionProduct) return;
+            const receiptItems = transactionProduct.map((p: TransactionProductResponse) => {
+              const pVariants = Array.isArray(p.selectedVariants)
+                ? (p.selectedVariants as SelectedVariant[])
+                : [];
+              const pName = p.name || p.productName || "Item";
+              const pPrice = p.sellingPrice ?? p.price ?? 0;
+              return {
+                name: pName,
+                quantity: p.quantity,
+                price: formatCurrency(
+                  (pPrice +
+                    (pVariants.reduce((s: number, v: SelectedVariant) => s + (v.price || 0), 0) ||
+                      0)) *
+                    p.quantity,
+                ),
+                variants: pVariants.map((v: SelectedVariant) => ({
+                  groupName: v.groupName,
+                  name: v.name,
+                  price: v.price,
+                })),
+              };
+            });
+            const subtotal = transactionProduct.reduce(
+              (sum: number, item: TransactionProductResponse) => {
+                const itemVariants = Array.isArray(item.selectedVariants)
+                  ? (item.selectedVariants as SelectedVariant[])
+                  : [];
+                const variantTotal = itemVariants.reduce(
+                  (s: number, v: SelectedVariant) => s + (v.price || 0),
+                  0,
+                );
+                const itemBasePrice = item.sellingPrice ?? item.price ?? 0;
+                return sum + (itemBasePrice + variantTotal) * item.quantity;
+              },
+              0,
+            );
             setPreviewData({
               title: "RECEIPT / STRUK (COPY)",
-              transactionId: transaction.id || "",
-              transactionDate: transaction.createdAt,
-              subtotal: formatCurrency(
-                transactionProduct?.reduce((sum: number, item: any) => {
-                  const variantTotal =
-                    item.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) ||
-                    0;
-                  return sum + (item.sellingPrice + variantTotal) * item.quantity;
-                }, 0) || 0,
-              ),
+              transactionId: transaction?.id ?? "",
+              transactionDate: transaction?.createdAt,
+              subtotal: formatCurrency(subtotal),
               discount: formatCurrency(totalDiscount || 0),
               tax: formatCurrency(totalTax),
               total: formatCurrency(totalPrice),
               paymentMethod: paymentMethodCode,
-              items:
-                transactionProduct?.map((p: any) => ({
-                  name: p.productName,
-                  // name: `${p.productName} (${formatCurrency(p.sellingPrice)})`,
-                  quantity: p.quantity,
-                  price:
-                    (p.sellingPrice +
-                      (p.selectedVariants?.reduce((s: number, v: any) => s + (v.price || 0), 0) ||
-                        0)) *
-                    p.quantity,
-                  variants:
-                    p.selectedVariants?.map((v: any) => ({
-                      groupName: v.groupName,
-                      name: v.name,
-                      price: v.price,
-                    })) || [],
-                })) || [],
+              items: receiptItems,
               footerMessage: "Thank you for your visit!",
             });
             setShowPreview(true);
@@ -269,21 +295,30 @@ const ReceiptDetailScreen = () => {
           if (previewData) {
             try {
               await printerService.printReceipt(previewData);
-            } catch (e: any) {
-              Alert.alert(t("print_error"), e.message);
+            } catch (e: unknown) {
+              const msg = e instanceof Error ? e.message : String(e);
+              Alert.alert(t("print_error"), msg);
             }
           }
           setIsPrinting(false);
           setShowPreview(false);
         }}
-        data={previewData || { total: "0", items: [] }}
+        data={previewData ?? { total: "0", items: [] }}
         isPrinting={isPrinting}
       />
     </View>
   );
 };
 
-const Row = ({ label, value, valueStyle }: { label: string; value: string; valueStyle?: any }) => (
+const Row = ({
+  label,
+  value,
+  valueStyle,
+}: {
+  label: string;
+  value: string;
+  valueStyle?: StyleProp<TextStyle>;
+}) => (
   <View style={$.row}>
     <Text style={$.rowLabel}>{label}</Text>
     <Text style={[$.rowValue, valueStyle]}>{value}</Text>

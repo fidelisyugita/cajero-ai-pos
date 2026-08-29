@@ -1,5 +1,14 @@
 import { Feather } from "@expo/vector-icons";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  type StyleProp,
+  Text,
+  type TextStyle,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IconButton from "@/components/ui/IconButton";
 import type { PettyCash } from "@/services/types/PettyCash";
@@ -12,7 +21,7 @@ interface ExpenseDetailModalProps {
   expense: PettyCash | null;
 }
 
-const CloseIcon = ({ width, style }: { width: number; style: any }) => (
+const CloseIcon = ({ width, style }: { width: number; style?: StyleProp<TextStyle> }) => (
   <Feather name="x" size={width} style={style} />
 );
 

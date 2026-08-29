@@ -10,14 +10,14 @@ import { vs } from "@/utils/Scale";
 
 interface OrderItemProps {
   item: OrderItemType;
-  index: number;
+  index?: number;
   isExpanded: boolean;
   onToggle: () => void;
   onRemove: () => void;
   onEdit: () => void;
 }
 
-const OrderItem = ({ item, index, isExpanded, onToggle, onRemove, onEdit }: OrderItemProps) => {
+const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemProps) => {
   const variantsTotal = item.variants.reduce((sum, v) => sum + (Number(v.price) || 0), 0);
   const unitPrice = Number(item.sellingPrice || 0) + variantsTotal;
   // Calculate total price: (unitPrice - discount?) * quantity.
@@ -51,8 +51,8 @@ const OrderItem = ({ item, index, isExpanded, onToggle, onRemove, onEdit }: Orde
           {/* Variants */}
           {item.variants.length > 0 && (
             <View style={$.variantsList}>
-              {item.variants.map((v, i) => (
-                <View key={i} style={$.variantRow}>
+              {item.variants.map((v) => (
+                <View key={`${v.groupName}-${v.name}`} style={$.variantRow}>
                   <Text style={$.variantName}>
                     {v.groupName}: {v.name}
                   </Text>

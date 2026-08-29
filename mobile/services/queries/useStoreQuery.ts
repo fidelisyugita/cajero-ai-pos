@@ -12,7 +12,7 @@ export const useStoreQuery = () => {
 
   const query = useQuery({
     queryKey: [...STORE_QUERY_KEY, storeId],
-    queryFn: () => getStore(storeId!),
+    queryFn: () => getStore(storeId as string),
     enabled: !!storeId,
   });
 

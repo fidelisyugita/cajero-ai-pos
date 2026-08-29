@@ -89,9 +89,10 @@ const AddIngredient = () => {
       });
       Alert.alert("Success", `Ingredient ${result.name} added successfully`);
       setIngredientName(""); // Reset name after success
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error("Failed to add ingredient:", error);
-      Alert.alert("Add Ingredient Failed", error.message);
+      const msg = error instanceof Error ? error.message : "Failed to add ingredient";
+      Alert.alert("Add Ingredient Failed", msg);
     }
   };
 

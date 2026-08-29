@@ -1,10 +1,10 @@
-import { and, eq, like, or, sql } from "drizzle-orm";
+import { and, eq, like, or, type SQL, sql } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
 import { nowDate, toDayjs } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
-import type { TransactionRequest } from "./types/Transaction";
+import type { GetTransactionsParams, TransactionRequest } from "./types/Transaction";
 
 export const LocalTransactionService = {
   async createTransaction(request: TransactionRequest) {
@@ -76,11 +76,11 @@ export const LocalTransactionService = {
       createdAt: now.toISOString(),
     };
   },
-  async getTransactions(params: any = {}) {
+  async getTransactions(params: GetTransactionsParams = {}) {
     const { page = 0, size = 20, startDate, endDate } = params;
 
     // Build conditions
-    const conditions: any[] = [];
+    const conditions: SQL[] = [];
 
     // Date handling
     if (startDate) {
@@ -94,9 +94,13 @@ export const LocalTransactionService = {
 
     if (params.search) {
       const searchPattern = `%${params.search}%`;
-      conditions.push(
-        or(like(transactions.id, searchPattern), like(transactions.description, searchPattern)),
+      const searchCondition = or(
+        like(transactions.id, searchPattern),
+        like(transactions.description, searchPattern),
       );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     // Combine conditions

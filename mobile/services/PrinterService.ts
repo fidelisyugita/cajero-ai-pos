@@ -7,9 +7,10 @@ import { usePrinterStore } from "@/store/PrinterStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { formatCurrency } from "@/utils/Format";
 import Logger from "./logger";
+import type { ReceiptData, ReceiptItem } from "./types/Receipt";
 
 if (!global.structuredClone) {
-  global.structuredClone = (val: any) => JSON.parse(JSON.stringify(val));
+  global.structuredClone = (val: unknown): unknown => JSON.parse(JSON.stringify(val));
 }
 
 class PrinterService {
@@ -62,7 +63,7 @@ class PrinterService {
     return true; // iOS permissions handled via Info.plist
   }
 
-  async scanDevices(onDeviceFound: (device: Device) => void, onError?: (error: any) => void) {
+  async scanDevices(onDeviceFound: (device: Device) => void, onError?: (error: Error) => void) {
     const hasPermission = await this.requestPermissions();
     if (!hasPermission) {
       throw new Error("Bluetooth permissions not granted");
@@ -337,15 +338,7 @@ class PrinterService {
     }
   }
 
-  private buildReceiptItems(
-    encoderChain: any,
-    items: {
-      name: string;
-      quantity: number;
-      price: string;
-      variants?: { groupName: string; name: string; price: number }[];
-    }[],
-  ): void {
+  private buildReceiptItems(encoderChain: EscPosEncoder, items: ReceiptItem[]): void {
     items.forEach((item) => {
       encoderChain.line(item.name);
 
@@ -364,7 +357,7 @@ class PrinterService {
   }
 
   private buildReceiptTotals(
-    encoderChain: any,
+    encoderChain: EscPosEncoder,
     data: {
       subtotal?: string;
       discount?: string;
@@ -397,21 +390,7 @@ class PrinterService {
       .cut();
   }
 
-  async printReceipt(data: {
-    title?: string;
-    total: string;
-    items: {
-      name: string;
-      quantity: number;
-      price: string;
-      variants?: { groupName: string; name: string; price: number }[];
-    }[];
-    subtotal?: string;
-    discount?: string;
-    tax?: string;
-    paymentMethod?: string;
-    footerMessage?: string;
-  }) {
+  async printReceipt(data: ReceiptData) {
     await this.ensureConnection();
 
     const encoder = new EscPosEncoder();

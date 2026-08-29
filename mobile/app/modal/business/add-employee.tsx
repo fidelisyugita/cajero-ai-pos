@@ -51,9 +51,10 @@ const AddEmployeeModal = () => {
       await createUser(data);
       if (router.canGoBack()) router.back();
       Alert.alert("Success", "Employee added successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error("Failed to add employee:", error);
-      Alert.alert("Error", error.message || "Failed to add employee");
+      const msg = error instanceof Error ? error.message : "Failed to add employee";
+      Alert.alert("Error", msg);
     }
   };
 
@@ -109,7 +110,7 @@ const AddEmployeeModal = () => {
               <Controller
                 control={control}
                 name="roleCode"
-                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                render={({ field: { onChange, value } }) => (
                   <Select
                     label="Role"
                     options={ROLES}

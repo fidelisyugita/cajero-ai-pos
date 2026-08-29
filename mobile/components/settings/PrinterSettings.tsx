@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Linking, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
@@ -10,6 +10,7 @@ import Switch from "@/components/ui/Switch";
 import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { printerService } from "@/services/PrinterService";
+import type { ReceiptData } from "@/services/types/Receipt";
 import { type PrinterDevice, usePrinterStore } from "@/store/PrinterStore";
 
 const PrinterSettings = () => {
@@ -26,7 +27,7 @@ const PrinterSettings = () => {
 
   // Preview State
   const [showPreview, setShowPreview] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<ReceiptData | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
   useEffect(() => {
@@ -53,16 +54,17 @@ const PrinterSettings = () => {
           setIsScanning(false);
         },
       );
-    } catch (error: any) {
-      if (error.message === "Bluetooth permissions not granted") {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg === "Bluetooth permissions not granted") {
         Alert.alert(t("permission_required"), t("bluetooth_permission_msg"), [
           { text: t("cancel"), style: "cancel" },
           { text: t("open_settings"), onPress: () => Linking.openSettings() },
         ]);
-      } else if (error.message.includes("Bluetooth is not powered on")) {
+      } else if (msg.includes("Bluetooth is not powered on")) {
         Alert.alert(t("bluetooth_off"), t("bluetooth_off_msg"));
       } else {
-        Alert.alert(t("failed"), error.message);
+        Alert.alert(t("failed"), msg);
       }
       setIsScanning(false);
     }
@@ -73,25 +75,26 @@ const PrinterSettings = () => {
     setIsScanning(false);
   };
 
-  const handleConnect = async (device: PrinterDevice) => {
+  const handleConnect = useCallback(async (device: PrinterDevice) => {
     setIsConnecting(true);
-    stopScan();
+    printerService.stopScan();
+    setIsScanning(false);
     try {
       await printerService.connectToDevice(device.id);
-      // Alert.alert(t("success"), `Connected to ${device.name}`);
-    } catch (error: any) {
-      Alert.alert(t("connection_failed"), error.message);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      Alert.alert(t("connection_failed"), msg);
     } finally {
       setIsConnecting(false);
     }
-  };
+  }, []);
 
   const handleDisconnect = async () => {
     try {
       await printerService.disconnect();
       setConnectedDevice(null);
-    } catch (error: any) {
-      console.error(error);
+    } catch (error: unknown) {
+      Logger.error("Failed to disconnect printer", error);
     }
   };
 
@@ -262,15 +265,18 @@ const PrinterSettings = () => {
           try {
             // We use the simpler testPrint method, or we could pass the full preview data to printReceipt
             // Using testPrint ensures we test the basic ASCII flow first.
-            await printerService.printReceipt(previewData);
-          } catch (error: any) {
-            Alert.alert(t("print_error"), error.message);
+            if (previewData) {
+              await printerService.printReceipt(previewData);
+            }
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            Alert.alert(t("print_error"), msg);
           } finally {
             setIsPrinting(false);
             setShowPreview(false);
           }
         }}
-        data={previewData || { total: "0", items: [] }}
+        data={previewData ?? { total: "0", items: [] }}
         isPrinting={isPrinting}
       />
     </FormSectionCard>

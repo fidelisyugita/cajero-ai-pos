@@ -6,7 +6,9 @@ jest.mock("react-native-ui-datepicker", () => {
   const React = require("react");
   const { View, Button } = require("react-native");
   const { toDate: mockToDate } = require("@/utils/Date");
-  return (props: any) => {
+  return (props: {
+    onChange?: (range: { startDate: Date | null; endDate: Date | null }) => void;
+  }) => {
     return React.createElement(
       View,
       { testID: "date-time-picker" },
@@ -24,8 +26,8 @@ jest.mock("react-native-ui-datepicker", () => {
 });
 
 describe("DateRangeModal component", () => {
-  const initialStart = toDate("2026-08-10T00:00:00Z")!;
-  const initialEnd = toDate("2026-08-20T00:00:00Z")!;
+  const initialStart = toDate("2026-08-10T00:00:00Z") ?? new Date("2026-08-10T00:00:00Z");
+  const initialEnd = toDate("2026-08-20T00:00:00Z") ?? new Date("2026-08-20T00:00:00Z");
   const mockOnClose = jest.fn();
   const mockOnApply = jest.fn();
 

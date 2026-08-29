@@ -13,11 +13,48 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { nowDate, toDate } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
 import Logger from "./logger";
+import type { ProductIngredient } from "./types/Product";
+import type { TransactionProductResponse, TransactionResponse } from "./types/Transaction";
+
+// Drizzle transaction callback parameter type
+type DrizzleTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/** Backend API shape for a product category */
+interface CategoryResponse {
+  code: string;
+  name: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+}
+
+/** Backend API shape for a product (from /product endpoint) */
+interface ProductApiResponse {
+  id: string;
+  name: string;
+  description?: string;
+  sellingPrice: number;
+  buyingPrice?: number;
+  stock?: number;
+  categoryCode: string;
+  imageUrl?: string;
+  barcode?: string;
+  tax?: number;
+  commission?: number;
+  discount?: number;
+  measureUnitCode?: string;
+  measureUnitName?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+  ingredients?: ProductIngredient[];
+}
 
 async function syncProductIngredients(
-  tx: any,
+  tx: DrizzleTx,
   productId: string,
-  ingredients: any[],
+  ingredients: ProductIngredient[],
 ): Promise<void> {
   await tx.delete(productIngredients).where(eq(productIngredients.productId, productId));
   for (const ing of ingredients) {
@@ -33,7 +70,7 @@ async function syncProductIngredients(
   }
 }
 
-async function upsertSingleProduct(tx: any, p: any): Promise<void> {
+async function upsertSingleProduct(tx: DrizzleTx, p: ProductApiResponse): Promise<void> {
   const createdAt = toDate(p.createdAt);
   const updatedAt = toDate(p.updatedAt);
   const deletedAt = toDate(p.deletedAt);
@@ -85,7 +122,7 @@ async function upsertSingleProduct(tx: any, p: any): Promise<void> {
   }
 }
 
-async function upsertSingleCategory(tx: any, c: any): Promise<void> {
+async function upsertSingleCategory(tx: DrizzleTx, c: CategoryResponse): Promise<void> {
   const createdAt = toDate(c.createdAt);
   const updatedAt = toDate(c.updatedAt);
   const deletedAt = toDate(c.deletedAt);
@@ -111,27 +148,31 @@ async function upsertSingleCategory(tx: any, c: any): Promise<void> {
     });
 }
 
-async function syncTransactionItems(tx: any, transactionId: string, items: any[]): Promise<void> {
+async function syncTransactionItems(
+  tx: DrizzleTx,
+  transactionId: string,
+  items: TransactionProductResponse[],
+): Promise<void> {
   await tx.delete(transactionItems).where(eq(transactionItems.transactionId, transactionId));
   for (const item of items) {
     await tx.insert(transactionItems).values({
-      id: item.id || generateUUID(),
+      id: generateUUID(),
       transactionId,
       productId: item.productId,
       quantity: item.quantity,
-      sellingPrice: item.sellingPrice,
-      buyingPrice: item.buyingPrice,
-      tax: item.tax,
-      commission: item.commission,
-      discount: item.discount,
-      note: item.note,
+      sellingPrice: item.sellingPrice ?? item.price ?? 0,
+      buyingPrice: item.buyingPrice ?? null,
+      tax: item.tax ?? null,
+      commission: item.commission ?? null,
+      discount: item.discount ?? null,
+      note: item.note ?? null,
       selectedVariants: JSON.stringify(item.selectedVariants),
-      productName: item.name,
+      productName: item.name ?? item.productName ?? null,
     });
   }
 }
 
-async function upsertSingleTransaction(tx: any, t: any): Promise<void> {
+async function upsertSingleTransaction(tx: DrizzleTx, t: TransactionResponse): Promise<void> {
   await tx
     .insert(transactions)
     .values({
@@ -175,7 +216,10 @@ function parseSelectedVariants(rawVariants: unknown): unknown {
   }
 }
 
-function mapTransactionProduct(item: any) {
+/** Row type as returned by drizzle select from transactionItems */
+type TransactionItemRow = typeof transactionItems.$inferSelect;
+
+function mapTransactionProduct(item: TransactionItemRow) {
   return {
     productId: item.productId,
     quantity: item.quantity,
@@ -189,7 +233,11 @@ function mapTransactionProduct(item: any) {
   };
 }
 
-async function handlePostPushSync(tx: any, localTxnId: string, backendTxn: any): Promise<void> {
+async function handlePostPushSync(
+  tx: DrizzleTx,
+  localTxnId: string,
+  backendTxn: TransactionResponse,
+): Promise<void> {
   const existing = await tx.select().from(transactions).where(eq(transactions.id, backendTxn.id));
 
   if (existing.length > 0) {
@@ -323,7 +371,7 @@ export const SyncService = {
         };
 
         const response = await api.post("/transaction", payload);
-        const backendTxn = response.data;
+        const backendTxn = response.data as TransactionResponse;
 
         await db.transaction(async (tx) => {
           await handlePostPushSync(tx, txn.id, backendTxn);

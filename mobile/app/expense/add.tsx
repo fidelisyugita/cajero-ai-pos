@@ -94,9 +94,10 @@ const AddExpense = () => {
       Alert.alert(t("success"), t("expense_added_success"), [
         { text: "OK", onPress: () => router.back() },
       ]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error("Add expense failed:", error);
-      Alert.alert(t("failed"), error.message || "Failed to add expense");
+      const msg = error instanceof Error ? error.message : "Failed to add expense";
+      Alert.alert(t("failed"), msg);
     }
   };
 

@@ -4,9 +4,13 @@ import {
 } from "@shopify/flash-list";
 import type React from "react";
 
+interface FlashListRef {
+  scrollToOffset: (params: { offset: number; animated?: boolean }) => void;
+}
+
 // Workaround for missing estimatedItemSize in FlashList props type definition
 const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number } & React.RefAttributes<any>,
+  props: FlashListProps<T> & { estimatedItemSize: number } & React.RefAttributes<FlashListRef>,
 ) => React.ReactElement;
 
 import { Image } from "expo-image";
@@ -29,7 +33,7 @@ import { vs } from "@/utils/Scale";
 import MenuListSkeleton from "./MenuListSkeleton";
 
 interface MenuListProps {
-  scrollHandler?: (event: any) => void;
+  scrollHandler?: FlashListProps<Product>["onScroll"];
   editable?: boolean;
 }
 
@@ -44,7 +48,7 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   const selectedCategory = useCategoryStore((s) => s.selectedCategory);
   const searchQuery = useCategoryStore((s) => s.searchQuery);
   const isSyncing = useSyncStore((s) => s.isSyncing);
-  const listRef = useRef<any>(null);
+  const listRef = useRef<FlashListRef | null>(null);
 
   const isSearching = searchQuery.length >= 2;
 

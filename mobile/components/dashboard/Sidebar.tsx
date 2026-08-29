@@ -1,4 +1,4 @@
-import { usePathname, useRouter } from "expo-router";
+import { type Href, usePathname, useRouter } from "expo-router";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import IcSignOut from "@/assets/icons/sign-out.svg";
@@ -56,7 +56,7 @@ const Sidebar = () => {
                 isActive={isActive}
                 key={tab.label}
                 label={tab.label}
-                onPress={() => router.replace(tab.path as any)}
+                onPress={() => router.replace(tab.path as Href)}
               />
             );
           })}

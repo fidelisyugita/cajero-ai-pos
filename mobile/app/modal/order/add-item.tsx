@@ -12,6 +12,7 @@ import Input from "@/components/ui/Input";
 import RadioButton from "@/components/ui/RadioButton";
 import ScreenModal from "@/components/ui/ScreenModal";
 import { t } from "@/services/i18n";
+import Logger from "@/services/logger";
 import { useVariantsQuery } from "@/services/queries/useVariantsQuery";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { useOrderStore } from "@/store/useOrderStore";
@@ -46,7 +47,7 @@ const AddItemModal = () => {
   const business = useBusinessStore((state) => state.business);
   const maxDiscountPercent = business?.maxDiscount ?? 10;
 
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>({});
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string | string[]>>({});
   const variantsInitialized = useRef(false);
 
   useEffect(() => {
@@ -54,14 +55,18 @@ const AddItemModal = () => {
       try {
         const initialItems = JSON.parse(params.initialVariants as string);
         if (Array.isArray(initialItems)) {
-          const newSelection: Record<string, any> = {};
+          const newSelection: Record<string, string | string[]> = {};
 
           productVariants.forEach((v) => {
-            const selectedForGroup = initialItems.filter((i: any) => i.groupId === v.id);
+            const selectedForGroup = initialItems.filter(
+              (i: { groupId: string; optionId: string }) => i.groupId === v.id,
+            );
 
             if (selectedForGroup.length > 0) {
               if (v.isMultiple) {
-                newSelection[v.id] = selectedForGroup.map((i: any) => i.optionId);
+                newSelection[v.id] = selectedForGroup.map(
+                  (i: { groupId: string; optionId: string }) => i.optionId,
+                );
               } else {
                 // For single select, define as the last one found or just the first
                 newSelection[v.id] = selectedForGroup[0].optionId;
@@ -72,7 +77,7 @@ const AddItemModal = () => {
           setSelectedVariants(newSelection);
         }
       } catch (e) {
-        console.error("Failed to parse initial variants", e);
+        Logger.error("Failed to parse initial variants", e);
       }
       variantsInitialized.current = true;
     }
@@ -93,7 +98,8 @@ const AddItemModal = () => {
     } else {
       // Checkbox logic: multiple selection
       setSelectedVariants((prev) => {
-        const current = prev[variantId] || [];
+        const val = prev[variantId];
+        const current = Array.isArray(val) ? val : [];
         if (current.includes(optionId)) {
           return {
             ...prev,
@@ -110,7 +116,13 @@ const AddItemModal = () => {
   const updateItem = useOrderStore((state) => state.updateItem);
 
   const handleAdd = () => {
-    const variants: any[] = [];
+    const variants: Array<{
+      groupId: string;
+      groupName: string;
+      optionId: string;
+      name: string;
+      price: number;
+    }> = [];
 
     productVariants.forEach((variant) => {
       const selection = selectedVariants[variant.id];

@@ -13,6 +13,7 @@ import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useCreateTransactionMutation } from "@/services/mutations/useCreateTransactionMutation";
 import { printerService } from "@/services/PrinterService";
+import type { ReceiptData } from "@/services/types/Receipt";
 import type { TransactionProductRequest } from "@/services/types/Transaction"; // PaymentMethod is now interface but we treat it as string mostly
 import { usePrinterStore } from "@/store/PrinterStore";
 import { useDraftStore } from "@/store/useDraftStore";
@@ -51,7 +52,7 @@ const PaymentScreen = () => {
 
   // Preview State
   const [showPreview, setShowPreview] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<ReceiptData | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
   // Calculate totals - Should probably share this logic or use store selectors more robustly
@@ -184,10 +185,10 @@ const PaymentScreen = () => {
         // price: item.sellingPrice * item.quantity, // passing raw number or string formatted,
         price:
           (item.sellingPrice +
-            (item.variants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) *
+            (item.variants?.reduce((s: number, v) => s + (v.price || 0), 0) || 0)) *
           item.quantity,
         variants:
-          item.variants?.map((v: any) => ({
+          item.variants?.map((v) => ({
             groupName: v.groupName,
             name: v.name,
             price: v.price,
@@ -227,10 +228,10 @@ const PaymentScreen = () => {
         // price: item.sellingPrice * item.quantity,
         price:
           (item.sellingPrice +
-            (item.variants?.reduce((s: number, v: any) => s + (v.price || 0), 0) || 0)) *
+            (item.variants?.reduce((s: number, v) => s + (v.price || 0), 0) || 0)) *
           item.quantity,
         variants:
-          item.variants?.map((v: any) => ({
+          item.variants?.map((v) => ({
             groupName: v.groupName,
             name: v.name,
             price: v.price,
@@ -305,14 +306,15 @@ const PaymentScreen = () => {
           if (previewData) {
             try {
               await printerService.printReceipt(previewData);
-            } catch (error: any) {
-              Alert.alert(t("print_error"), error.message);
+            } catch (error: unknown) {
+              const msg = error instanceof Error ? error.message : String(error);
+              Alert.alert(t("print_error"), msg);
             }
           }
           setIsPrinting(false);
           setShowPreview(false);
         }}
-        data={previewData || { total: "0", items: [] }}
+        data={previewData ?? { total: "0", items: [] }}
         isPrinting={isPrinting}
       />
     </View>
