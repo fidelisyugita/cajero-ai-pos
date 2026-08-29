@@ -1,6 +1,9 @@
-# --- Branch Protection: Block direct push to main ---
+# Read stdin once into a variable
 STDIN_DATA=$(cat)
+
+# --- Branch Protection: Block direct push to main ---
 while IFS=" " read -r _local_ref _local_sha remote_ref _remote_sha; do
+  [ -z "$remote_ref" ] && continue
   if [ "$remote_ref" = "refs/heads/main" ]; then
     echo ""
     echo "🚫 Direct push to 'main' is not allowed."
@@ -8,10 +11,9 @@ while IFS=" " read -r _local_ref _local_sha remote_ref _remote_sha; do
     echo ""
     exit 1
   fi
-done <<< "$STDIN_DATA"
-
-# Re-expose stdin for subsequent hooks (Jest section reads it too)
-exec < <(echo "$STDIN_DATA")
+done <<EOF
+$STDIN_DATA
+EOF
 
 # --- TypeScript Typecheck ---
 echo "🔷 Running TypeScript typecheck..."
@@ -29,14 +31,20 @@ echo "🧪 Running related Jest tests..."
 # Read the refs being pushed from stdin (pre-push hook format)
 CHANGED_FILES=""
 while IFS=" " read -r local_ref local_sha remote_ref remote_sha; do
-  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-    # New branch: diff against HEAD
-    FILES=$(git diff --name-only HEAD -- mobile/ 2>/dev/null | grep -E '\.(ts|tsx)$' | grep -v '__tests__' | grep -v '\.test\.' | sed 's|mobile/||' || true)
+  [ -z "$local_sha" ] && continue
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ] || [ -z "$remote_sha" ]; then
+    # New branch: diff against origin/main or HEAD
+    FILES=$(git diff --name-only origin/main...HEAD -- mobile/ 2>/dev/null | grep -E '\.(ts|tsx)$' | grep -v '__tests__' | grep -v '\.test\.' | sed 's|mobile/||' || true)
+    if [ -z "$FILES" ]; then
+      FILES=$(git diff --name-only HEAD~1 -- mobile/ 2>/dev/null | grep -E '\.(ts|tsx)$' | grep -v '__tests__' | grep -v '\.test\.' | sed 's|mobile/||' || true)
+    fi
   else
     FILES=$(git diff --name-only "$remote_sha" "$local_sha" -- mobile/ 2>/dev/null | grep -E '\.(ts|tsx)$' | grep -v '__tests__' | grep -v '\.test\.' | sed 's|mobile/||' || true)
   fi
   CHANGED_FILES="$CHANGED_FILES $FILES"
-done
+done <<EOF
+$STDIN_DATA
+EOF
 
 CHANGED_FILES=$(echo "$CHANGED_FILES" | xargs)
 
@@ -44,6 +52,7 @@ if [ -n "$CHANGED_FILES" ]; then
   echo "📂 Changed files: $CHANGED_FILES"
   cd mobile && yarn test --findRelatedTests --passWithNoTests $CHANGED_FILES
   TEST_EXIT=$?
+  cd ..
   if [ $TEST_EXIT -ne 0 ]; then
     echo "❌ Tests failed. Fix before pushing."
     exit 1
