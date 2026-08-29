@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cajero",
     "slug": "cajero",
-    "version": "1.0.7",
+    "version": "1.1.0",
     "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "cajero",
@@ -26,7 +26,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FEF5E2"
       },
-      "package": "com.cajero.app"
+      "package": "com.cajero.app",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",

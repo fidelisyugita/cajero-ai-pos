@@ -1,3 +1,4 @@
+import packageJson from "../../package.json";
 import {
   AppInfo,
   getAppEnvironment,
@@ -62,7 +63,7 @@ describe("AppInfo Utility", () => {
 
     it("falls back to package.json version if expoConfig is null", () => {
       mockConfig = null;
-      expect(getAppVersion()).toBe("1.0.7");
+      expect(getAppVersion()).toBe(packageJson.version);
     });
   });
 
