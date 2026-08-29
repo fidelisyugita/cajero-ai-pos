@@ -1,3 +1,18 @@
+# --- Branch Protection: Block direct push to main ---
+STDIN_DATA=$(cat)
+while IFS=" " read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo ""
+    echo "🚫 Direct push to 'main' is not allowed."
+    echo "   Please open a Pull Request instead."
+    echo ""
+    exit 1
+  fi
+done <<< "$STDIN_DATA"
+
+# Re-expose stdin for subsequent hooks (Jest section reads it too)
+exec < <(echo "$STDIN_DATA")
+
 # --- TypeScript Typecheck ---
 echo "🔷 Running TypeScript typecheck..."
 cd mobile && yarn typecheck
