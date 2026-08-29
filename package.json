@@ -13,7 +13,8 @@
     "test:all": "npm-run-all test:backend test:frontend",
     "clean:docker": "./clean-start.sh",
     "release:notes": "node ./scripts/generate-release-notes.js",
-    "tag:mobile": "cd mobile && yarn tag:release"
+    "tag:mobile": "cd mobile && yarn tag:release",
+    "test:scripts": "node --test scripts/__tests__/*.test.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
