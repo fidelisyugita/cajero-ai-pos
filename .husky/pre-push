@@ -1,0 +1,38 @@
+# --- TypeScript Typecheck ---
+echo "🔷 Running TypeScript typecheck..."
+cd mobile && yarn typecheck
+TYPECHECK_EXIT=$?
+cd ..
+if [ $TYPECHECK_EXIT -ne 0 ]; then
+  echo "❌ TypeScript typecheck failed. Fix errors before pushing."
+  exit 1
+fi
+
+# --- Jest: run tests related to changed files ---
+echo "🧪 Running related Jest tests..."
+
+# Read the refs being pushed from stdin (pre-push hook format)
+CHANGED_FILES=""
+while IFS=" " read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    # New branch: diff against HEAD
+    FILES=$(git diff --name-only HEAD -- mobile/ 2>/dev/null | grep -E '\.(ts|tsx)$' | grep -v '__tests__' | grep -v '\.test\.' | sed 's|mobile/||' || true)
+  else
+    FILES=$(git diff --name-only "$remote_sha" "$local_sha" -- mobile/ 2>/dev/null | grep -E '\.(ts|tsx)$' | grep -v '__tests__' | grep -v '\.test\.' | sed 's|mobile/||' || true)
+  fi
+  CHANGED_FILES="$CHANGED_FILES $FILES"
+done
+
+CHANGED_FILES=$(echo "$CHANGED_FILES" | xargs)
+
+if [ -n "$CHANGED_FILES" ]; then
+  echo "📂 Changed files: $CHANGED_FILES"
+  cd mobile && yarn test --findRelatedTests --passWithNoTests $CHANGED_FILES
+  TEST_EXIT=$?
+  if [ $TEST_EXIT -ne 0 ]; then
+    echo "❌ Tests failed. Fix before pushing."
+    exit 1
+  fi
+else
+  echo "✅ No relevant mobile source files changed — skipping Jest."
+fi
