@@ -37,6 +37,7 @@ app-example
 # Native & Builds
 /android
 /ios
+builds/
 *.apk
 *.aab
 *.ipa
