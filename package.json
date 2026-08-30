@@ -14,7 +14,8 @@
     "clean:docker": "./clean-start.sh",
     "release:notes": "node ./scripts/generate-release-notes.js",
     "tag:mobile": "cd mobile && yarn tag:release",
-    "test:scripts": "node --test scripts/__tests__/*.test.js"
+    "test:scripts": "node --test scripts/__tests__/*.test.js",
+    "wiki:sync": "./scripts/sync-wiki.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",

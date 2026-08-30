@@ -1,0 +1,63 @@
+name: Sync Wiki to GitHub Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "wiki/**"
+      - ".github/workflows/wiki-sync.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-wiki:
+    name: Sync Wiki
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Source Repository
+        uses: actions/checkout@v4
+
+      - name: Configure Git Author
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync Wiki Directory to GitHub Wiki Repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WIKI_REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git"
+          WIKI_DIR="wiki-repo-temp"
+
+          echo "Cloning GitHub Wiki repository..."
+          if git clone "$WIKI_REPO_URL" "$WIKI_DIR"; then
+            echo "Wiki repo cloned successfully."
+          else
+            echo "::error ::Failed to clone GitHub Wiki repository. Please ensure the Wiki feature is enabled in GitHub Repository Settings and that at least one initial page has been created manually via GitHub UI."
+            exit 1
+          fi
+
+          echo "Synchronizing wiki markdown files..."
+          # Remove existing files in the cloned wiki repo except .git
+          find "$WIKI_DIR" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+          # Copy all files from local wiki/ directory
+          cp -R wiki/* "$WIKI_DIR/"
+
+          cd "$WIKI_DIR"
+          git add -A
+
+          if git diff --staged --quiet; then
+            echo "No wiki changes to commit."
+          else
+            git commit -m "docs(wiki): synchronize wiki from main [skip ci]"
+            git push origin master || git push origin main
+            echo "Wiki successfully synchronized and pushed."
+          fi
