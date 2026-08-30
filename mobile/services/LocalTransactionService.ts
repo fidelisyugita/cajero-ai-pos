@@ -60,7 +60,7 @@ export const LocalTransactionService = {
 
         // Update Stock (Optimistic)
         // We decrement stock in `products` table
-        await tx.run(
+        tx.run(
           sql`UPDATE ${products} SET stock = stock - ${item.quantity} WHERE id = ${item.productId}`,
         );
       }

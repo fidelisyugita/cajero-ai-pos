@@ -21,7 +21,7 @@ const revokeServerSession = async (refreshToken?: string): Promise<void> => {
 
 const cleanLocalDatabase = async (): Promise<void> => {
   try {
-    await expoDb.closeSync();
+    expoDb.closeSync();
   } catch (error) {
     Logger.log("Error closing DB", error);
   }
