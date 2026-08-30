@@ -18,6 +18,7 @@ dist/
 build/
 out/
 *.min.js
+.scannerwork/
 
 # Backend (Spring Boot)
 backend/.gradle/

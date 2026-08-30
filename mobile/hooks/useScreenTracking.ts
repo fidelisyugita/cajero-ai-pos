@@ -3,6 +3,10 @@ import { useEffect, useRef } from "react";
 import { trackAnalyticsScreen } from "@/lib/posthog";
 import { addSentryBreadcrumb } from "@/lib/sentry";
 
+const LEADING_SLASH_REGEX = /^\//;
+const ROUTE_GROUP_REGEX = /\(.*?\)\/?/g;
+const TRAILING_SLASH_REGEX = /\/$/;
+
 /**
  * Automatically captures screen transitions in Expo Router navigation for PostHog and Sentry breadcrumbs.
  */
@@ -18,9 +22,9 @@ export const useScreenTracking = (): void => {
     // Clean up raw segment formatting for clearer analytics reporting
     const screenName =
       pathname
-        .replace(/^\//, "")
-        .replace(/\(.*?\)\/?/g, "")
-        .replace(/\/$/, "") || "home";
+        .replace(LEADING_SLASH_REGEX, "")
+        .replace(ROUTE_GROUP_REGEX, "")
+        .replace(TRAILING_SLASH_REGEX, "") || "home";
 
     trackAnalyticsScreen(screenName, {
       screenName,

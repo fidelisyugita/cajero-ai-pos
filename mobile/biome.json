@@ -63,7 +63,8 @@
         "noUnusedVariables": "error",
         "noUnusedImports": "error",
         "useExhaustiveDependencies": "error",
-        "useHookAtTopLevel": "error"
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error"
       },
       "suspicious": {
         "preset": "recommended",
@@ -74,11 +75,19 @@
           }
         },
         "noExplicitAny": "error",
-        "noArrayIndexKey": "error"
+        "noArrayIndexKey": "error",
+        "noFocusedTests": "error",
+        "noDoubleEquals": "error",
+        "noDuplicateJsxProps": "error"
+      },
+      "security": {
+        "preset": "recommended",
+        "noDangerouslySetInnerHtml": "error"
       },
       "style": {
         "preset": "recommended",
         "useImportType": "error",
+        "useExportType": "error",
         "noNonNullAssertion": "error",
         "useConst": "error",
         "useSelfClosingElements": "error",
@@ -103,7 +112,8 @@
       "performance": {
         "preset": "recommended",
         "noDelete": "error",
-        "noAccumulatingSpread": "error"
+        "noAccumulatingSpread": "error",
+        "useTopLevelRegex": "error"
       },
       "complexity": {
         "preset": "recommended",
@@ -154,7 +164,9 @@
         "**/*.test.ts",
         "**/*.test.tsx",
         "jest.setup.ts",
-        "jest.config.js"
+        "jest.config.js",
+        "scripts/**",
+        "plugins/**"
       ],
       "linter": {
         "rules": {
@@ -163,6 +175,9 @@
           },
           "complexity": {
             "noExcessiveCognitiveComplexity": "off"
+          },
+          "performance": {
+            "useTopLevelRegex": "off"
           }
         }
       }

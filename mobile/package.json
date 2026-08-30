@@ -42,7 +42,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sonar:scan": "node ./scripts/sonar-scanner.js",
+    "sonar": "yarn test:coverage && yarn sonar:scan"
   },
   "dependencies": {
     "@config-plugins/react-native-ble-plx": "^7.0.0",
@@ -131,6 +133,7 @@
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "^19.2.8",
     "reactotron-react-native": "^5.3.1",
+    "sonarqube-scanner": "^5.0.0",
     "test-renderer": "^1.2.0",
     "typescript": "~6.0.3"
   },

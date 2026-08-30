@@ -15,7 +15,13 @@
     "release:notes": "node ./scripts/generate-release-notes.js",
     "tag:mobile": "cd mobile && yarn tag:release",
     "test:scripts": "node --test scripts/__tests__/*.test.js",
-    "wiki:sync": "./scripts/sync-wiki.sh"
+    "wiki:sync": "./scripts/sync-wiki.sh",
+    "sonarqube:start": "./scripts/sonarqube.sh start",
+    "sonarqube:stop": "./scripts/sonarqube.sh stop",
+    "sonarqube:status": "./scripts/sonarqube.sh status",
+    "sonarqube:logs": "./scripts/sonarqube.sh logs",
+    "sonarqube:clean": "./scripts/sonarqube.sh clean",
+    "sonar:mobile": "cd mobile && yarn sonar"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
