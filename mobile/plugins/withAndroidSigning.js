@@ -12,71 +12,68 @@ const withAndroidSigning = (config) => {
 };
 
 function addSigningConfig(buildGradle) {
-  const storeFile = process.env.ANDROID_UPLOAD_STORE_FILE;
-  const storePassword = process.env.ANDROID_UPLOAD_STORE_PASSWORD;
-  const keyAlias = process.env.ANDROID_UPLOAD_KEY_ALIAS;
-  const keyPassword = process.env.ANDROID_UPLOAD_KEY_PASSWORD;
+  let updated = buildGradle;
 
-  if (!storeFile) {
-    console.warn(
-      "⚠️  ANDROID_UPLOAD_STORE_FILE is not defined. Release build will use debug keystore.",
-    );
-    return buildGradle;
-  }
+  const signingResolutionSnippet = `
+// Android Release Signing Resolution
+def rawStoreFile = System.getenv("ANDROID_UPLOAD_STORE_FILE") ?: localEnvMap.get("ANDROID_UPLOAD_STORE_FILE") ?: (file("upload.keystore").exists() ? "upload.keystore" : (file("\${projectRoot}/credentials/upload.keystore").exists() ? "credentials/upload.keystore" : null))
+def resolvedStorePassword = System.getenv("ANDROID_UPLOAD_STORE_PASSWORD") ?: localEnvMap.get("ANDROID_UPLOAD_STORE_PASSWORD") ?: "123456"
+def resolvedKeyAlias = System.getenv("ANDROID_UPLOAD_KEY_ALIAS") ?: localEnvMap.get("ANDROID_UPLOAD_KEY_ALIAS") ?: "upload"
+def resolvedKeyPassword = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD") ?: localEnvMap.get("ANDROID_UPLOAD_KEY_PASSWORD") ?: "123456"
 
-  // Inject release config into existing signingConfigs if present
-  if (buildGradle.includes("signingConfigs {")) {
-    const releaseConfig = `
-        release {
-            storeFile file("../../${storeFile}")
-            storePassword "${storePassword}"
-            keyAlias "${keyAlias}"
-            keyPassword "${keyPassword}"
-        }
-    `;
-
-    // Only add if not already present
-    // We check for the alias to see if our specific config is there
-    if (!buildGradle.includes(`keyAlias "${keyAlias}"`)) {
-      buildGradle = buildGradle.replace("signingConfigs {", `signingConfigs {${releaseConfig}`);
+def resolvedStoreFile = null
+if (rawStoreFile) {
+    def directFile = file(rawStoreFile)
+    if (directFile.exists()) {
+        resolvedStoreFile = directFile
+    } else if (file("\${projectRoot}/\${rawStoreFile}").exists()) {
+        resolvedStoreFile = file("\${projectRoot}/\${rawStoreFile}")
+    } else if (file("\${rootDir}/\${rawStoreFile}").exists()) {
+        resolvedStoreFile = file("\${rootDir}/\${rawStoreFile}")
+    } else if (file("\${rootDir}/app/\${rawStoreFile}").exists()) {
+        resolvedStoreFile = file("\${rootDir}/app/\${rawStoreFile}")
     }
-  } else {
-    // Fallback if no signingConfigs block exists
-    const signingConfig = `
-        signingConfigs {
-            debug {
-                storeFile file('debug.keystore')
-                storePassword 'android'
-                keyAlias 'androiddebugkey'
-                keyPassword 'android'
-            }
+}
+
+if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
+    project.logger.lifecycle("🔑 Release signing keystore detected: \${resolvedStoreFile.absolutePath} (alias: \${resolvedKeyAlias})")
+} else {
+    project.logger.lifecycle("⚠️  No release signing keystore found. Release build will use debug keystore.")
+}
+`;
+
+  // 1. Inject signing resolution before android { block if not already present
+  if (!updated.includes("def rawStoreFile =") && updated.includes("android {")) {
+    updated = updated.replace("android {", `${signingResolutionSnippet}\nandroid {`);
+  }
+
+  // 2. Inject release signingConfig into signingConfigs { if not present
+  if (updated.includes("signingConfigs {") && !updated.includes("storeFile resolvedStoreFile")) {
+    const releaseConfig = `
+        if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
             release {
-                storeFile file("../../${storeFile}")
-                storePassword "${storePassword}"
-                keyAlias "${keyAlias}"
-                keyPassword "${keyPassword}"
+                storeFile resolvedStoreFile
+                storePassword resolvedStorePassword
+                keyAlias resolvedKeyAlias
+                keyPassword resolvedKeyPassword
             }
-        }
-      `;
-    const pattern = /buildTypes\s?{/;
-    buildGradle = buildGradle.replace(pattern, `${signingConfig}\n    buildTypes {`);
+        }`;
+    updated = updated.replace("signingConfigs {", `signingConfigs {${releaseConfig}`);
   }
 
-  // Update release buildType to use the new signing config
-  // We specifically look for the release block and replace the signingConfig inside it.
-  const releaseBlockPattern =
-    /(buildTypes\s?{[\s\S]*?release\s?{[\s\S]*?)signingConfig signingConfigs.debug([\s\S]*?})/;
-
-  if (releaseBlockPattern.test(buildGradle)) {
-    return buildGradle.replace(releaseBlockPattern, "$1signingConfig signingConfigs.release$2");
-  } else {
-    // If it mentions release but doesn't have signingConfig debug explicitly (maybe it has none), we might need another strategy.
-    // But based on the template, we know it's there.
-    // Fallback: try global replace if the specific regex fails, but use replaceAll
-    return buildGradle
-      .split("signingConfig signingConfigs.debug")
-      .join("signingConfig signingConfigs.release");
+  // 3. Ensure release buildType points to signingConfigs.release
+  const releaseBlockRegex =
+    /(buildTypes\s*\{[\s\S]*?release\s*\{[\s\S]*?)signingConfig\s+signingConfigs\.debug([\s\S]*?\})/;
+  if (releaseBlockRegex.test(updated)) {
+    const releaseSigningConfig = `if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }`;
+    updated = updated.replace(releaseBlockRegex, `$1${releaseSigningConfig}$2`);
   }
+
+  return updated;
 }
 
 module.exports = withAndroidSigning;

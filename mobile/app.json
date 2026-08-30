@@ -27,7 +27,7 @@
         "backgroundColor": "#FEF5E2"
       },
       "package": "com.cajero.app",
-      "versionCode": 2
+      "versionCode": 8
     },
     "web": {
       "bundler": "metro",
@@ -64,19 +64,19 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true,
-            "useLegacyPackaging": true
+            "usesCleartextTraffic": true
           }
         }
       ],
       "./plugins/withAndroidSigning",
       "./plugins/withIosXcode26Fix",
+      "./plugins/withSentryConfig",
       "@react-native-community/datetimepicker",
       [
         "@sentry/react-native",
         {
-          "organization": "cajero",
-          "project": "cajero-mobile",
+          "organization": "cajero-bj",
+          "project": "react-native",
           "disableAutoUpload": true
         }
       ],
