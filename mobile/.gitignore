@@ -17,6 +17,7 @@ node_modules/
 coverage/
 *.lcov
 .nyc_output/
+.scannerwork/
 .maestro/output
 .maestro/recordings
 .maestro/*.mp4
