@@ -116,11 +116,12 @@ class PrinterService {
         `  [PrinterService] Char: ${char.uuid} | W_Resp: ${char.isWritableWithResponse} | W_NoResp: ${char.isWritableWithoutResponse}`,
       );
 
-      const method: "withResponse" | "withoutResponse" | null = char.isWritableWithResponse
-        ? "withResponse"
-        : char.isWritableWithoutResponse
-          ? "withoutResponse"
-          : null;
+      let method: "withResponse" | "withoutResponse" | null = null;
+      if (char.isWritableWithResponse) {
+        method = "withResponse";
+      } else if (char.isWritableWithoutResponse) {
+        method = "withoutResponse";
+      }
 
       if (method) {
         return {

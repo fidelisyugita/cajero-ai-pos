@@ -22,6 +22,26 @@ interface Message {
   content: string;
 }
 
+const getMessageBubbleStyle = (role: Message["role"], styles: typeof $) => {
+  if (role === "user") {
+    return styles.userBubble;
+  }
+  if (role === "system") {
+    return styles.systemBubble;
+  }
+  return styles.aiBubble;
+};
+
+const getMessageTextStyle = (role: Message["role"], styles: typeof $) => {
+  if (role === "user") {
+    return styles.userText;
+  }
+  if (role === "system") {
+    return styles.systemText;
+  }
+  return styles.aiText;
+};
+
 const ChatInterface = () => {
   const _language = useLanguageStore((state) => state.language); // Subscribe to language changes
   const [messages, setMessages] = useState<Message[]>([
@@ -91,28 +111,8 @@ const ChatInterface = () => {
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View
-            style={[
-              $.messageBubble,
-              item.role === "user"
-                ? $.userBubble
-                : item.role === "system"
-                  ? $.systemBubble
-                  : $.aiBubble,
-            ]}
-          >
-            <Text
-              style={[
-                $.messageText,
-                item.role === "user"
-                  ? $.userText
-                  : item.role === "system"
-                    ? $.systemText
-                    : $.aiText,
-              ]}
-            >
-              {item.content}
-            </Text>
+          <View style={[$.messageBubble, getMessageBubbleStyle(item.role, $)]}>
+            <Text style={[$.messageText, getMessageTextStyle(item.role, $)]}>{item.content}</Text>
           </View>
         )}
         contentContainerStyle={$.listContent}

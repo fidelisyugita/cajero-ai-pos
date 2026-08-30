@@ -51,17 +51,14 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   const listRef = useRef<FlashListRef | null>(null);
 
   const isSearching = searchQuery.length >= 2;
+  const categoryCode = isSearching || selectedCategory === "ALL" ? undefined : selectedCategory;
 
   const { data, isLoading } = useProductsQuery({
     page: 0,
     size: 16,
     sortBy: "name",
     sortDir: "asc",
-    categoryCode: isSearching
-      ? undefined
-      : selectedCategory === "ALL"
-        ? undefined
-        : selectedCategory,
+    categoryCode,
     keyword: isSearching ? searchQuery : undefined,
     includeDeleted: editable,
   });

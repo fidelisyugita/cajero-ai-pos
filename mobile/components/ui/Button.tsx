@@ -196,6 +196,33 @@ const stylesheet = StyleSheet.create((theme) => ({
   }),
 }));
 
+type ButtonInteractionState = "default" | "pressed" | "disabled";
+
+const getButtonState = (disabled: boolean, pressed: boolean): ButtonInteractionState => {
+  if (disabled) {
+    return "disabled";
+  }
+  if (pressed) {
+    return "pressed";
+  }
+  return "default";
+};
+
+const renderLeadingVisual = (
+  isLoading: boolean,
+  leftIcon: ButtonProps["leftIcon"],
+  size: ButtonSize,
+  color: string,
+) => {
+  if (isLoading) {
+    return <Indicator size="small" uniProps={() => ({ color })} />;
+  }
+  if (leftIcon) {
+    return leftIcon(buttonIconSizes[size], color);
+  }
+  return null;
+};
+
 const Button = ({
   variant = "primary",
   size = "md",
@@ -213,7 +240,7 @@ const Button = ({
 
   stylesheet.useVariants({ variant, size });
 
-  const state = disabled ? "disabled" : pressed ? "pressed" : "default";
+  const state = getButtonState(disabled, pressed);
 
   const color =
     getButtonTitleStyles(state)[variant as keyof ReturnType<typeof getButtonTitleStyles>]?.color ||
@@ -229,11 +256,7 @@ const Button = ({
       style={[stylesheet.container(state), style]}
       {...rest}
     >
-      {isLoading ? (
-        <Indicator size="small" uniProps={() => ({ color })} />
-      ) : leftIcon ? (
-        leftIcon(buttonIconSizes[size], color)
-      ) : null}
+      {renderLeadingVisual(isLoading, leftIcon, size, color)}
 
       <Text adjustsFontSizeToFit numberOfLines={1} style={stylesheet.title(state)}>
         {title}
