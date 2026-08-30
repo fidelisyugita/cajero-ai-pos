@@ -13,6 +13,10 @@ import { t } from "@/services/i18n";
 import { useAuthStore } from "@/store/useAuthStore";
 import { type Dayjs, formatApiDate, formatDateRange, toDayjs } from "@/utils/Date";
 
+const renderCalendarIcon = (size: number, color: string) => (
+  <Feather name="calendar" size={size} color={color} />
+);
+
 const ReceiptScreen = () => {
   const [activeTab, setActiveTab] = useState<"Transactions" | "Drafts">("Transactions");
   const user = useAuthStore((state) => state.user);
@@ -47,7 +51,7 @@ const ReceiptScreen = () => {
           <Button
             variant="secondary"
             title={formatDateRange(dateRange.startDate, dateRange.endDate)}
-            rightIcon={(size, color) => <Feather name="calendar" size={size} color={color} />}
+            rightIcon={renderCalendarIcon}
             onPress={() => setShowPicker(true)}
             size="sm"
           />

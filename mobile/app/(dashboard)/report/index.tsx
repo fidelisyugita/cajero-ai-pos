@@ -11,6 +11,14 @@ import { useReportsQuery } from "@/services/queries/useReportsQuery";
 import { useAuthStore } from "@/store/useAuthStore";
 import { type Dayjs, formatApiDate, formatDateRange, toDayjs } from "@/utils/Date";
 
+const renderCalendarIcon = (size: number, color: string) => (
+  <Feather name="calendar" size={size} color={color} />
+);
+
+const renderDownloadIcon = (size: number, color: string) => (
+  <Feather name="download" size={size} color={color} />
+);
+
 const ReportScreen = () => {
   const user = useAuthStore((state) => state.user);
 
@@ -52,7 +60,7 @@ const ReportScreen = () => {
         <Button
           variant="secondary"
           title={formatDateRange(dateRange.startDate, dateRange.endDate)}
-          rightIcon={(size, color) => <Feather name="calendar" size={size} color={color} />}
+          rightIcon={renderCalendarIcon}
           onPress={() => setShowPicker(true)}
           size="sm"
         />
@@ -62,12 +70,7 @@ const ReportScreen = () => {
           onPress={() => setIncludeCogs(!includeCogs)}
           size="sm"
         />
-        <Button
-          title="Export"
-          variant="primary"
-          leftIcon={(size, color) => <Feather name="download" size={size} color={color} />}
-          size="sm"
-        />
+        <Button title="Export" variant="primary" leftIcon={renderDownloadIcon} size="sm" />
       </Header>
 
       <DateRangeModal
