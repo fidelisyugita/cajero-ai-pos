@@ -337,7 +337,6 @@ const AddItemModal = () => {
           title={orderItemId ? t("update_order") : t("add_to_order_list")}
           size="lg"
           variant="primary"
-          leftIcon={() => <View />}
           style={$.addButton}
           onPress={handleAdd}
         />

@@ -137,6 +137,8 @@ const AddMeasureUnit = () => {
   );
 };
 
+const ListSeparator = () => <View style={$.listSeparator} />;
+
 const MeasureUnitList = () => {
   const { data: measureUnits } = useMeasureUnitsQuery();
 
@@ -144,7 +146,7 @@ const MeasureUnitList = () => {
     <View style={$.flex}>
       <FlashList
         data={measureUnits}
-        ItemSeparatorComponent={() => <View style={$.listSeparator} />}
+        ItemSeparatorComponent={ListSeparator}
         keyExtractor={(item) => item.code}
         ListHeaderComponent={<Text style={$.listTitle}>{t("list_of_measure_unit")}</Text>}
         ListHeaderComponentStyle={$.listHeader}

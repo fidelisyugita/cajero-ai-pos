@@ -1,5 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { memo } from "react";
 import { Alert, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -9,21 +9,20 @@ import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
-import { useStoreShallow } from "@/hooks/useStoreShallow";
 import { t } from "@/services/i18n";
 import { useVariantStore, type VariantDraft } from "@/store/useVariantStore";
 import { vs } from "@/utils/Scale";
 
+const ListSeparator = () => <View style={$.listSeparator} />;
+
 const ManageVariantsScreen = () => {
   const router = useRouter();
-  const { variants, removeVariant, selectVariant } = useStoreShallow(useVariantStore, (s) => ({
-    variants: s.variants,
-    removeVariant: s.removeVariant,
-    selectVariant: s.selectVariant,
-  }));
+  const variants = useVariantStore((s) => s.variants);
+  const removeVariant = useVariantStore((s) => s.removeVariant);
+  const selectVariant = useVariantStore((s) => s.selectVariant);
 
   const handleAddVariant = () => {
-    selectVariant(null); // Clear selected for new entry
+    selectVariant(null);
     router.push("/modal/product/edit-variant");
   };
 
@@ -45,30 +44,24 @@ const ManageVariantsScreen = () => {
 
   return (
     <View style={$.container}>
-      <Stack.Screen
-        options={{
-          header: () => (
-            <ScreenHeader
-              title={t("manage_variants")}
-              noBack
-              rightAction={
-                <Button
-                  onPress={() => router.back()}
-                  size="md"
-                  title={t("back_and_save")}
-                  variant="primary"
-                />
-              }
-            />
-          ),
-        }}
+      <ScreenHeader
+        title={t("manage_variants")}
+        noBack
+        rightAction={
+          <Button
+            onPress={() => router.back()}
+            size="md"
+            title={t("back_and_save")}
+            variant="primary"
+          />
+        }
       />
 
       <View style={$.content}>
         <FlashList
           data={variants}
           contentContainerStyle={$.listContent}
-          ItemSeparatorComponent={() => <View style={$.listSeparator} />}
+          ItemSeparatorComponent={ListSeparator}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <VariantItem

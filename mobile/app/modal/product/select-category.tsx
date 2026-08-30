@@ -130,6 +130,8 @@ const AddCategory = () => {
   );
 };
 
+const ListSeparator = () => <View style={$.listSeparator} />;
+
 const CategoryList = () => {
   const { data: categories } = useProductCategoriesQuery();
 
@@ -137,7 +139,7 @@ const CategoryList = () => {
     <View style={$.flex}>
       <FlashList
         data={categories}
-        ItemSeparatorComponent={() => <View style={$.listSeparator} />}
+        ItemSeparatorComponent={ListSeparator}
         keyExtractor={(item) => item.code}
         ListHeaderComponent={<Text style={$.listTitle}>{t("list_of_category")}</Text>}
         ListHeaderComponentStyle={$.listHeader}

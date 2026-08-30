@@ -50,7 +50,9 @@ const variantSchema = z.object({
 
 type VariantFormData = z.infer<typeof variantSchema>;
 
-const createTempId = () => Math.random().toString(36).substring(2, 9);
+const renderPlusIcon = () => <IcPlus color="white" />;
+
+const createTempId = () => `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
 const EditVariantModal = () => {
   const router = useRouter();
@@ -178,7 +180,7 @@ const EditVariantModal = () => {
               />
             ))}
             <Button
-              leftIcon={() => <IcPlus color="white" />}
+              leftIcon={renderPlusIcon}
               onPress={() =>
                 append({
                   id: createTempId(),
@@ -352,7 +354,7 @@ const VariantOptionItem = ({
             </View>
           ))}
           <Button
-            leftIcon={() => <IcPlus color="white" />}
+            leftIcon={renderPlusIcon}
             onPress={() =>
               append({ ingredientId: "", name: "", quantityNeeded: 0, measureUnit: "" })
             }

@@ -1,4 +1,3 @@
-import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -28,14 +27,7 @@ const EditListScreen = () => {
 
   return (
     <View style={$.container}>
-      <Stack.Screen
-        options={{
-          header: () => (
-            <ScreenHeader rightAction={<MenuSearchBar />} title={t("edit_product_category")} />
-          ),
-          headerShown: true,
-        }}
-      />
+      <ScreenHeader rightAction={<MenuSearchBar />} title={t("edit_product_category")} />
       <CategoryFilter editable style={[$.categoryFilter, headerAnimatedStyle]} />
       <MenuList editable scrollHandler={scrollHandler} />
     </View>

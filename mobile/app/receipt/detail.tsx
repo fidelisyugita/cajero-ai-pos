@@ -15,6 +15,14 @@ import type { TransactionProductResponse, TransactionResponse } from "@/services
 import { formatCustomDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
+const renderRotateCcwIcon = (size: number, color: string) => (
+  <Feather name="rotate-ccw" size={size} color={color} />
+);
+
+const renderPrinterIcon = (size: number, color: string) => (
+  <Feather name="printer" size={size} color={color} />
+);
+
 const ReceiptDetailScreen = () => {
   const params = useLocalSearchParams();
   const router = useRouter();
@@ -222,7 +230,7 @@ const ReceiptDetailScreen = () => {
             onPress={() => router.back()}
             style={$.footerButton}
             size="lg"
-            leftIcon={(size, color) => <Feather name="rotate-ccw" size={size} color={color} />}
+            leftIcon={renderRotateCcwIcon}
           />
         )}
         <Button
@@ -282,7 +290,7 @@ const ReceiptDetailScreen = () => {
           }}
           style={$.footerButton}
           size="lg"
-          leftIcon={(size, color) => <Feather name="printer" size={size} color={color} />}
+          leftIcon={renderPrinterIcon}
         />
       </View>
 

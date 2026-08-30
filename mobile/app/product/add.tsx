@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Text, View } from "react-native";
@@ -85,6 +85,8 @@ const productSchema = z.object({
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
+
+const renderUploadIcon = () => <UniIcUpload />;
 
 const AddProduct = () => {
   const router = useRouter();
@@ -507,45 +509,39 @@ const AddProduct = () => {
 
   return (
     <View style={$.container}>
-      <Stack.Screen
-        options={{
-          header: () => (
-            <ScreenHeader
-              rightAction={
-                <View style={$.headerActions}>
-                  {isEditing ? (
-                    <Button
-                      disabled={disableAction}
-                      isLoading={isSubmitting}
-                      onPress={productToEdit?.deletedAt ? handleRestore : handleDelete}
-                      size="md"
-                      title={productToEdit?.deletedAt ? t("unhide_product") : t("delete_product")}
-                      variant="secondary"
-                    />
-                  ) : (
-                    <Button
-                      disabled={disableAction}
-                      isLoading={isSubmitting}
-                      onPress={handleSubmit(onSaveAndAddMore)}
-                      size="md"
-                      title={t("save_and_add_more")}
-                      variant="secondary"
-                    />
-                  )}
-                  <Button
-                    disabled={disableAction}
-                    isLoading={isSubmitting}
-                    onPress={handleSubmit(onSave)}
-                    size="md"
-                    title={t("save")}
-                    variant="primary"
-                  />
-                </View>
-              }
-              title={isEditing ? t("edit_product") : t("add_product")}
+      <ScreenHeader
+        rightAction={
+          <View style={$.headerActions}>
+            {isEditing ? (
+              <Button
+                disabled={disableAction}
+                isLoading={isSubmitting}
+                onPress={productToEdit?.deletedAt ? handleRestore : handleDelete}
+                size="md"
+                title={productToEdit?.deletedAt ? t("unhide_product") : t("delete_product")}
+                variant="secondary"
+              />
+            ) : (
+              <Button
+                disabled={disableAction}
+                isLoading={isSubmitting}
+                onPress={handleSubmit(onSaveAndAddMore)}
+                size="md"
+                title={t("save_and_add_more")}
+                variant="secondary"
+              />
+            )}
+            <Button
+              disabled={disableAction}
+              isLoading={isSubmitting}
+              onPress={handleSubmit(onSave)}
+              size="md"
+              title={t("save")}
+              variant="primary"
             />
-          ),
-        }}
+          </View>
+        }
+        title={isEditing ? t("edit_product") : t("add_product")}
       />
 
       <KeyboardForm contentContainerStyle={$.scrollContent} style={$.flex}>
@@ -567,7 +563,7 @@ const AddProduct = () => {
                     <Text style={$.uploadText}>{t("upload_image_or_select_color")}</Text>
                     <Button
                       disabled={disableAction}
-                      leftIcon={() => <UniIcUpload />}
+                      leftIcon={renderUploadIcon}
                       onPress={() => handleUploadImagePress(value)}
                       size="md"
                       title={t("upload")}
