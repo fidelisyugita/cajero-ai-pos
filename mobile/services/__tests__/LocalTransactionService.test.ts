@@ -1,4 +1,4 @@
-import { db } from "@/db/drizzle";
+import { db, runInTransaction } from "@/db/drizzle";
 import type { SignInResponse } from "@/services/types/Auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toDate } from "@/utils/Date";
@@ -53,6 +53,15 @@ jest.mock("@/db/drizzle", () => ({
       });
     }),
   },
+  runInTransaction: jest.fn(async (cb: (tx: any) => Promise<any>) => {
+    return await cb({
+      select: jest.fn(() => mockTxBuilder),
+      insert: jest.fn(() => mockTxBuilder),
+      update: jest.fn(() => mockTxBuilder),
+      delete: jest.fn(() => mockTxBuilder),
+      run: jest.fn(() => Promise.resolve()),
+    });
+  }),
 }));
 
 describe("LocalTransactionService", () => {
@@ -128,7 +137,7 @@ describe("LocalTransactionService", () => {
 
       const result = await LocalTransactionService.createTransaction(request);
 
-      expect(db.transaction).toHaveBeenCalled();
+      expect(runInTransaction).toHaveBeenCalled();
       expect(result).toHaveProperty("id");
       expect(result.storeId).toBe("store-123");
       expect(result.totalPrice).toBe(60000);
