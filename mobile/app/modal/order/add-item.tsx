@@ -19,6 +19,38 @@ import { useOrderStore } from "@/store/useOrderStore";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
 
+type VariantItemSelection = { groupId: string; optionId: string };
+
+function parseInitialVariantSelection(
+  rawVariants: unknown,
+  productVariants: Array<{ id: string; isMultiple: boolean }>,
+): Record<string, string | string[]> | null {
+  if (typeof rawVariants !== "string" || !rawVariants) {
+    return null;
+  }
+  try {
+    const initialItems = JSON.parse(rawVariants);
+    if (!Array.isArray(initialItems)) {
+      return null;
+    }
+
+    const newSelection: Record<string, string | string[]> = {};
+    for (const v of productVariants) {
+      const selectedForGroup = initialItems.filter((i: VariantItemSelection) => i.groupId === v.id);
+
+      if (selectedForGroup.length > 0) {
+        newSelection[v.id] = v.isMultiple
+          ? selectedForGroup.map((i: VariantItemSelection) => i.optionId)
+          : selectedForGroup[0].optionId;
+      }
+    }
+    return newSelection;
+  } catch (e) {
+    Logger.error("Failed to parse initial variants", e);
+    return null;
+  }
+}
+
 const AddItemModal = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -51,36 +83,14 @@ const AddItemModal = () => {
   const variantsInitialized = useRef(false);
 
   useEffect(() => {
-    if (productVariants.length > 0 && params.initialVariants && !variantsInitialized.current) {
-      try {
-        const initialItems = JSON.parse(params.initialVariants as string);
-        if (Array.isArray(initialItems)) {
-          const newSelection: Record<string, string | string[]> = {};
-
-          productVariants.forEach((v) => {
-            const selectedForGroup = initialItems.filter(
-              (i: { groupId: string; optionId: string }) => i.groupId === v.id,
-            );
-
-            if (selectedForGroup.length > 0) {
-              if (v.isMultiple) {
-                newSelection[v.id] = selectedForGroup.map(
-                  (i: { groupId: string; optionId: string }) => i.optionId,
-                );
-              } else {
-                // For single select, define as the last one found or just the first
-                newSelection[v.id] = selectedForGroup[0].optionId;
-              }
-            }
-          });
-
-          setSelectedVariants(newSelection);
-        }
-      } catch (e) {
-        Logger.error("Failed to parse initial variants", e);
-      }
-      variantsInitialized.current = true;
+    if (productVariants.length === 0 || !params.initialVariants || variantsInitialized.current) {
+      return;
     }
+    const initialSelection = parseInitialVariantSelection(params.initialVariants, productVariants);
+    if (initialSelection) {
+      setSelectedVariants(initialSelection);
+    }
+    variantsInitialized.current = true;
   }, [productVariants, params.initialVariants]);
   const [note, setNote] = useState((params.initialNote as string) || "");
   const [discount, setDiscount] = useState(
