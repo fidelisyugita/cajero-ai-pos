@@ -1,7 +1,6 @@
-import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 import { usePathname, useRouter } from "expo-router";
-import { Alert } from "react-native";
-import { SyncService } from "@/services/SyncService";
+import { LogoutService } from "@/services/LogoutService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import Sidebar from "../Sidebar";
@@ -14,12 +13,7 @@ jest.mock("expo-router", () => ({
 jest.mock("@/services/LogoutService", () => ({
   LogoutService: {
     performLogout: jest.fn(),
-  },
-}));
-
-jest.mock("@/services/SyncService", () => ({
-  SyncService: {
-    getUnsyncedCount: jest.fn(),
+    performSafeLogout: jest.fn(),
   },
 }));
 
@@ -32,7 +26,6 @@ describe("Sidebar component", () => {
       replace: mockReplace,
     });
     (usePathname as jest.Mock).mockReturnValue("/menu");
-    (SyncService.getUnsyncedCount as jest.Mock).mockResolvedValue(0);
 
     useAuthStore.setState({
       user: { roleCode: "OWNER" } as any,
@@ -61,19 +54,12 @@ describe("Sidebar component", () => {
     expect(mockReplace).toHaveBeenCalledWith("/(dashboard)/stock");
   });
 
-  it("prompts sign out alert when Sign Out is pressed", async () => {
-    const alertSpy = jest.spyOn(Alert, "alert");
+  it("calls LogoutService.performSafeLogout when Sign Out is pressed", async () => {
     await render(<Sidebar />);
 
     const signOutBtn = screen.getByText("Sign Out");
-    await act(async () => {
-      fireEvent.press(signOutBtn);
-    });
+    fireEvent.press(signOutBtn);
 
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      expect.any(Array),
-    );
+    expect(LogoutService.performSafeLogout).toHaveBeenCalledTimes(1);
   });
 });

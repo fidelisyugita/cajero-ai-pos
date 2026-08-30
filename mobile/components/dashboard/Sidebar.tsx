@@ -1,10 +1,9 @@
 import { type Href, usePathname, useRouter } from "expo-router";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import IcSignOut from "@/assets/icons/sign-out.svg";
 import Logo from "@/assets/images/logo.svg";
 import { LogoutService } from "@/services/LogoutService";
-import { SyncService } from "@/services/SyncService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { vs } from "@/utils/Scale";
@@ -64,27 +63,8 @@ const Sidebar = () => {
       </ScrollView>
       <TouchableOpacity
         style={$.signOutButton}
-        onPress={async () => {
-          const unsyncedCount = await SyncService.getUnsyncedCount();
-          Alert.alert(
-            "Sign Out",
-            unsyncedCount > 0
-              ? `Warning: You have ${unsyncedCount} unsynced transactions. Signing out will DELETE them permanently. Are you sure?`
-              : "Are you sure you want to sign out?",
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
-              },
-              {
-                text: unsyncedCount > 0 ? "Delete & Sign Out" : "Sign Out",
-                style: "destructive",
-                onPress: () => {
-                  LogoutService.performLogout();
-                },
-              },
-            ],
-          );
+        onPress={() => {
+          LogoutService.performSafeLogout();
         }}
       >
         <UniIcSignOut height={vs(26)} width={vs(26)} />

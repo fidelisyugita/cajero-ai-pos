@@ -1,9 +1,10 @@
 import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
-import { DevSettings } from "react-native";
+import { Alert, DevSettings } from "react-native";
 import { expoDb } from "@/db/drizzle";
 import * as StorageModule from "@/lib/Storage";
 import * as PostLogoutModule from "@/services/endpoints/postLogout";
+import { SyncService } from "@/services/SyncService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { LogoutService } from "../LogoutService";
 import Logger from "../logger";
@@ -158,5 +159,120 @@ describe("LogoutService", () => {
     expect(useAuthStore.getState().isLoggedIn).toBe(false);
     expect(useAuthStore.getState().user).toBeUndefined();
     expect(routerReplaceSpy).toHaveBeenCalledWith("/(auth)/sign-in");
+  });
+
+  describe("performSafeLogout", () => {
+    let alertSpy: jest.SpyInstance;
+    let getUnsyncedCountSpy: jest.SpyInstance;
+    let pushTransactionsSpy: jest.SpyInstance;
+    let performLogoutSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+      getUnsyncedCountSpy = jest.spyOn(SyncService, "getUnsyncedCount").mockResolvedValue(0);
+      pushTransactionsSpy = jest.spyOn(SyncService, "pushTransactions").mockResolvedValue(true);
+      performLogoutSpy = jest.spyOn(LogoutService, "performLogout").mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      alertSpy.mockRestore();
+      getUnsyncedCountSpy.mockRestore();
+      pushTransactionsSpy.mockRestore();
+      performLogoutSpy.mockRestore();
+    });
+
+    it("should proceed directly to performLogout if there are no unsynced transactions", async () => {
+      getUnsyncedCountSpy.mockResolvedValueOnce(0);
+
+      await LogoutService.performSafeLogout();
+
+      expect(getUnsyncedCountSpy).toHaveBeenCalledTimes(1);
+      expect(pushTransactionsSpy).not.toHaveBeenCalled();
+      expect(performLogoutSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should push transactions and performLogout if unsynced items exist and push succeeds", async () => {
+      getUnsyncedCountSpy
+        .mockResolvedValueOnce(3) // initial count
+        .mockResolvedValueOnce(0); // count after push
+      pushTransactionsSpy.mockResolvedValueOnce(true);
+
+      await LogoutService.performSafeLogout();
+
+      expect(pushTransactionsSpy).toHaveBeenCalledTimes(1);
+      expect(performLogoutSpy).toHaveBeenCalledTimes(1);
+      expect(alertSpy).not.toHaveBeenCalled();
+    });
+
+    it("should show warning alert if pushTransactions fails", async () => {
+      getUnsyncedCountSpy.mockResolvedValue(2);
+      pushTransactionsSpy.mockResolvedValueOnce(false);
+
+      await LogoutService.performSafeLogout();
+
+      expect(pushTransactionsSpy).toHaveBeenCalledTimes(1);
+      expect(performLogoutSpy).not.toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith(
+        "Unsynced Transactions",
+        "You have unsynced transactions. If you sign out now, this data will be deleted permanently. (2)",
+        expect.any(Array),
+      );
+    });
+
+    it("should show warning alert if pushTransactions throws an error", async () => {
+      getUnsyncedCountSpy.mockResolvedValue(1);
+      pushTransactionsSpy.mockRejectedValueOnce(new Error("Network offline"));
+
+      await LogoutService.performSafeLogout();
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        "Push transactions on logout failed",
+        expect.any(Error),
+      );
+      expect(performLogoutSpy).not.toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalled();
+    });
+
+    it("should trigger force logout when Force Sign Out button in alert is pressed", async () => {
+      getUnsyncedCountSpy.mockResolvedValue(2);
+      pushTransactionsSpy.mockResolvedValue(false);
+
+      alertSpy.mockImplementation((_title, _message, buttons) => {
+        const forceBtn = buttons?.find((b: any) => b.text === "Force Sign Out");
+        forceBtn?.onPress?.();
+      });
+
+      await LogoutService.performSafeLogout();
+
+      expect(performLogoutSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should trigger retry when Retry button in alert is pressed", async () => {
+      getUnsyncedCountSpy
+        .mockResolvedValueOnce(1) // 1st safe logout initial
+        .mockResolvedValueOnce(1) // 1st safe logout after push attempt
+        .mockResolvedValueOnce(1) // 1st safe logout remaining
+        .mockResolvedValueOnce(1) // 2nd safe logout initial
+        .mockResolvedValueOnce(0); // 2nd safe logout remaining after push
+      pushTransactionsSpy
+        .mockResolvedValueOnce(false) // 1st attempt fails
+        .mockResolvedValueOnce(true); // 2nd attempt succeeds
+
+      let retryCallback: (() => void) | undefined;
+      alertSpy.mockImplementation((_title, _message, buttons) => {
+        const retryBtn = buttons?.find((b: any) => b.text === "Retry");
+        retryCallback = retryBtn?.onPress;
+      });
+
+      await LogoutService.performSafeLogout();
+
+      expect(pushTransactionsSpy).toHaveBeenCalledTimes(1);
+      expect(retryCallback).toBeDefined();
+
+      await retryCallback?.();
+
+      expect(pushTransactionsSpy).toHaveBeenCalledTimes(2);
+      expect(performLogoutSpy).toHaveBeenCalledTimes(1);
+    });
   });
 });
