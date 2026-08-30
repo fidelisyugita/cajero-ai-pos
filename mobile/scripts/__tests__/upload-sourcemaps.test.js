@@ -53,7 +53,7 @@ describe("upload-sourcemaps script", () => {
     const stdoutSpy = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     expect(() => {
-      uploadSourcemaps({ platform: "android", dryRun: true });
+      uploadSourcemaps({ platform: "android", dryRun: true, mobileDir: tempDir });
     }).not.toThrow();
 
     expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("[DRY RUN]"));

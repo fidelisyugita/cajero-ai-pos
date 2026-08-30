@@ -104,8 +104,11 @@ function uploadArtifacts(mobileDir, platform, paths, config) {
   execSync(uploadCmd, { cwd: mobileDir, stdio: "inherit" });
 }
 
-function uploadSourcemaps({ platform = "android", dryRun = false } = {}) {
-  const mobileDir = path.resolve(__dirname, "..");
+function uploadSourcemaps({
+  platform = "android",
+  dryRun = false,
+  mobileDir = path.resolve(__dirname, ".."),
+} = {}) {
   const config = resolveConfig(mobileDir);
   const tempDir = path.join(mobileDir, ".sentry-temp");
 
