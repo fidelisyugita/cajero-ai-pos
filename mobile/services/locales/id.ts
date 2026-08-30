@@ -297,4 +297,14 @@ export default {
   pos_error_description:
     "Terjadi kendala teknis pada tampilan kasir. Data transaksi dan keranjang belanja Anda tetap aman.",
   pos_error_recover_button: "Pulihkan Layar Kasir",
+
+  // Logout & Sync
+  sign_out: "Keluar",
+  confirm_sign_out: "Apakah Anda yakin ingin keluar?",
+  unsynced_logout_title: "Transaksi Belum Tersinkronisasi",
+  unsynced_logout_warning:
+    "Anda memiliki transaksi yang belum tersinkronisasi. Jika Anda keluar sekarang, data ini akan terhapus secara permanen.",
+  syncing_transactions: "Menyinkronkan transaksi...",
+  force_sign_out: "Tetap Keluar",
+  retry: "Coba Lagi",
 };

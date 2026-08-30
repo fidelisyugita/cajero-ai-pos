@@ -297,4 +297,14 @@ export default {
   pos_error_description:
     "An unexpected issue occurred on the cashier display. Your active transaction and cart data remain safe.",
   pos_error_recover_button: "Recover POS Screen",
+
+  // Logout & Sync
+  sign_out: "Sign Out",
+  confirm_sign_out: "Are you sure you want to sign out?",
+  unsynced_logout_title: "Unsynced Transactions",
+  unsynced_logout_warning:
+    "You have unsynced transactions. If you sign out now, this data will be deleted permanently.",
+  syncing_transactions: "Syncing transactions...",
+  force_sign_out: "Force Sign Out",
+  retry: "Retry",
 };
