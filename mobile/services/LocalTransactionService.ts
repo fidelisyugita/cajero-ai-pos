@@ -1,5 +1,5 @@
 import { and, eq, like, or, type SQL, sql } from "drizzle-orm";
-import { db } from "@/db/drizzle";
+import { db, runInTransaction } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
 import { nowDate, toDayjs } from "@/utils/Date";
@@ -14,7 +14,7 @@ export const LocalTransactionService = {
     const transactionId = generateUUID();
     const now = nowDate();
 
-    await db.transaction(async (tx) => {
+    await runInTransaction(async (tx) => {
       // Insert Transaction
       await tx.insert(transactions).values({
         id: transactionId,

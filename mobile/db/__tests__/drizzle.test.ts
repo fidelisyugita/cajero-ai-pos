@@ -1,5 +1,5 @@
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { db, initialize, useMigrationHelper } from "../drizzle";
+import { db, initialize, runInTransaction, useMigrationHelper } from "../drizzle";
 import migrations from "../migrations/migrations";
 
 jest.mock("expo-sqlite", () => ({
@@ -14,6 +14,7 @@ jest.mock("drizzle-orm/expo-sqlite", () => ({
     _client: client,
     select: jest.fn(),
     insert: jest.fn(),
+    transaction: jest.fn(async (cb) => cb({ select: jest.fn() })),
   })),
 }));
 
@@ -36,5 +37,28 @@ describe("Drizzle Helper (drizzle.ts)", () => {
 
     expect(useMigrations).toHaveBeenCalledWith(db, migrations);
     expect(result).toEqual({ success: true, error: null });
+  });
+
+  it("executes transactions sequentially via runInTransaction", async () => {
+    const order: number[] = [];
+    (db.transaction as jest.Mock).mockImplementation(async (cb) => {
+      return cb({});
+    });
+
+    const p1 = runInTransaction(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+      order.push(1);
+      return "res1";
+    });
+
+    const p2 = runInTransaction(async () => {
+      order.push(2);
+      return "res2";
+    });
+
+    const [res1, res2] = await Promise.all([p1, p2]);
+    expect(res1).toBe("res1");
+    expect(res2).toBe("res2");
+    expect(order).toEqual([1, 2]);
   });
 });

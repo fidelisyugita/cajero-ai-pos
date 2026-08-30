@@ -30,6 +30,7 @@ app-example
 
 # Metro & Bundles
 .metro-health-check*
+.sentry-temp/
 *.jsbundle
 *.bundle
 *.map
