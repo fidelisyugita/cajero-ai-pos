@@ -1,7 +1,7 @@
+const RGBA_REGEX = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/i;
+
 export function rgbaStringToHex6(rgbaString: string): string {
-  const rgbaMatch = rgbaString.match(
-    /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/i,
-  );
+  const rgbaMatch = rgbaString.match(RGBA_REGEX);
 
   if (!rgbaMatch) {
     throw new Error("Invalid RGBA string format");
