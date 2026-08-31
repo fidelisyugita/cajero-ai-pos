@@ -72,13 +72,13 @@ const CategoryItem = memo(({ item, editable }: CategoryItemProps) => {
   const { mutate: deleteCategory } = useDeleteCategoryMutation();
 
   const handleDelete = () => {
-    Alert.alert("Delete Category", `Are you sure you want to delete ${item.name}?`, [
+    Alert.alert(t("delete_category_title"), `${t("confirm_delete_category")} ${item.name}?`, [
       {
-        text: "Cancel",
+        text: t("cancel"),
         style: "cancel",
       },
       {
-        text: "Delete",
+        text: t("delete"),
         style: "destructive",
         onPress: () => deleteCategory(item.code),
       },

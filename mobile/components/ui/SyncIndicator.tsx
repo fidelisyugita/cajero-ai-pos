@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { ActivityIndicator, Animated, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Typography from "@/components/ui/Typography";
+import { t } from "@/services/i18n";
 import { useSyncStore } from "@/store/useSyncStore";
 
 const SyncIndicator = () => {
@@ -41,7 +42,7 @@ const SyncIndicator = () => {
       <View style={$.content}>
         <ActivityIndicator color="white" size="small" testID="sync-spinner" />
         <Typography color="white" variant="bodySm">
-          Syncing...
+          {t("syncing")}
         </Typography>
       </View>
     </Animated.View>

@@ -158,7 +158,7 @@ const PaymentScreen = () => {
           }
         },
         onError: (error) => {
-          Alert.alert("Payment Failed", "An error occurred while processing the transaction.");
+          Alert.alert(t("payment_failed"), t("payment_failed_msg"));
           Logger.error("Payment transaction failed", error);
         },
       },
@@ -208,7 +208,7 @@ const PaymentScreen = () => {
       discount: globalDiscount,
     });
 
-    Alert.alert("Draft Bill", "Bill saved as draft. Ready for next customer.");
+    Alert.alert(t("draft_bill"), t("draft_bill_msg"));
     // Clear order for next customer
     handleNewTransaction();
   };

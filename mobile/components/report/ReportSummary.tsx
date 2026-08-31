@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { t } from "@/services/i18n";
 import type { ReportSummary as ReportSummaryType } from "@/services/types/Report";
 import { formatCurrency } from "@/utils/Format";
 
@@ -20,28 +21,28 @@ const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => 
       <View style={$.cardsContainer}>
         {/* Total Transaction */}
         <SummaryCard
-          label="Total Transaction"
+          label={t("total_transaction")}
           value={summary.totalTransaction.toString()}
           icon={<Feather name="repeat" size={24} color="#A05E5E" />}
         />
 
         {/* Total Item Sold */}
         <SummaryCard
-          label="Total Item Sold"
+          label={t("total_item_sold")}
           value={summary.totalProductSold.toString()}
           icon={<Feather name="package" size={24} color="#A05E5E" />}
         />
 
         {/* Total Revenue */}
         <SummaryCard
-          label="Total Revenue"
+          label={t("total_revenue")}
           value={formatCurrency(summary.totalRevenue)}
           icon={<Feather name="dollar-sign" size={24} color="#A05E5E" />}
         />
 
         {/* Total Refund */}
         <SummaryCard
-          label="Total Refund"
+          label={t("total_refund")}
           value={formatCurrency(summary.totalRefund)}
           icon={<Feather name="refresh-ccw" size={24} color="#A05E5E" />}
         />
@@ -49,7 +50,7 @@ const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => 
         {/* Total COGS - Only show when data is available */}
         {summary.totalCogs != null && summary.totalCogs > 0 && (
           <SummaryCard
-            label="Total COGS"
+            label={t("total_cogs")}
             value={formatCurrency(summary.totalCogs)}
             icon={<Feather name="shopping-cart" size={24} color="#A05E5E" />}
           />
@@ -57,7 +58,7 @@ const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => 
 
         {/* Total Net Revenue - Use adjusted value when COGS is included */}
         <SummaryCard
-          label={includeCogs ? "Net Revenue (w/ COGS)" : "Total Net Revenue"}
+          label={includeCogs ? t("net_revenue_with_cogs") : t("total_net_revenue")}
           value={formatCurrency(adjustedNetRevenue)}
           icon={<Feather name="pie-chart" size={24} color="#A05E5E" />}
         />

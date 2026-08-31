@@ -57,7 +57,7 @@ const ReportDetailScreen = () => {
   if (!report) {
     return (
       <View style={$.container}>
-        <Text>Report not found</Text>
+        <Text>{t("report_not_found")}</Text>
       </View>
     );
   }
@@ -188,7 +188,7 @@ const ReportDetailScreen = () => {
                 <Text style={$.cardTitle}>COGS</Text>
               </View>
               <View style={$.cardContent}>
-                <Row label="Total COGS" value={formatCurrency(report.totalCogs ?? 0)} />
+                <Row label={t("total_cogs")} value={formatCurrency(report.totalCogs ?? 0)} />
               </View>
             </View>
           )}

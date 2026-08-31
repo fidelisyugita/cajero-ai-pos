@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
 import IcTrash from "@/assets/icons/trash.svg";
 import Button from "@/components/ui/Button";
+import { t } from "@/services/i18n";
 import type { OrderItem as OrderItemType } from "@/store/useOrderStore";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
@@ -80,7 +81,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
           {/* Discount */}
           {item.discount ? (
             <View style={$.discountRow}>
-              <Text style={$.discountLabel}>Discount</Text>
+              <Text style={$.discountLabel}>{t("discount")}</Text>
               <Text style={$.discountValue}>{discountStr}</Text>
             </View>
           ) : null}
@@ -88,7 +89,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
           {/* Actions */}
           <View style={$.actions}>
             <Button
-              title="Edit"
+              title={t("edit")}
               variant="positive"
               size="sm"
               leftIcon={renderEditIcon}
@@ -96,7 +97,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
               style={$.actionButton}
             />
             <Button
-              title="Remove"
+              title={t("remove")}
               variant="warning"
               size="sm"
               leftIcon={renderTrashIcon}

@@ -204,14 +204,14 @@ const StockRow = memo(
     onEditPress: () => void;
     onStockUpdatePress: () => void;
   }) => {
-    let status = "In Stock";
+    let status = t("in_stock");
     let statusVariant: "active" | "inactive" | "warning" = "active";
 
     if (item.stock <= 0) {
-      status = "Out of Stock";
+      status = t("out_of_stock");
       statusVariant = "inactive";
     } else if (item.stock < 50) {
-      status = "Low Stock";
+      status = t("low_stock");
       statusVariant = "warning";
     }
 
@@ -232,8 +232,8 @@ const StockRow = memo(
           <StatusBadge variant={statusVariant} label={status} />
         </View>
         <View style={[$.actionContainer, { flex: COLUMNS[4].flex }]}>
-          <Button size="sm" title="Edit" variant="neutral" onPress={onEditPress} />
-          <Button size="sm" title="History" variant="neutral" onPress={onHistoryPress} />
+          <Button size="sm" title={t("edit")} variant="neutral" onPress={onEditPress} />
+          <Button size="sm" title={t("history")} variant="neutral" onPress={onHistoryPress} />
         </View>
       </View>
     );

@@ -296,15 +296,15 @@ const VariantRow = ({
   onHistoryPress: () => void;
   onStockUpdatePress: () => void;
 }) => {
-  let status = "In Stock";
+  let status = t("in_stock");
   let statusVariant: "active" | "inactive" | "warning" = "active";
 
   if (item.stock <= 0) {
-    status = "Out of Stock";
+    status = t("out_of_stock");
     statusVariant = "inactive";
   } else if (item.stock < 10) {
     // Arbitrary low stock threshold for variants
-    status = "Low Stock";
+    status = t("low_stock");
     statusVariant = "warning";
   }
 
@@ -329,7 +329,7 @@ const VariantRow = ({
         <StatusBadge variant={statusVariant} label={status} />
       </View>
       <View style={[$.actionContainer, { flex: COLUMNS[4].flex }]}>
-        <Button size="sm" title="History" variant="neutral" onPress={onHistoryPress} />
+        <Button size="sm" title={t("history")} variant="neutral" onPress={onHistoryPress} />
       </View>
     </View>
   );

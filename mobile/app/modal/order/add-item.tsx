@@ -293,7 +293,7 @@ const AddItemModal = () => {
             {/* Discount & Note */}
             <View style={$.inputGroup}>
               <Input
-                label="Discount"
+                label={t("discount")}
                 size="lg"
                 value={discount}
                 onChangeText={(text) => {
@@ -318,15 +318,15 @@ const AddItemModal = () => {
                     setDiscount(text);
                   }
                 }}
-                placeholder="Discount"
+                placeholder={t("discount")}
                 keyboardType="numeric"
               />
               <Input
-                label="Note (Optional)"
+                label={t("note_optional")}
                 size="lg"
                 value={note}
                 onChangeText={setNote}
-                placeholder="Note (Optional)"
+                placeholder={t("note_optional")}
               />
             </View>
           </ScrollView>

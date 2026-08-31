@@ -1,4 +1,5 @@
 export default {
+  // Navigation & Settings
   settings: "Pengaturan",
   developer: "Developer",
   ai_settings: "Asisten AI",
@@ -10,9 +11,6 @@ export default {
   help_support: "Bantuan dan Dukungan",
   printer_setting: "Pengaturan Printer",
   default_printer: "Printer Utama",
-  printer_name: "Nama Printer",
-  list_of_printer: "Daftar Printer",
-  add_printer: "Tambah Printer",
   test_printer: "Tes Printer",
   auto_print: "Cetak Otomatis",
   auto_print_desc: "Cetak struk secara otomatis setelah pembayaran berhasil",
@@ -26,6 +24,11 @@ export default {
   connection_failed: "Gagal Terhubung",
   not_connected: "Tidak Terhubung",
   language_setting: "Pengaturan Bahasa",
+  no_devices_found: "Perangkat tidak ditemukan",
+  scanning: "Memindai...",
+  available_devices: "Perangkat Tersedia",
+  connected_printer: "Printer Terhubung",
+
   // Printer Permissions
   permission_required: "Izin Diperlukan",
   open_settings: "Buka Pengaturan",
@@ -37,7 +40,7 @@ export default {
   // Payment Methods
   select_payment_method: "Pilih Metode Pembayaran",
 
-  // Modals
+  // Modals & Actions
   delete_product: "Sembunyikan Produk",
   confirm_delete_product: "Apakah Anda yakin ingin menyembunyikan produk ini?",
   unhide_product: "Tampilkan Produk",
@@ -58,19 +61,17 @@ export default {
   change_category: "Ubah Kategori",
   measure_unit: "Satuan Ukuran",
   select_measure_unit: "Pilih Satuan",
-  change_measure_unit: "Ubah Satuan",
   product_information: "Informasi Produk",
   product_name_required: "Nama Produk *",
   description: "Deskripsi",
   buying_price: "Harga Beli (HPP)",
   selling_price_required: "Harga Jual *",
   commission: "Komisi",
-  product_code: "Kode Produk",
-  code: "Kode",
-  category_name: "Nama Kategori",
-  common: "Umum",
   error: "Kesalahan",
   discount_exceeds_price: "Diskon tidak boleh melebihi total harga produk",
+  product_code: "Kode Produk",
+  category_name: "Nama Kategori",
+  code: "Kode",
   name: "Nama",
   ingredient_name: "Nama Bahan",
   unit: "Unit",
@@ -79,8 +80,6 @@ export default {
   list_of_ingredient: "Daftar Opsi Bahan",
   tax: "Pajak",
   price_includes_tax: "Harga termasuk Pajak",
-  stock_management: "Manajemen Stok",
-  initial_stock_required: "Stok Awal *",
   product_ingredient: "Bahan Produk",
   add_ingredient: "Tambah Bahan",
   edit_ingredient: "Ubah Bahan",
@@ -89,6 +88,8 @@ export default {
   failed_to_add_category: "Gagal menambahkan kategori",
   product_added_success: "Produk berhasil ditambahkan",
   product_updated_success: "Produk berhasil diperbarui",
+  add_ingredient_failed: "Gagal Menambahkan Bahan",
+  ingredient_added_success: "Bahan berhasil ditambahkan",
 
   // Expense
   add_expense_title: "Tambah Pengeluaran",
@@ -101,26 +102,59 @@ export default {
   expense: "Pengeluaran",
   income: "Pemasukan",
   expense_added_success: "Pengeluaran berhasil ditambahkan",
+  expense_details: "Detail Pengeluaran",
+  no_image_proof: "Tidak Ada Bukti Gambar",
+  amount: "Jumlah",
+  date: "Tanggal",
+  type: "Tipe",
+  created_by: "Dibuat Oleh",
 
-  // Payment Index
+  // Payment
   transaction: "Transaksi",
   print_bill: "Cetak Tagihan",
   draft_open_bill: "Draft / Tagihan Berjalan",
+  payment_failed: "Pembayaran Gagal",
+  payment_failed_msg: "Terjadi kesalahan saat memproses transaksi.",
+  draft_bill: "Draf Tagihan",
+  draft_bill_msg: "Tagihan disimpan sebagai draf. Siap untuk pelanggan berikutnya.",
+  charge: "Tagihan",
+  exact: "Uang Pas",
+  paid: "Dibayar",
+  change: "Kembalian",
+  pay: "Bayar",
+  payment_success: "Pembayaran Berhasil!",
+  transaction_no: "No. Transaksi",
+  total_price: "Total Harga",
+  cash: "Tunai",
+  new_order: "Pesanan Baru",
+  payment: "Pembayaran",
 
-  // Order Modal
+  // Order & Cart
   add_item: "Tambah Item",
   edit_item: "Ubah Item",
   update_order: "Perbarui Pesanan",
-  add_discount: "Tambah Diskon",
-  expense_note_placeholder: "Masukkan detail pengeluaran",
   discount_amount: "Jumlah Diskon",
   max_discount: "Maksimal Diskon",
   invalid_amount: "Jumlah Tidak Valid",
   add_to_order_list: "Tambah ke Pesanan",
   basic_price: "Harga Dasar",
   variant: "Varian",
+  note_optional: "Catatan (Opsional)",
+  proceed: "Lanjut",
+  current_order: "Pesanan Saat Ini",
+  customer_name: "Nama Pelanggan",
+  all: "Semua",
+  hidden: "Tersembunyi",
+  order_summary: "Ringkasan Pesanan",
+  remove_all: "Hapus Semua",
+  subtotal: "Subtotal",
+  total: "Total",
+  discount: "Diskon",
+  add_discount: "Tambah Diskon",
+  list_of_order: "Daftar Pesanan",
+  order_list: "Daftar Pesanan",
 
-  // Product Modals
+  // Modals & Selection
   choose_file: "Pilih File",
   choose_color: "Pilih Warna",
   add_measure_unit: "Tambah Satuan",
@@ -136,6 +170,8 @@ export default {
   ingredients: "Bahan",
   products: "Produk",
   history: "Riwayat",
+  attendance: "Kehadiran",
+  not_found: "Halaman Tidak Ditemukan",
 
   // Auth
   intro_title: "Selamat datang di\nPoint of Sale Anda!",
@@ -143,11 +179,8 @@ export default {
     "Aplikasi POS pilihan Anda untuk operasional bisnis yang lancar. Tanpa onboarding yang rumit — kami percaya pada kesederhanaan dan kecepatan. Ayo mulai!",
   sign_up: "Daftar",
   sign_in: "Masuk",
-  sign_in_google: "Masuk dengan Google",
   sign_up_google: "Daftar dengan Google",
   go_to_sign_in: "Ke Halaman Masuk",
-  go_to_sign_up: "Ke Halaman Daftar",
-  forgot_password: "Lupa Kata Sandi?",
   email: "Email",
   password: "Kata Sandi",
   full_name: "Nama Lengkap",
@@ -155,7 +188,6 @@ export default {
   or: "Atau",
   email_required: "Email wajib diisi",
   email_invalid: "Alamat email tidak valid",
-  invalid_email_address: "Alamat email tidak valid",
   password_required: "Kata sandi wajib diisi",
   password_min_length: "Kata sandi minimal 6 karakter",
   full_name_required: "Nama lengkap wajib diisi",
@@ -163,11 +195,11 @@ export default {
   confirm_password_required: "Konfirmasi kata sandi wajib diisi",
   passwords_do_not_match: "Kata sandi tidak cocok",
   sign_in_failed: "Gagal Masuk",
-  sign_up_failed: "Gagal Mendaftar",
   incorrect_email_or_password: "Email atau kata sandi salah. Silakan coba lagi.",
 
   // Report
   report_details: "Detail Laporan",
+  report_not_found: "Laporan tidak ditemukan",
   sales: "Penjualan",
   total_transaction: "Total Transaksi",
   total_item_sold: "Total Item Terjual",
@@ -185,16 +217,46 @@ export default {
   detail: "Detail",
   select_date_range: "Pilih Rentang Tanggal",
   apply: "Terapkan",
+  total_cogs: "Total HPP",
+  total_refund: "Total Pengembalian",
+  total_net_revenue: "Total Pendapatan Bersih",
+  net_revenue_with_cogs: "Pendapatan Bersih (dg HPP)",
+  start_date: "Tanggal Mulai",
+  end_date: "Tanggal Akhir",
 
-  // Header
+  // Receipts & Details
+  transaction_not_found: "Transaksi tidak ditemukan",
+  receipt_details: "Detail Struk",
+  summary: "Ringkasan",
+  payment_information: "Informasi Pembayaran",
+  method: "Metode",
+  customer: "Pelanggan",
+  refunded_amount: "Jumlah Pengembalian",
+  print_preview: "Pratinjau Cetak",
+  printing: "Mencetak...",
+  print: "Cetak",
+  overwrite_draft_title: "Timpa pesanan saat ini?",
+  overwrite_draft_msg:
+    "Anda memiliki item aktif di keranjang. Melanjutkan draf ini akan menghapusnya.",
+  overwrite: "Timpa",
+  resume: "Lanjutkan",
+  loading_more: "Memuat lebih banyak...",
+
+  // Header & Global
   guest: "Tamu",
   visitor: "Pengunjung",
-
-  // Global
   cancel: "Batal",
   confirm: "Konfirmasi",
   delete: "Hapus",
   edit: "Ubah",
+  remove: "Hapus",
+  ok: "OK",
+  close: "Tutup",
+  details: "Detail",
+  product: "Produk",
+  by: "Oleh",
+  info: "Info",
+  store_id_not_available: "ID Toko tidak tersedia",
 
   // Empty States
   empty_menu_search_title: "Produk Tidak Ditemukan",
@@ -209,60 +271,81 @@ export default {
   empty_ingredients_subtitle: "Tambahkan bahan untuk mengelola stok Anda.",
   empty_products_title: "Produk Tidak Ditemukan",
   empty_products_subtitle: "Tambahkan produk untuk melacak stoknya.",
-  empty_history_title: "Riwayat Tidak Ditemukan",
-  empty_history_subtitle: "Pergerakan stok akan muncul di sini.",
-  empty_product_history_week_title: "Tidak Ada Riwayat",
-  empty_product_history_week_subtitle: "Tidak ada transaksi dalam 7 hari terakhir.",
-  empty_expenses_title: "Pengeluaran Tidak Ditemukan",
-  empty_expenses_date_subtitle: "Tidak ada pengeluaran tercatat untuk tanggal yang dipilih.",
-  empty_employees_title: "Karyawan Tidak Ditemukan",
-  empty_employees_subtitle: "Tambahkan karyawan untuk mengelolanya di sini.",
-
-  // Missing keys added
-  no_history: "Tidak Ada Riwayat",
-  no_stock_history_subtitle: "Tidak ada riwayat stok untuk item ini.",
   empty_variants_title: "Varian Tidak Ditemukan",
   empty_variants_subtitle: "Coba sesuaikan pencarian Anda atau tambahkan varian.",
   empty_reports_title: "Laporan Tidak Ditemukan",
   empty_reports_date_subtitle: "Tidak ada laporan tersedia untuk rentang tanggal yang dipilih.",
-  no_devices_found: "Perangkat tidak ditemukan",
-  scanning: "Memindai...",
-  available_devices: "Perangkat Tersedia",
-  connected_printer: "Printer Terhubung",
+  empty_expenses_title: "Pengeluaran Tidak Ditemukan",
+  empty_expenses_date_subtitle: "Tidak ada pengeluaran tercatat untuk tanggal yang dipilih.",
+  empty_employees_title: "Karyawan Tidak Ditemukan",
+  empty_employees_subtitle: "Tambahkan karyawan untuk mengelolanya di sini.",
+  no_history_found: "Tidak ada riwayat ditemukan.",
 
-  // Business
+  // Business & Employee Management
   business_info: "Info Bisnis",
   profile_information: "Informasi Profil",
   management_employee: "Manajemen Karyawan",
   add_employee: "Tambah Karyawan",
+  add_new_employee: "Tambah Karyawan Baru",
+  create_employee: "Buat Karyawan",
+  employee_added_success: "Karyawan berhasil ditambahkan",
+  role: "Peran",
+  select_role: "Pilih Peran",
+  phone_number: "Nomor Telepon",
+  edit_profile: "Ubah Profil",
+  update_profile: "Perbarui Profil",
+  profile_updated_success: "Profil berhasil diperbarui",
+  new_password_optional: "Kata Sandi Baru (Opsional)",
+  leave_blank_to_keep_current: "Biarkan kosong jika tidak ingin mengubah",
+  edit_business_profile: "Ubah Profil Bisnis",
+  business_receipt_info: "Data ini akan ditampilkan pada struk dan laporan Anda.",
+  business_name: "Nama Bisnis",
+  failed_to_upload_image: "Gagal mengunggah gambar",
+  store_profile_updated_success: "Profil toko berhasil diperbarui",
+  uploading: "Mengunggah...",
+  location: "Lokasi",
+  street: "Jalan",
+  city: "Kota",
+  country: "Negara",
+  postal_code: "Kode Pos",
+  profile: "Profil",
 
-  // Menu & Order
-  proceed: "Lanjut",
-  current_order: "Pesanan Saat Ini",
-  customer_name: "Nama Pelanggan",
-  all: "Semua",
-  hidden: "Tersembunyi",
+  // Menu Search & Filter
+  search_menu: "Cari Menu",
+  delete_category_title: "Hapus Kategori",
+  confirm_delete_category: "Apakah Anda yakin ingin menghapus",
 
-  // Order List
-  order_summary: "Ringkasan Pesanan",
-  remove_all: "Hapus Semua",
-  subtotal: "Subtotal",
-  total: "Total",
-  discount: "Diskon",
-  list_of_order: "Daftar Pesanan",
-  // Receipt / Print
-  print_preview: "Pratinjau Cetak",
-  printing: "Mencetak...",
-  print: "Cetak",
-  reprint: "Cetak Ulang",
-  // Stock Update Modal
-  update_stock_for: "Perbaharui stok untuk",
+  // Stock Management & History
+  update_stock_for: "Perbarui Stok untuk",
   new_stock_value: "Nilai Stok Baru",
+  stock_history: "Riwayat Stok",
+  in_stock: "Tersedia",
+  out_of_stock: "Habis",
+  low_stock: "Stok Menipis",
+  inactive: "Tidak Aktif",
 
-  // AI Chat
+  // AI & Settings
   ai_welcome_message: "Halo! Saya asisten AI Anda.",
   type_message_placeholder: "Ketik pesan...",
   ai_connection_error: "Kesalahan: Tidak dapat terhubung ke server AI. Silakan coba lagi.",
+  coming_soon: "Segera Hadir",
+  coming_soon_ai_desc:
+    "Buka kemampuan AI untuk mendapatkan wawasan cerdas dan bantuan langsung di perangkat Anda.",
+  artificial_intelligence: "Kecerdasan Buatan",
+  ai_online_active: "AI Online Aktif",
+  ai_groq_desc:
+    "Asisten AI Anda sekarang didukung oleh cloud (Groq). Cepat, canggih, dan tanpa perlu unduhan.",
+  ai_model_groq: "Model: Llama 3 8B (Online)",
+  reset_database: "Reset Database",
+  reset_database_confirm: "Apakah Anda yakin ingin mereset database? Semua data lokal akan hilang.",
+  reset_database_success: "Reset database selesai. Memuat ulang aplikasi...",
+  failed_to_reset_database: "Gagal mereset database",
+  developer_options: "Opsi Pengembang",
+  developer_options_desc:
+    "Gunakan opsi ini untuk memperbaiki masalah data lokal selama pengembangan.",
+  database: "Database",
+  database_reset_info:
+    'Jika Anda melihat kesalahan "missing column", skema database lokal Anda sudah usang. Meresetnya akan menghapus data lokal dan mengambil data baru dari server.',
 
   // Variant Management
   variants: "Varian",
@@ -273,7 +356,6 @@ export default {
   add_new_variant: "Tambah Varian Baru",
   no_variants_title: "Belum Ada Varian",
   no_variants_subtitle: "Tambahkan varian seperti Ukuran, Warna, dll.",
-  done: "Selesai",
   back_and_save: "Kembali dan Simpan",
   options: "Opsi",
   required: "Wajib",
@@ -288,23 +370,21 @@ export default {
   stock: "Stok",
   price_adj: "Penambahan Harga",
   add_option: "Tambah Opsi",
-  select_option: "Pilih Opsi",
   option: "Opsi",
-  ingredient: "Bahan Baku",
 
-  // POS Error Boundary
+  // POS Error Boundary & Diagnostics
   pos_error_title: "Kendala Sistem Kasir",
   pos_error_description:
     "Terjadi kendala teknis pada tampilan kasir. Data transaksi dan keranjang belanja Anda tetap aman.",
   pos_error_recover_button: "Pulihkan Layar Kasir",
+  diagnostic: "Diagnostik",
 
   // Logout & Sync
   sign_out: "Keluar",
-  confirm_sign_out: "Apakah Anda yakin ingin keluar?",
   unsynced_logout_title: "Transaksi Belum Tersinkronisasi",
   unsynced_logout_warning:
-    "Anda memiliki transaksi yang belum tersinkronisasi. Jika Anda keluar sekarang, data ini akan terhapus secara permanen.",
-  syncing_transactions: "Menyinkronkan transaksi...",
-  force_sign_out: "Tetap Keluar",
+    "Anda memiliki transaksi yang belum tersinkronisasi. Jika Anda keluar sekarang, data ini akan dihapus secara permanen.",
+  syncing: "Menyinkronkan...",
+  force_sign_out: "Paksa Keluar",
   retry: "Coba Lagi",
 };

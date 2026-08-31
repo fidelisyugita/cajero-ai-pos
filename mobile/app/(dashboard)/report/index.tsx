@@ -7,6 +7,7 @@ import DateRangeModal from "@/components/report/DateRangeModal";
 import ReportList from "@/components/report/ReportList";
 import ReportSummary from "@/components/report/ReportSummary";
 import Button from "@/components/ui/Button";
+import { t } from "@/services/i18n";
 import { useReportsQuery } from "@/services/queries/useReportsQuery";
 import { useAuthStore } from "@/store/useAuthStore";
 import { type Dayjs, formatApiDate, formatDateRange, toDayjs } from "@/utils/Date";
@@ -52,7 +53,7 @@ const ReportScreen = () => {
           onPress={() => setIncludeCogs(!includeCogs)}
           size="sm"
         />
-        <Button title="Export" variant="primary" leftIcon={renderDownloadIcon} size="sm" />
+        <Button title={t("export")} variant="primary" leftIcon={renderDownloadIcon} size="sm" />
       </Header>
 
       <DateRangeModal

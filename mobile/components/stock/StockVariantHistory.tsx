@@ -5,6 +5,7 @@ import {
 import type React from "react";
 import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { t } from "@/services/i18n";
 import { useProductQuery } from "@/services/queries/useProductQuery";
 import { useStockMovementsQuery } from "@/services/queries/useStockMovementsQuery";
 import type { StockMovement } from "@/services/types/StockMovement";
@@ -51,21 +52,21 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
           <View style={$.modalContent}>
             <View style={$.header}>
               <Text style={$.title}>
-                Stock History: {product?.name ? `${product.name} - ` : ""}
+                {t("stock_history")}: {product?.name ? `${product.name} - ` : ""}
                 {variant.name} - {option.name}
               </Text>
               <TouchableOpacity onPress={onClose}>
-                <Text style={$.closeButton}>Close</Text>
+                <Text style={$.closeButton}>{t("close")}</Text>
               </TouchableOpacity>
             </View>
 
             <View style={$.headerRow}>
-              <Text style={$.headerCell}>Date</Text>
-              <Text style={[$.headerCell, { flex: 1.5 }]}>Product</Text>
-              <Text style={$.headerCell}>Type</Text>
-              <Text style={$.headerCell}>Qty</Text>
-              <Text style={$.headerCell}>By</Text>
-              <Text style={[$.headerCell, { flex: 2 }]}>Info</Text>
+              <Text style={$.headerCell}>{t("date")}</Text>
+              <Text style={[$.headerCell, { flex: 1.5 }]}>{t("product")}</Text>
+              <Text style={$.headerCell}>{t("type")}</Text>
+              <Text style={$.headerCell}>{t("qty")}</Text>
+              <Text style={$.headerCell}>{t("by")}</Text>
+              <Text style={[$.headerCell, { flex: 2 }]}>{t("info")}</Text>
             </View>
 
             <AnimatedFlashList
@@ -97,10 +98,10 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
                   </Text>
                 </View>
               )}
-              ListEmptyComponent={<Text style={$.emptyText}>No history found.</Text>}
+              ListEmptyComponent={<Text style={$.emptyText}>{t("no_history_found")}</Text>}
               ListFooterComponent={
                 isFetchingNextPage ? (
-                  <Text style={{ textAlign: "center", padding: 10 }}>Loading more...</Text>
+                  <Text style={{ textAlign: "center", padding: 10 }}>{t("loading_more")}</Text>
                 ) : null
               }
             />

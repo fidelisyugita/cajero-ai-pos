@@ -11,6 +11,7 @@ import IcAddImage from "@/assets/icons/add-image.svg";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal";
+import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useUpdateUserMutation } from "@/services/mutations/useUpdateUserMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
@@ -79,7 +80,7 @@ const EditProfileModal = () => {
       }
     } catch (error) {
       Logger.error("Upload failed", error);
-      Alert.alert("Error", "Failed to upload image");
+      Alert.alert(t("error"), t("failed_to_upload_image"));
     }
   };
 
@@ -95,17 +96,17 @@ const EditProfileModal = () => {
 
       await updateUser({ id: user.id, data: payload });
       if (router.canGoBack()) router.back();
-      Alert.alert("Success", "Profile updated successfully");
+      Alert.alert(t("success"), t("profile_updated_success"));
     } catch (error: unknown) {
       Logger.error("Failed to update profile", error);
       const msg = error instanceof Error ? error.message : "Failed to update profile";
-      Alert.alert("Error", msg);
+      Alert.alert(t("error"), msg);
     }
   };
 
   return (
     <ScreenModal modalStyle={$.modal}>
-      <ScreenModal.Header title="Edit Profile" hideCloseButton />
+      <ScreenModal.Header title={t("edit_profile")} hideCloseButton />
       <ScreenModal.Body>
         <View style={$.container}>
           <ScrollView contentContainerStyle={$.scrollContent}>
@@ -144,7 +145,7 @@ const EditProfileModal = () => {
                 name="name"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Full Name"
+                    label={t("full_name")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -157,7 +158,7 @@ const EditProfileModal = () => {
                 name="email"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Email"
+                    label={t("email")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -173,7 +174,7 @@ const EditProfileModal = () => {
                 name="phone"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Phone Number"
+                    label={t("phone_number")}
                     value={value || ""}
                     onChangeText={onChange}
                     error={error?.message}
@@ -184,7 +185,7 @@ const EditProfileModal = () => {
               />
 
               <Input
-                label="Role"
+                label={t("role")}
                 value={user?.roleCode || ""}
                 editable={false} // Role cannot be changed by self-edit usually
                 size="lg"
@@ -196,13 +197,13 @@ const EditProfileModal = () => {
                 name="password"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="New Password (Optional)"
+                    label={t("new_password_optional")}
                     value={value || ""}
                     onChangeText={onChange}
                     error={error?.message}
                     size="lg"
                     secureTextEntry
-                    placeholder="Leave blank to keep current"
+                    placeholder={t("leave_blank_to_keep_current")}
                   />
                 )}
               />
@@ -213,13 +214,13 @@ const EditProfileModal = () => {
       <ScreenModal.Footer>
         <View style={$.footerButtons}>
           <Button
-            title="Cancel"
+            title={t("cancel")}
             variant="secondary"
             onPress={() => router.back()}
             style={{ flex: 1 }}
           />
           <Button
-            title="Update Profile"
+            title={t("update_profile")}
             variant="primary"
             onPress={handleSubmit(onSubmit)}
             isLoading={isPending}

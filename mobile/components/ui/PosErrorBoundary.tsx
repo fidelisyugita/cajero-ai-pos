@@ -76,7 +76,7 @@ export class PosErrorBoundary extends Component<PosErrorBoundaryProps, PosErrorB
         {error?.message ? (
           <View style={$.errorBox}>
             <Typography variant="caption" align="center">
-              Diagnostic: {error.message}
+              {t("diagnostic")}: {error.message}
             </Typography>
           </View>
         ) : null}

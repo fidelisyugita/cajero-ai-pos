@@ -122,18 +122,14 @@ const DraftRow = memo(({ item }: { item: DraftOrder }) => {
     };
 
     if (currentItems.length > 0) {
-      Alert.alert(
-        "Overwrite current order?",
-        "You have active items in your cart. Resuming this draft will clear them.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Overwrite",
-            style: "destructive",
-            onPress: resumeOrder,
-          },
-        ],
-      );
+      Alert.alert(t("overwrite_draft_title"), t("overwrite_draft_msg"), [
+        { text: t("cancel"), style: "cancel" },
+        {
+          text: t("overwrite"),
+          style: "destructive",
+          onPress: resumeOrder,
+        },
+      ]);
     } else {
       resumeOrder();
     }
@@ -177,7 +173,7 @@ const DraftRow = memo(({ item }: { item: DraftOrder }) => {
 
       {/* Action */}
       <View style={{ flex: COLUMNS[5].flex }}>
-        <Button size="sm" title="Resume" variant="primary" onPress={handleResume} />
+        <Button size="sm" title={t("resume")} variant="primary" onPress={handleResume} />
       </View>
     </View>
   );

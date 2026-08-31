@@ -97,6 +97,7 @@ const ReceiptPreviewModal = ({
                       )}
                       {/* {item.quantity > 1 && ( */}
                       <Text style={$.itemSubText}>
+                        {/* i18n-ignore: Multiplier symbol */}
                         {item.quantity} x{" "}
                         {typeof item.price === "number"
                           ? formatCurrency(item.price / item.quantity)
@@ -117,19 +118,19 @@ const ReceiptPreviewModal = ({
               <View style={$.totalsContainer}>
                 {data.subtotal && (
                   <View style={$.totalRow}>
-                    <Text style={$.receiptText}>Subtotal</Text>
+                    <Text style={$.receiptText}>{t("subtotal")}</Text>
                     <Text style={$.receiptText}>{data.subtotal}</Text>
                   </View>
                 )}
                 {data.discount && (
                   <View style={$.totalRow}>
-                    <Text style={$.receiptText}>Discount</Text>
+                    <Text style={$.receiptText}>{t("discount")}</Text>
                     <Text style={$.receiptText}>{data.discount}</Text>
                   </View>
                 )}
                 {data.tax && (
                   <View style={$.totalRow}>
-                    <Text style={$.receiptText}>Tax</Text>
+                    <Text style={$.receiptText}>{t("tax")}</Text>
                     <Text style={$.receiptText}>{data.tax}</Text>
                   </View>
                 )}
@@ -142,7 +143,7 @@ const ReceiptPreviewModal = ({
                 </View>
                 {data.paymentMethod && (
                   <View style={[$.totalRow, { marginTop: 4 }]}>
-                    <Text style={$.receiptText}>Payment</Text>
+                    <Text style={$.receiptText}>{t("payment")}</Text>
                     <Text style={$.receiptText}>{data.paymentMethod}</Text>
                   </View>
                 )}

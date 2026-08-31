@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IconButton from "@/components/ui/IconButton";
+import { t } from "@/services/i18n";
 import type { PettyCash } from "@/services/types/PettyCash";
 import { formatDateTimeNamed } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
@@ -34,7 +35,7 @@ const ExpenseDetailModal = ({ visible, onClose, expense }: ExpenseDetailModalPro
       <Pressable style={$.overlay} onPress={onClose}>
         <Pressable style={$.container} onPress={(e) => e.stopPropagation()}>
           <View style={$.header}>
-            <Text style={$.title}>Expense Details</Text>
+            <Text style={$.title}>{t("expense_details")}</Text>
             <IconButton Icon={CloseIcon} onPress={onClose} size="sm" variant="neutral-no-stroke" />
           </View>
 
@@ -47,13 +48,13 @@ const ExpenseDetailModal = ({ visible, onClose, expense }: ExpenseDetailModalPro
             ) : (
               <View style={[$.imageContainer, $.noImage]}>
                 <Feather name="image" size={40} color="#ccc" />
-                <Text style={$.noImageText}>No Image Proof</Text>
+                <Text style={$.noImageText}>{t("no_image_proof")}</Text>
               </View>
             )}
 
             <View style={$.detailsContainer}>
               <View style={$.row}>
-                <Text style={$.label}>Amount</Text>
+                <Text style={$.label}>{t("amount")}</Text>
                 <Text style={[$.value, $.amount, { color: expense.isIncome ? "green" : "red" }]}>
                   {expense.isIncome ? "+" : "-"} {formatCurrency(expense.amount)}
                 </Text>
@@ -62,19 +63,19 @@ const ExpenseDetailModal = ({ visible, onClose, expense }: ExpenseDetailModalPro
               <View style={$.divider} />
 
               <View style={$.row}>
-                <Text style={$.label}>Date</Text>
+                <Text style={$.label}>{t("date")}</Text>
                 <Text style={$.value}>{formatDateTimeNamed(expense.createdAt)}</Text>
               </View>
 
               <View style={$.divider} />
 
               <View style={$.row}>
-                <Text style={$.label}>Type</Text>
+                <Text style={$.label}>{t("type")}</Text>
                 <View
                   style={[$.badge, { backgroundColor: expense.isIncome ? "#d1fae5" : "#fee2e2" }]}
                 >
                   <Text style={[$.badgeText, { color: expense.isIncome ? "#047857" : "#b91c1c" }]}>
-                    {expense.isIncome ? "Income" : "Expense"}
+                    {expense.isIncome ? t("income") : t("expense")}
                   </Text>
                 </View>
               </View>
@@ -82,14 +83,14 @@ const ExpenseDetailModal = ({ visible, onClose, expense }: ExpenseDetailModalPro
               <View style={$.divider} />
 
               <View style={$.row}>
-                <Text style={$.label}>Created By</Text>
-                <Text style={$.value}>{expense.createdByName || "Unknown"}</Text>
+                <Text style={$.label}>{t("created_by")}</Text>
+                <Text style={$.value}>{expense.createdByName || "-"}</Text>
               </View>
 
               <View style={$.divider} />
 
               <View style={$.section}>
-                <Text style={$.label}>Description</Text>
+                <Text style={$.label}>{t("description")}</Text>
                 <Text style={$.description}>{expense.description}</Text>
               </View>
             </View>

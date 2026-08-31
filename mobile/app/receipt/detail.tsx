@@ -70,7 +70,7 @@ const ReceiptDetailScreen = () => {
   if (!transaction) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Transaction not found</Text>
+        <Text>{t("transaction_not_found")}</Text>
       </View>
     );
   }
@@ -94,14 +94,16 @@ const ReceiptDetailScreen = () => {
       />
 
       <View style={$.headerWrapper}>
-        <ScreenHeader title="Receipt Details" />
+        <ScreenHeader title={t("receipt_details")} />
       </View>
 
       <ScrollView contentContainerStyle={$.scrollContent}>
         <View style={$.topSection}>
           <View>
             <Text style={$.dateTitle}>{formatCustomDate(createdAt, "ddd D MMM HH:mm")}</Text>
-            <Text style={$.subTitle}>Transaction #{transaction.id}</Text>
+            <Text style={$.subTitle}>
+              {t("transaction")} #{transaction.id}
+            </Text>
           </View>
           <View
             style={[$.statusBadge, statusCode === "COMPLETED" ? $.statusSuccess : $.statusRefund]}
@@ -116,7 +118,7 @@ const ReceiptDetailScreen = () => {
           {/* Order List Card - Full Width */}
           <View style={[$.card, { width: "100%" }]}>
             <View style={$.cardHeader}>
-              <Text style={$.cardTitle}>Order List</Text>
+              <Text style={$.cardTitle}>{t("order_list")}</Text>
             </View>
             <View style={$.cardContent}>
               {transactionProduct?.map((item: TransactionProductResponse) => {
@@ -132,7 +134,8 @@ const ReceiptDetailScreen = () => {
                 return (
                   <View key={item.productId + String(itemBasePrice)} style={$.orderRow}>
                     <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                      <Text style={$.qtyBadge}>{item.quantity}x</Text>
+                      {/* i18n-ignore: Multiplier symbol */}
+                      <Text style={$.qtyBadge}>{`${item.quantity}x`}</Text>
                       <View>
                         <Text
                           style={$.itemName}
@@ -155,11 +158,11 @@ const ReceiptDetailScreen = () => {
           {/* Summary Card */}
           <View style={$.card}>
             <View style={$.cardHeader}>
-              <Text style={$.cardTitle}>Summary</Text>
+              <Text style={$.cardTitle}>{t("summary")}</Text>
             </View>
             <View style={$.cardContent}>
               <Row
-                label="Subtotal"
+                label={t("subtotal")}
                 value={formatCurrency(
                   transactionProduct?.reduce((sum: number, item: TransactionProductResponse) => {
                     const itemVariants = Array.isArray(item.selectedVariants)
@@ -175,14 +178,14 @@ const ReceiptDetailScreen = () => {
                 )}
               />
               <Row
-                label="Discount"
+                label={t("discount")}
                 value={`-${formatCurrency(totalDiscount || 0)}`}
                 valueStyle={{ color: "#D32F2F" }} // Red for deductions
               />
-              <Row label="Tax" value={formatCurrency(totalTax || 0)} />
+              <Row label={t("tax")} value={formatCurrency(totalTax || 0)} />
               <View style={$.divider} />
               <Row
-                label="Total Price"
+                label={t("total_price")}
                 value={formatCurrency(totalPrice)}
                 valueStyle={$.totalValue}
               />
@@ -192,12 +195,12 @@ const ReceiptDetailScreen = () => {
           {/* Payment Info Card */}
           <View style={$.card}>
             <View style={$.cardHeader}>
-              <Text style={$.cardTitle}>Payment Information</Text>
+              <Text style={$.cardTitle}>{t("payment_information")}</Text>
             </View>
             <View style={$.cardContent}>
-              <Row label="Method" value={paymentMethodCode} />
+              <Row label={t("method")} value={paymentMethodCode} />
               <Row
-                label="Customer"
+                label={t("customer")}
                 value={
                   transaction.description
                     ? transaction.description.split(" - ")[0].replace("Order for ", "")
@@ -208,7 +211,7 @@ const ReceiptDetailScreen = () => {
                 <>
                   <View style={$.divider} />
                   <Row
-                    label="Refunded Amount"
+                    label={t("refunded_amount")}
                     value={`-${formatCurrency(totalPrice)}`}
                     valueStyle={{ color: "#D32F2F" }}
                   />

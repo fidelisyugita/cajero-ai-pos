@@ -4,6 +4,7 @@ import IcSearch from "@/assets/icons/search.svg";
 import IcX from "@/assets/icons/x.svg";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
+import { t } from "@/services/i18n";
 import { useCategoryStore } from "@/store/useMenuCategoryStore";
 import { vs } from "@/utils/Scale";
 
@@ -34,7 +35,7 @@ const MenuSearchBar = () => {
   return (
     <Input
       containerStyle={$.searchBar}
-      placeholder="Search Menu"
+      placeholder={t("search_menu")}
       right={
         <IconButton
           Icon={isSearching ? IcX : IcSearch}

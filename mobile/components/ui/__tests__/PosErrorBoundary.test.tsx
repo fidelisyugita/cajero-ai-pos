@@ -61,7 +61,7 @@ describe("PosErrorBoundary component", () => {
       ),
     ).toBeTruthy();
     expect(screen.getByText("Pulihkan Layar Kasir")).toBeTruthy();
-    expect(screen.getByText("Diagnostic: Simulated Cart Rendering Crash")).toBeTruthy();
+    expect(screen.getByText("Diagnostik: Simulated Cart Rendering Crash")).toBeTruthy();
     expect(captureSentryException).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
   });

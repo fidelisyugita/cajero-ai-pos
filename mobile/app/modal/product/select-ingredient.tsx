@@ -76,7 +76,7 @@ const AddIngredient = () => {
     // If storeId is not available, we can't add an ingredient
     if (!storeId) {
       Logger.error("Store ID is not available");
-      Alert.alert("Error", "Store ID is not available");
+      Alert.alert(t("error"), t("store_id_not_available"));
       return;
     }
 
@@ -87,12 +87,12 @@ const AddIngredient = () => {
         stock: 0,
         measureUnitCode: measureUnitCode || "PCS",
       });
-      Alert.alert("Success", `Ingredient ${result.name} added successfully`);
+      Alert.alert(t("success"), `${result.name}: ${t("ingredient_added_success")}`);
       setIngredientName(""); // Reset name after success
     } catch (error: unknown) {
       Logger.error("Failed to add ingredient:", error);
       const msg = error instanceof Error ? error.message : "Failed to add ingredient";
-      Alert.alert("Add Ingredient Failed", msg);
+      Alert.alert(t("add_ingredient_failed"), msg);
     }
   };
 

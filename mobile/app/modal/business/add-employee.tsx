@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal";
 import Select from "@/components/ui/Select";
+import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useCreateUserMutation } from "@/services/mutations/useCreateUserMutation";
 import { vs } from "@/utils/Scale";
@@ -50,17 +51,17 @@ const AddEmployeeModal = () => {
     try {
       await createUser(data);
       if (router.canGoBack()) router.back();
-      Alert.alert("Success", "Employee added successfully");
+      Alert.alert(t("success"), t("employee_added_success"));
     } catch (error: unknown) {
       Logger.error("Failed to add employee:", error);
       const msg = error instanceof Error ? error.message : "Failed to add employee";
-      Alert.alert("Error", msg);
+      Alert.alert(t("error"), msg);
     }
   };
 
   return (
     <ScreenModal modalStyle={$.modal}>
-      <ScreenModal.Header title="Add New Employee" hideCloseButton />
+      <ScreenModal.Header title={t("add_new_employee")} hideCloseButton />
       <ScreenModal.Body>
         <View style={$.container}>
           <ScrollView contentContainerStyle={$.scrollContent}>
@@ -70,7 +71,7 @@ const AddEmployeeModal = () => {
                 name="name"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Full Name"
+                    label={t("full_name")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -83,7 +84,7 @@ const AddEmployeeModal = () => {
                 name="email"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Email"
+                    label={t("email")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -98,7 +99,7 @@ const AddEmployeeModal = () => {
                 name="phone"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Phone Number"
+                    label={t("phone_number")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -112,11 +113,11 @@ const AddEmployeeModal = () => {
                 name="roleCode"
                 render={({ field: { onChange, value } }) => (
                   <Select
-                    label="Role"
+                    label={t("role")}
                     options={ROLES}
                     value={value}
                     onSelect={onChange}
-                    placeholder="Select Role"
+                    placeholder={t("select_role")}
                     containerStyle={{ marginBottom: 0 }}
                   />
                 )}
@@ -126,7 +127,7 @@ const AddEmployeeModal = () => {
                 name="password"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Password"
+                    label={t("password")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -142,13 +143,13 @@ const AddEmployeeModal = () => {
       <ScreenModal.Footer>
         <View style={$.footerButtons}>
           <Button
-            title="Cancel"
+            title={t("cancel")}
             variant="secondary"
             onPress={() => router.back()}
             style={{ flex: 1 }}
           />
           <Button
-            title="Create Employee"
+            title={t("create_employee")}
             variant="primary"
             onPress={handleSubmit(onSubmit)}
             isLoading={isPending}

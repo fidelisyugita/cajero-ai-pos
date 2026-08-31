@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Text from "@/components/ui/Typography";
+import { t } from "@/services/i18n";
 import { vs } from "@/utils/Scale";
 
 export interface Employee {
@@ -53,7 +54,7 @@ const EmployeeItem = ({ employee, onPressDetails }: EmployeeItemProps) => {
 
           <TouchableOpacity onPress={onPressDetails} style={$.detailsLink}>
             <Text variant="caption" color="#4B5563">
-              Details
+              {t("details")}
             </Text>
             <Ionicons name="arrow-forward" size={12} color="#4B5563" />
           </TouchableOpacity>

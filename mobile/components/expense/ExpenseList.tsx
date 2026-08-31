@@ -176,7 +176,7 @@ const ExpenseRow = memo(({ item, onPress }: { item: PettyCash; onPress: () => vo
 
       {/* Action */}
       <View style={{ flex: COLUMNS[4].flex }}>
-        <Button size="sm" title="Detail" variant="neutral" onPress={onPress} />
+        <Button size="sm" title={t("detail")} variant="neutral" onPress={onPress} />
       </View>
     </View>
   );
@@ -187,7 +187,7 @@ const TypeBadge = ({ isIncome }: { isIncome: boolean }) => {
 
   return (
     <View style={$.badge}>
-      <Text style={$.badgeText}>{isIncome ? "Income" : "Expense"}</Text>
+      <Text style={$.badgeText}>{isIncome ? t("income") : t("expense")}</Text>
     </View>
   );
 };

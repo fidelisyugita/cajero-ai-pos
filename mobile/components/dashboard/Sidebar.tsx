@@ -3,6 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import IcSignOut from "@/assets/icons/sign-out.svg";
 import Logo from "@/assets/images/logo.svg";
+import { t } from "@/services/i18n";
 import { LogoutService } from "@/services/LogoutService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
@@ -61,7 +62,7 @@ const Sidebar = () => {
       >
         <UniIcSignOut height={vs(26)} width={vs(26)} />
         <Text adjustsFontSizeToFit numberOfLines={1} style={$.signOut}>
-          Sign Out
+          {t("sign_out")}
         </Text>
       </TouchableOpacity>
     </View>

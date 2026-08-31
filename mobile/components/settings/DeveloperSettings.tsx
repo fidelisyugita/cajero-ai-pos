@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import FormSectionCard from "@/components/ui/FormSectionCard";
 import Typography from "@/components/ui/Typography";
 import { db } from "@/db/drizzle";
+import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -14,71 +15,66 @@ const DeveloperSettings = () => {
   const router = useRouter();
 
   const handleResetDatabase = () => {
-    Alert.alert(
-      "Reset Database",
-      "Are you sure you want to reset the database? All local data will be lost.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Reset",
-          style: "destructive",
-          onPress: async () => {
+    Alert.alert(t("reset_database"), t("reset_database_confirm"), [
+      {
+        text: t("cancel"),
+        style: "cancel",
+      },
+      {
+        text: t("delete"),
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // Close database connection first
             try {
-              // Close database connection first
-              try {
-                // @ts-expect-error - invalid type definition for close
-                await db.$client.close();
-              } catch {
-                // ignore
-              }
-
-              const dbDir = `${FileSystem.documentDirectory}SQLite`;
-              await FileSystem.deleteAsync(dbDir, { idempotent: true });
-
-              Alert.alert("Success", "Database reset complete. Reloading app...", [
-                {
-                  text: "OK",
-                  onPress: () => {
-                    setLoggedIn(false);
-                    try {
-                      DevSettings.reload();
-                    } catch {
-                      router.replace("/(auth)/sign-in");
-                    }
-                  },
-                },
-              ]);
-            } catch (error: unknown) {
-              const msg = error instanceof Error ? error.message : String(error);
-              Alert.alert("Error", `Failed to reset database: ${msg}`);
-              Logger.error("Failed to reset database", error);
+              // @ts-expect-error - invalid type definition for close
+              await db.$client.close();
+            } catch {
+              // ignore
             }
-          },
+
+            const dbDir = `${FileSystem.documentDirectory}SQLite`;
+            await FileSystem.deleteAsync(dbDir, { idempotent: true });
+
+            Alert.alert(t("success"), t("reset_database_success"), [
+              {
+                text: t("ok"),
+                onPress: () => {
+                  setLoggedIn(false);
+                  try {
+                    DevSettings.reload();
+                  } catch {
+                    router.replace("/(auth)/sign-in");
+                  }
+                },
+              },
+            ]);
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            Alert.alert(t("error"), `${t("failed_to_reset_database")}: ${msg}`);
+            Logger.error("Failed to reset database", error);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
-    <FormSectionCard title="Developer Options" style={{ flex: 1 }} contentStyle={$.container}>
+    <FormSectionCard title={t("developer_options")} style={{ flex: 1 }} contentStyle={$.container}>
       <View style={$.section}>
         <Typography variant="bodyMd" style={$.description}>
-          Use these options to fix local data issues during development.
+          {t("developer_options_desc")}
         </Typography>
 
         <View style={$.card}>
           <View style={$.cardHeader}>
-            <Typography variant="headingSm">Database</Typography>
+            <Typography variant="headingSm">{t("database")}</Typography>
           </View>
           <View style={$.cardContent}>
             <Typography variant="bodySm" style={{ marginBottom: 16 }}>
-              If you see "missing column" errors, your local database schema is stale. Resetting it
-              will clear local data and fetch fresh data from the server.
+              {t("database_reset_info")}
             </Typography>
-            <Button title="Reset Database" variant="warning" onPress={handleResetDatabase} />
+            <Button title={t("reset_database")} variant="warning" onPress={handleResetDatabase} />
           </View>
         </View>
       </View>

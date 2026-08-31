@@ -34,6 +34,21 @@ const MENU_ITEMS: MenuItem[] = [
   { id: "developer", labelKey: "developer", icon: Feather, iconName: "code" },
 ];
 
+const getMenuLabel = (id: SettingsTab): string => {
+  switch (id) {
+    case "printers":
+      return t("printers");
+    case "language":
+      return t("language");
+    case "developer":
+      return t("developer");
+    case "ai":
+      return t("ai_settings");
+    case "payment":
+      return t("payment");
+  }
+};
+
 const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {
   // Subscribe to language changes to trigger re-render
   useLanguageStore((state) => state.language);
@@ -62,7 +77,9 @@ const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {
                   color={isActive ? "#000" : "#555"}
                 />
               )}
-              <Text style={[$.menuLabel, isActive && $.menuLabelActive]}>{t(item.labelKey)}</Text>
+              <Text style={[$.menuLabel, isActive && $.menuLabelActive]}>
+                {getMenuLabel(item.id)}
+              </Text>
             </TouchableOpacity>
           );
         })}

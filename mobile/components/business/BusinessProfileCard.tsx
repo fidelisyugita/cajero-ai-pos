@@ -5,6 +5,7 @@ import FormSectionCard from "@/components/ui/FormSectionCard";
 import IconButton from "@/components/ui/IconButton";
 import Skeleton from "@/components/ui/Skeleton";
 import Text from "@/components/ui/Typography";
+import { t } from "@/services/i18n";
 import type { Location } from "@/services/types/Store";
 import { vs } from "@/utils/Scale";
 
@@ -30,7 +31,7 @@ const BusinessProfileCard = ({
 }: BusinessProfileCardProps & { onEdit?: () => void }) => {
   return (
     <View style={$.container}>
-      <FormSectionCard title="Profile">
+      <FormSectionCard title={t("profile")}>
         {!loading && onEdit && (
           <View style={$.editButton}>
             <IconButton

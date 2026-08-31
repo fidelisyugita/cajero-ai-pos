@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import FormSectionCard from "@/components/ui/FormSectionCard";
+import { t } from "@/services/i18n";
 import { useBusinessStore } from "@/store/useBusinessStore";
 
 const AISettings = () => {
@@ -15,36 +16,35 @@ const AISettings = () => {
   // Render Upgrade Prompt if not Pro
   if (!isUltra) {
     return (
-      <FormSectionCard title="AI Assistant" style={{ flex: 1 }} contentStyle={$.container}>
+      <FormSectionCard title={t("ai_settings")} style={{ flex: 1 }} contentStyle={$.container}>
         <View style={$.upgradeContainer}>
           <View style={$.iconContainer}>
             <Feather name="cpu" size={48} color="#2196F3" />
           </View>
-          <Text style={$.upgradeTitle}>Coming Soon</Text>
-          <Text style={$.upgradeDescription}>
-            Unlock AI capabilities to get smart insights and assistance directly on your device.
-          </Text>
+          <Text style={$.upgradeTitle}>{t("coming_soon")}</Text>
+          <Text style={$.upgradeDescription}>{t("coming_soon_ai_desc")}</Text>
         </View>
       </FormSectionCard>
     );
   }
 
   return (
-    <FormSectionCard title="Artificial Intelligence" style={{ flex: 1 }} contentStyle={$.container}>
+    <FormSectionCard
+      title={t("artificial_intelligence")}
+      style={{ flex: 1 }}
+      contentStyle={$.container}
+    >
       <ScrollView style={$.section}>
         <View style={$.upgradeContainer}>
           <View style={[$.iconContainer, { backgroundColor: "#E8F5E9" }]}>
             <Feather name="cloud-lightning" size={48} color="#4CAF50" />
           </View>
-          <Text style={$.upgradeTitle}>AI Online Active</Text>
-          <Text style={$.upgradeDescription}>
-            Your AI assistant is now powered by cloud (Groq). Fast, powerful, and no downloads
-            required.
-          </Text>
+          <Text style={$.upgradeTitle}>{t("ai_online_active")}</Text>
+          <Text style={$.upgradeDescription}>{t("ai_groq_desc")}</Text>
 
           <View style={$.infoRow}>
             <Feather name="check-circle" size={20} color="green" />
-            <Text style={$.infoText}>Model: Llama 3 8B (Online)</Text>
+            <Text style={$.infoText}>{t("ai_model_groq")}</Text>
           </View>
         </View>
       </ScrollView>

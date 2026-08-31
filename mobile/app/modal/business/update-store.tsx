@@ -12,6 +12,7 @@ import IcUpload from "@/assets/icons/upload.svg";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal"; // Using reusable modal wrapper
+import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useUpdateStoreMutation } from "@/services/mutations/useUpdateStoreMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
@@ -120,7 +121,7 @@ const UpdateStoreModal = () => {
       }
     } catch (error) {
       Logger.error("Upload failed", error);
-      Alert.alert("Error", "Failed to upload image");
+      Alert.alert(t("error"), t("failed_to_upload_image"));
     }
   };
 
@@ -143,31 +144,29 @@ const UpdateStoreModal = () => {
 
       // Success
       if (router.canGoBack()) router.back();
-      Alert.alert("Success", "Store profile updated successfully");
+      Alert.alert(t("success"), t("store_profile_updated_success"));
     } catch (error: unknown) {
       Logger.error("Failed to update store", error);
       const msg = error instanceof Error ? error.message : "Failed to update store";
-      Alert.alert("Error", msg);
+      Alert.alert(t("error"), msg);
     }
   };
 
   return (
     <ScreenModal modalStyle={$.modal}>
-      <ScreenModal.Header title="Edit Business Profile" />
+      <ScreenModal.Header title={t("edit_business_profile")} />
       <ScreenModal.Body>
         <View style={$.container}>
           <ScrollView contentContainerStyle={$.scrollContent} showsVerticalScrollIndicator={false}>
             <View style={$.infoBox}>
               <View style={$.infoIcon}>
-                {/* Info Icon placeholder or similar */}
+                {/* i18n-ignore: Info icon symbol */}
                 <Text style={{ color: "#3B82F6", fontWeight: "bold" }}>i</Text>
               </View>
-              <Text style={$.infoText}>
-                This data will be reflected on your receipts and reports.
-              </Text>
+              <Text style={$.infoText}>{t("business_receipt_info")}</Text>
             </View>
 
-            <Text style={$.sectionLabel}>Upload image or Select from Color Options</Text>
+            <Text style={$.sectionLabel}>{t("upload_image_or_select_color")}</Text>
 
             <View style={$.imageSection}>
               <TouchableOpacity onPress={handleUploadPress} activeOpacity={0.8}>
@@ -185,7 +184,7 @@ const UpdateStoreModal = () => {
               </TouchableOpacity>
 
               <View style={$.rightColumn}>
-                <Text style={$.subLabel}>Choose Color</Text>
+                <Text style={$.subLabel}>{t("choose_color")}</Text>
                 <View style={$.colorGrid}>
                   {AVATAR_COLORS.map((c) => (
                     <TouchableOpacity
@@ -201,11 +200,11 @@ const UpdateStoreModal = () => {
                   disabled={isUploadingImage}
                 >
                   {isUploadingImage ? (
-                    <Text style={$.uploadButtonText}>Uploading...</Text>
+                    <Text style={$.uploadButtonText}>{t("uploading")}</Text>
                   ) : (
                     <>
                       <IcUpload width={16} height={16} color="#B91C1C" />
-                      <Text style={$.uploadButtonText}>Upload Image</Text>
+                      <Text style={$.uploadButtonText}>{t("upload_image")}</Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -218,7 +217,7 @@ const UpdateStoreModal = () => {
                 name="name"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Business Name"
+                    label={t("business_name")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -231,7 +230,7 @@ const UpdateStoreModal = () => {
                 name="phone"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Phone Number"
+                    label={t("phone_number")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -246,7 +245,7 @@ const UpdateStoreModal = () => {
                 name="email"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Email"
+                    label={t("email")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -261,7 +260,7 @@ const UpdateStoreModal = () => {
                 name="description"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
-                    label="Description"
+                    label={t("description")}
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
@@ -279,13 +278,13 @@ const UpdateStoreModal = () => {
       <ScreenModal.Footer>
         <View style={$.footerButtons}>
           <Button
-            title="Cancel"
+            title={t("cancel")}
             variant="secondary"
             onPress={() => router.back()}
             style={{ flex: 1 }}
           />
           <Button
-            title="Save"
+            title={t("save")}
             variant="primary"
             onPress={handleSubmit(onSubmit)}
             isLoading={isUpdating}

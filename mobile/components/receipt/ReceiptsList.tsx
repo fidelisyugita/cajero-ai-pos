@@ -118,7 +118,7 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
         ListFooterComponent={
           isFetchingNextPage ? (
             <View style={{ padding: 10, alignItems: "center" }}>
-              <Text>Loading more...</Text>
+              <Text>{t("loading_more")}</Text>
             </View>
           ) : null
         }

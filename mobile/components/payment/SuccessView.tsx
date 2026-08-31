@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
+import { t } from "@/services/i18n";
 import { formatDayDateTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
@@ -27,26 +28,29 @@ const SuccessView = ({
       <View style={$.content}>
         {/* Icon Placeholder - Creating simple circle check if icon missing or use Text */}
         <View style={$.iconContainer}>
+          {/* i18n-ignore: Emoji checkmark */}
           <Text style={{ fontSize: 60 }}>✅</Text>
         </View>
 
-        <Text style={$.title}>Payment Success!</Text>
-        <Text style={$.subtitle}>Transaction No. {transactionNumber}</Text>
+        <Text style={$.title}>{t("payment_success")}</Text>
+        <Text style={$.subtitle}>
+          {t("transaction_no")} {transactionNumber}
+        </Text>
         <Text style={$.date}>{formatDayDateTime()}</Text>
 
         <View style={$.divider} />
 
         <View style={$.summary}>
           <View style={$.row}>
-            <Text style={$.label}>Total Price</Text>
+            <Text style={$.label}>{t("total_price")}</Text>
             <Text style={$.totalPrice}>{formatCurrency(totalAmount)}</Text>
           </View>
           <View style={$.row}>
-            <Text style={$.label}>Cash</Text>
+            <Text style={$.label}>{t("cash")}</Text>
             <Text style={$.value}>{formatCurrency(paidAmount)}</Text>
           </View>
           <View style={$.row}>
-            <Text style={$.label}>Change</Text>
+            <Text style={$.label}>{t("change")}</Text>
             <Text style={$.value}>{formatCurrency(change)}</Text>
           </View>
         </View>
@@ -55,14 +59,14 @@ const SuccessView = ({
       <View style={$.footer}>
         <Button
           variant="neutral"
-          title="New Order"
+          title={t("new_order")}
           onPress={onNewTransaction}
           style={{ flex: 1 }}
           size="lg"
         />
         <Button
           variant="primary"
-          title="Print Receipt"
+          title={t("print_receipt")}
           onPress={onPrintReceipt}
           style={{ flex: 1 }}
           size="lg"

@@ -2,6 +2,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcBackspace from "@/assets/icons/backspace.svg";
 import Button from "@/components/ui/Button";
+import { t } from "@/services/i18n";
 import colors from "@/tokens/Colors";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
@@ -71,26 +72,28 @@ const CashPayment = ({
   return (
     <View style={$.container}>
       <View style={$.header}>
-        <Text style={$.chargeLabel}>Charge {formatCurrency(totalAmount)}</Text>
+        <Text style={$.chargeLabel}>
+          {t("charge")} {formatCurrency(totalAmount)}
+        </Text>
       </View>
 
       <View style={$.quickAmounts}>
         {suggestions.map((amt, index) => (
           <TouchableOpacity key={amt} style={$.quickButton} onPress={() => onChangePaidAmount(amt)}>
-            <Text style={$.quickButtonText}>{index === 0 ? "Exact" : formatCurrency(amt)}</Text>
+            <Text style={$.quickButtonText}>{index === 0 ? t("exact") : formatCurrency(amt)}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <View style={$.paymentInfoRow}>
         <View style={$.amountBlock}>
-          <Text style={$.amountLabel}>Paid</Text>
+          <Text style={$.amountLabel}>{t("paid")}</Text>
           <Text style={$.amountValue}>{formatCurrency(paidAmount)}</Text>
         </View>
 
         {change > 0 && (
           <View style={[$.amountBlock, { alignItems: "flex-end" }]}>
-            <Text style={$.changeLabel}>Change</Text>
+            <Text style={$.changeLabel}>{t("change")}</Text>
             <Text style={$.changeValue}>{formatCurrency(change)}</Text>
           </View>
         )}
@@ -114,7 +117,7 @@ const CashPayment = ({
       </View>
 
       <Button
-        title="Pay"
+        title={t("pay")}
         size="lg"
         variant="primary"
         onPress={onPay}

@@ -64,14 +64,14 @@ const DateRangeModal = ({
 
           <View style={$.dateDisplayContainer}>
             <View style={$.dateBox}>
-              <Text style={$.dateLabel}>Start Date</Text>
+              <Text style={$.dateLabel}>{t("start_date")}</Text>
               <Text style={$.dateValue}>
                 {range.startDate ? formatDate(range.startDate as DateInput) : "-"}
               </Text>
             </View>
             <Feather name="arrow-right" size={20} color="#666" />
             <View style={$.dateBox}>
-              <Text style={$.dateLabel}>End Date</Text>
+              <Text style={$.dateLabel}>{t("end_date")}</Text>
               <Text style={$.dateValue}>
                 {range.endDate ? formatDate(range.endDate as DateInput) : "-"}
               </Text>

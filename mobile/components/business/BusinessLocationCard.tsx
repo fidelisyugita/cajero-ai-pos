@@ -5,6 +5,7 @@ import FormSectionCard from "@/components/ui/FormSectionCard";
 import IconButton from "@/components/ui/IconButton";
 import Skeleton from "@/components/ui/Skeleton";
 import Text from "@/components/ui/Typography";
+import { t } from "@/services/i18n";
 
 interface BusinessLocationCardProps {
   street: string;
@@ -32,7 +33,7 @@ const BusinessLocationCard = ({
 }: BusinessLocationCardProps) => {
   return (
     <View style={$.container}>
-      <FormSectionCard title="Location">
+      <FormSectionCard title={t("location")}>
         {!loading && (
           <View style={$.editButton}>
             <IconButton Icon={IcEdit} variant="neutral-no-stroke" />
@@ -48,10 +49,10 @@ const BusinessLocationCard = ({
             </>
           ) : (
             <>
-              <InfoRow label="Street" value={street} />
-              <InfoRow label="City" value={city} />
-              <InfoRow label="Country" value={country} />
-              <InfoRow label="Postal Code" value={postalCode} />
+              <InfoRow label={t("street")} value={street} />
+              <InfoRow label={t("city")} value={city} />
+              <InfoRow label={t("country")} value={country} />
+              <InfoRow label={t("postal_code")} value={postalCode} />
             </>
           )}
         </View>

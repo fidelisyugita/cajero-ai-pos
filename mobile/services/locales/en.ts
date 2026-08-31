@@ -1,4 +1,5 @@
 export default {
+  // Navigation & Settings
   settings: "Settings",
   developer: "Developer",
   ai_settings: "AI Assistant",
@@ -10,9 +11,6 @@ export default {
   help_support: "Help and Support",
   printer_setting: "Printer Setting",
   default_printer: "Default Printer",
-  printer_name: "Printer Name",
-  list_of_printer: "List of Printer",
-  add_printer: "Add Printer",
   test_printer: "Test Printer",
   auto_print: "Auto Print",
   auto_print_desc: "Print receipt automatically after payment success",
@@ -26,6 +24,11 @@ export default {
   connection_failed: "Connection Failed",
   not_connected: "Not Connected",
   language_setting: "Language Setting",
+  no_devices_found: "No devices found",
+  scanning: "Scanning...",
+  available_devices: "Available Devices",
+  connected_printer: "Connected Printer",
+
   // Printer Permissions
   permission_required: "Permission Required",
   open_settings: "Open Settings",
@@ -37,7 +40,7 @@ export default {
   // Payment Methods
   select_payment_method: "Select Payment Method",
 
-  // Modals
+  // Modals & Actions
   delete_product: "Hide Product",
   confirm_delete_product: "Are you sure you want to hide this product?",
   unhide_product: "Unhide Product",
@@ -58,14 +61,12 @@ export default {
   change_category: "Change Category",
   measure_unit: "Measure Unit",
   select_measure_unit: "Select Measure Unit",
-  change_measure_unit: "Change Measure Unit",
   product_information: "Product Information",
   product_name_required: "Product Name *",
   description: "Description",
   buying_price: "Buying Price (COGS)",
   selling_price_required: "Price *",
   commission: "Commission",
-  common: "Common",
   error: "Error",
   discount_exceeds_price: "Discount cannot exceed the total product price",
   product_code: "Product Code",
@@ -79,8 +80,6 @@ export default {
   list_of_ingredient: "List of Ingredient Options",
   tax: "Tax",
   price_includes_tax: "Price Includes Tax",
-  stock_management: "Stock Management",
-  initial_stock_required: "Initial Stock *",
   product_ingredient: "Product Ingredient",
   add_ingredient: "Add Ingredient",
   edit_ingredient: "Edit Ingredient",
@@ -89,6 +88,8 @@ export default {
   failed_to_add_category: "Failed to add category",
   product_added_success: "Product added successfully",
   product_updated_success: "Product updated successfully",
+  add_ingredient_failed: "Add Ingredient Failed",
+  ingredient_added_success: "Ingredient added successfully",
 
   // Expense
   add_expense_title: "Add Expense",
@@ -101,13 +102,34 @@ export default {
   expense: "Expense",
   income: "Income",
   expense_added_success: "Expense added successfully",
+  expense_details: "Expense Details",
+  no_image_proof: "No Image Proof",
+  amount: "Amount",
+  date: "Date",
+  type: "Type",
+  created_by: "Created By",
 
-  // Payment Index
+  // Payment
   transaction: "Transaction",
   print_bill: "Print Bill",
   draft_open_bill: "Draft / Open Bill",
+  payment_failed: "Payment Failed",
+  payment_failed_msg: "An error occurred while processing the transaction.",
+  draft_bill: "Draft Bill",
+  draft_bill_msg: "Bill saved as draft. Ready for next customer.",
+  charge: "Charge",
+  exact: "Exact",
+  paid: "Paid",
+  change: "Change",
+  pay: "Pay",
+  payment_success: "Payment Success!",
+  transaction_no: "Transaction No.",
+  total_price: "Total Price",
+  cash: "Cash",
+  new_order: "New Order",
+  payment: "Payment",
 
-  // Order Modal
+  // Order & Cart
   add_item: "Add Item",
   edit_item: "Edit Item",
   update_order: "Update Order",
@@ -117,8 +139,22 @@ export default {
   add_to_order_list: "Add to Order List",
   basic_price: "Basic Price",
   variant: "Variant",
+  note_optional: "Note (Optional)",
+  proceed: "Proceed",
+  current_order: "Current Order",
+  customer_name: "Customer Name",
+  all: "All",
+  hidden: "Hidden",
+  order_summary: "Order Summary",
+  remove_all: "Remove All",
+  subtotal: "Subtotal",
+  total: "Total",
+  discount: "Discount",
+  add_discount: "Add Discount",
+  list_of_order: "Order List",
+  order_list: "Order List",
 
-  // Product Modals
+  // Modals & Selection
   choose_file: "Choose File",
   choose_color: "Choose Color",
   add_measure_unit: "Add Measure Unit",
@@ -134,6 +170,8 @@ export default {
   ingredients: "Ingredients",
   products: "Products",
   history: "History",
+  attendance: "Attendance",
+  not_found: "Page Not Found",
 
   // Auth
   intro_title: "Welcome to Your\nPoint of Sale!",
@@ -141,11 +179,8 @@ export default {
     "Your go-to Point of Sale (POS) app for seamless business operations. No lengthy onboarding - we believe in simplicity and speed. Let's dive right in!",
   sign_up: "Sign Up",
   sign_in: "Sign In",
-  sign_in_google: "Sign In with Google",
   sign_up_google: "Sign Up with Google",
   go_to_sign_in: "Go to Sign In",
-  go_to_sign_up: "Go to Sign Up",
-  forgot_password: "Forgot Password?",
   email: "Email",
   password: "Password",
   full_name: "Full Name",
@@ -153,7 +188,6 @@ export default {
   or: "Or",
   email_required: "Email is required",
   email_invalid: "Invalid email address",
-  invalid_email_address: "Invalid email address",
   password_required: "Password is required",
   password_min_length: "Password must be at least 6 characters",
   full_name_required: "Full name is required",
@@ -161,11 +195,11 @@ export default {
   confirm_password_required: "Confirm password is required",
   passwords_do_not_match: "Passwords do not match",
   sign_in_failed: "Sign In Failed",
-  sign_up_failed: "Sign Up Failed",
   incorrect_email_or_password: "Incorrect email or password. Please try again.",
 
   // Report
   report_details: "Report Details",
+  report_not_found: "Report not found",
   sales: "Sales",
   total_transaction: "Total Transaction",
   total_item_sold: "Total Item Sold",
@@ -183,16 +217,45 @@ export default {
   detail: "Detail",
   select_date_range: "Select Date Range",
   apply: "Apply",
+  total_cogs: "Total COGS",
+  total_refund: "Total Refund",
+  total_net_revenue: "Total Net Revenue",
+  net_revenue_with_cogs: "Net Revenue (w/ COGS)",
+  start_date: "Start Date",
+  end_date: "End Date",
 
-  // Header
+  // Receipts & Details
+  transaction_not_found: "Transaction not found",
+  receipt_details: "Receipt Details",
+  summary: "Summary",
+  payment_information: "Payment Information",
+  method: "Method",
+  customer: "Customer",
+  refunded_amount: "Refunded Amount",
+  print_preview: "Print Preview",
+  printing: "Printing...",
+  print: "Print",
+  overwrite_draft_title: "Overwrite current order?",
+  overwrite_draft_msg: "You have active items in your cart. Resuming this draft will clear them.",
+  overwrite: "Overwrite",
+  resume: "Resume",
+  loading_more: "Loading more...",
+
+  // Header & Global
   guest: "Guest",
   visitor: "Visitor",
-
-  // Global
   cancel: "Cancel",
   confirm: "Confirm",
   delete: "Delete",
   edit: "Edit",
+  remove: "Remove",
+  ok: "OK",
+  close: "Close",
+  details: "Details",
+  product: "Product",
+  by: "By",
+  info: "Info",
+  store_id_not_available: "Store ID is not available",
 
   // Empty States
   empty_menu_search_title: "No Products Found",
@@ -207,62 +270,81 @@ export default {
   empty_ingredients_subtitle: "Add ingredients to manage your stock.",
   empty_products_title: "No Products Found",
   empty_products_subtitle: "Add products to track their stock.",
-  empty_history_title: "No History Found",
-  empty_history_subtitle: "Stock movements will appear here.",
-  empty_product_history_week_title: "No History",
-  empty_product_history_week_subtitle: "No transactions found in last 7 days.",
-  empty_expenses_title: "No Expenses Found",
-  empty_expenses_date_subtitle: "No expenses recorded for the selected date.",
-  empty_employees_title: "No Employees Found",
-  empty_employees_subtitle: "Add employees to manage them here.",
-
-  // Missing keys added
-  no_history: "No History",
-  no_stock_history_subtitle: "No stock history found for this item.",
   empty_variants_title: "No Variants Found",
   empty_variants_subtitle: "Try adjusting your search or add variants.",
   empty_reports_title: "No Reports Found",
   empty_reports_date_subtitle: "No reports available for the selected date range.",
-  no_devices_found: "No devices found",
-  scanning: "Scanning...",
-  available_devices: "Available Devices",
-  connected_printer: "Connected Printer",
+  empty_expenses_title: "No Expenses Found",
+  empty_expenses_date_subtitle: "No expenses recorded for the selected date.",
+  empty_employees_title: "No Employees Found",
+  empty_employees_subtitle: "Add employees to manage them here.",
+  no_history_found: "No history found.",
 
-  // Business
+  // Business & Employee Management
   business_info: "Business Info",
   profile_information: "Profile Information",
   management_employee: "Management Employee",
   add_employee: "Add Employee",
+  add_new_employee: "Add New Employee",
+  create_employee: "Create Employee",
+  employee_added_success: "Employee added successfully",
+  role: "Role",
+  select_role: "Select Role",
+  phone_number: "Phone Number",
+  edit_profile: "Edit Profile",
+  update_profile: "Update Profile",
+  profile_updated_success: "Profile updated successfully",
+  new_password_optional: "New Password (Optional)",
+  leave_blank_to_keep_current: "Leave blank to keep current",
+  edit_business_profile: "Edit Business Profile",
+  business_receipt_info: "This data will be reflected on your receipts and reports.",
+  business_name: "Business Name",
+  failed_to_upload_image: "Failed to upload image",
+  store_profile_updated_success: "Store profile updated successfully",
+  uploading: "Uploading...",
+  location: "Location",
+  street: "Street",
+  city: "City",
+  country: "Country",
+  postal_code: "Postal Code",
+  profile: "Profile",
 
-  // Menu & Order
-  proceed: "Proceed",
-  current_order: "Current Order",
-  customer_name: "Customer Name",
-  all: "All",
-  hidden: "Hidden",
+  // Menu Search & Filter
+  search_menu: "Search Menu",
+  delete_category_title: "Delete Category",
+  confirm_delete_category: "Are you sure you want to delete",
 
-  // Order List
-  order_summary: "Order Summary",
-  remove_all: "Remove All",
-  subtotal: "Subtotal",
-  total: "Total",
-  discount: "Discount",
-  add_discount: "Add Discount",
-  expense_note_placeholder: "Enter expense details",
-  list_of_order: "Order List",
-  // Receipt / Print
-  print_preview: "Print Preview",
-  printing: "Printing...",
-  print: "Print",
-  reprint: "Reprint",
-  // Stock Update Modal
+  // Stock Management & History
   update_stock_for: "Update Stock for",
   new_stock_value: "New Stock Value",
+  stock_history: "Stock History",
+  in_stock: "In Stock",
+  out_of_stock: "Out of Stock",
+  low_stock: "Low Stock",
+  inactive: "Inactive",
 
-  // AI Chat
+  // AI & Settings
   ai_welcome_message: "Hello! I am your AI assistant.",
   type_message_placeholder: "Type a message...",
   ai_connection_error: "Error: Could not connect to AI server. Please try again.",
+  coming_soon: "Coming Soon",
+  coming_soon_ai_desc:
+    "Unlock AI capabilities to get smart insights and assistance directly on your device.",
+  artificial_intelligence: "Artificial Intelligence",
+  ai_online_active: "AI Online Active",
+  ai_groq_desc:
+    "Your AI assistant is now powered by cloud (Groq). Fast, powerful, and no downloads required.",
+  ai_model_groq: "Model: Llama 3 8B (Online)",
+  reset_database: "Reset Database",
+  reset_database_confirm:
+    "Are you sure you want to reset the database? All local data will be lost.",
+  reset_database_success: "Database reset complete. Reloading app...",
+  failed_to_reset_database: "Failed to reset database",
+  developer_options: "Developer Options",
+  developer_options_desc: "Use these options to fix local data issues during development.",
+  database: "Database",
+  database_reset_info:
+    'If you see "missing column" errors, your local database schema is stale. Resetting it will clear local data and fetch fresh data from the server.',
 
   // Variant Management
   variants: "Variants",
@@ -273,7 +355,6 @@ export default {
   add_new_variant: "Add New Variant",
   no_variants_title: "No Variants Configured",
   no_variants_subtitle: "Add variants like Size, Color, etc.",
-  done: "Done",
   back_and_save: "Back and Save",
   options: "Options",
   required: "Required",
@@ -288,23 +369,21 @@ export default {
   stock: "Stock",
   price_adj: "Increase Price",
   add_option: "Add Option",
-  select_option: "Select Option",
   option: "Option",
-  ingredient: "Ingredient",
 
-  // POS Error Boundary
+  // POS Error Boundary & Diagnostics
   pos_error_title: "POS System Alert",
   pos_error_description:
     "An unexpected issue occurred on the cashier display. Your active transaction and cart data remain safe.",
   pos_error_recover_button: "Recover POS Screen",
+  diagnostic: "Diagnostic",
 
   // Logout & Sync
   sign_out: "Sign Out",
-  confirm_sign_out: "Are you sure you want to sign out?",
   unsynced_logout_title: "Unsynced Transactions",
   unsynced_logout_warning:
     "You have unsynced transactions. If you sign out now, this data will be deleted permanently.",
-  syncing_transactions: "Syncing transactions...",
+  syncing: "Syncing...",
   force_sign_out: "Force Sign Out",
   retry: "Retry",
 };

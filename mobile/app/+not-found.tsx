@@ -1,13 +1,14 @@
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { t } from "@/services/i18n";
 
 const NotFoundScreen = () => {
   return (
     <>
       <Stack.Screen options={{ title: "Oops!" }} />
       <View style={$.container}>
-        <Text>not found</Text>
+        <Text>{t("not_found")}</Text>
       </View>
     </>
   );
