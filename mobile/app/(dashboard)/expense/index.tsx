@@ -30,17 +30,10 @@ const ExpenseScreen = () => {
   });
 
   const [showPicker, setShowPicker] = useState(false);
-  const [searchQuery, _setSearchQuery] = useState("");
 
   return (
     <View style={$.container}>
       <Header>
-        {/* // TODO: currently not work due to API not support
-                <SearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder={`Search Expenses`}
-                /> */}
         <Button
           variant="secondary"
           title={formatDateRange(dateRange.startDate, dateRange.endDate)}
@@ -70,7 +63,6 @@ const ExpenseScreen = () => {
         <ExpenseList
           startDate={formatApiDate(dateRange.startDate)}
           endDate={formatApiDate(dateRange.endDate)}
-          searchQuery={searchQuery}
         />
       </View>
     </View>

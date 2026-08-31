@@ -226,7 +226,7 @@ const ReceiptDetailScreen = () => {
           <Button
             variant="secondary"
             title={t("refund")}
-            disabled={true} // TODO: implement refund
+            disabled={true} // Refund workflow is not yet supported by the backend API
             onPress={() => router.back()}
             style={$.footerButton}
             size="lg"

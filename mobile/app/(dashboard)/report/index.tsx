@@ -36,27 +36,9 @@ const ReportScreen = () => {
     endDate: formatApiDate(dateRange.endDate),
   });
 
-  // const scrollY = useSharedValue(0);
-
-  // const scrollHandler = useAnimatedScrollHandler((event) => {
-  //     scrollY.value = event.contentOffset.y;
-  // });
-
-  // const summaryStyle = useAnimatedStyle(() => {
-  //     return {
-  //         height: interpolate(scrollY.value, [0, 100], [130, 0], Extrapolation.CLAMP),
-  //         opacity: interpolate(scrollY.value, [0, 50], [1, 0], Extrapolation.CLAMP),
-  //         transform: [
-  //             { translateY: interpolate(scrollY.value, [0, 100], [0, -20], Extrapolation.CLAMP) }
-  //         ],
-  //         overflow: 'hidden',
-  //     };
-  // });
-
   return (
     <View style={$.container}>
       <Header>
-        {/* <Text style={$.headerTitle}>Report</Text> */}
         <Button
           variant="secondary"
           title={formatDateRange(dateRange.startDate, dateRange.endDate)}
@@ -84,17 +66,11 @@ const ReportScreen = () => {
 
       {/* Report Summary Section */}
       {reportData?.summary && (
-        // <Animated.View style={summaryStyle}>
         <ReportSummary summary={reportData.summary} includeCogs={includeCogs} />
-        // </Animated.View>
       )}
 
       <View style={$.content}>
-        <ReportList
-          data={reportData?.dailyReports || []}
-          isLoading={isLoading}
-          // onScroll={scrollHandler}
-        />
+        <ReportList data={reportData?.dailyReports || []} isLoading={isLoading} />
       </View>
     </View>
   );
@@ -105,16 +81,9 @@ const $ = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.neutral[200],
   },
-  headerTitle: {
-    ...theme.typography.heading3,
-    color: theme.colors.neutral[700],
-    marginRight: theme.spacing.xl,
-  },
   content: {
     flex: 1,
     padding: theme.spacing.xl,
-    // paddingTop: 0,
-    // marginTop: -theme.spacing.md,
   },
 }));
 

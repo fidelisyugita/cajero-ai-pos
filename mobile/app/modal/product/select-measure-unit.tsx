@@ -176,7 +176,6 @@ const MeasureUnitItem = memo(({ item }: MeasureUnitItemProps) => {
           {item.name} ({item.code})
         </Text>
       </TouchableOpacity>
-      {/* <IconButton Icon={IcX} size="md" variant="neutral-no-stroke" /> */}
     </View>
   );
 });
@@ -184,7 +183,6 @@ MeasureUnitItem.displayName = "MeasureUnitItem";
 
 const $ = StyleSheet.create((theme) => ({
   modal: {
-    // aspectRatio: 649 / 874,
     width: vs(649),
     height: "90%",
   },

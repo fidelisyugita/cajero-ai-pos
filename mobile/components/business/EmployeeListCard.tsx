@@ -22,22 +22,7 @@ const EmployeeListCard = ({ employees, onAddEmployee, loading }: EmployeeListCar
       {loading ? (
         <Skeleton width="100%" height={200} borderRadius={16} />
       ) : (
-        <FormSectionCard
-          title={t("management_employee")}
-          // headerRight={
-          // 	!loading && (
-          // 		<Button
-          // 			title={t("add_employee")}
-          // 			variant="primary"
-          // 			size="sm"
-          // 			leftIcon={(size, color) => (
-          // 				<IcPlus width={size} height={size} color={color} />
-          // 			)}
-          // 			onPress={onAddEmployee}
-          // 		/>
-          // 	)
-          // }
-        >
+        <FormSectionCard title={t("management_employee")}>
           <View style={$.list}>
             {employees.length === 0 ? (
               <EmptyState

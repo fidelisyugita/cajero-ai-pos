@@ -10,11 +10,6 @@ import { useCollapsibleHeader } from "@/hooks/useCollapsibleHeader";
 import { useCategoryStore } from "@/store/useMenuCategoryStore";
 import { vs } from "@/utils/Scale";
 
-/**
- *
- * TODO
- * implement store settings maybe update API & DB, to have special_code for limit view all report/receipt
- */
 const MenuScreen = () => {
   return (
     <View style={$.container}>

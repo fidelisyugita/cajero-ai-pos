@@ -265,7 +265,6 @@ const UpdateStoreModal = () => {
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
-                    // size="lg"
                     multiline
                     numberOfLines={3}
                     style={{ height: vs(80) }}

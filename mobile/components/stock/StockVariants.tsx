@@ -328,13 +328,6 @@ const VariantRow = ({
         <StatusBadge variant={statusVariant} label={status} />
       </View>
       <View style={[$.actionContainer, { flex: COLUMNS[4].flex }]}>
-        {/* TODO: Update API for this */}
-        {/* <Button
-          size="sm"
-          title="Edit"
-          variant="neutral"
-          onPress={onEditPress}
-        /> */}
         <Button size="sm" title="History" variant="neutral" onPress={onHistoryPress} />
       </View>
     </View>

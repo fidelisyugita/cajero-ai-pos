@@ -318,7 +318,6 @@ const VariantOptionItem = ({
                 name={`options.${index}.ingredients.${ingIndex}.ingredientId`}
                 render={({ field: { onChange, value } }) => (
                   <Select
-                    // label={t("ingredient")}
                     options={ingredientOptions}
                     value={value}
                     onSelect={(val) => {
@@ -349,7 +348,6 @@ const VariantOptionItem = ({
                 onPress={() => removeIngredient(ingIndex)}
                 size="sm"
                 variant="secondary-warning"
-                // style={{ marginTop: 28 }} // Align with inputs
               />
             </View>
           ))}
