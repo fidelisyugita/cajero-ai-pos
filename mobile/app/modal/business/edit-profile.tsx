@@ -25,7 +25,7 @@ const profileSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(
-      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
       "Password must contain at least one uppercase, one lowercase, and one number",
     )
     .optional()

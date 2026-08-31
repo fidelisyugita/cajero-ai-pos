@@ -142,7 +142,7 @@ const StockProducts = ({ searchQuery = "" }: StockProductsProps) => {
             onStockUpdatePress={() => setEditingProduct(item)}
           />
         )}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={ProductSeparator}
         ListEmptyComponent={
           <EmptyState title={t("empty_products_title")} subtitle={t("empty_products_subtitle")} />
         }
@@ -163,6 +163,8 @@ const StockProducts = ({ searchQuery = "" }: StockProductsProps) => {
     </View>
   );
 };
+
+const ProductSeparator = () => <View style={$.separator} />;
 
 const StockRow = memo(
   ({

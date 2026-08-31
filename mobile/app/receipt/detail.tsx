@@ -121,7 +121,7 @@ const ReceiptDetailScreen = () => {
             <View style={$.cardContent}>
               {transactionProduct?.map((item: TransactionProductResponse) => {
                 const itemVariants = Array.isArray(item.selectedVariants)
-                  ? (item.selectedVariants as SelectedVariant[])
+                  ? item.selectedVariants
                   : [];
                 const itemName = item.name || item.productName || "Item";
                 const itemBasePrice = item.sellingPrice ?? item.price ?? 0;
@@ -163,7 +163,7 @@ const ReceiptDetailScreen = () => {
                 value={formatCurrency(
                   transactionProduct?.reduce((sum: number, item: TransactionProductResponse) => {
                     const itemVariants = Array.isArray(item.selectedVariants)
-                      ? (item.selectedVariants as SelectedVariant[])
+                      ? item.selectedVariants
                       : [];
                     const variantTotal = itemVariants.reduce(
                       (s: number, v: SelectedVariant) => s + (v.price || 0),
@@ -238,9 +238,7 @@ const ReceiptDetailScreen = () => {
           onPress={() => {
             if (!transactionProduct) return;
             const receiptItems = transactionProduct.map((p: TransactionProductResponse) => {
-              const pVariants = Array.isArray(p.selectedVariants)
-                ? (p.selectedVariants as SelectedVariant[])
-                : [];
+              const pVariants = Array.isArray(p.selectedVariants) ? p.selectedVariants : [];
               const pName = p.name || p.productName || "Item";
               const pPrice = p.sellingPrice ?? p.price ?? 0;
               return {
@@ -262,7 +260,7 @@ const ReceiptDetailScreen = () => {
             const subtotal = transactionProduct.reduce(
               (sum: number, item: TransactionProductResponse) => {
                 const itemVariants = Array.isArray(item.selectedVariants)
-                  ? (item.selectedVariants as SelectedVariant[])
+                  ? item.selectedVariants
                   : [];
                 const variantTotal = itemVariants.reduce(
                   (s: number, v: SelectedVariant) => s + (v.price || 0),

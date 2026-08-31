@@ -17,6 +17,14 @@ interface OrderItemProps {
   onEdit: () => void;
 }
 
+const renderEditIcon = (size: number, color: string) => (
+  <IcEdit width={size} height={size} color={color} />
+);
+
+const renderTrashIcon = (size: number, color: string) => (
+  <IcTrash width={size} height={size} color={color} />
+);
+
 const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemProps) => {
   const variantsTotal = item.variants.reduce((sum, v) => sum + (Number(v.price) || 0), 0);
   const unitPrice = Number(item.sellingPrice || 0) + variantsTotal;
@@ -83,7 +91,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
               title="Edit"
               variant="positive"
               size="sm"
-              leftIcon={(size, color) => <IcEdit width={size} height={size} color={color} />}
+              leftIcon={renderEditIcon}
               onPress={onEdit}
               style={$.actionButton}
             />
@@ -91,7 +99,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
               title="Remove"
               variant="warning"
               size="sm"
-              leftIcon={(size, color) => <IcTrash width={size} height={size} color={color} />}
+              leftIcon={renderTrashIcon}
               onPress={onRemove}
               style={$.actionButton}
             />

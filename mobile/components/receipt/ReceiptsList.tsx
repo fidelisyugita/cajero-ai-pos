@@ -104,7 +104,7 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
         estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <TransactionRow item={item} />}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={ReceiptSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_transactions_title")}
@@ -126,6 +126,8 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
     </View>
   );
 };
+
+const ReceiptSeparator = () => <View style={$.separator} />;
 
 const TransactionRow = memo(({ item }: { item: TransactionResponse }) => {
   const router = useRouter();

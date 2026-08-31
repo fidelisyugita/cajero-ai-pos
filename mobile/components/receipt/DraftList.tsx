@@ -59,7 +59,7 @@ const DraftList = ({ searchQuery = "" }: DraftListProps) => {
         estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <DraftRow item={item} />}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={DraftSeparator}
         ListEmptyComponent={
           <EmptyState title={t("empty_drafts_title")} subtitle={t("empty_drafts_subtitle")} />
         }
@@ -67,6 +67,8 @@ const DraftList = ({ searchQuery = "" }: DraftListProps) => {
     </View>
   );
 };
+
+const DraftSeparator = () => <View style={$.separator} />;
 
 const DraftRow = memo(({ item }: { item: DraftOrder }) => {
   const router = useRouter();

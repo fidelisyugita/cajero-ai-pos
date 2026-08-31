@@ -93,7 +93,7 @@ const ReportList = ({ data, isLoading, onScroll }: ReportListProps) => {
         estimatedItemSize={60}
         keyExtractor={(item) => (item as DailyReport).date}
         renderItem={({ item }) => <ReportRow item={item as DailyReport} />}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={ReportSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_reports_title")}
@@ -106,6 +106,8 @@ const ReportList = ({ data, isLoading, onScroll }: ReportListProps) => {
     </View>
   );
 };
+
+const ReportSeparator = () => <View style={$.separator} />;
 
 const ReportRow = memo(({ item }: { item: DailyReport }) => {
   const router = useRouter();

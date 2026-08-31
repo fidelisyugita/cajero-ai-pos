@@ -115,7 +115,7 @@ const ExpenseList = ({ startDate, endDate, searchQuery }: ExpenseListProps) => {
         estimatedItemSize={60}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <ExpenseRow item={item} onPress={() => handlePressItem(item)} />}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={ExpenseSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_expenses_title")}
@@ -132,6 +132,8 @@ const ExpenseList = ({ startDate, endDate, searchQuery }: ExpenseListProps) => {
     </View>
   );
 };
+
+const ExpenseSeparator = () => <View style={$.separator} />;
 
 const ExpenseRow = memo(({ item, onPress }: { item: PettyCash; onPress: () => void }) => {
   // Import TouchableOpacity if not present, but I can use View with onStartShouldSetResponder which is messier.

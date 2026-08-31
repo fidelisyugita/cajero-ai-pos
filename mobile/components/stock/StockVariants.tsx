@@ -247,7 +247,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
             }
           />
         )}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={VariantSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_variants_title") || "No Variants Found"}
@@ -284,6 +284,8 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
     </View>
   );
 };
+
+const VariantSeparator = () => <View style={$.separator} />;
 
 const VariantRow = ({
   item,

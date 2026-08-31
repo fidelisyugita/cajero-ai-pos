@@ -51,7 +51,7 @@ const CategoryFilter = ({ style, editable }: CategoryFilterProps) => {
         contentContainerStyle={$.content}
         data={dataWithAll}
         horizontal
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={CategorySeparator}
         keyExtractor={(item) => item.code}
         estimatedItemSize={50}
         renderItem={({ item }) => <CategoryItem editable={editable} item={item} />}
@@ -59,6 +59,8 @@ const CategoryFilter = ({ style, editable }: CategoryFilterProps) => {
     </Animated.View>
   );
 };
+
+const CategorySeparator = () => <View style={$.separator} />;
 
 interface CategoryItemProps {
   item: ProductCategory;

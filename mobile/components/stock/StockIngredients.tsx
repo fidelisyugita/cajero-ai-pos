@@ -157,7 +157,7 @@ const StockIngredients = ({ onIngredientPress, searchQuery = "" }: StockIngredie
             onStockUpdatePress={() => setStockUpdateTarget(item)}
           />
         )}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={IngredientSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_ingredients_title")}
@@ -189,6 +189,8 @@ const StockIngredients = ({ onIngredientPress, searchQuery = "" }: StockIngredie
     </View>
   );
 };
+
+const IngredientSeparator = () => <View style={$.separator} />;
 
 const StockRow = memo(
   ({
