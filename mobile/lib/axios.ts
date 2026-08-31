@@ -108,7 +108,7 @@ const handleUnauthorized = async (
 
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
+  (error: AxiosError) => {
     const originalRequest = error.config as
       | (InternalAxiosRequestConfig & { _retry?: boolean })
       | undefined;

@@ -31,7 +31,7 @@ const DeveloperSettings = () => {
               try {
                 // @ts-expect-error - invalid type definition for close
                 await db.$client.close();
-              } catch (_e) {
+              } catch {
                 // ignore
               }
 
@@ -45,7 +45,7 @@ const DeveloperSettings = () => {
                     setLoggedIn(false);
                     try {
                       DevSettings.reload();
-                    } catch (_e) {
+                    } catch {
                       router.replace("/(auth)/sign-in");
                     }
                   },

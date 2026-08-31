@@ -294,7 +294,7 @@ const AddProduct = () => {
     if (deletedVariantIds.length > 0) {
       await Promise.all(deletedVariantIds.map((id) => deleteVariant(id)));
     }
-    const variantPromises = storeVariants.map(async (variant) => {
+    const variantPromises = storeVariants.map((variant) => {
       const variantPayload = {
         productId,
         name: variant.name,

@@ -33,7 +33,7 @@ const cleanLocalDatabase = async (): Promise<void> => {
 const reloadOrRedirect = (): void => {
   try {
     DevSettings.reload();
-  } catch (_e) {
+  } catch {
     router.replace("/(auth)/sign-in");
   }
 };

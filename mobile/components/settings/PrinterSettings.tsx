@@ -106,7 +106,7 @@ const PrinterSettings = () => {
     }
   };
 
-  const handleTestPrint = async () => {
+  const handleTestPrint = () => {
     setPreviewData({
       title: "TEST PRINT",
       items: [

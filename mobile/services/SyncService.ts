@@ -462,7 +462,8 @@ export const SyncService = {
 
   async syncAll(): Promise<void> {
     if (syncAllPromise) {
-      return syncAllPromise;
+      await syncAllPromise;
+      return;
     }
 
     syncAllPromise = (async () => {
@@ -479,7 +480,7 @@ export const SyncService = {
       }
     })();
 
-    return syncAllPromise;
+    await syncAllPromise;
   },
 
   async getUnsyncedCount(): Promise<number> {

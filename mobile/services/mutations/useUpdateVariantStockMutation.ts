@@ -14,7 +14,7 @@ export const useUpdateVariantStockMutation = () => {
         reason,
       });
     },
-    onSuccess: async (_, _variables) => {
+    onSuccess: (_, _variables) => {
       // For now we just invalidate variants queries
       // If we had a local DB table for variants, we would update it here like in useUpdateProductStockMutation
 

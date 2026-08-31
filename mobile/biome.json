@@ -60,37 +60,67 @@
       },
       "correctness": {
         "preset": "recommended",
-        "noUnusedVariables": "error",
+        "noChildrenProp": "error",
+        "noConstantCondition": "error",
+        "noDuplicateVariableNames": "error",
+        "noEmptyPattern": "error",
+        "noNestedComponentDefinitions": "error",
+        "noRenderReturnValue": "error",
+        "noSelfAssign": "error",
+        "noStringCaseMismatch": "error",
+        "noUnsafeOptionalChaining": "error",
         "noUnusedImports": "error",
+        "noUnusedVariables": "error",
         "useExhaustiveDependencies": "error",
         "useHookAtTopLevel": "error",
         "useJsxKeyInIterable": "error"
       },
       "suspicious": {
         "preset": "recommended",
+        "noArrayIndexKey": "error",
+        "noAsyncPromiseExecutor": "error",
         "noConsole": {
           "level": "error",
           "options": {
             "allow": ["warn", "error"]
           }
         },
-        "noExplicitAny": "error",
-        "noArrayIndexKey": "error",
-        "noFocusedTests": "error",
+        "noConstantBinaryExpressions": "error",
+        "noControlCharactersInRegex": "error",
+        "noDeprecatedImports": "error",
         "noDoubleEquals": "error",
-        "noDuplicateJsxProps": "error"
+        "noDuplicateCase": "error",
+        "noDuplicateElseIf": "error",
+        "noDuplicateJsxProps": "error",
+        "noDuplicateObjectKeys": "error",
+        "noDuplicateParameters": "error",
+        "noEmptyInterface": "error",
+        "noExplicitAny": "error",
+        "noFocusedTests": "error",
+        "noMisleadingCharacterClass": "error",
+        "noNonNullAssertedOptionalChain": "error",
+        "noRedundantUseStrict": "error",
+        "noSelfCompare": "error",
+        "noTsIgnore": "error",
+        "noUnsafeNegation": "error",
+        "noUnusedExpressions": "error",
+        "noUselessEscapeInString": "error",
+        "noUselessRegexBackrefs": "error",
+        "useAwait": "error",
+        "useDeprecatedDate": "error"
       },
       "security": {
         "preset": "recommended",
-        "noDangerouslySetInnerHtml": "error"
+        "noDangerouslySetInnerHtml": "error",
+        "noDangerouslySetInnerHtmlWithChildren": "error",
+        "noGlobalEval": "error",
+        "noScriptUrl": "error"
       },
       "style": {
         "preset": "recommended",
-        "useImportType": "error",
-        "useExportType": "error",
+        "noInferrableTypes": "error",
+        "noNestedTernary": "error",
         "noNonNullAssertion": "error",
-        "useConst": "error",
-        "useSelfClosingElements": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -107,28 +137,54 @@
               }
             ]
           }
-        }
+        },
+        "noUselessElse": "error",
+        "useAsConstAssertion": "error",
+        "useConst": "error",
+        "useExportType": "error",
+        "useFragmentSyntax": "error",
+        "useImportType": "error",
+        "useSelfClosingElements": "error"
       },
       "performance": {
         "preset": "recommended",
-        "noDelete": "error",
         "noAccumulatingSpread": "error",
+        "noDelete": "error",
         "useTopLevelRegex": "error"
       },
       "complexity": {
         "preset": "recommended",
+        "noAdjacentSpacesInRegex": "error",
+        "noEmptyTypeParameters": "error",
         "noExcessiveCognitiveComplexity": {
           "level": "error",
           "options": {
             "maxAllowedComplexity": 10
           }
         },
-        "useSimplifiedLogicExpression": "error",
-        "noUselessTernary": "error",
+        "noExtraBooleanCast": "error",
+        "noUselessCatch": "error",
+        "noUselessCatchBinding": "error",
+        "noUselessEmptyExport": "error",
+        "noUselessEscapeInRegex": "error",
         "noUselessFragments": "error",
+        "noUselessRename": "error",
+        "noUselessReturn": "error",
+        "noUselessStringConcat": "error",
         "noUselessSwitchCase": "error",
+        "noUselessTernary": "error",
         "noUselessThisAlias": "error",
-        "useFlatMap": "error"
+        "noUselessTypeConstraint": "error",
+        "noUselessUndefinedInitialization": "error",
+        "useDateNow": "error",
+        "useFlatMap": "error",
+        "useOptionalChain": "error",
+        "useRegexLiterals": "error",
+        "useSimplifiedLogicExpression": "error"
+      },
+      "nursery": {
+        "noDrizzleDeleteWithoutWhere": "error",
+        "noDrizzleUpdateWithoutWhere": "error"
       }
     }
   },
@@ -171,7 +227,8 @@
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "off"
+            "noExplicitAny": "off",
+            "useAwait": "off"
           },
           "complexity": {
             "noExcessiveCognitiveComplexity": "off"

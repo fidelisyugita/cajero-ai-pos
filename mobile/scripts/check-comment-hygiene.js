@@ -351,13 +351,16 @@ function getScriptOptions(fileName) {
   const isJsx = fileName.endsWith(".jsx");
   const isTs = fileName.endsWith(".ts");
   const target = isTsx || isJsx ? ts.ScriptTarget.Latest : ts.ScriptTarget.ES2022;
-  const kind = isTsx
-    ? ts.ScriptKind.TSX
-    : isTs
-      ? ts.ScriptKind.TS
-      : isJsx
-        ? ts.ScriptKind.JSX
-        : ts.ScriptKind.JS;
+
+  let kind = ts.ScriptKind.JS;
+  if (isTsx) {
+    kind = ts.ScriptKind.TSX;
+  } else if (isTs) {
+    kind = ts.ScriptKind.TS;
+  } else if (isJsx) {
+    kind = ts.ScriptKind.JSX;
+  }
+
   return { target, kind };
 }
 
