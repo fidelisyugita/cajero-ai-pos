@@ -1,8 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import type { StyleProp, TextStyle } from "react-native";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, type StyleProp, Text, type TextStyle, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
 import Button from "@/components/ui/Button";

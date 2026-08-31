@@ -1,8 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import type { Control, Resolver } from "react-hook-form";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { type Control, Controller, type Resolver, useFieldArray, useForm } from "react-hook-form";
 import { ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";

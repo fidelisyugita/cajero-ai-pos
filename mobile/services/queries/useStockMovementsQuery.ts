@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import type { StockMovementPageResponse } from "../endpoints/getStockMovements";
-import { getStockMovements } from "../endpoints/getStockMovements";
+import {
+  getStockMovements,
+  type StockMovementPageResponse,
+} from "@/services/endpoints/getStockMovements";
 
 export const useStockMovementsQuery = (
   params: Record<string, string | number | boolean | undefined> = {},

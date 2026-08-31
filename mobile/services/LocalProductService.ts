@@ -1,5 +1,4 @@
-import type { SQL } from "drizzle-orm";
-import { and, eq, isNull, like } from "drizzle-orm";
+import { and, eq, isNull, like, type SQL } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { categories, products } from "@/db/schema";
 import { nowDate } from "@/utils/Date";

@@ -5,8 +5,7 @@ import {
   TouchableOpacity,
   type TouchableOpacityProps,
 } from "react-native";
-import type { Theme } from "react-native-unistyles";
-import { StyleSheet, UnistylesRuntime, withUnistyles } from "react-native-unistyles";
+import { StyleSheet, type Theme, UnistylesRuntime, withUnistyles } from "react-native-unistyles";
 import { vs } from "@/utils/Scale";
 
 const Indicator = withUnistyles(ActivityIndicator);

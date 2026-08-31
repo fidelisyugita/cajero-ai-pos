@@ -1,13 +1,6 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import type React from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { memo, type ReactElement } from "react";
 import { Alert, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
@@ -17,6 +10,11 @@ import { type DraftOrder, useDraftStore } from "@/store/useDraftStore";
 import { useOrderStore } from "@/store/useOrderStore";
 import { formatDayDate, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 const COLUMNS = [
   { label: "Time", flex: 1 },

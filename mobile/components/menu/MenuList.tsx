@@ -2,20 +2,9 @@ import {
   type FlashListProps,
   AnimatedFlashList as ShopifyAnimatedFlashList,
 } from "@shopify/flash-list";
-import type React from "react";
-
-interface FlashListRef {
-  scrollToOffset: (params: { offset: number; animated?: boolean }) => void;
-}
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number } & React.RefAttributes<FlashListRef>,
-) => React.ReactElement;
-
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { memo, useEffect, useRef } from "react";
+import { memo, type ReactElement, type RefAttributes, useEffect, useRef } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -31,6 +20,15 @@ import { useSyncStore } from "@/store/useSyncStore";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
 import MenuListSkeleton from "./MenuListSkeleton";
+
+interface FlashListRef {
+  scrollToOffset: (params: { offset: number; animated?: boolean }) => void;
+}
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number } & RefAttributes<FlashListRef>,
+) => ReactElement;
 
 interface MenuListProps {
   scrollHandler?: FlashListProps<Product>["onScroll"];
