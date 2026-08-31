@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Text, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
@@ -42,6 +42,8 @@ const expenseSchema = z.object({
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
+const renderUploadIcon = () => <UniIcUpload />;
+
 const AddExpense = () => {
   const router = useRouter();
   const { mutateAsync: addExpense } = useCreatePettyCashMutation();
@@ -57,7 +59,7 @@ const AddExpense = () => {
     defaultValues: {
       description: "",
       amount: 0,
-      isIncome: false, // Default to Expense
+      isIncome: false,
     },
   });
 
@@ -87,8 +89,10 @@ const AddExpense = () => {
       }
 
       await addExpense({
-        ...data,
         imageUrl: uploadedImageUrl,
+        description: data.description,
+        amount: data.amount,
+        isIncome: data.isIncome,
       });
 
       Alert.alert(t("success"), t("expense_added_success"), [
@@ -103,23 +107,17 @@ const AddExpense = () => {
 
   return (
     <View style={$.container}>
-      <Stack.Screen
-        options={{
-          header: () => (
-            <ScreenHeader
-              rightAction={
-                <Button
-                  isLoading={isSubmitting}
-                  onPress={handleSubmit(onSubmit)}
-                  size="md"
-                  title={t("save")}
-                  variant="primary"
-                />
-              }
-              title={t("add_expense_title")}
-            />
-          ),
-        }}
+      <ScreenHeader
+        rightAction={
+          <Button
+            isLoading={isSubmitting}
+            onPress={handleSubmit(onSubmit)}
+            size="md"
+            title={t("save")}
+            variant="primary"
+          />
+        }
+        title={t("add_expense_title")}
       />
 
       <KeyboardForm contentContainerStyle={$.scrollContent} style={$.flex}>
@@ -141,7 +139,7 @@ const AddExpense = () => {
                   <View style={$.uploadRow}>
                     <Text style={$.uploadText}>{t("upload_receipt_or_select_image")}</Text>
                     <Button
-                      leftIcon={() => <UniIcUpload />}
+                      leftIcon={renderUploadIcon}
                       onPress={() => handleUploadImagePress(value)}
                       size="md"
                       title={t("upload")}

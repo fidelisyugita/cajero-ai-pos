@@ -13,6 +13,20 @@ import type { Ingredient } from "@/services/types/Ingredient";
 
 type Tab = "Ingredients" | "Products" | "Variants";
 
+const renderTabContent = (
+  activeTab: Tab,
+  searchQuery: string,
+  onIngredientPress: (ingredient: Ingredient) => void,
+) => {
+  if (activeTab === "Ingredients") {
+    return <StockIngredients onIngredientPress={onIngredientPress} searchQuery={searchQuery} />;
+  }
+  if (activeTab === "Products") {
+    return <StockProducts searchQuery={searchQuery} />;
+  }
+  return <StockVariants searchQuery={searchQuery} />;
+};
+
 const StockScreen = () => {
   const [activeTab, setActiveTab] = useState<Tab>("Ingredients");
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
@@ -31,7 +45,6 @@ const StockScreen = () => {
             [
               { label: t("ingredients"), value: "Ingredients" },
               { label: t("products"), value: "Products" },
-              // { label: t("variants"), value: "Variants" }, // TODO
             ] as { label: string; value: Tab }[]
           }
           value={activeTab}
@@ -39,13 +52,7 @@ const StockScreen = () => {
         />
       </Header>
       <View style={$.content}>
-        {activeTab === "Ingredients" ? (
-          <StockIngredients onIngredientPress={setSelectedIngredient} searchQuery={searchQuery} />
-        ) : activeTab === "Products" ? (
-          <StockProducts searchQuery={searchQuery} />
-        ) : (
-          <StockVariants searchQuery={searchQuery} />
-        )}
+        {renderTabContent(activeTab, searchQuery, setSelectedIngredient)}
       </View>
       {selectedIngredient && (
         <StockIngredientHistory

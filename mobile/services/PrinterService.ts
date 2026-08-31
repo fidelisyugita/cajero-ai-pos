@@ -116,11 +116,12 @@ class PrinterService {
         `  [PrinterService] Char: ${char.uuid} | W_Resp: ${char.isWritableWithResponse} | W_NoResp: ${char.isWritableWithoutResponse}`,
       );
 
-      const method: "withResponse" | "withoutResponse" | null = char.isWritableWithResponse
-        ? "withResponse"
-        : char.isWritableWithoutResponse
-          ? "withoutResponse"
-          : null;
+      let method: "withResponse" | "withoutResponse" | null = null;
+      if (char.isWritableWithResponse) {
+        method = "withResponse";
+      } else if (char.isWritableWithoutResponse) {
+        method = "withoutResponse";
+      }
 
       if (method) {
         return {
@@ -273,7 +274,6 @@ class PrinterService {
       const chunk = buffer.subarray(i, i + CHUNK_SIZE);
       // Force re-wrap to ensure toString('base64') works correctly in RN environment
       const chunkBase64 = Buffer.from(chunk).toString("base64");
-      // console.log(`[PrinterService] Writing chunk (${i}/${buffer.length}): ${chunkBase64}`);
 
       try {
         if (this.writeMethod === "withResponse") {
@@ -306,7 +306,6 @@ class PrinterService {
     const trimmed = text.substring(0, this.WIDTH);
     const padding = Math.max(0, this.WIDTH - trimmed.length);
     const leftPad = Math.floor(padding / 2);
-    // return ' '.repeat(leftPad) + trimmed; // Right side handled by newline
     // Actually better to fill whole line to avoid printer drift? No, newline is fine.
     return " ".repeat(leftPad) + trimmed;
   }

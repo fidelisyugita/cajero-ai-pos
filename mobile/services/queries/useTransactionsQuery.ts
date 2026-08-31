@@ -20,7 +20,7 @@ export const useTransactionsQuery = (params: GetTransactionsParams = {}) => {
         totalElements: 0, // Not calculated
         totalPages: 100, // Dummy
         size: transactions.length,
-        number: pageParam as number,
+        number: pageParam,
       };
     },
     initialPageParam: 0,

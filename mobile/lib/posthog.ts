@@ -1,5 +1,4 @@
-import type { PostHogCustomStorage } from "posthog-react-native";
-import PostHog from "posthog-react-native";
+import PostHog, { type PostHogCustomStorage } from "posthog-react-native";
 import { createMMKV } from "react-native-mmkv";
 import type {
   AnalyticsEventMap,

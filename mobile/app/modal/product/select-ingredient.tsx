@@ -136,12 +136,14 @@ const AddIngredient = () => {
   );
 };
 
+const ListSeparator = () => <View style={$.listSeparator} />;
+
 const IngredientList = () => {
   const { data: ingredients } = useIngredientsQuery();
   return (
     <FlashList
       data={ingredients}
-      ItemSeparatorComponent={() => <View style={$.listSeparator} />}
+      ItemSeparatorComponent={ListSeparator}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={<Text style={$.listTitle}>{t("list_of_ingredient")}</Text>}
       ListHeaderComponentStyle={$.listHeader}

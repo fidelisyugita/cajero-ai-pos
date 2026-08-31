@@ -10,9 +10,6 @@ import { vs } from "@/utils/Scale";
 import { LIST_SIDEBAR_ITEMS } from "./Sidebar.cons";
 import SidebarItem from "./SidebarItem";
 
-// import { Image } from "expo-image";
-// import ALogo from "@/assets/images/logo.webp";
-
 const UniIcSignOut = withUnistyles(IcSignOut, (theme) => ({
   color: theme.colors.error[400],
 }));
@@ -28,11 +25,6 @@ const Sidebar = () => {
   return (
     <View style={$.container}>
       <Logo height={vs(80)} width={vs(80)} />
-      {/* <Image
-				source={ALogo}
-				style={{ width: vs(100), height: vs(100) }}
-				contentFit="contain"
-			/> */}
       <ScrollView
         bounces={false}
         contentContainerStyle={$.scrollContent}

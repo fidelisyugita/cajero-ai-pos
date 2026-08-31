@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { TouchableOpacity, type TouchableOpacityProps } from "react-native";
-import type { Theme } from "react-native-unistyles";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, type Theme } from "react-native-unistyles";
 import { vs } from "@/utils/Scale";
 
 export interface IconButtonProps extends TouchableOpacityProps {

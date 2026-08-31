@@ -58,24 +58,6 @@ const InitialLayout = () => {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="+not-found" />
       <Stack.Screen
-        name="product/add"
-        options={{
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
-        name="product/manage-variants"
-        options={{
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
-        name="expense/add"
-        options={{
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
         name="modal/product/upload-image"
         options={{ presentation: "transparentModal", animation: "fade" }}
       />

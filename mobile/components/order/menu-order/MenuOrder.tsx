@@ -20,6 +20,10 @@ const UniIcTable = withUnistyles(IcTable, (theme) => ({
   color: theme.colors.neutral[600],
 }));
 
+const renderArrowCircleRightIcon = (size: number, color: string) => (
+  <IcArrowCircleRight color={color} height={size} width={size} />
+);
+
 const MenuOrder = () => {
   const today = formatFullDate();
   const router = useRouter();
@@ -64,9 +68,7 @@ const MenuOrder = () => {
       <View style={$.footer}>
         <Button
           disabled={!isValid}
-          leftIcon={(size, color) => (
-            <IcArrowCircleRight color={color} height={size} width={size} />
-          )}
+          leftIcon={renderArrowCircleRightIcon}
           size="md"
           title={t("proceed")}
           variant="primary"

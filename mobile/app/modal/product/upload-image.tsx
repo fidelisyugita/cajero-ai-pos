@@ -42,6 +42,10 @@ const getImagePlaceholderColor = (hexColor: string) => {
   return `https://placehold.co/16x9/${hexColor}/${hexColor}`;
 };
 
+const renderUploadIcon = (size: number, color: string) => (
+  <IcUpload color={color} height={size} width={size} />
+);
+
 const UploadImageModal = () => {
   const router = useRouter();
   const { title } = useLocalSearchParams<{ title: string }>();
@@ -76,7 +80,7 @@ const UploadImageModal = () => {
           <View style={$.uploadImage}>
             <Text style={$.uploadImageText}>{t("upload_image")}</Text>
             <Button
-              leftIcon={(size, color) => <IcUpload color={color} height={size} width={size} />}
+              leftIcon={renderUploadIcon}
               onPress={chooseFile}
               size="md"
               title={t("choose_file")}

@@ -1,13 +1,6 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import React, { useState } from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { memo, type ReactElement, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -21,6 +14,11 @@ import { useProductsQuery } from "@/services/queries/useProductsQuery";
 import type { Product } from "@/services/types/Product";
 import StockProductHistory from "./StockProductHistory";
 import StockUpdateModal from "./StockUpdateModal";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 const COLUMNS = [
   { label: "Product Name", flex: 2 },
@@ -49,7 +47,7 @@ const StockProducts = ({ searchQuery = "" }: StockProductsProps) => {
 
   const products = productsData?.content || [];
 
-  const sortedProducts = React.useMemo(() => {
+  const sortedProducts = useMemo(() => {
     return [...products].sort((a, b) => {
       const aActive = !a.deletedAt;
       const bActive = !b.deletedAt;
@@ -144,7 +142,7 @@ const StockProducts = ({ searchQuery = "" }: StockProductsProps) => {
             onStockUpdatePress={() => setEditingProduct(item)}
           />
         )}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={ProductSeparator}
         ListEmptyComponent={
           <EmptyState title={t("empty_products_title")} subtitle={t("empty_products_subtitle")} />
         }
@@ -165,6 +163,8 @@ const StockProducts = ({ searchQuery = "" }: StockProductsProps) => {
     </View>
   );
 };
+
+const ProductSeparator = () => <View style={$.separator} />;
 
 const StockRow = memo(
   ({

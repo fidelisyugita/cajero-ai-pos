@@ -15,13 +15,13 @@ import { vs } from "@/utils/Scale";
 
 const employeeSchema = z.object({
   name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email"),
+  email: z.email("Invalid email"),
   roleCode: z.string().min(1, "Role is required"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(
-      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
       "Password must contain at least one uppercase, one lowercase, and one number",
     ),
   phone: z.string().optional(),

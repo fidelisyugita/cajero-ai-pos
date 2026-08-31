@@ -1,13 +1,6 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import type React from "react";
-import { useState } from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
+import { type ReactElement, useState } from "react";
 import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
@@ -21,6 +14,11 @@ import {
 } from "@/store/useOrderStore";
 import { formatCurrency } from "@/utils/Format";
 import OrderItem from "./OrderItem";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 interface CurvedShapeProps {
   rotate?: number;

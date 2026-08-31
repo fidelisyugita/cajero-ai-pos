@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Text, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { z } from "zod";
 import IcAddImage from "@/assets/icons/add-image.svg";
-import IcInfo from "@/assets/icons/info.svg";
 import IcUpload from "@/assets/icons/upload.svg";
 import IcX from "@/assets/icons/x.svg";
 import Button from "@/components/ui/Button";
@@ -51,12 +50,6 @@ const UniIcUpload = withUnistyles(IcUpload, (theme) => ({
   height: vs(20),
 }));
 
-const _UniIcInfo = withUnistyles(IcInfo, (theme) => ({
-  color: theme.colors.neutral[600],
-  width: vs(20),
-  height: vs(20),
-}));
-
 const productSchema = z.object({
   imageUrl: z.url("Invalid image URL").optional(),
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -85,6 +78,8 @@ const productSchema = z.object({
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
+
+const renderUploadIcon = () => <UniIcUpload />;
 
 const AddProduct = () => {
   const router = useRouter();
@@ -182,16 +177,6 @@ const AddProduct = () => {
         }));
         setValue("productIngredients", ingredients);
       }
-
-      // Sync ingredients to store
-      // ingredients.forEach((ing) => {
-      // 	useIngredientStore.getState().selectIngredient({
-      // 		id: ing.ingredientId,
-      // 		name: ing.name,
-      // 		quantityNeeded: ing.quantityNeeded,
-      // 		measureUnitName: ing.measureUnitCode,
-      // 	} as any);
-      // });
     }
   }, [productToEdit, categories, setValue, setImageUri]);
 
@@ -507,45 +492,39 @@ const AddProduct = () => {
 
   return (
     <View style={$.container}>
-      <Stack.Screen
-        options={{
-          header: () => (
-            <ScreenHeader
-              rightAction={
-                <View style={$.headerActions}>
-                  {isEditing ? (
-                    <Button
-                      disabled={disableAction}
-                      isLoading={isSubmitting}
-                      onPress={productToEdit?.deletedAt ? handleRestore : handleDelete}
-                      size="md"
-                      title={productToEdit?.deletedAt ? t("unhide_product") : t("delete_product")}
-                      variant="secondary"
-                    />
-                  ) : (
-                    <Button
-                      disabled={disableAction}
-                      isLoading={isSubmitting}
-                      onPress={handleSubmit(onSaveAndAddMore)}
-                      size="md"
-                      title={t("save_and_add_more")}
-                      variant="secondary"
-                    />
-                  )}
-                  <Button
-                    disabled={disableAction}
-                    isLoading={isSubmitting}
-                    onPress={handleSubmit(onSave)}
-                    size="md"
-                    title={t("save")}
-                    variant="primary"
-                  />
-                </View>
-              }
-              title={isEditing ? t("edit_product") : t("add_product")}
+      <ScreenHeader
+        rightAction={
+          <View style={$.headerActions}>
+            {isEditing ? (
+              <Button
+                disabled={disableAction}
+                isLoading={isSubmitting}
+                onPress={productToEdit?.deletedAt ? handleRestore : handleDelete}
+                size="md"
+                title={productToEdit?.deletedAt ? t("unhide_product") : t("delete_product")}
+                variant="secondary"
+              />
+            ) : (
+              <Button
+                disabled={disableAction}
+                isLoading={isSubmitting}
+                onPress={handleSubmit(onSaveAndAddMore)}
+                size="md"
+                title={t("save_and_add_more")}
+                variant="secondary"
+              />
+            )}
+            <Button
+              disabled={disableAction}
+              isLoading={isSubmitting}
+              onPress={handleSubmit(onSave)}
+              size="md"
+              title={t("save")}
+              variant="primary"
             />
-          ),
-        }}
+          </View>
+        }
+        title={isEditing ? t("edit_product") : t("add_product")}
       />
 
       <KeyboardForm contentContainerStyle={$.scrollContent} style={$.flex}>
@@ -567,7 +546,7 @@ const AddProduct = () => {
                     <Text style={$.uploadText}>{t("upload_image_or_select_color")}</Text>
                     <Button
                       disabled={disableAction}
-                      leftIcon={() => <UniIcUpload />}
+                      leftIcon={renderUploadIcon}
                       onPress={() => handleUploadImagePress(value)}
                       size="md"
                       title={t("upload")}
@@ -612,28 +591,6 @@ const AddProduct = () => {
               />
             </View>
           </FormSectionCard>
-
-          {/* <View style={$.stockRow}>
-						<View style={$.stockLabelBox}>
-							<Text style={$.stockTitle}>
-								Does this menu require stock management?
-							</Text>
-							<View style={$.stockDescRow}>
-								<View style={$.infoIconBox}>
-									<UniIcInfo />
-								</View>
-								<Text style={$.stockDescText}>
-									When enabled, stock management is required before adding the
-									menu item to orders. If the stock reaches 0, the menu item
-									cannot be ordered.
-								</Text>
-							</View>
-						</View>
-						<Switch
-							onValueChange={setIsStockManagementEnabled}
-							value={isStockManagementEnabled}
-						/>
-					</View> */}
         </View>
 
         <View style={$.section}>
@@ -777,7 +734,6 @@ const AddProduct = () => {
                   error={error?.message}
                   keyboardType="numeric"
                   label={`${t("tax")} (%)`}
-                  // maxLength={5}
                   maxValue={30}
                   minValue={0}
                   // Input controls the RATE (%), not the amount directly
@@ -883,36 +839,6 @@ const $ = StyleSheet.create((theme) => ({
     gap: theme.spacing.xs,
   },
   uploadText: {
-    ...theme.typography.labelMd,
-    color: theme.colors.neutral[600],
-  },
-  stockRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: theme.spacing.md,
-  },
-  stockLabelBox: {
-    gap: theme.spacing.md,
-    flexShrink: 1,
-  },
-  stockTitle: {
-    ...theme.typography.heading4,
-    color: theme.colors.neutral[700],
-    flexShrink: 1,
-  },
-  stockDescRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: theme.spacing.sm,
-    flexShrink: 1,
-  },
-  infoIconBox: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: vs(2),
-  },
-  stockDescText: {
     ...theme.typography.labelMd,
     color: theme.colors.neutral[600],
   },

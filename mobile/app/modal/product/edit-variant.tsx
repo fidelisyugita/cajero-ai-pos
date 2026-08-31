@@ -1,8 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import type { Control, Resolver } from "react-hook-form";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { type Control, Controller, type Resolver, useFieldArray, useForm } from "react-hook-form";
 import { ScrollView, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { z } from "zod";
@@ -50,7 +49,9 @@ const variantSchema = z.object({
 
 type VariantFormData = z.infer<typeof variantSchema>;
 
-const createTempId = () => Math.random().toString(36).substring(2, 9);
+const renderPlusIcon = () => <IcPlus color="white" />;
+
+const createTempId = () => `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
 const EditVariantModal = () => {
   const router = useRouter();
@@ -178,7 +179,7 @@ const EditVariantModal = () => {
               />
             ))}
             <Button
-              leftIcon={() => <IcPlus color="white" />}
+              leftIcon={renderPlusIcon}
               onPress={() =>
                 append({
                   id: createTempId(),
@@ -316,7 +317,6 @@ const VariantOptionItem = ({
                 name={`options.${index}.ingredients.${ingIndex}.ingredientId`}
                 render={({ field: { onChange, value } }) => (
                   <Select
-                    // label={t("ingredient")}
                     options={ingredientOptions}
                     value={value}
                     onSelect={(val) => {
@@ -347,12 +347,11 @@ const VariantOptionItem = ({
                 onPress={() => removeIngredient(ingIndex)}
                 size="sm"
                 variant="secondary-warning"
-                // style={{ marginTop: 28 }} // Align with inputs
               />
             </View>
           ))}
           <Button
-            leftIcon={() => <IcPlus color="white" />}
+            leftIcon={renderPlusIcon}
             onPress={() =>
               append({ ingredientId: "", name: "", quantityNeeded: 0, measureUnit: "" })
             }

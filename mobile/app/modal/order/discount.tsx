@@ -26,7 +26,6 @@ const DiscountModal = () => {
   // We should subtract item discounts to get the true "subtotal before global discount"
   const subtotal = selectSubtotal(items);
   const totalItemDiscounts = items.reduce((sum, item) => sum + (item.discount || 0), 0);
-  // const currentTotal = subtotal - totalItemDiscounts;
   const maxAmount = subtotal * (maxDiscountPercent / 100) - totalItemDiscounts;
 
   const [value, setValue] = useState(discount > 0 ? String(discount) : "");

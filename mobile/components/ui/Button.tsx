@@ -5,8 +5,7 @@ import {
   TouchableOpacity,
   type TouchableOpacityProps,
 } from "react-native";
-import type { Theme } from "react-native-unistyles";
-import { StyleSheet, UnistylesRuntime, withUnistyles } from "react-native-unistyles";
+import { StyleSheet, type Theme, UnistylesRuntime, withUnistyles } from "react-native-unistyles";
 import { vs } from "@/utils/Scale";
 
 const Indicator = withUnistyles(ActivityIndicator);
@@ -20,6 +19,8 @@ export type ButtonVariant =
   | "warning"
   | "positive";
 
+export type ButtonInteractionState = "default" | "pressed" | "disabled";
+
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends TouchableOpacityProps {
@@ -32,7 +33,7 @@ export interface ButtonProps extends TouchableOpacityProps {
   right?: React.ReactNode;
 }
 
-const getButtonVariants = (theme: Theme, state: "default" | "pressed" | "disabled") => {
+const getButtonVariants = (theme: Theme, state: ButtonInteractionState) => {
   const { colors } = theme;
 
   const stateStyles = {
@@ -123,7 +124,7 @@ const buttonIconSizes = {
   sm: vs(16),
 };
 
-const getButtonTitleStyles = (state: "default" | "pressed" | "disabled") => {
+const getButtonTitleStyles = (state: ButtonInteractionState) => {
   const theme = UnistylesRuntime.getTheme();
   const { colors } = theme;
 
@@ -161,7 +162,7 @@ const getButtonTitleStyles = (state: "default" | "pressed" | "disabled") => {
 };
 
 const stylesheet = StyleSheet.create((theme) => ({
-  container: (state: "default" | "pressed" | "disabled" = "default") => ({
+  container: (state: ButtonInteractionState = "default") => ({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
@@ -184,7 +185,7 @@ const stylesheet = StyleSheet.create((theme) => ({
       },
     ],
   }),
-  title: (state: "default" | "pressed" | "disabled" = "default") => ({
+  title: (state: ButtonInteractionState = "default") => ({
     variants: {
       variant: getButtonTitleStyles(state),
       size: {
@@ -195,6 +196,31 @@ const stylesheet = StyleSheet.create((theme) => ({
     },
   }),
 }));
+
+const getButtonState = (disabled: boolean, pressed: boolean): ButtonInteractionState => {
+  if (disabled) {
+    return "disabled";
+  }
+  if (pressed) {
+    return "pressed";
+  }
+  return "default";
+};
+
+const renderLeadingVisual = (
+  isLoading: boolean,
+  leftIcon: ButtonProps["leftIcon"],
+  size: ButtonSize,
+  color: string,
+) => {
+  if (isLoading) {
+    return <Indicator size="small" uniProps={() => ({ color })} />;
+  }
+  if (leftIcon) {
+    return leftIcon(buttonIconSizes[size], color);
+  }
+  return null;
+};
 
 const Button = ({
   variant = "primary",
@@ -213,7 +239,7 @@ const Button = ({
 
   stylesheet.useVariants({ variant, size });
 
-  const state = disabled ? "disabled" : pressed ? "pressed" : "default";
+  const state = getButtonState(disabled, pressed);
 
   const color =
     getButtonTitleStyles(state)[variant as keyof ReturnType<typeof getButtonTitleStyles>]?.color ||
@@ -229,11 +255,7 @@ const Button = ({
       style={[stylesheet.container(state), style]}
       {...rest}
     >
-      {isLoading ? (
-        <Indicator size="small" uniProps={() => ({ color })} />
-      ) : leftIcon ? (
-        leftIcon(buttonIconSizes[size], color)
-      ) : null}
+      {renderLeadingVisual(isLoading, leftIcon, size, color)}
 
       <Text adjustsFontSizeToFit numberOfLines={1} style={stylesheet.title(state)}>
         {title}

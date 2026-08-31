@@ -1,13 +1,15 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import type { StockMovementPageResponse } from "../endpoints/getStockMovements";
-import { getStockMovements } from "../endpoints/getStockMovements";
+import {
+  getStockMovements,
+  type StockMovementPageResponse,
+} from "@/services/endpoints/getStockMovements";
 
 export const useStockMovementsQuery = (
   params: Record<string, string | number | boolean | undefined> = {},
 ) => {
   return useInfiniteQuery({
     queryKey: ["stock-movements", params],
-    queryFn: ({ pageParam = 0 }) => getStockMovements({ ...params, page: pageParam as number }),
+    queryFn: ({ pageParam = 0 }) => getStockMovements({ ...params, page: pageParam }),
     initialPageParam: 0,
     getNextPageParam: (lastPage: StockMovementPageResponse) => {
       if (lastPage.last) return undefined;

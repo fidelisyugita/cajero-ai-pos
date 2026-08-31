@@ -17,7 +17,7 @@ export function formatCurrency(amount: number): string {
 
 export function parseCurrency(formattedValue: string): number {
   const numericString = formattedValue
-    .replace(/[^\d]/g, "") // Remove all non-digit characters
+    .replace(/\D/g, "") // Remove all non-digit characters
     .trim();
 
   if (!numericString) {
@@ -38,7 +38,7 @@ export function formatNumber(amount: number): string {
 
 export function parseNumber(formattedValue: string): number {
   const numericString = formattedValue
-    .replace(/[^0-9,]/g, "") // Remove all except digits and comma
+    .replace(/[^\d,]/g, "") // Remove all except digits and comma
     .replace(/\./g, "") // Remove thousands separator
     .replace(",", "."); // Replace decimal comma with dot
 

@@ -16,6 +16,18 @@ const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
   props: FlashListProps<T> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
+const OUT_MOVEMENT_TYPES = ["OUT", "SOLD", "WASTE", "EXPIRED"];
+
+const getStockMovementColor = (type: string): string => {
+  if (type === "IN") {
+    return "green";
+  }
+  if (OUT_MOVEMENT_TYPES.includes(type)) {
+    return "red";
+  }
+  return "black";
+};
+
 interface StockVariantHistoryProps {
   variant: Variant;
   option: VariantOption;
@@ -72,12 +84,7 @@ const StockVariantHistory = ({ variant, option, onClose }: StockVariantHistoryPr
                     style={[
                       $.cell,
                       {
-                        color:
-                          item.type === "IN"
-                            ? "green"
-                            : ["OUT", "SOLD", "WASTE", "EXPIRED"].includes(item.type)
-                              ? "red"
-                              : "black",
+                        color: getStockMovementColor(item.type),
                       },
                     ]}
                   >

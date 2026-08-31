@@ -1,13 +1,6 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import type React from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { memo, type ReactElement } from "react";
 import { Alert, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
@@ -17,6 +10,11 @@ import { type DraftOrder, useDraftStore } from "@/store/useDraftStore";
 import { useOrderStore } from "@/store/useOrderStore";
 import { formatDayDate, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 const COLUMNS = [
   { label: "Time", flex: 1 },
@@ -61,7 +59,7 @@ const DraftList = ({ searchQuery = "" }: DraftListProps) => {
         estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <DraftRow item={item} />}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={DraftSeparator}
         ListEmptyComponent={
           <EmptyState title={t("empty_drafts_title")} subtitle={t("empty_drafts_subtitle")} />
         }
@@ -69,6 +67,8 @@ const DraftList = ({ searchQuery = "" }: DraftListProps) => {
     </View>
   );
 };
+
+const DraftSeparator = () => <View style={$.separator} />;
 
 const DraftRow = memo(({ item }: { item: DraftOrder }) => {
   const router = useRouter();

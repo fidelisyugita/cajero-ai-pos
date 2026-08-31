@@ -11,6 +11,14 @@ import { t } from "@/services/i18n";
 import { useAuthStore } from "@/store/useAuthStore";
 import { type Dayjs, formatApiDate, formatDateRange, toDayjs } from "@/utils/Date";
 
+const renderCalendarIcon = (size: number, color: string) => (
+  <Feather name="calendar" size={size} color={color} />
+);
+
+const renderPlusIcon = (size: number, color: string) => (
+  <Feather name="plus" size={size} color={color} />
+);
+
 const ExpenseScreen = () => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -22,21 +30,14 @@ const ExpenseScreen = () => {
   });
 
   const [showPicker, setShowPicker] = useState(false);
-  const [searchQuery, _setSearchQuery] = useState("");
 
   return (
     <View style={$.container}>
       <Header>
-        {/* // TODO: currently not work due to API not support
-                <SearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder={`Search Expenses`}
-                /> */}
         <Button
           variant="secondary"
           title={formatDateRange(dateRange.startDate, dateRange.endDate)}
-          rightIcon={(size, color) => <Feather name="calendar" size={size} color={color} />}
+          rightIcon={renderCalendarIcon}
           onPress={() => setShowPicker(true)}
           size="sm"
         />
@@ -45,7 +46,7 @@ const ExpenseScreen = () => {
           size="sm"
           title={t("add_expense_title")}
           variant="primary"
-          leftIcon={(size, color) => <Feather name="plus" size={size} color={color} />}
+          leftIcon={renderPlusIcon}
         />
       </Header>
 
@@ -62,7 +63,6 @@ const ExpenseScreen = () => {
         <ExpenseList
           startDate={formatApiDate(dateRange.startDate)}
           endDate={formatApiDate(dateRange.endDate)}
-          searchQuery={searchQuery}
         />
       </View>
     </View>

@@ -1,11 +1,5 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import React, { useState } from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
+import { type ReactElement, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -22,6 +16,11 @@ import type { Variant, VariantOption } from "@/services/types/Variant";
 import SaveVariantOptionModal from "./SaveVariantOptionModal";
 import StockUpdateModal from "./StockUpdateModal";
 import StockVariantHistory from "./StockVariantHistory";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 const COLUMNS = [
   { label: "Product Name", flex: 2 },
@@ -72,7 +71,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
   const updateVariantStockMutation = useUpdateVariantStockMutation();
   const updateVariantMutation = useUpdateVariantMutation();
 
-  const flattenedVariants: FlattenedVariant[] = React.useMemo(() => {
+  const flattenedVariants: FlattenedVariant[] = useMemo(() => {
     if (!(variants && productsData)) return [];
 
     const productMap = new Map(productsData.content.map((p) => [p.id, p]));
@@ -248,7 +247,7 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
             }
           />
         )}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={VariantSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_variants_title") || "No Variants Found"}
@@ -285,6 +284,8 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
     </View>
   );
 };
+
+const VariantSeparator = () => <View style={$.separator} />;
 
 const VariantRow = ({
   item,
@@ -328,13 +329,6 @@ const VariantRow = ({
         <StatusBadge variant={statusVariant} label={status} />
       </View>
       <View style={[$.actionContainer, { flex: COLUMNS[4].flex }]}>
-        {/* TODO: Update API for this */}
-        {/* <Button
-          size="sm"
-          title="Edit"
-          variant="neutral"
-          onPress={onEditPress}
-        /> */}
         <Button size="sm" title="History" variant="neutral" onPress={onHistoryPress} />
       </View>
     </View>

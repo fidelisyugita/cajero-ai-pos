@@ -23,10 +23,10 @@ interface MeasureUnitItemProps {
 
 const SelectMeasureUnitModal = () => {
   const router = useRouter();
-  const { code, name } = useLocalSearchParams() as {
-    code: string;
-    name: string;
-  };
+  const { code, name } = useLocalSearchParams<{
+    code?: string;
+    name?: string;
+  }>();
 
   const { hasSelected, saveMeasureUnit, reset } = useMeasureUnitStore(
     useShallow((s) => ({
@@ -137,6 +137,8 @@ const AddMeasureUnit = () => {
   );
 };
 
+const ListSeparator = () => <View style={$.listSeparator} />;
+
 const MeasureUnitList = () => {
   const { data: measureUnits } = useMeasureUnitsQuery();
 
@@ -144,7 +146,7 @@ const MeasureUnitList = () => {
     <View style={$.flex}>
       <FlashList
         data={measureUnits}
-        ItemSeparatorComponent={() => <View style={$.listSeparator} />}
+        ItemSeparatorComponent={ListSeparator}
         keyExtractor={(item) => item.code}
         ListHeaderComponent={<Text style={$.listTitle}>{t("list_of_measure_unit")}</Text>}
         ListHeaderComponentStyle={$.listHeader}
@@ -174,7 +176,6 @@ const MeasureUnitItem = memo(({ item }: MeasureUnitItemProps) => {
           {item.name} ({item.code})
         </Text>
       </TouchableOpacity>
-      {/* <IconButton Icon={IcX} size="md" variant="neutral-no-stroke" /> */}
     </View>
   );
 });
@@ -182,7 +183,6 @@ MeasureUnitItem.displayName = "MeasureUnitItem";
 
 const $ = StyleSheet.create((theme) => ({
   modal: {
-    // aspectRatio: 649 / 874,
     width: vs(649),
     height: "90%",
   },

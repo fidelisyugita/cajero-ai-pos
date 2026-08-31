@@ -1,8 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import type { StyleProp, TextStyle } from "react-native";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, type StyleProp, Text, type TextStyle, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
 import Button from "@/components/ui/Button";
@@ -15,15 +14,23 @@ import type { TransactionProductResponse, TransactionResponse } from "@/services
 import { formatCustomDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
+const renderRotateCcwIcon = (size: number, color: string) => (
+  <Feather name="rotate-ccw" size={size} color={color} />
+);
+
+const renderPrinterIcon = (size: number, color: string) => (
+  <Feather name="printer" size={size} color={color} />
+);
+
 const ReceiptDetailScreen = () => {
-  const params = useLocalSearchParams();
+  const { transaction: transactionParam } = useLocalSearchParams<{ transaction?: string }>();
   const router = useRouter();
 
   // Parse transaction from params if available, otherwise we might fail or need fallback (but user insisted on no fetch)
   let transaction: TransactionResponse | null = null;
   try {
-    if (params.transaction) {
-      transaction = JSON.parse(params.transaction as string) as TransactionResponse;
+    if (transactionParam) {
+      transaction = JSON.parse(transactionParam) as TransactionResponse;
 
       // Ensure selectedVariants is always an array
       if (transaction?.transactionProduct) {
@@ -114,7 +121,7 @@ const ReceiptDetailScreen = () => {
             <View style={$.cardContent}>
               {transactionProduct?.map((item: TransactionProductResponse) => {
                 const itemVariants = Array.isArray(item.selectedVariants)
-                  ? (item.selectedVariants as SelectedVariant[])
+                  ? item.selectedVariants
                   : [];
                 const itemName = item.name || item.productName || "Item";
                 const itemBasePrice = item.sellingPrice ?? item.price ?? 0;
@@ -156,7 +163,7 @@ const ReceiptDetailScreen = () => {
                 value={formatCurrency(
                   transactionProduct?.reduce((sum: number, item: TransactionProductResponse) => {
                     const itemVariants = Array.isArray(item.selectedVariants)
-                      ? (item.selectedVariants as SelectedVariant[])
+                      ? item.selectedVariants
                       : [];
                     const variantTotal = itemVariants.reduce(
                       (s: number, v: SelectedVariant) => s + (v.price || 0),
@@ -218,11 +225,11 @@ const ReceiptDetailScreen = () => {
           <Button
             variant="secondary"
             title={t("refund")}
-            disabled={true} // TODO: implement refund
+            disabled={true} // Refund workflow is not yet supported by the backend API
             onPress={() => router.back()}
             style={$.footerButton}
             size="lg"
-            leftIcon={(size, color) => <Feather name="rotate-ccw" size={size} color={color} />}
+            leftIcon={renderRotateCcwIcon}
           />
         )}
         <Button
@@ -231,9 +238,7 @@ const ReceiptDetailScreen = () => {
           onPress={() => {
             if (!transactionProduct) return;
             const receiptItems = transactionProduct.map((p: TransactionProductResponse) => {
-              const pVariants = Array.isArray(p.selectedVariants)
-                ? (p.selectedVariants as SelectedVariant[])
-                : [];
+              const pVariants = Array.isArray(p.selectedVariants) ? p.selectedVariants : [];
               const pName = p.name || p.productName || "Item";
               const pPrice = p.sellingPrice ?? p.price ?? 0;
               return {
@@ -255,7 +260,7 @@ const ReceiptDetailScreen = () => {
             const subtotal = transactionProduct.reduce(
               (sum: number, item: TransactionProductResponse) => {
                 const itemVariants = Array.isArray(item.selectedVariants)
-                  ? (item.selectedVariants as SelectedVariant[])
+                  ? item.selectedVariants
                   : [];
                 const variantTotal = itemVariants.reduce(
                   (s: number, v: SelectedVariant) => s + (v.price || 0),
@@ -282,7 +287,7 @@ const ReceiptDetailScreen = () => {
           }}
           style={$.footerButton}
           size="lg"
-          leftIcon={(size, color) => <Feather name="printer" size={size} color={color} />}
+          leftIcon={renderPrinterIcon}
         />
       </View>
 

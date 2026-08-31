@@ -35,6 +35,8 @@ const signUpSchema = z
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
+const renderGoogleIcon = () => <IcGoogle height={vs(24)} width={vs(24)} />;
+
 const SignUpForm = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState<boolean>(false);
@@ -211,7 +213,7 @@ const SignUpForm = () => {
 
         <Button
           isLoading={false}
-          leftIcon={() => <IcGoogle height={vs(24)} width={vs(24)} />}
+          leftIcon={renderGoogleIcon}
           onPress={() => onGoogleSignUp()}
           size="lg"
           title={t("sign_up_google")}

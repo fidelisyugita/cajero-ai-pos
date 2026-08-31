@@ -15,6 +15,10 @@ interface EmployeeListCardProps {
   loading?: boolean;
 }
 
+const renderPlusIcon = (size: number, color: string) => (
+  <IcPlus width={size} height={size} color={color} />
+);
+
 const EmployeeListCard = ({ employees, onAddEmployee, loading }: EmployeeListCardProps) => {
   // Custom container instead of FormSectionCard because header is different
   return (
@@ -22,22 +26,7 @@ const EmployeeListCard = ({ employees, onAddEmployee, loading }: EmployeeListCar
       {loading ? (
         <Skeleton width="100%" height={200} borderRadius={16} />
       ) : (
-        <FormSectionCard
-          title={t("management_employee")}
-          // headerRight={
-          // 	!loading && (
-          // 		<Button
-          // 			title={t("add_employee")}
-          // 			variant="primary"
-          // 			size="sm"
-          // 			leftIcon={(size, color) => (
-          // 				<IcPlus width={size} height={size} color={color} />
-          // 			)}
-          // 			onPress={onAddEmployee}
-          // 		/>
-          // 	)
-          // }
-        >
+        <FormSectionCard title={t("management_employee")}>
           <View style={$.list}>
             {employees.length === 0 ? (
               <EmptyState
@@ -55,7 +44,7 @@ const EmployeeListCard = ({ employees, onAddEmployee, loading }: EmployeeListCar
                 title={t("add_employee")}
                 variant="primary"
                 size="sm"
-                leftIcon={(size, color) => <IcPlus width={size} height={size} color={color} />}
+                leftIcon={renderPlusIcon}
                 style={{ width: vs(150), alignSelf: "center", marginTop: vs(10) }}
                 onPress={onAddEmployee}
               />

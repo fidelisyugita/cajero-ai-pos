@@ -1,14 +1,6 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import type React from "react";
-import { useState } from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { memo, type ReactElement, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -17,13 +9,18 @@ import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import Skeleton from "@/components/ui/Skeleton";
 import { t } from "@/services/i18n";
+import Logger from "@/services/logger";
 import { useUpdateIngredientMutation } from "@/services/mutations/useUpdateIngredientMutation";
 import { useUpdateIngredientStockMutation } from "@/services/mutations/useUpdateIngredientStockMutation";
 import { useIngredientsQuery } from "@/services/queries/useIngredientsQuery";
 import type { Ingredient } from "@/services/types/Ingredient";
-import Logger from "../../services/logger";
 import SaveIngredientModal from "./SaveIngredientModal";
 import StockUpdateModal from "./StockUpdateModal";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 const COLUMNS = [
   { label: "Ingredient Name", flex: 2 },
@@ -160,7 +157,7 @@ const StockIngredients = ({ onIngredientPress, searchQuery = "" }: StockIngredie
             onStockUpdatePress={() => setStockUpdateTarget(item)}
           />
         )}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={IngredientSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_ingredients_title")}
@@ -192,6 +189,8 @@ const StockIngredients = ({ onIngredientPress, searchQuery = "" }: StockIngredie
     </View>
   );
 };
+
+const IngredientSeparator = () => <View style={$.separator} />;
 
 const StockRow = memo(
   ({

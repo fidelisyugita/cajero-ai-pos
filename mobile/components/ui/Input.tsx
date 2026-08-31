@@ -162,6 +162,41 @@ const UniTextInput = withUnistyles(TextInput, (theme) => ({
   placeholderTextColor: theme.colors.neutral[500],
 }));
 
+function useInputTextState(value?: string, defaultValue?: string) {
+  const [hasText, setHasText] = useState<boolean>(Boolean(value ?? defaultValue));
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setHasText(Boolean(value));
+    } else if (defaultValue !== undefined) {
+      setHasText(Boolean(defaultValue));
+    }
+  }, [value, defaultValue]);
+
+  const isControlled = value !== undefined;
+  const hasContent = isControlled ? Boolean(value) : hasText;
+
+  return { hasContent, setHasText };
+}
+
+function getEffectivePlaceholder(
+  placeholder?: string,
+  label?: string,
+  isFloating?: boolean,
+): string {
+  if (isFloating) {
+    return placeholder || "";
+  }
+  return placeholder || label || "";
+}
+
+function isWithinMaxValue(text: string, maxValue?: number): boolean {
+  if (maxValue === undefined) {
+    return true;
+  }
+  return parseNumber(text) <= maxValue;
+}
+
 const Input = forwardRef<TextInput, InputProps>(
   (
     {
@@ -184,23 +219,11 @@ const Input = forwardRef<TextInput, InputProps>(
     ref,
   ) => {
     const [isFocused, setIsFocused] = useState<boolean>(false);
-    const [hasText, setHasText] = useState<boolean>(Boolean(value ?? defaultValue));
-
-    useEffect(() => {
-      if (value !== undefined) {
-        setHasText(Boolean(value));
-      } else if (defaultValue !== undefined) {
-        setHasText(Boolean(defaultValue));
-      }
-    }, [value, defaultValue]);
-
-    const isControlled = value !== undefined;
-    const hasContent = isControlled ? Boolean(value) : hasText;
+    const { hasContent, setHasText } = useInputTextState(value, defaultValue);
 
     const isFloating = Boolean(label) && hasContent;
     const isValueExisting = hasContent || isFocused;
-
-    const activePlaceholder = !isFloating ? placeholder || label || "" : placeholder || "";
+    const activePlaceholder = getEffectivePlaceholder(placeholder, label, isFloating);
 
     stylesheet.useVariants({
       size,
@@ -210,6 +233,24 @@ const Input = forwardRef<TextInput, InputProps>(
       error: !!error,
       disabled: !editable,
     });
+
+    const handleTextChange = (text: string) => {
+      if (!isWithinMaxValue(text, maxValue)) {
+        return;
+      }
+      onChangeText?.(text);
+      setHasText(Boolean(text));
+    };
+
+    const handleBlur = (e: Parameters<NonNullable<TextInputProps["onBlur"]>>[0]) => {
+      setIsFocused(false);
+      rest.onBlur?.(e);
+    };
+
+    const handleFocus = (e: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) => {
+      setIsFocused(true);
+      rest.onFocus?.(e);
+    };
 
     return (
       <View style={[stylesheet.container, containerStyle]}>
@@ -225,24 +266,9 @@ const Input = forwardRef<TextInput, InputProps>(
             defaultValue={defaultValue}
             disableFullscreenUI={true}
             editable={editable}
-            onBlur={(e) => {
-              setIsFocused(false);
-              rest.onBlur?.(e);
-            }}
-            onChangeText={(text) => {
-              if (maxValue !== undefined) {
-                const numericVal = parseNumber(text);
-                if (numericVal > maxValue) {
-                  return;
-                }
-              }
-              onChangeText?.(text);
-              setHasText(Boolean(text));
-            }}
-            onFocus={(e) => {
-              setIsFocused(true);
-              rest.onFocus?.(e);
-            }}
+            onBlur={handleBlur}
+            onChangeText={handleTextChange}
+            onFocus={handleFocus}
             placeholder={activePlaceholder}
             value={value}
             style={[

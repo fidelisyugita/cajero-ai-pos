@@ -1,7 +1,7 @@
 import type { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
 import type { SQLJsDatabase } from "drizzle-orm/sql-js";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
-import React, { type PropsWithChildren, useContext, useEffect, useState } from "react";
+import React, { type PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { expoDb, initialize, useMigrationHelper } from "./drizzle";
 
@@ -24,6 +24,8 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
     });
   }, [db]);
 
+  const contextValue = useMemo(() => ({ db }), [db]);
+
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -40,5 +42,5 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
     );
   }
 
-  return <DatabaseContext.Provider value={{ db }}>{children}</DatabaseContext.Provider>;
+  return <DatabaseContext.Provider value={contextValue}>{children}</DatabaseContext.Provider>;
 }

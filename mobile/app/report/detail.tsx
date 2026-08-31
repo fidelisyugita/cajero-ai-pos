@@ -1,8 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import type { StyleProp, TextStyle } from "react-native";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, type StyleProp, Text, type TextStyle, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { SummaryCard } from "@/components/report/ReportSummary";
 import Button from "@/components/ui/Button";

@@ -53,19 +53,16 @@ const $ = StyleSheet.create((theme) => ({
     height: vs(20),
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.neutral[100],
-    //shadow
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.08,
     shadowRadius: vs(4),
     elevation: 4,
     zIndex: 2,
-    // animate
     transform: [{ translateX: animate ? vs(26) : 0 }],
     transitionProperty: "transform",
     transitionDuration: "200ms",
     transitionTimingFunction: "linear",
-    //variants
     variants: {
       active: {
         true: {

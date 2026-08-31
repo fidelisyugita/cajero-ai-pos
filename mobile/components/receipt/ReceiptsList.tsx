@@ -1,13 +1,6 @@
 import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import type React from "react";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
-
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { memo, type ReactElement } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
@@ -18,6 +11,11 @@ import { useTransactionsQuery } from "@/services/queries/useTransactionsQuery";
 import type { TransactionResponse } from "@/services/types/Transaction";
 import { formatDayDateYear, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
+
+// Workaround for missing estimatedItemSize in FlashList props type definition
+const FlashList = ShopifyFlashList as unknown as <T>(
+  props: FlashListProps<T> & { estimatedItemSize: number },
+) => ReactElement;
 
 const COLUMNS = [
   { label: "Time", flex: 1 },
@@ -106,7 +104,7 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
         estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <TransactionRow item={item} />}
-        ItemSeparatorComponent={() => <View style={$.separator} />}
+        ItemSeparatorComponent={ReceiptSeparator}
         ListEmptyComponent={
           <EmptyState
             title={t("empty_transactions_title")}
@@ -128,6 +126,8 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
     </View>
   );
 };
+
+const ReceiptSeparator = () => <View style={$.separator} />;
 
 const TransactionRow = memo(({ item }: { item: TransactionResponse }) => {
   const router = useRouter();

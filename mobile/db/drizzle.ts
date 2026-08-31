@@ -26,7 +26,7 @@ let transactionQueue: Promise<unknown> = Promise.resolve();
  */
 export const runInTransaction = async <T>(callback: (tx: DrizzleTx) => Promise<T>): Promise<T> => {
   const previousQueue = transactionQueue;
-  let resolveCurrent: () => void = () => {};
+  let resolveCurrent!: () => void;
   transactionQueue = new Promise<void>((resolve) => {
     resolveCurrent = resolve;
   });

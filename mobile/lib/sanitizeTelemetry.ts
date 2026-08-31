@@ -14,8 +14,8 @@ const SENSITIVE_KEY_PATTERNS = [
   /private_?key/i,
 ];
 
-const CARD_NUMBER_REGEX = /\b(?:\d[ -]*?){13,19}\b/g;
-const BEARER_TOKEN_REGEX = /Bearer\s+[A-Za-z0-9-_=.]+/gi;
+const CARD_NUMBER_REGEX = /\b(?:\d[ -]?){13,19}\b/g;
+const BEARER_TOKEN_REGEX = /Bearer\s+[a-z0-9-_=.]+/gi;
 const JWT_TOKEN_REGEX = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 
 /**

@@ -33,6 +33,10 @@ interface ReceiptPreviewModalProps {
   isPrinting?: boolean;
 }
 
+const renderPrinterIcon = (size: number, color: string) => (
+  <Feather name="printer" size={size} color={color} />
+);
+
 const ReceiptPreviewModal = ({
   visible,
   onClose,
@@ -169,7 +173,7 @@ const ReceiptPreviewModal = ({
               onPress={onPrint}
               isLoading={isPrinting}
               style={{ flex: 1 }}
-              leftIcon={(size, color) => <Feather name="printer" size={size} color={color} />}
+              leftIcon={renderPrinterIcon}
             />
           </View>
         </View>

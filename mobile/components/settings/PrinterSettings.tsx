@@ -13,6 +13,14 @@ import { printerService } from "@/services/PrinterService";
 import type { ReceiptData } from "@/services/types/Receipt";
 import { type PrinterDevice, usePrinterStore } from "@/store/PrinterStore";
 
+const renderScanningIcon = (_size: number, color: string) => (
+  <ActivityIndicator size="small" color={color} />
+);
+
+const renderSearchIcon = (size: number, color: string) => (
+  <Feather name="search" size={size} color={color} />
+);
+
 const PrinterSettings = () => {
   const {
     connectedDevice,
@@ -221,7 +229,7 @@ const PrinterSettings = () => {
               title={t("stop_scan")}
               variant="secondary"
               size="sm"
-              leftIcon={(_size, color) => <ActivityIndicator size="small" color={color} />}
+              leftIcon={renderScanningIcon}
               onPress={stopScan}
             />
           ) : (
@@ -229,7 +237,7 @@ const PrinterSettings = () => {
               title={t("scan_devices")}
               variant="primary" // Revert to primary as it's the main action in this section now
               size="sm"
-              leftIcon={(size, color) => <Feather name="search" size={size} color={color} />}
+              leftIcon={renderSearchIcon}
               onPress={startScan}
             />
           )}
