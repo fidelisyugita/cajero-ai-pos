@@ -25,10 +25,10 @@ interface CategoryItemProps {
 
 const SelectCategoryModal = () => {
   const router = useRouter();
-  const { code, name } = useLocalSearchParams() as {
-    code: string;
-    name: string;
-  };
+  const { code, name } = useLocalSearchParams<{
+    code?: string;
+    name?: string;
+  }>();
 
   const { hasSelected, saveCategory, reset } = useCategoryStore(
     useShallow((s) => ({

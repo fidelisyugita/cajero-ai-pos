@@ -7,7 +7,7 @@ export const useStockMovementsQuery = (
 ) => {
   return useInfiniteQuery({
     queryKey: ["stock-movements", params],
-    queryFn: ({ pageParam = 0 }) => getStockMovements({ ...params, page: pageParam as number }),
+    queryFn: ({ pageParam = 0 }) => getStockMovements({ ...params, page: pageParam }),
     initialPageParam: 0,
     getNextPageParam: (lastPage: StockMovementPageResponse) => {
       if (lastPage.last) return undefined;

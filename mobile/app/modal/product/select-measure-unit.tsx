@@ -23,10 +23,10 @@ interface MeasureUnitItemProps {
 
 const SelectMeasureUnitModal = () => {
   const router = useRouter();
-  const { code, name } = useLocalSearchParams() as {
-    code: string;
-    name: string;
-  };
+  const { code, name } = useLocalSearchParams<{
+    code?: string;
+    name?: string;
+  }>();
 
   const { hasSelected, saveMeasureUnit, reset } = useMeasureUnitStore(
     useShallow((s) => ({

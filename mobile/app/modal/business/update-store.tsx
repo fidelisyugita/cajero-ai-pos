@@ -40,7 +40,7 @@ const AVATAR_COLORS = [
 const storeSchema = z.object({
   name: z.string().min(2, "Name is required"),
   phone: z.string().optional(),
-  email: z.string().email("Invalid email").optional(), // Mapped to 'Website' field in UI
+  email: z.email("Invalid email").optional(), // Mapped to 'Website' field in UI
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   // vatNumber: z.string().optional(), // Not in API, ignoring
@@ -50,19 +50,19 @@ type StoreFormData = z.infer<typeof storeSchema>;
 
 const UpdateStoreModal = () => {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{ storeData?: string; id?: string }>();
 
   // Parse initial data from params
   const initialData = useMemo(() => {
     try {
       if (params.storeData) {
-        return JSON.parse(params.storeData as string);
+        return JSON.parse(params.storeData);
       }
     } catch (e) {
       Logger.error("Failed to parse store data", e);
     }
     return {
-      id: params.id as string, // Fallback if old params still used
+      id: params.id || "", // Fallback if old params still used
       name: "",
       phone: "",
       email: "",
@@ -96,7 +96,7 @@ const UpdateStoreModal = () => {
   const handleUploadPress = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: "images",
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,

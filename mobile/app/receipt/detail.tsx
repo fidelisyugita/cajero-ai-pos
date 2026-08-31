@@ -24,14 +24,14 @@ const renderPrinterIcon = (size: number, color: string) => (
 );
 
 const ReceiptDetailScreen = () => {
-  const params = useLocalSearchParams();
+  const { transaction: transactionParam } = useLocalSearchParams<{ transaction?: string }>();
   const router = useRouter();
 
   // Parse transaction from params if available, otherwise we might fail or need fallback (but user insisted on no fetch)
   let transaction: TransactionResponse | null = null;
   try {
-    if (params.transaction) {
-      transaction = JSON.parse(params.transaction as string) as TransactionResponse;
+    if (transactionParam) {
+      transaction = JSON.parse(transactionParam) as TransactionResponse;
 
       // Ensure selectedVariants is always an array
       if (transaction?.transactionProduct) {

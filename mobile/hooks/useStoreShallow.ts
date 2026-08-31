@@ -5,5 +5,5 @@ export function useStoreShallow<TState, TSelected>(
   store: UseBoundStore<StoreApi<TState>>,
   selector: (state: TState) => TSelected,
 ): TSelected {
-  return store(useShallow(selector)) as TSelected;
+  return store(useShallow(selector));
 }

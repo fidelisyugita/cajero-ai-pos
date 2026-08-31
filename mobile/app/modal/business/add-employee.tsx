@@ -15,7 +15,7 @@ import { vs } from "@/utils/Scale";
 
 const employeeSchema = z.object({
   name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email"),
+  email: z.email("Invalid email"),
   roleCode: z.string().min(1, "Role is required"),
   password: z
     .string()
