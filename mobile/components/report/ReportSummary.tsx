@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { ReportSummary as ReportSummaryType } from "@/services/types/Report";

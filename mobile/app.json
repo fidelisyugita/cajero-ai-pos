@@ -65,11 +65,14 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": true,
+            "enableMinifyInReleaseBuilds": true,
+            "extraProguardRules": "-keep class com.facebook.react.bridge.** { *; }\n-keep class com.facebook.react.uimanager.** { *; }\n-keep class com.facebook.jni.** { *; }\n-keep class com.mrousavy.nitro.** { *; }\n-keepclassmembers class * extends com.mrousavy.nitro.HybridObject { *; }\n-keep class expo.modules.sqlite.** { *; }\n-keep class io.requery.android.database.sqlite.** { *; }\n-keep class com.polidea.reactnativeble.** { *; }\n-keep class com.polidea.rxandroidble2.** { *; }\n-keep class com.posthog.** { *; }\n-keep class io.sentry.** { *; }\n-keep class com.swmansion.rnscreens.** { *; }\n-keep class com.swmansion.gesturehandler.** { *; }\n-keep class com.reactnativekeyboardcontroller.** { *; }"
           }
         }
       ],
       "./plugins/withAndroidSigning",
+      "./plugins/withAndroidSizeOptimizations",
       "./plugins/withIosXcode26Fix",
       "./plugins/withSentryConfig",
       "@react-native-community/datetimepicker",
