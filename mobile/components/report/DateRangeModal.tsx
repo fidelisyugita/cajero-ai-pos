@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import DateTimePicker, { type DateType } from "react-native-ui-datepicker";

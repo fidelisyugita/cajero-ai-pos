@@ -4589,9 +4589,9 @@ __metadata:
   linkType: hard
 
 "@types/emscripten@npm:*":
-  version: 1.41.5
-  resolution: "@types/emscripten@npm:1.41.5"
-  checksum: 10c0/ae816da716f896434e59df7a71b67c71ae7e85ca067a32aef1616572fc4757459515d42ade6f5b8fd8d69733a9dbd0cf23010fec5b2f41ce52c09501aa350e45
+  version: 1.41.6
+  resolution: "@types/emscripten@npm:1.41.6"
+  checksum: 10c0/b51a730b6cb2848ac5e3f0536707bf656b6887be21f20e96b01e74a59ed52319dd0942f49b1072b1ca6d38df19e2d633f540df54d6ba1f7216be14af7373a41f
   languageName: node
   linkType: hard
 
@@ -4709,7 +4709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sql.js@npm:^1.4.11":
+"@types/sql.js@npm:^1":
   version: 1.4.11
   resolution: "@types/sql.js@npm:1.4.11"
   dependencies:
@@ -5304,6 +5304,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"babel-plugin-transform-remove-console@npm:^6.9.4":
+  version: 6.9.4
+  resolution: "babel-plugin-transform-remove-console@npm:6.9.4"
+  checksum: 10c0/8bb152eed6685b92c371d72be3d9107d879f64b507f3e255edd6a1fb4806e9bcf39011d6f32ce1d8d745fb3533d1da4d5c706eefa633fae25151866c986f2e24
+  languageName: node
+  linkType: hard
+
 "babel-preset-current-node-syntax@npm:^1.0.0":
   version: 1.2.0
   resolution: "babel-preset-current-node-syntax@npm:1.2.0"
@@ -5698,9 +5705,10 @@ __metadata:
     "@types/jest": "npm:~29.5.12"
     "@types/node": "npm:^26.3.0"
     "@types/react": "npm:~19.2.4"
-    "@types/sql.js": "npm:^1.4.11"
+    "@types/sql.js": "npm:^1"
     axios: "npm:^1.19.0"
     babel-plugin-inline-import: "npm:^3.0.0"
+    babel-plugin-transform-remove-console: "npm:^6.9.4"
     bcryptjs: "npm:^3.0.3"
     buffer: "npm:^6.0.3"
     dayjs: "npm:^1.11.23"
@@ -5730,10 +5738,8 @@ __metadata:
     expo-splash-screen: "npm:~57.0.8"
     expo-sqlite: "npm:~57.0.1"
     expo-status-bar: "npm:~57.0.1"
-    expo-symbols: "npm:~57.0.2"
     expo-system-ui: "npm:~57.0.2"
     expo-web-browser: "npm:~57.0.2"
-    jalaliday: "npm:^3.1.1"
     jest: "npm:~29.7.0"
     jest-expo: "npm:~57.0.4"
     posthog-react-native: "npm:^4.64.1"
@@ -5756,12 +5762,11 @@ __metadata:
     react-native-ui-datepicker: "npm:^3.3.0"
     react-native-unistyles: "npm:^3.3.0"
     react-native-web: "npm:^0.21.2"
-    react-native-webview: "npm:13.16.1"
     react-native-worklets: "npm:0.10.1"
     react-test-renderer: "npm:^19.2.8"
     reactotron-react-native: "npm:^5.3.1"
     sonarqube-scanner: "npm:^5.0.0"
-    sql.js: "npm:^1.14.2"
+    sql.js: "npm:^1.15.1"
     test-renderer: "npm:^1.2.0"
     typescript: "npm:~6.0.3"
     zod: "npm:^4.4.3"
@@ -7899,7 +7904,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-symbols@npm:^57.0.2, expo-symbols@npm:~57.0.2":
+"expo-symbols@npm:^57.0.2":
   version: 57.0.2
   resolution: "expo-symbols@npm:57.0.2"
   dependencies:
@@ -8838,7 +8843,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"invariant@npm:2.2.4, invariant@npm:^2.2.2, invariant@npm:^2.2.4":
+"invariant@npm:^2.2.2, invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
   dependencies:
@@ -9105,15 +9110,6 @@ __metadata:
   version: 1.1.4
   resolution: "jalali-plugin-dayjs@npm:1.1.4"
   checksum: 10c0/2a8fada01435fab90d754d87e383385a9b80f303cee3bf8425db91c7f5bd7be48f0995774b21d903ae840499f12762dc34392d757e3feb4516af6b7e0a2b651b
-  languageName: node
-  linkType: hard
-
-"jalaliday@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "jalaliday@npm:3.1.1"
-  peerDependencies:
-    dayjs: ^1.11.13
-  checksum: 10c0/1d5915cb57ca1cf2828c5d93d3ab79bc477e6e9127b7657130f5d81ff2520e02b72354df9d2b87ba6de4398528ff3acd01db5c1a03e8671081df59dadb0e52d2
   languageName: node
   linkType: hard
 
@@ -11893,19 +11889,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview@npm:13.16.1":
-  version: 13.16.1
-  resolution: "react-native-webview@npm:13.16.1"
-  dependencies:
-    escape-string-regexp: "npm:^4.0.0"
-    invariant: "npm:2.2.4"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/8fdf14447bc430100d78030b8fdb60df223bd51cdb25c06d58757962fea8ad0cd9cdb13a7aa40ff795c671d2b04a561cbeb2b5795d95780d7f0d3734573ebeeb
-  languageName: node
-  linkType: hard
-
 "react-native-worklets@npm:0.10.1":
   version: 0.10.1
   resolution: "react-native-worklets@npm:0.10.1"
@@ -12731,10 +12714,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sql.js@npm:^1.14.2":
-  version: 1.14.2
-  resolution: "sql.js@npm:1.14.2"
-  checksum: 10c0/4c217404d85b7396a2c7b6037a9dc96dd05f10c94847bb8c5df70d387ff37702f51551afc97d338ff2c0d504414bb1d3631d48f2a3f33eaa45e862747135d5d5
+"sql.js@npm:^1.15.1":
+  version: 1.15.1
+  resolution: "sql.js@npm:1.15.1"
+  checksum: 10c0/f4d84bceebd0d10612c42c73ee2f3180abb1cfbe9a4c22d09a3e4e0cff30a6ef23268abfc05552f1ba544568d6693de0eef8eafc623b0fef6ecb4b4de7d63fee
   languageName: node
   linkType: hard
 

@@ -1,4 +1,4 @@
-import { Entypo } from "@expo/vector-icons";
+import Entypo from "@expo/vector-icons/Entypo";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
