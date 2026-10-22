@@ -188,4 +188,33 @@ export function Counter() {
       expect(fixedText).toContain("const [count, setCount] = useState(0);");
     });
   });
+
+  describe("entry import order invariant", () => {
+    it("flags error if expo-router/entry is imported before ./config/Unistyles", () => {
+      const code = `
+import "expo-router/entry";
+import "./config/Unistyles";
+      `.trim();
+      const { violations } = analyzeSource(code, "index.ts");
+      expect(violations).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule: "HYGIENE_ENTRY_IMPORT_ORDER",
+          }),
+        ]),
+      );
+    });
+
+    it("passes when ./config/Unistyles is imported before expo-router/entry", () => {
+      const code = `
+import "./config/Unistyles";
+import "expo-router/entry";
+      `.trim();
+      const { violations } = analyzeSource(code, "index.ts");
+      const orderViolations = violations.filter(
+        (v: any) => v.rule === "HYGIENE_ENTRY_IMPORT_ORDER",
+      );
+      expect(orderViolations).toHaveLength(0);
+    });
+  });
 });

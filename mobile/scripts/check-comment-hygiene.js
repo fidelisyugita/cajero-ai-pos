@@ -416,6 +416,22 @@ function analyzeSource(sourceText, fileName = "file.tsx") {
   checkCommentDensity(inlineCommentCount, lines, violations);
   checkFunctions(sourceFile, lines, violations);
 
+  if (path.basename(fileName) === "index.ts") {
+    const unistylesIdx = sourceText.indexOf('import "./config/Unistyles"');
+    const entryIdx = sourceText.indexOf('import "expo-router/entry"');
+    if (entryIdx !== -1 && (unistylesIdx === -1 || unistylesIdx > entryIdx)) {
+      violations.push({
+        line: 1,
+        column: 1,
+        rule: "HYGIENE_ENTRY_IMPORT_ORDER",
+        message:
+          'Unistyles configuration (import "./config/Unistyles") must be imported before "expo-router/entry" in index.ts',
+        lineContent: lines[0] || "",
+        isFixable: false,
+      });
+    }
+  }
+
   return { violations };
 }
 
@@ -580,6 +596,10 @@ function resolveTargetFiles(customFiles, rootDir) {
     if (fs.existsSync(fullDir)) {
       collectFiles(fullDir, targetFiles);
     }
+  }
+  const indexPath = path.resolve(rootDir, "index.ts");
+  if (fs.existsSync(indexPath)) {
+    targetFiles.push(indexPath);
   }
   return targetFiles;
 }
