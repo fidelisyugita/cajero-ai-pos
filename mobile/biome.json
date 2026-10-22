@@ -98,12 +98,18 @@
               "dayjs": "Do not import dayjs directly. Use centralized date helpers from @/utils/Date instead.",
               "moment": "Do not use moment. Use centralized date helpers from @/utils/Date instead.",
               "date-fns": "Do not use date-fns. Use centralized date helpers from @/utils/Date instead.",
-              "luxon": "Do not use luxon. Use centralized date helpers from @/utils/Date instead."
+              "luxon": "Do not use luxon. Use centralized date helpers from @/utils/Date instead.",
+              "lodash": "Do not import monolithic lodash. Use native JS methods, lodash-es, or lightweight shims instead.",
+              "@expo/vector-icons": "Do not import from '@expo/vector-icons' barrel. Use deep icon set imports like '@expo/vector-icons/Feather' to avoid bundling unused font assets."
             },
             "patterns": [
               {
                 "group": ["dayjs/**", "date-fns/**"],
                 "message": "Do not import date sub-modules directly. Use @/utils/Date instead."
+              },
+              {
+                "group": ["lodash/**"],
+                "message": "Do not import lodash sub-modules. Use native JS methods or lightweight shims instead."
               }
             ]
           }
