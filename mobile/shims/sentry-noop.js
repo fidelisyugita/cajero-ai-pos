@@ -1,0 +1,22 @@
+// No-op stub for unused Sentry browser integrations in native React Native environment.
+module.exports = {
+  buildLaunchDarklyFlagUsedHandler: () => {},
+  launchDarklyIntegration: () => ({ name: "LaunchDarkly", setupOnce: () => {} }),
+  OpenFeatureIntegrationHook: class {},
+  openFeatureIntegration: () => ({ name: "OpenFeature", setupOnce: () => {} }),
+  unleashIntegration: () => ({ name: "Unleash", setupOnce: () => {} }),
+  growthbookIntegration: () => ({ name: "GrowthBook", setupOnce: () => {} }),
+  statsigIntegration: () => ({ name: "Statsig", setupOnce: () => {} }),
+  diagnoseSdkConnectivity: () => Promise.resolve(),
+  registerWebWorker: () => {},
+  webWorkerIntegration: () => ({ name: "WebWorker", setupOnce: () => {} }),
+  uiProfiler: () => ({ name: "UIProfiler", setupOnce: () => {} }),
+  browserProfilingIntegration: () => ({ name: "BrowserProfiling", setupOnce: () => {} }),
+  reportingObserverIntegration: () => ({ name: "ReportingObserver", setupOnce: () => {} }),
+  graphqlClientIntegration: () => ({ name: "GraphQLClient", setupOnce: () => {} }),
+  spotlightBrowserIntegration: () => ({ name: "SpotlightBrowser", setupOnce: () => {} }),
+  httpClientIntegration: () => ({ name: "HttpClient", setupOnce: () => {} }),
+  contextLinesIntegration: () => ({ name: "ContextLines", setupOnce: () => {} }),
+  browserSessionIntegration: () => ({ name: "BrowserSession", setupOnce: () => {} }),
+  makeBrowserOfflineTransport: () => () => ({ send: () => Promise.resolve({}) }),
+};

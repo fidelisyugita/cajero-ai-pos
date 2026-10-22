@@ -43,6 +43,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
+    "check:bundle": "node ./scripts/check-bundle-size.js",
     "sonar:scan": "node ./scripts/sonar-scanner.js",
     "sonar": "yarn test:coverage && yarn sonar:scan"
   },
@@ -87,10 +88,8 @@
     "expo-splash-screen": "~57.0.8",
     "expo-sqlite": "~57.0.1",
     "expo-status-bar": "~57.0.1",
-    "expo-symbols": "~57.0.2",
     "expo-system-ui": "~57.0.2",
     "expo-web-browser": "~57.0.2",
-    "jalaliday": "^3.1.1",
     "posthog-react-native": "^4.64.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",

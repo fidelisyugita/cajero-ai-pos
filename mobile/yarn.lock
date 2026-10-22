@@ -5738,10 +5738,8 @@ __metadata:
     expo-splash-screen: "npm:~57.0.8"
     expo-sqlite: "npm:~57.0.1"
     expo-status-bar: "npm:~57.0.1"
-    expo-symbols: "npm:~57.0.2"
     expo-system-ui: "npm:~57.0.2"
     expo-web-browser: "npm:~57.0.2"
-    jalaliday: "npm:^3.1.1"
     jest: "npm:~29.7.0"
     jest-expo: "npm:~57.0.4"
     posthog-react-native: "npm:^4.64.1"
@@ -7906,7 +7904,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-symbols@npm:^57.0.2, expo-symbols@npm:~57.0.2":
+"expo-symbols@npm:^57.0.2":
   version: 57.0.2
   resolution: "expo-symbols@npm:57.0.2"
   dependencies:
@@ -9112,15 +9110,6 @@ __metadata:
   version: 1.1.4
   resolution: "jalali-plugin-dayjs@npm:1.1.4"
   checksum: 10c0/2a8fada01435fab90d754d87e383385a9b80f303cee3bf8425db91c7f5bd7be48f0995774b21d903ae840499f12762dc34392d757e3feb4516af6b7e0a2b651b
-  languageName: node
-  linkType: hard
-
-"jalaliday@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "jalaliday@npm:3.1.1"
-  peerDependencies:
-    dayjs: ^1.11.13
-  checksum: 10c0/1d5915cb57ca1cf2828c5d93d3ab79bc477e6e9127b7657130f5d81ff2520e02b72354df9d2b87ba6de4398528ff3acd01db5c1a03e8671081df59dadb0e52d2
   languageName: node
   linkType: hard
 
