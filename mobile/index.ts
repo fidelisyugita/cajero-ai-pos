@@ -1,5 +1,5 @@
-import "expo-router/entry";
 import "./config/Unistyles";
+import "expo-router/entry";
 import { Buffer } from "buffer";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";

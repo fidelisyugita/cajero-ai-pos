@@ -124,7 +124,7 @@ const $ = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.neutral[100],
     paddingHorizontal: theme.spacing.xl,
     paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: theme.spacing.xl + rt.insets.bottom,
     borderTopColor: theme.colors.neutral[300],
     borderTopWidth: vs(1),
     position: "absolute",

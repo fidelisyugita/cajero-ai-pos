@@ -58,13 +58,18 @@
         {
           "isBackgroundEnabled": false,
           "modes": ["central"],
-          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices",
+          "neverForLocation": true
         }
       ],
       [
         "expo-build-properties",
         {
           "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "buildToolsVersion": "36.0.0",
+            "minSdkVersion": 24,
             "usesCleartextTraffic": true,
             "enableMinifyInReleaseBuilds": true,
             "extraProguardRules": "-keep class com.facebook.react.bridge.** { *; }\n-keep class com.facebook.react.uimanager.** { *; }\n-keep class com.facebook.jni.** { *; }\n-keep class com.mrousavy.nitro.** { *; }\n-keepclassmembers class * extends com.mrousavy.nitro.HybridObject { *; }\n-keep class expo.modules.sqlite.** { *; }\n-keep class io.requery.android.database.sqlite.** { *; }\n-keep class com.polidea.reactnativeble.** { *; }\n-keep class com.polidea.rxandroidble2.** { *; }\n-keep class com.posthog.** { *; }\n-keep class io.sentry.** { *; }\n-keep class com.swmansion.rnscreens.** { *; }\n-keep class com.swmansion.gesturehandler.** { *; }\n-keep class com.reactnativekeyboardcontroller.** { *; }"

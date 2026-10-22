@@ -37,6 +37,17 @@ process.stdout.write(
   `🎯 Target Budget: ${BUDGET_BYTES} bytes (${(BUDGET_BYTES / (1024 * 1024)).toFixed(2)} MB)\n`,
 );
 
+process.stdout.write("🧪 Testing Metro bundle syntax and structure...\n");
+try {
+  const vm = require("node:vm");
+  const code = fs.readFileSync(BUNDLE_PATH, "utf8");
+  new vm.Script(code);
+  process.stdout.write("✅ Bundle script parses successfully without syntax errors.\n");
+} catch (evalErr) {
+  process.stderr.write(`❌ Bundle parse error: ${evalErr.message}\n`);
+  process.exit(1);
+}
+
 if (fs.existsSync(MAP_PATH)) {
   try {
     const map = JSON.parse(fs.readFileSync(MAP_PATH, "utf8"));

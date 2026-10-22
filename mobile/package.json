@@ -44,6 +44,7 @@
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
     "check:bundle": "node ./scripts/check-bundle-size.js",
+    "check:16kb": "node ./scripts/check-16kb-alignment.js",
     "sonar:scan": "node ./scripts/sonar-scanner.js",
     "sonar": "yarn test:coverage && yarn sonar:scan"
   },
