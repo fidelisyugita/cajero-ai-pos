@@ -119,4 +119,19 @@ describe("ReportScreen integration", () => {
 
     expect(screen.getByText("Select Date Range")).toBeTruthy();
   });
+
+  it("redirects unauthorized users away from report screen", async () => {
+    useAuthStore.setState({
+      user: {
+        id: "u-staff",
+        name: "Staff Sam",
+        roleCode: "CASHIER",
+      } as any,
+    });
+
+    await render(<ReportScreen />, { wrapper: createWrapper() });
+
+    expect(screen.queryByText("Total Transaction")).toBeNull();
+    expect(screen.queryByText("COGS: OFF")).toBeNull();
+  });
 });

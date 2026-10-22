@@ -27,7 +27,8 @@
         "backgroundColor": "#FEF5E2"
       },
       "package": "com.cajero.app",
-      "versionCode": 8
+      "versionCode": 8,
+      "allowBackup": false
     },
     "web": {
       "bundler": "metro",

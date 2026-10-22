@@ -26,7 +26,7 @@ const SettingsScreen = () => {
           {activeTab === "printers" && <PrinterSettings />}
           {activeTab === "language" && <LanguageSettings />}
           {activeTab === "ai" && <AISettings />}
-          {activeTab === "developer" && <DeveloperSettings />}
+          {__DEV__ && activeTab === "developer" && <DeveloperSettings />}
         </View>
       </View>
     </View>

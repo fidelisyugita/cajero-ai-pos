@@ -1,24 +1,9 @@
-import { createMMKV } from "react-native-mmkv";
 import { create } from "zustand";
-import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { createEncryptedMMKV } from "@/lib/Storage";
 import type { OrderItem } from "./useOrderStore";
 
-export const storage = createMMKV({
-  id: "cajero-draft-storage",
-});
-
-const mmkvStorage: StateStorage = {
-  getItem: (name) => {
-    const value = storage.getString(name);
-    return value ?? null;
-  },
-  setItem: (name, value) => {
-    storage.set(name, value);
-  },
-  removeItem: (name) => {
-    storage.remove(name);
-  },
-};
+export const storage = createEncryptedMMKV("cajero-draft-storage");
 
 export interface DraftOrder {
   id: string;
@@ -62,7 +47,7 @@ export const useDraftStore = create<DraftState>()(
     }),
     {
       name: "cajero-draft-storage",
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => storage),
     },
   ),
 );

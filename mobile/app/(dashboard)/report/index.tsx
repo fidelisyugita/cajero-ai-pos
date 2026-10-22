@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { Redirect } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -21,6 +22,7 @@ const renderDownloadIcon = (size: number, color: string) => (
 
 const ReportScreen = () => {
   const user = useAuthStore((state) => state.user);
+  const isAuthorized = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
 
   // Default to last 7 days
   const [dateRange, setDateRange] = useState<{ startDate: Dayjs; endDate: Dayjs }>({
@@ -32,9 +34,13 @@ const ReportScreen = () => {
   const [includeCogs, setIncludeCogs] = useState(false);
 
   const { data: reportData, isLoading } = useReportsQuery({
-    startDate: formatApiDate(dateRange.startDate),
-    endDate: formatApiDate(dateRange.endDate),
+    startDate: isAuthorized ? formatApiDate(dateRange.startDate) : "",
+    endDate: isAuthorized ? formatApiDate(dateRange.endDate) : "",
   });
+
+  if (!isAuthorized) {
+    return <Redirect href="/(dashboard)" />;
+  }
 
   return (
     <View style={$.container}>

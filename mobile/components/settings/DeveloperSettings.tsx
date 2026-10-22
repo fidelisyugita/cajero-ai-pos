@@ -13,6 +13,10 @@ const DeveloperSettings = () => {
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
   const router = useRouter();
 
+  if (!__DEV__) {
+    return null;
+  }
+
   const handleResetDatabase = () => {
     Alert.alert(
       "Reset Database",
