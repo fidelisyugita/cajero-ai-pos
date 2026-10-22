@@ -6,6 +6,7 @@ const withAndroidSizeOptimizations = (config) => {
     const propsToSet = [
       { type: "property", key: "android.enableMinifyInReleaseBuilds", value: "true" },
       { type: "property", key: "android.enableShrinkResourcesInReleaseBuilds", value: "true" },
+      { type: "property", key: "android.enableR8.fullMode", value: "true" },
       { type: "property", key: "expo.gif.enabled", value: "false" },
     ];
 
@@ -50,6 +51,14 @@ function applySizeOptimizations(buildGradle) {
 
   if (!updated.includes("splits {") && updated.includes("buildTypes {")) {
     updated = updated.replace("buildTypes {", `${splitsSnippet}\n    buildTypes {`);
+  }
+
+  // Switch to proguard-android-optimize.txt for aggressive R8 bytecode optimization and inlining
+  if (updated.includes('getDefaultProguardFile("proguard-android.txt")')) {
+    updated = updated.replace(
+      'getDefaultProguardFile("proguard-android.txt")',
+      'getDefaultProguardFile("proguard-android-optimize.txt")',
+    );
   }
 
   // Add font exclusions to ignoreAssetsPattern
