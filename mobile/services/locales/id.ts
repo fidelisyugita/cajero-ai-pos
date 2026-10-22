@@ -192,6 +192,9 @@ export default {
 
   // Global
   cancel: "Batal",
+  cancel_payment_title: "Keluar Pembayaran",
+  cancel_payment_message: "Apakah Anda yakin ingin kembali ke menu?",
+  exit: "Keluar",
   confirm: "Konfirmasi",
   delete: "Hapus",
   edit: "Ubah",

@@ -190,6 +190,9 @@ export default {
 
   // Global
   cancel: "Cancel",
+  cancel_payment_title: "Exit Checkout",
+  cancel_payment_message: "Are you sure you want to return to the menu?",
+  exit: "Exit",
   confirm: "Confirm",
   delete: "Delete",
   edit: "Edit",

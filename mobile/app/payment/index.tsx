@@ -8,6 +8,7 @@ import SuccessView from "@/components/payment/SuccessView";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
 import Button from "@/components/ui/Button";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { usePaymentBackGuard } from "@/hooks/usePaymentBackGuard";
 import { captureAnalyticsEvent } from "@/lib/posthog";
 import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
@@ -171,6 +172,14 @@ const PaymentScreen = () => {
     router.replace("/(dashboard)/menu");
   };
 
+  usePaymentBackGuard({
+    isPending,
+    isSuccess,
+    hasActiveItems: items.length > 0,
+    onNewTransaction: handleNewTransaction,
+    onExit: () => router.back(),
+  });
+
   const handlePrintBill = () => {
     setPreviewData({
       title: "BILL / TAGIHAN",
@@ -321,10 +330,14 @@ const PaymentScreen = () => {
   );
 };
 
-const $ = StyleSheet.create((theme) => ({
+const $ = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.neutral[200],
+    paddingTop: rt.insets.top,
+    paddingBottom: rt.insets.bottom,
+    paddingLeft: rt.insets.left,
+    paddingRight: rt.insets.right,
   },
   content: {
     flex: 1,
