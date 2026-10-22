@@ -27,7 +27,7 @@
         "backgroundColor": "#FEF5E2"
       },
       "package": "com.cajero.app",
-      "versionCode": 9,
+      "versionCode": 10,
       "allowBackup": false
     },
     "web": {
