@@ -36,12 +36,13 @@ const withAndroidSizeOptimizations = (config) => {
 function applySizeOptimizations(buildGradle) {
   let updated = buildGradle;
 
-  // Add splits block if not present
+  // Add splits block if not present (only enabled for APK builds; App Bundles handle ABI splits natively)
   const splitsSnippet = `
+    def isBundleTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("bundle") }
     splits {
         abi {
             reset()
-            enable true
+            enable !isBundleTask
             universalApk true
             include "armeabi-v7a", "arm64-v8a"
         }
