@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useUpdateUserMutation } from "@/services/mutations/useUpdateUserMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
+import { useAuthStore } from "@/store/useAuthStore";
 import EditProfileModal from "../edit-profile";
 
 jest.mock("@/services/mutations/useUpdateUserMutation", () => ({
@@ -55,5 +56,31 @@ describe("EditProfileModal integration", () => {
     fireEvent.press(cancelBtn);
 
     expect(router.back).toHaveBeenCalledTimes(1);
+  });
+
+  it("pre-fills form directly from useAuthStore when userData is omitted", async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({});
+    useAuthStore.setState({
+      user: {
+        id: "auth-u-1",
+        name: "Auth Alice",
+        email: "alice@example.com",
+        phone: "+628999999",
+        roleCode: "MANAGER",
+        storeId: "store-10",
+        imageUrl: "https://example.com/alice.jpg",
+        accessToken: "secret-token",
+        refreshToken: "secret-refresh",
+        createdAt: null,
+        updatedAt: null,
+      },
+    });
+
+    await render(<EditProfileModal />);
+
+    expect(screen.getByDisplayValue("Auth Alice")).toBeTruthy();
+    expect(screen.getByDisplayValue("alice@example.com")).toBeTruthy();
+    expect(screen.getByDisplayValue("+628999999")).toBeTruthy();
+    expect(screen.getByDisplayValue("MANAGER")).toBeTruthy();
   });
 });

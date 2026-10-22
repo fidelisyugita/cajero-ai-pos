@@ -17,9 +17,9 @@ function addSigningConfig(buildGradle) {
   const signingResolutionSnippet = `
 // Android Release Signing Resolution
 def rawStoreFile = System.getenv("ANDROID_UPLOAD_STORE_FILE") ?: localEnvMap.get("ANDROID_UPLOAD_STORE_FILE") ?: (file("upload.keystore").exists() ? "upload.keystore" : (file("\${projectRoot}/credentials/upload.keystore").exists() ? "credentials/upload.keystore" : null))
-def resolvedStorePassword = System.getenv("ANDROID_UPLOAD_STORE_PASSWORD") ?: localEnvMap.get("ANDROID_UPLOAD_STORE_PASSWORD") ?: "123456"
+def resolvedStorePassword = System.getenv("ANDROID_UPLOAD_STORE_PASSWORD") ?: localEnvMap.get("ANDROID_UPLOAD_STORE_PASSWORD")
 def resolvedKeyAlias = System.getenv("ANDROID_UPLOAD_KEY_ALIAS") ?: localEnvMap.get("ANDROID_UPLOAD_KEY_ALIAS") ?: "upload"
-def resolvedKeyPassword = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD") ?: localEnvMap.get("ANDROID_UPLOAD_KEY_PASSWORD") ?: "123456"
+def resolvedKeyPassword = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD") ?: localEnvMap.get("ANDROID_UPLOAD_KEY_PASSWORD")
 
 def resolvedStoreFile = null
 if (rawStoreFile) {
@@ -35,10 +35,10 @@ if (rawStoreFile) {
     }
 }
 
-if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
+if (resolvedStoreFile != null && resolvedStoreFile.exists() && resolvedStorePassword != null && resolvedKeyPassword != null) {
     project.logger.lifecycle("🔑 Release signing keystore detected: \${resolvedStoreFile.absolutePath} (alias: \${resolvedKeyAlias})")
 } else {
-    project.logger.lifecycle("⚠️  No release signing keystore found. Release build will use debug keystore.")
+    project.logger.lifecycle("⚠️  No release signing keystore or credentials found. Release build will use debug keystore.")
 }
 `;
 
@@ -50,7 +50,7 @@ if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
   // 2. Inject release signingConfig into signingConfigs { if not present
   if (updated.includes("signingConfigs {") && !updated.includes("storeFile resolvedStoreFile")) {
     const releaseConfig = `
-        if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
+        if (resolvedStoreFile != null && resolvedStoreFile.exists() && resolvedStorePassword != null && resolvedKeyPassword != null) {
             release {
                 storeFile resolvedStoreFile
                 storePassword resolvedStorePassword
@@ -65,7 +65,7 @@ if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
   const releaseBlockRegex =
     /(buildTypes\s*\{[\s\S]*?release\s*\{[\s\S]*?)signingConfig\s+signingConfigs\.debug([\s\S]*?\})/;
   if (releaseBlockRegex.test(updated)) {
-    const releaseSigningConfig = `if (resolvedStoreFile != null && resolvedStoreFile.exists()) {
+    const releaseSigningConfig = `if (resolvedStoreFile != null && resolvedStoreFile.exists() && resolvedStorePassword != null && resolvedKeyPassword != null) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug

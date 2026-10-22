@@ -31,7 +31,16 @@ const MENU_ITEMS: MenuItem[] = [
   { id: "printers", labelKey: "printers", icon: Feather, iconName: "printer" },
   { id: "language", labelKey: "language", icon: MaterialIcons, iconName: "language" },
   // { id: "ai", labelKey: "ai_settings", icon: Feather, iconName: "cpu" },   // disabled for now
-  { id: "developer", labelKey: "developer", icon: Feather, iconName: "code" },
+  ...(__DEV__
+    ? ([
+        {
+          id: "developer",
+          labelKey: "developer",
+          icon: Feather,
+          iconName: "code",
+        },
+      ] as MenuItem[])
+    : []),
 ];
 
 const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {

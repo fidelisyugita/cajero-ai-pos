@@ -14,7 +14,9 @@ import ScreenModal from "@/components/ui/ScreenModal";
 import Logger from "@/services/logger";
 import { useUpdateUserMutation } from "@/services/mutations/useUpdateUserMutation";
 import { useUploadImageMutation } from "@/services/mutations/useUploadImageMutation";
+import type { AuthUser } from "@/services/types/Auth";
 import type { CreateUserRequest, User } from "@/services/types/User";
+import { useAuthStore } from "@/store/useAuthStore";
 import { vs } from "@/utils/Scale";
 
 const profileSchema = z.object({
@@ -36,10 +38,55 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
+function resolveUser(userData?: string, authUser?: AuthUser | User | null): User | null {
+  if (userData) {
+    try {
+      return JSON.parse(userData) as User;
+    } catch {
+      // Fall through to authUser
+    }
+  }
+  if (!authUser) return null;
+  return {
+    id: authUser.id || "",
+    name: authUser.name || "",
+    email: authUser.email || "",
+    phone: authUser.phone || "",
+    storeId: authUser.storeId || "",
+    roleCode: authUser.roleCode || "",
+    imageUrl: authUser.imageUrl || "",
+  };
+}
+
+function buildProfilePayload(data: ProfileFormData): Partial<CreateUserRequest> {
+  const payload: Partial<CreateUserRequest> = { ...data };
+  if (!payload.password) {
+    payload.password = undefined;
+  }
+  return payload;
+}
+
+function syncAuthUser(
+  authUser: AuthUser | null | undefined,
+  targetId: string,
+  updatedUser: User,
+): void {
+  if (authUser && authUser.id === targetId) {
+    useAuthStore.getState().setUser({
+      ...authUser,
+      name: updatedUser.name || authUser.name,
+      email: updatedUser.email || authUser.email,
+      phone: updatedUser.phone ?? authUser.phone,
+      imageUrl: updatedUser.imageUrl ?? authUser.imageUrl,
+    });
+  }
+}
+
 const EditProfileModal = () => {
   const router = useRouter();
-  const { userData } = useLocalSearchParams<{ userData: string }>();
-  const user: User | null = userData ? JSON.parse(userData) : null;
+  const authUser = useAuthStore((state) => state.user);
+  const { userData } = useLocalSearchParams<{ userData?: string }>();
+  const user = resolveUser(userData, authUser);
   const { mutateAsync: updateUser, isPending } = useUpdateUserMutation();
   const { mutateAsync: uploadImage, isPending: isUploadingImage } = useUploadImageMutation();
 
@@ -87,13 +134,10 @@ const EditProfileModal = () => {
     if (!user) return;
 
     try {
-      // Filter out empty password if not changing it
-      const payload: Partial<CreateUserRequest> = { ...data };
-      if (!payload.password) {
-        payload.password = undefined;
-      }
+      const payload = buildProfilePayload(data);
+      const updatedUser = await updateUser({ id: user.id, data: payload });
+      syncAuthUser(authUser, user.id, updatedUser);
 
-      await updateUser({ id: user.id, data: payload });
       if (router.canGoBack()) router.back();
       Alert.alert("Success", "Profile updated successfully");
     } catch (error: unknown) {

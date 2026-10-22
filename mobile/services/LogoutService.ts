@@ -8,6 +8,7 @@ import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { SyncService } from "@/services/SyncService";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useDraftStore } from "@/store/useDraftStore";
 import { useLoadingStore } from "@/store/useLoadingStore";
 
 const revokeServerSession = async (refreshToken?: string): Promise<void> => {
@@ -72,6 +73,7 @@ export const LogoutService = {
     try {
       await revokeServerSession(refreshToken);
       clearAllStorage();
+      useDraftStore.getState().clearDrafts();
       useAuthStore.setState({ isLoggedIn: false, user: undefined });
       await cleanLocalDatabase();
       reloadOrRedirect();

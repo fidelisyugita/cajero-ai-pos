@@ -78,10 +78,7 @@ const BusinessScreen = () => {
 
   const handleEditProfile = () => {
     if (!currentUser) return;
-    router.push({
-      pathname: "/modal/business/edit-profile",
-      params: { userData: JSON.stringify(currentUser) },
-    });
+    router.push("/modal/business/edit-profile");
   };
 
   return (
