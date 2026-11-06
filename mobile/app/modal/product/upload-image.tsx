@@ -1,11 +1,15 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import IcImage from "@/assets/icons/image.svg";
 import IcUpload from "@/assets/icons/upload.svg";
+import IcX from "@/assets/icons/x.svg";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import Input from "@/components/ui/Input";
 import ScreenModal from "@/components/ui/ScreenModal";
 import { t } from "@/services/i18n";
 import useImageSelectionStore from "@/store/useImageSelectionStore";
@@ -51,6 +55,7 @@ const UploadImageModal = () => {
   const { title } = useLocalSearchParams<{ title: string }>();
 
   const { imageUri, setImageUri, onImageUploaded, setOnImageUploaded } = useImageSelectionStore();
+  const [urlInput, setUrlInput] = useState(imageUri || "");
 
   const chooseFile = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -69,8 +74,8 @@ const UploadImageModal = () => {
       <ScreenModal.Header title={title || t("upload_image")} />
       <ScreenModal.Body>
         <View style={$.container}>
-          {imageUri ? (
-            <Image contentFit="cover" source={imageUri} style={$.image} />
+          {urlInput || imageUri ? (
+            <Image contentFit="cover" source={urlInput || imageUri} style={$.image} />
           ) : (
             <View style={$.imagePlaceholder}>
               <UniIcImage />
@@ -88,6 +93,26 @@ const UploadImageModal = () => {
             />
           </View>
 
+          <Input
+            defaultValue={urlInput}
+            label="Image URL"
+            onChangeText={setUrlInput}
+            placeholder="https://..."
+            right={
+              urlInput ? (
+                <IconButton
+                  Icon={IcX}
+                  onPress={() => {
+                    setUrlInput("");
+                    setImageUri("");
+                  }}
+                  size="sm"
+                  variant="neutral-no-stroke"
+                />
+              ) : null
+            }
+          />
+
           <View style={$.chooseColor}>
             <Text style={$.chooseColorText}>{t("choose_color")}</Text>
             <FlatList
@@ -99,11 +124,11 @@ const UploadImageModal = () => {
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => {
-                    setImageUri(
-                      getImagePlaceholderColor(
-                        item.indexOf("rgba") > -1 ? rgbaStringToHex6(item) : item,
-                      ),
+                    const color = getImagePlaceholderColor(
+                      item.indexOf("rgba") > -1 ? rgbaStringToHex6(item) : item,
                     );
+                    setUrlInput(color);
+                    setImageUri(color);
                   }}
                   style={$.colorItem(item)}
                 />
@@ -118,6 +143,7 @@ const UploadImageModal = () => {
           onPress={() => {
             router.dismiss();
             setImageUri("");
+            setUrlInput("");
           }}
           size="md"
           style={$.flex}
@@ -126,7 +152,9 @@ const UploadImageModal = () => {
         />
         <Button
           onPress={() => {
-            onImageUploaded?.(imageUri ?? "");
+            const finalUri = urlInput || imageUri || "";
+            onImageUploaded?.(finalUri);
+            setImageUri(finalUri);
             setOnImageUploaded(undefined);
             router.dismiss();
           }}

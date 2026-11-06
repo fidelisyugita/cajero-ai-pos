@@ -90,10 +90,21 @@ const AddCategory = () => {
   const { mutate: createCategory, isPending } = useCreateProductCategoryMutation();
 
   const handleAddCategory = () => {
-    if (!newCategoryName) return;
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+
+    // Derive deterministic uppercase code capped at 10 characters matching backend DB column length
+    const code = trimmed
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 10);
+
+    if (!code) return;
 
     createCategory(
-      { name: newCategoryName, code: newCategoryName.toUpperCase().replace(" ", "_") },
+      { name: trimmed, code },
       {
         onSuccess: () => {
           setNewCategoryName("");
@@ -114,7 +125,7 @@ const AddCategory = () => {
           containerStyle={$.addCategoryInput}
           defaultValue={newCategoryName}
           label={t("category_name")}
-          maxLength={60}
+          maxLength={50}
           onChangeText={setNewCategoryName}
           size="lg"
         />
