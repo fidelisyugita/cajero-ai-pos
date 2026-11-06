@@ -1,5 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Image, TouchableOpacity, View } from "react-native";
+import { Image } from "expo-image";
+import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Text from "@/components/ui/Typography";
 import { vs } from "@/utils/Scale";
@@ -23,6 +24,8 @@ const EmployeeItem = ({ employee, onPressDetails }: EmployeeItemProps) => {
     <View style={$.container}>
       <View style={$.row}>
         <Image
+          cachePolicy="memory-disk"
+          contentFit="cover"
           source={{
             uri:
               employee.avatar ||

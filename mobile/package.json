@@ -14,7 +14,7 @@
     "web": "expo start --web",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "lint:hygiene": "node ./scripts/check-comment-hygiene.js",
+    "lint:hygiene": "node ./scripts/check-comment-hygiene.js && node ./scripts/check-image-cache-policy.js",
     "lint:hygiene:fix": "node ./scripts/check-comment-hygiene.js --fix",
     "lint:test": "biome check app/**/__tests__/** components/**/__tests__/** db/**/__tests__/** hooks/**/__tests__/** lib/**/__tests__/** services/**/__tests__/** store/**/__tests__/** utils/**/__tests__/** jest.setup.ts jest.config.js",
     "lint:test:fix": "biome check --write app/**/__tests__/** components/**/__tests__/** db/**/__tests__/** hooks/**/__tests__/** lib/**/__tests__/** services/**/__tests__/** store/**/__tests__/** utils/**/__tests__/** jest.setup.ts jest.config.js",
@@ -44,6 +44,8 @@
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
     "check:bundle": "node ./scripts/check-bundle-size.js",
+    "check:images": "node ./scripts/check-image-cache-policy.js",
+    "check:migrations": "node ./scripts/check-migrations.js",
     "check:16kb": "node ./scripts/check-16kb-alignment.js",
     "sonar:scan": "node ./scripts/sonar-scanner.js",
     "sonar": "yarn test:coverage && yarn sonar:scan"

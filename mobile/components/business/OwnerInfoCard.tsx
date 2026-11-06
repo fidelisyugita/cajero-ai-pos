@@ -1,4 +1,5 @@
-import { Image, View } from "react-native";
+import { Image } from "expo-image";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
 import FormSectionCard from "@/components/ui/FormSectionCard";
@@ -36,7 +37,12 @@ const OwnerInfoCard = ({
           {loading ? (
             <Skeleton width={vs(60)} height={vs(60)} borderRadius={vs(30)} />
           ) : (
-            <Image source={{ uri: avatar }} style={$.avatar} />
+            <Image
+              cachePolicy="memory-disk"
+              contentFit="cover"
+              source={{ uri: avatar }}
+              style={$.avatar}
+            />
           )}
 
           <View style={$.info}>
