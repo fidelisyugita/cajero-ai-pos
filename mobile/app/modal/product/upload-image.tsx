@@ -55,7 +55,7 @@ const UploadImageModal = () => {
   const { title } = useLocalSearchParams<{ title: string }>();
 
   const { imageUri, setImageUri, onImageUploaded, setOnImageUploaded } = useImageSelectionStore();
-  const [urlInput, setUrlInput] = useState(imageUri || "");
+  const [urlInput, setUrlInput] = useState("");
 
   const chooseFile = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -84,23 +84,36 @@ const UploadImageModal = () => {
 
           <View style={$.uploadImage}>
             <Text style={$.uploadImageText}>{t("upload_image")}</Text>
-            <Button
-              leftIcon={renderUploadIcon}
-              onPress={chooseFile}
-              size="md"
-              title={t("choose_file")}
-              variant="soft"
-            />
+            <View style={{ flexDirection: "row", gap: vs(12) }}>
+              <Button
+                leftIcon={renderUploadIcon}
+                onPress={chooseFile}
+                size="md"
+                title={t("choose_file")}
+                variant="soft"
+              />
+              <Button
+                onPress={() => {
+                  setUrlInput("");
+                  setImageUri("");
+                }}
+                size="md"
+                title="Clear Image"
+                variant="neutral"
+              />
+            </View>
           </View>
 
           <Input
-            defaultValue={urlInput}
+            value={urlInput}
             label="Image URL"
             onChangeText={setUrlInput}
             placeholder="https://..."
             right={
               urlInput ? (
                 <IconButton
+                  accessibilityLabel="clear-image-url"
+                  testID="clear-image-url"
                   Icon={IcX}
                   onPress={() => {
                     setUrlInput("");

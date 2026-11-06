@@ -519,10 +519,12 @@ const AddProduct = () => {
               />
             )}
             <Button
+              accessibilityLabel="save-product-button"
               disabled={disableAction}
               isLoading={isSubmitting}
               onPress={handleSubmit(onSave)}
               size="md"
+              testID="save-product-button"
               title={t("save")}
               variant="primary"
             />

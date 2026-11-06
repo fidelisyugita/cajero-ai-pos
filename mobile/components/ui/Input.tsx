@@ -1,4 +1,4 @@
-import { forwardRef, memo, useEffect, useState } from "react";
+import { forwardRef, memo, useState } from "react";
 import {
   type StyleProp,
   Text,
@@ -163,20 +163,18 @@ const UniTextInput = withUnistyles(TextInput, (theme) => ({
 }));
 
 function useInputTextState(value?: string, defaultValue?: string) {
-  const [hasText, setHasText] = useState<boolean>(Boolean(value ?? defaultValue));
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setHasText(Boolean(value));
-    } else if (defaultValue !== undefined) {
-      setHasText(Boolean(defaultValue));
-    }
-  }, [value, defaultValue]);
-
   const isControlled = value !== undefined;
+  const [hasText, setHasText] = useState<boolean>(Boolean(defaultValue));
+
   const hasContent = isControlled ? Boolean(value) : hasText;
 
-  return { hasContent, setHasText };
+  const updateHasText = (hasTextValue: boolean) => {
+    if (!isControlled) {
+      setHasText(hasTextValue);
+    }
+  };
+
+  return { hasContent, setHasText: updateHasText };
 }
 
 function getEffectivePlaceholder(
@@ -263,6 +261,7 @@ const Input = forwardRef<TextInput, InputProps>(
 
           <UniTextInput
             ref={ref}
+            clearButtonMode="while-editing"
             defaultValue={defaultValue}
             disableFullscreenUI={true}
             editable={editable}
@@ -270,6 +269,7 @@ const Input = forwardRef<TextInput, InputProps>(
             onChangeText={handleTextChange}
             onFocus={handleFocus}
             placeholder={activePlaceholder}
+            selectTextOnFocus={true}
             value={value}
             style={[
               stylesheet.input,
