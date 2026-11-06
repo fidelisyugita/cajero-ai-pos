@@ -1,4 +1,5 @@
 import Entypo from "@expo/vector-icons/Entypo";
+import { memo, useCallback } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -12,9 +13,9 @@ interface OrderItemProps {
   item: OrderItemType;
   index?: number;
   isExpanded: boolean;
-  onToggle: () => void;
-  onRemove: () => void;
-  onEdit: () => void;
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  onEdit: (item: OrderItemType) => void;
 }
 
 const renderEditIcon = (size: number, color: string) => (
@@ -26,6 +27,18 @@ const renderTrashIcon = (size: number, color: string) => (
 );
 
 const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemProps) => {
+  const handleToggle = useCallback(() => {
+    onToggle(item.id);
+  }, [onToggle, item.id]);
+
+  const handleRemove = useCallback(() => {
+    onRemove(item.id);
+  }, [onRemove, item.id]);
+
+  const handleEdit = useCallback(() => {
+    onEdit(item);
+  }, [onEdit, item]);
+
   const variantsTotal = item.variants.reduce((sum, v) => sum + (Number(v.price) || 0), 0);
   const unitPrice = Number(item.sellingPrice || 0) + variantsTotal;
   // Calculate total price: (unitPrice - discount?) * quantity.
@@ -41,7 +54,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
 
   return (
     <View style={[$.container, isExpanded && $.expandedContainer]}>
-      <TouchableOpacity style={$.header} onPress={onToggle} activeOpacity={0.7}>
+      <TouchableOpacity style={$.header} onPress={handleToggle} activeOpacity={0.7}>
         <View style={$.left}>
           <Entypo name={isExpanded ? "chevron-down" : "chevron-right"} size={vs(20)} color="#666" />
           <Text style={$.quantity} adjustsFontSizeToFit numberOfLines={1}>
@@ -92,7 +105,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
               variant="positive"
               size="sm"
               leftIcon={renderEditIcon}
-              onPress={onEdit}
+              onPress={handleEdit}
               style={$.actionButton}
             />
             <Button
@@ -100,7 +113,7 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
               variant="warning"
               size="sm"
               leftIcon={renderTrashIcon}
-              onPress={onRemove}
+              onPress={handleRemove}
               style={$.actionButton}
             />
           </View>
@@ -109,6 +122,8 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
     </View>
   );
 };
+
+OrderItem.displayName = "OrderItem";
 
 const $ = StyleSheet.create((theme) => ({
   container: {
@@ -198,4 +213,4 @@ const $ = StyleSheet.create((theme) => ({
   },
 }));
 
-export default OrderItem;
+export default memo(OrderItem);

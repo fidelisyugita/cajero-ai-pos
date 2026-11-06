@@ -8,6 +8,7 @@ const withAndroidSizeOptimizations = (config) => {
       { type: "property", key: "android.enableShrinkResourcesInReleaseBuilds", value: "true" },
       { type: "property", key: "android.enableR8.fullMode", value: "true" },
       { type: "property", key: "expo.gif.enabled", value: "false" },
+      { type: "property", key: "reactNativeArchitectures", value: "armeabi-v7a,arm64-v8a" },
     ];
 
     for (const prop of propsToSet) {
@@ -36,6 +37,14 @@ const withAndroidSizeOptimizations = (config) => {
 
 function applySizeOptimizations(buildGradle) {
   let updated = buildGradle;
+
+  // Add resConfigs to defaultConfig to strip unused language translations from third-party libraries
+  if (!updated.includes("resConfigs") && updated.includes("defaultConfig {")) {
+    updated = updated.replace(
+      "defaultConfig {",
+      `defaultConfig {\n        resConfigs "en", "id", "in"`,
+    );
+  }
 
   // Add splits block if not present (only enabled for APK builds; App Bundles handle ABI splits natively)
   const splitsSnippet = `

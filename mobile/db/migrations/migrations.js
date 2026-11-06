@@ -6,6 +6,7 @@ import m0002 from "./0002_equal_morg.sql";
 import m0003 from "./0003_round_wendigo.sql";
 import m0004 from "./0004_fix_missing_columns.sql";
 import m0005 from "./0005_add_ingredients_table.sql";
+import m0006 from "./0006_performance_indexes.sql";
 import journal from "./meta/_journal.json";
 
 export default {
@@ -17,5 +18,6 @@ export default {
     m0003,
     m0004,
     m0005,
+    m0006,
   },
 };

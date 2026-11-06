@@ -1,13 +1,8 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import { memo, type ReactElement } from "react";
+import { FlashList } from "@shopify/flash-list";
+import { memo } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { vs } from "@/utils/Scale";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 const NUM_COLUMNS = 4;
 
@@ -18,7 +13,6 @@ const SKELETON_DATA = Array.from({ length: 16 }, (_, index) => ({
 const MenuListSkeleton = () => {
   return (
     <FlashList
-      estimatedItemSize={200}
       data={SKELETON_DATA}
       keyExtractor={(item) => item.id.toString()}
       numColumns={NUM_COLUMNS}

@@ -1,10 +1,23 @@
-import { and, eq, like, or, type SQL, sql } from "drizzle-orm";
+import { and, eq, inArray, like, or, type SQL, sql } from "drizzle-orm";
 import { db, runInTransaction } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
 import { nowDate, toDayjs } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
 import type { GetTransactionsParams, TransactionRequest } from "./types/Transaction";
+
+function groupItemsByTransactionId(items: (typeof transactionItems.$inferSelect)[]) {
+  const map = new Map<string, (typeof transactionItems.$inferSelect)[]>();
+  for (const item of items) {
+    const list = map.get(item.transactionId);
+    if (list) {
+      list.push(item);
+    } else {
+      map.set(item.transactionId, [item]);
+    }
+  }
+  return map;
+}
 
 export const LocalTransactionService = {
   async createTransaction(request: TransactionRequest) {
@@ -106,30 +119,31 @@ export const LocalTransactionService = {
     // Combine conditions
     const finalCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const result = await db
+    const txnRows = await db
       .select()
       .from(transactions)
       .where(finalCondition)
       .limit(size)
       .offset(page * size)
-      .orderBy(sql`${transactions.createdAt} DESC`); // Default sort desc
+      .orderBy(sql`${transactions.createdAt} DESC`);
 
-    // Map to TransactionResponse (simplified for list)
-    return Promise.all(
-      result.map(async (txn) => {
-        const items = await db
-          .select()
-          .from(transactionItems)
-          .where(eq(transactionItems.transactionId, txn.id));
-        return {
-          ...txn,
-          transactionProduct: items, // Map to expected structure if needed, but length usage is key
-          id: txn.id,
-          createdAt: txn.createdAt ? toDayjs(txn.createdAt).toISOString() : "",
-          updatedAt: "", // Not tracked in local list query mostly
-        };
-      }),
-    );
+    if (txnRows.length === 0) return [];
+
+    const txnIds = txnRows.map((t) => t.id);
+    const itemsRows = await db
+      .select()
+      .from(transactionItems)
+      .where(inArray(transactionItems.transactionId, txnIds));
+
+    const itemsByTxnId = groupItemsByTransactionId(itemsRows);
+
+    return txnRows.map((txn) => ({
+      ...txn,
+      transactionProduct: itemsByTxnId.get(txn.id) || [],
+      id: txn.id,
+      createdAt: txn.createdAt ? toDayjs(txn.createdAt).toISOString() : "",
+      updatedAt: "",
+    }));
   },
   async getTransactionById(id: string) {
     const result = await db.select().from(transactions).where(eq(transactions.id, id));

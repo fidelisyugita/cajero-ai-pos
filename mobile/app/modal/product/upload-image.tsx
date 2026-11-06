@@ -55,8 +55,9 @@ const UploadImageModal = () => {
   const chooseFile = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
-      allowsEditing: false,
-      quality: 0.8,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.7,
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {

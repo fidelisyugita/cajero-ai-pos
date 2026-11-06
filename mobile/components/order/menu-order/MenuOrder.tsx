@@ -31,9 +31,7 @@ const MenuOrder = () => {
   const tableNumber = useOrderStore((state) => state.tableNumber);
   const setCustomerName = useOrderStore((state) => state.setCustomerName);
   const setTableNumber = useOrderStore((state) => state.setTableNumber);
-  const items = useOrderStore((state) => state.items);
-
-  const isValid = items.length > 0;
+  const isValid = useOrderStore((state) => state.items.length > 0);
 
   return (
     <View style={$.container}>

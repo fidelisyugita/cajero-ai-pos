@@ -1,5 +1,5 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import { type ComponentProps, memo, type ReactElement, useMemo } from "react";
+import { FlashList } from "@shopify/flash-list";
+import { type ComponentProps, memo, useMemo } from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -12,11 +12,6 @@ import { useProductCategoriesQuery } from "@/services/queries/useProductCategori
 import type { ProductCategory } from "@/services/types/ProductCategory";
 import { useCategoryStore } from "@/store/useMenuCategoryStore";
 import { vs } from "@/utils/Scale";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 interface CategoryFilterProps {
   style?: ComponentProps<typeof Animated.View>["style"];
@@ -53,7 +48,6 @@ const CategoryFilter = ({ style, editable }: CategoryFilterProps) => {
         horizontal
         ItemSeparatorComponent={CategorySeparator}
         keyExtractor={(item) => item.code}
-        estimatedItemSize={50}
         renderItem={({ item }) => <CategoryItem editable={editable} item={item} />}
       />
     </Animated.View>

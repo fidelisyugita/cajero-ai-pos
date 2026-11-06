@@ -1,5 +1,5 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import { memo, type ReactElement, useState } from "react";
+import { FlashList } from "@shopify/flash-list";
+import { memo, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ExpenseDetailModal from "@/components/expense/ExpenseDetailModal";
@@ -11,11 +11,6 @@ import { usePettyCashQuery } from "@/services/queries/usePettyCashQuery";
 import type { PettyCash } from "@/services/types/PettyCash";
 import { formatDayDate, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 const COLUMNS = [
   { label: "Time", flex: 1 },
@@ -112,7 +107,6 @@ const ExpenseList = ({ startDate, endDate, searchQuery }: ExpenseListProps) => {
           (!data?.content || data.content.length === 0) && { flex: 1 },
         ]}
         data={data?.content || []}
-        estimatedItemSize={60}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <ExpenseRow item={item} onPress={() => handlePressItem(item)} />}
         ItemSeparatorComponent={ExpenseSeparator}

@@ -196,6 +196,63 @@ describe("LocalTransactionService", () => {
       expect(result[0].transactionProduct).toEqual(mockItems);
       expect(result[0].createdAt).toBe("2026-08-24T10:00:00.000Z");
     });
+
+    it("batch-fetches all transaction items in a single query across multiple transactions without N+1", async () => {
+      const mockTxns = [
+        {
+          id: "txn-1",
+          storeId: "store-123",
+          totalPrice: 50000,
+          isIn: true,
+          createdAt: toDate("2026-08-24T10:00:00.000Z"),
+        },
+        {
+          id: "txn-2",
+          storeId: "store-123",
+          totalPrice: 75000,
+          isIn: true,
+          createdAt: toDate("2026-08-24T11:00:00.000Z"),
+        },
+      ];
+
+      const mockItems = [
+        {
+          id: "item-1",
+          transactionId: "txn-1",
+          productId: "prod-1",
+          quantity: 1,
+          sellingPrice: 50000,
+        },
+        {
+          id: "item-2",
+          transactionId: "txn-2",
+          productId: "prod-2",
+          quantity: 2,
+          sellingPrice: 37500,
+        },
+      ];
+
+      mockDbBuilder.orderBy.mockResolvedValueOnce(mockTxns);
+      let isFirstWhere = true;
+      mockDbBuilder.where.mockImplementation(() => {
+        if (isFirstWhere) {
+          isFirstWhere = false;
+          return mockDbBuilder;
+        }
+        return Promise.resolve(mockItems);
+      });
+
+      const result = await LocalTransactionService.getTransactions({
+        page: 0,
+        size: 10,
+      });
+
+      // Exactly 2 select calls: 1 for transactions page, 1 for batch items
+      expect(db.select).toHaveBeenCalledTimes(2);
+      expect(result.length).toBe(2);
+      expect(result[0].transactionProduct).toEqual([mockItems[0]]);
+      expect(result[1].transactionProduct).toEqual([mockItems[1]]);
+    });
   });
 
   describe("getTransactionById", () => {

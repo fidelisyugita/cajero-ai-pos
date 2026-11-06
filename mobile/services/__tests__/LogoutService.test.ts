@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { Alert, DevSettings } from "react-native";
 import { expoDb } from "@/db/drizzle";
+import { queryClient } from "@/lib/ReactQuery";
 import * as StorageModule from "@/lib/Storage";
 import * as PostLogoutModule from "@/services/endpoints/postLogout";
 import { SyncService } from "@/services/SyncService";
@@ -82,6 +83,15 @@ describe("LogoutService", () => {
       idempotent: true,
     });
     expect(reloadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("should clear the React Query cache during performLogout to free JS memory", async () => {
+    const clearSpy = jest.spyOn(queryClient, "clear");
+
+    await LogoutService.performLogout();
+
+    expect(clearSpy).toHaveBeenCalledTimes(1);
+    clearSpy.mockRestore();
   });
 
   it("should proceed with local cleanup if remote logout fails or times out", async () => {
