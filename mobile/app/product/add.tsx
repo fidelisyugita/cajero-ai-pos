@@ -56,7 +56,10 @@ const productSchema = z.object({
   sellingPrice: z.number().min(0, "Price must be a positive number"),
   buyingPrice: z.number().min(0, "Buying Price must be a positive number").optional(),
   category: z.object({
-    code: z.string().min(2, "Category code must be at least 2 characters"),
+    code: z
+      .string()
+      .min(2, "Category code must be at least 2 characters")
+      .max(10, "Category code cannot exceed 10 characters"),
     name: z.string().min(2, "Category name must be at least 2 characters"),
   }),
 
@@ -346,6 +349,7 @@ const AddProduct = () => {
       } else {
         reset();
         useVariantStore.getState().reset();
+        useImageSelectionStore.getState().reset();
       }
     } catch (error: unknown) {
       Logger.error("Add/Update product failed:", error);

@@ -1,4 +1,5 @@
-import { Image, View } from "react-native";
+import { Image } from "expo-image";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
 import FormSectionCard from "@/components/ui/FormSectionCard";
@@ -48,6 +49,8 @@ const BusinessProfileCard = ({
               <Skeleton width={vs(100)} height={vs(100)} borderRadius={vs(50)} />
             ) : (
               <Image
+                cachePolicy="memory-disk"
+                contentFit="cover"
                 source={{
                   uri: imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
                 }}
