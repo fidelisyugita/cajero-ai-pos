@@ -17,16 +17,18 @@ const createMockDevice = (overrides: Partial<any> = {}) => {
     characteristics: jest.fn().mockResolvedValue([mockChar]),
   };
 
+  const mockSubscription = { remove: jest.fn() };
   const device: any = {
     id: "device-123",
     name: "POS-58 Printer",
     discoverAllServicesAndCharacteristics: jest.fn().mockResolvedValue(undefined),
     services: jest.fn().mockResolvedValue([mockService]),
     requestMTU: jest.fn().mockResolvedValue({}),
-    onDisconnected: jest.fn(),
+    onDisconnected: jest.fn().mockReturnValue(mockSubscription),
     cancelConnection: jest.fn().mockResolvedValue(undefined),
     writeCharacteristicWithResponseForService: jest.fn().mockResolvedValue(undefined),
     writeCharacteristicWithoutResponseForService: jest.fn().mockResolvedValue(undefined),
+    mockSubscription,
     ...overrides,
   };
   return device;
@@ -312,6 +314,25 @@ describe("PrinterService", () => {
 
       expect(mockDevice.cancelConnection).toHaveBeenCalled();
       expect(usePrinterStore.getState().isConnected).toBe(false);
+    });
+
+    it("cleans up previous disconnect subscription when reconnecting or disconnecting", async () => {
+      const mockDevice1 = createMockDevice({ id: "device-1" });
+      const mockDevice2 = createMockDevice({ id: "device-2" });
+      mockBleManager.connectToDevice
+        .mockResolvedValueOnce(mockDevice1)
+        .mockResolvedValueOnce(mockDevice2);
+
+      await printerService.connectToDevice("device-1");
+      expect(mockDevice1.onDisconnected).toHaveBeenCalled();
+
+      // Connect to second device while first was connected
+      await printerService.connectToDevice("device-2");
+      expect(mockDevice1.mockSubscription.remove).toHaveBeenCalled();
+
+      // Now disconnect
+      await printerService.disconnect();
+      expect(mockDevice2.mockSubscription.remove).toHaveBeenCalled();
     });
   });
 

@@ -1,6 +1,6 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { memo, type ReactElement, useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -14,11 +14,6 @@ import { useProductsQuery } from "@/services/queries/useProductsQuery";
 import type { Product } from "@/services/types/Product";
 import StockProductHistory from "./StockProductHistory";
 import StockUpdateModal from "./StockUpdateModal";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 const COLUMNS = [
   { label: "Product Name", flex: 2 },
@@ -127,7 +122,6 @@ const StockProducts = ({ searchQuery = "" }: StockProductsProps) => {
       <FlashList<Product>
         contentContainerStyle={[$.listContent, sortedProducts.length === 0 && { flex: 1 }]}
         data={sortedProducts}
-        estimatedItemSize={60}
         keyExtractor={(item: Product) => item.id}
         renderItem={({ item }: { item: Product }) => (
           <StockRow

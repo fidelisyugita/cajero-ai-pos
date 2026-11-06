@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { Alert, DevSettings } from "react-native";
 import { expoDb } from "@/db/drizzle";
+import { queryClient } from "@/lib/ReactQuery";
 import { clearAllStorage } from "@/lib/Storage";
 import { postLogout } from "@/services/endpoints/postLogout";
 import { t } from "@/services/i18n";
@@ -72,6 +73,7 @@ export const LogoutService = {
 
     try {
       await revokeServerSession(refreshToken);
+      queryClient.clear();
       clearAllStorage();
       useDraftStore.getState().clearDrafts();
       useAuthStore.setState({ isLoggedIn: false, user: undefined });
@@ -79,6 +81,7 @@ export const LogoutService = {
       reloadOrRedirect();
     } catch (error) {
       Logger.error("Logout failed", error);
+      queryClient.clear();
       useAuthStore.setState({ isLoggedIn: false, user: undefined });
       router.replace("/(auth)/sign-in");
     }

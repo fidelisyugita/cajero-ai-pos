@@ -1,4 +1,8 @@
 import "./config/Unistyles";
+import { enableFreeze } from "react-native-screens";
+
+enableFreeze(true);
+
 import "expo-router/entry";
 import { Buffer } from "buffer";
 import dayjs from "dayjs";

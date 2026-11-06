@@ -1,6 +1,6 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { type ReactElement, useState } from "react";
+import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
@@ -15,11 +15,6 @@ import {
 import { formatCurrency } from "@/utils/Format";
 import OrderItem from "./OrderItem";
 
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
-
 interface CurvedShapeProps {
   rotate?: number;
 }
@@ -32,28 +27,52 @@ const ListOrder = () => {
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const handleToggle = (id: string) => {
+  const handleToggle = useCallback((id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
-  };
+  }, []);
 
-  const handleEdit = (item: OrderItemType) => {
-    router.push({
-      pathname: "/modal/order/add-item",
-      params: {
-        id: item.productId,
-        orderItemId: item.id,
-        name: item.name,
-        sellingPrice: item.sellingPrice,
-        imageUrl: item.imageUrl,
-        tax: item.tax,
-        commission: item.commission,
-        initialQuantity: item.quantity,
-        initialNote: item.note,
-        initialDiscount: item.discount,
-        initialVariants: JSON.stringify(item.variants),
-      },
-    });
-  };
+  const handleRemove = useCallback(
+    (id: string) => {
+      removeItem(id);
+    },
+    [removeItem],
+  );
+
+  const handleEdit = useCallback(
+    (item: OrderItemType) => {
+      router.push({
+        pathname: "/modal/order/add-item",
+        params: {
+          id: item.productId,
+          orderItemId: item.id,
+          name: item.name,
+          sellingPrice: item.sellingPrice,
+          imageUrl: item.imageUrl,
+          tax: item.tax,
+          commission: item.commission,
+          initialQuantity: item.quantity,
+          initialNote: item.note,
+          initialDiscount: item.discount,
+          initialVariants: JSON.stringify(item.variants),
+        },
+      });
+    },
+    [router],
+  );
+
+  const renderOrderItem = useCallback(
+    ({ item, index }: { item: OrderItemType; index: number }) => (
+      <OrderItem
+        item={item}
+        index={index + 1}
+        isExpanded={expandedId === item.id}
+        onToggle={handleToggle}
+        onRemove={handleRemove}
+        onEdit={handleEdit}
+      />
+    ),
+    [expandedId, handleToggle, handleRemove, handleEdit],
+  );
 
   return (
     <View style={$.container}>
@@ -62,21 +81,12 @@ const ListOrder = () => {
         <Button size="sm" title={t("remove_all")} variant="link" onPress={clearOrder} />
       </View>
       <FlashList
+        contentContainerStyle={$.content}
         data={items}
         extraData={expandedId}
-        renderItem={({ item, index }) => (
-          <OrderItem
-            item={item}
-            index={index + 1}
-            isExpanded={expandedId === item.id}
-            onToggle={() => handleToggle(item.id)}
-            onRemove={() => removeItem(item.id)}
-            onEdit={() => handleEdit(item)}
-          />
-        )}
-        estimatedItemSize={100}
+        keyExtractor={(item) => item.id}
         ListFooterComponent={Footer}
-        contentContainerStyle={$.content}
+        renderItem={renderOrderItem}
         showsVerticalScrollIndicator={false}
       />
     </View>
