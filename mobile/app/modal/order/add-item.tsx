@@ -290,12 +290,20 @@ const AddItemModal = () => {
               ))
             )}
 
-            {/* Discount & Note */}
+            {/* Note & Discount */}
             <View style={$.inputGroup}>
+              <Input
+                label="Note (Optional)"
+                size="lg"
+                value={note}
+                onChangeText={setNote}
+                placeholder="e.g. Sambal dipisah, less sugar"
+              />
               <Input
                 label="Discount"
                 size="lg"
                 value={discount}
+                left={<Text style={$.currencyPrefix}>Rp</Text>}
                 onChangeText={(text) => {
                   let totalVariantPrice = 0;
 
@@ -318,15 +326,8 @@ const AddItemModal = () => {
                     setDiscount(text);
                   }
                 }}
-                placeholder="Discount"
+                placeholder="0"
                 keyboardType="numeric"
-              />
-              <Input
-                label="Note (Optional)"
-                size="lg"
-                value={note}
-                onChangeText={setNote}
-                placeholder="Note (Optional)"
               />
             </View>
           </ScrollView>
@@ -448,6 +449,11 @@ const $ = StyleSheet.create((theme) => ({
   inputGroup: {
     gap: theme.spacing.lg,
     marginTop: theme.spacing.lg,
+  },
+  currencyPrefix: {
+    ...theme.typography.bodyMd,
+    color: theme.colors.neutral[500],
+    paddingLeft: theme.spacing.xs,
   },
   addButton: {
     flex: 1,

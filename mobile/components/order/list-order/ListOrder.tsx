@@ -75,10 +75,10 @@ const ListOrder = () => {
           />
         )}
         estimatedItemSize={100}
-        ListFooterComponent={Footer}
         contentContainerStyle={$.content}
         showsVerticalScrollIndicator={false}
       />
+      <Footer />
     </View>
   );
 };
@@ -193,11 +193,12 @@ const $ = StyleSheet.create((theme) => ({
   },
   content: {
     paddingHorizontal: theme.spacing.xl,
-    paddingBottom: theme.spacing.xl + 100, // accommodate absolute footer
+    paddingBottom: theme.spacing.md,
   },
   footer: {
-    gap: theme.spacing.lg,
-    marginTop: theme.spacing.lg,
+    gap: theme.spacing.md,
+    paddingHorizontal: theme.spacing.xl,
+    paddingBottom: theme.spacing.xs,
   },
   summaryColumn: {
     gap: theme.spacing.md,

@@ -86,8 +86,9 @@ const $ = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.neutral[100],
     paddingTop: rt.insets.top,
     width: vs(338),
+    height: "100%",
     zIndex: 10,
-    gap: vs(20),
+    gap: vs(12),
     //shadow
     shadowColor: "#000",
     shadowOffset: { height: 0, width: 0 },
@@ -97,7 +98,7 @@ const $ = StyleSheet.create((theme, rt) => ({
   },
   header: {
     paddingHorizontal: theme.spacing.xl,
-    gap: vs(20),
+    gap: vs(16),
   },
   headerContent: {
     gap: vs(6),
@@ -123,12 +124,10 @@ const $ = StyleSheet.create((theme, rt) => ({
   footer: {
     backgroundColor: theme.colors.neutral[100],
     paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.md,
+    paddingTop: theme.spacing.sm,
     paddingBottom: theme.spacing.xl + rt.insets.bottom,
     borderTopColor: theme.colors.neutral[300],
     borderTopWidth: vs(1),
-    position: "absolute",
-    bottom: 0,
     width: "100%",
   },
 }));
