@@ -5,7 +5,7 @@ import Typography from "@/components/ui/Typography";
 import { useSyncStore } from "@/store/useSyncStore";
 
 const SyncIndicator = () => {
-  const { isSyncing } = useSyncStore();
+  const isSyncing = useSyncStore((state) => state.isSyncing);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {

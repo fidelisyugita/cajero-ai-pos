@@ -19,19 +19,43 @@ interface ReferenceState {
   fetchAll: () => Promise<void>;
 }
 
+let fetchAllPromise: Promise<void> | null = null;
+
 export const useReferenceStore = create<ReferenceState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       transactionTypes: [],
       paymentMethods: [],
       transactionStatuses: [],
       fetchAll: async () => {
-        const [transactionTypes, paymentMethods, transactionStatuses] = await Promise.all([
-          getTransactionTypes(),
-          getPaymentMethods(),
-          getTransactionStatuses(),
-        ]);
-        set({ transactionTypes, paymentMethods, transactionStatuses });
+        const { transactionTypes, paymentMethods, transactionStatuses } = get();
+        if (
+          transactionTypes.length > 0 &&
+          paymentMethods.length > 0 &&
+          transactionStatuses.length > 0
+        ) {
+          return;
+        }
+        if (fetchAllPromise) {
+          return fetchAllPromise;
+        }
+        fetchAllPromise = (async () => {
+          try {
+            const [types, methods, statuses] = await Promise.all([
+              getTransactionTypes(),
+              getPaymentMethods(),
+              getTransactionStatuses(),
+            ]);
+            set({
+              transactionTypes: types,
+              paymentMethods: methods,
+              transactionStatuses: statuses,
+            });
+          } finally {
+            fetchAllPromise = null;
+          }
+        })();
+        return fetchAllPromise;
       },
     }),
     {

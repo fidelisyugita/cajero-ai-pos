@@ -1,10 +1,61 @@
 import { and, eq, inArray, like, or, type SQL, sql } from "drizzle-orm";
-import { db, runInTransaction } from "@/db/drizzle";
+import { type DrizzleTx, db, runInTransaction } from "@/db/drizzle";
 import { products, transactionItems, transactions } from "@/db/schema";
 import { useAuthStore } from "@/store/useAuthStore";
 import { nowDate, toDayjs } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
 import type { GetTransactionsParams, TransactionRequest } from "./types/Transaction";
+
+async function fetchProductNameMap(
+  tx: DrizzleTx,
+  productIds: string[],
+): Promise<Map<string, string>> {
+  const nameMap = new Map<string, string>();
+  if (productIds.length === 0) return nameMap;
+
+  const productRows = await tx
+    .select({ id: products.id, name: products.name })
+    .from(products)
+    .where(inArray(products.id, productIds));
+  for (const row of productRows) {
+    nameMap.set(row.id, row.name);
+  }
+  return nameMap;
+}
+
+async function insertItemsAndDecrementStock(
+  tx: DrizzleTx,
+  transactionId: string,
+  items: TransactionRequest["transactionProducts"],
+): Promise<void> {
+  if (items.length === 0) return;
+
+  const productIds = Array.from(new Set(items.map((i) => i.productId)));
+  const productNameMap = await fetchProductNameMap(tx, productIds);
+
+  await tx.insert(transactionItems).values(
+    items.map((item) => ({
+      id: generateUUID(),
+      transactionId,
+      productId: item.productId,
+      quantity: item.quantity,
+      sellingPrice: item.sellingPrice,
+      buyingPrice: item.buyingPrice,
+      tax: item.tax,
+      commission: item.commission,
+      discount: item.discount,
+      note: item.note,
+      selectedVariants: item.selectedVariants,
+      productName: productNameMap.get(item.productId) || "Unknown Product",
+    })),
+  );
+
+  for (const item of items) {
+    tx.run(
+      sql`UPDATE ${products} SET stock = stock - ${item.quantity} WHERE id = ${item.productId}`,
+    );
+  }
+}
 
 function groupItemsByTransactionId(items: (typeof transactionItems.$inferSelect)[]) {
   const map = new Map<string, (typeof transactionItems.$inferSelect)[]>();
@@ -47,36 +98,7 @@ export const LocalTransactionService = {
         createdAt: now,
       });
 
-      // Insert Items
-      for (const item of request.transactionProducts) {
-        // Fetch product name from DB to store in snapshot
-        const productRes = await tx
-          .select({ name: products.name })
-          .from(products)
-          .where(eq(products.id, item.productId));
-        const productName = productRes[0]?.name || "Unknown Product";
-
-        await tx.insert(transactionItems).values({
-          id: generateUUID(),
-          transactionId: transactionId,
-          productId: item.productId,
-          quantity: item.quantity,
-          sellingPrice: item.sellingPrice,
-          buyingPrice: item.buyingPrice,
-          tax: item.tax,
-          commission: item.commission,
-          discount: item.discount,
-          note: item.note,
-          selectedVariants: item.selectedVariants,
-          productName: productName,
-        });
-
-        // Update Stock (Optimistic)
-        // We decrement stock in `products` table
-        tx.run(
-          sql`UPDATE ${products} SET stock = stock - ${item.quantity} WHERE id = ${item.productId}`,
-        );
-      }
+      await insertItemsAndDecrementStock(tx, transactionId, request.transactionProducts);
     });
 
     return {

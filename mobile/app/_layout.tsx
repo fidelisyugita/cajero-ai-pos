@@ -22,12 +22,16 @@ if (__DEV__) {
 
 SplashScreen.preventAutoHideAsync();
 
+const SyncManager = () => {
+  useSync();
+  return null;
+};
+
 const InitialLayout = () => {
   const { loaded } = useCustomFonts();
-  const { isLoggedIn } = useAuthStore();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const segments = useSegments();
   const router = useRouter();
-  useSync();
 
   useEffect(() => {
     if (loaded) {
@@ -109,6 +113,7 @@ const RootLayout = () => {
           <AnalyticsProvider>
             <PosErrorBoundary>
               <StatusBar style="auto" />
+              <SyncManager />
               <InitialLayout />
             </PosErrorBoundary>
           </AnalyticsProvider>

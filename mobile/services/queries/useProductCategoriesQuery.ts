@@ -5,5 +5,6 @@ export const useProductCategoriesQuery = () => {
   return useQuery({
     queryKey: ["product-categories"],
     queryFn: getProductCategory,
+    staleTime: 5 * 60_000,
   });
 };

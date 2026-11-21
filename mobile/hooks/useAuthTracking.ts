@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { identifyAnalyticsUser, resetAnalyticsUser } from "@/lib/posthog";
 import { clearSentryUser, setSentryUser } from "@/lib/sentry";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -7,7 +8,12 @@ import { useAuthStore } from "@/store/useAuthStore";
  * Synchronizes PostHog and Sentry user identification lifecycle with the global authentication store.
  */
 export const useAuthTracking = (): void => {
-  const { isLoggedIn, user } = useAuthStore();
+  const { isLoggedIn, user } = useAuthStore(
+    useShallow((state) => ({
+      isLoggedIn: state.isLoggedIn,
+      user: state.user,
+    })),
+  );
 
   useEffect(() => {
     if (isLoggedIn && user?.id) {

@@ -6,7 +6,7 @@ import SyncIndicator from "@/components/ui/SyncIndicator";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const DashboardLayout = () => {
-  const { isLoggedIn } = useAuthStore();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   if (!isLoggedIn) {
     return <Redirect href="/(auth)/sign-in" />;

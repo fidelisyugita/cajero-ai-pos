@@ -1,18 +1,24 @@
+const currencyFormatter = new Intl.NumberFormat("id-ID", {
+  style: "currency",
+  currency: "IDR",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+  currencyDisplay: "symbol",
+});
+
+const numberFormatter = new Intl.NumberFormat("id-ID", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+  useGrouping: true,
+});
+
 export function formatCurrency(amount: number): string {
   const numericAmount = Number(amount);
   if (Number.isNaN(numericAmount)) {
     return "Rp 0"; // Fallback for invalid numbers
   }
 
-  const formatter = new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-    currencyDisplay: "symbol",
-  });
-
-  return formatter.format(numericAmount).replace("Rp", "Rp ");
+  return currencyFormatter.format(numericAmount).replace("Rp", "Rp ");
 }
 
 export function parseCurrency(formattedValue: string): number {
@@ -28,12 +34,7 @@ export function parseCurrency(formattedValue: string): number {
 }
 
 export function formatNumber(amount: number): string {
-  const formatter = new Intl.NumberFormat("id-ID", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-    useGrouping: true,
-  });
-  return formatter.format(amount);
+  return numberFormatter.format(amount);
 }
 
 export function parseNumber(formattedValue: string): number {

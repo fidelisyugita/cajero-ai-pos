@@ -48,4 +48,26 @@ describe("useReferenceStore", () => {
     expect(getPaymentMethods).toHaveBeenCalledTimes(1);
     expect(getTransactionStatuses).toHaveBeenCalledTimes(1);
   });
+
+  it("should deduplicate concurrent fetchAll calls and skip when already populated", async () => {
+    const mockTypes = [{ id: "1", code: "SALE", name: "Sale" }];
+    const mockMethods = [{ id: "1", code: "CASH", name: "Cash" }];
+    const mockStatuses = [{ id: "1", code: "COMPLETED", name: "Completed" }];
+
+    (getTransactionTypes as jest.Mock).mockResolvedValue(mockTypes);
+    (getPaymentMethods as jest.Mock).mockResolvedValue(mockMethods);
+    (getTransactionStatuses as jest.Mock).mockResolvedValue(mockStatuses);
+
+    await Promise.all([
+      useReferenceStore.getState().fetchAll(),
+      useReferenceStore.getState().fetchAll(),
+    ]);
+
+    expect(getTransactionTypes).toHaveBeenCalledTimes(1);
+    expect(getPaymentMethods).toHaveBeenCalledTimes(1);
+    expect(getTransactionStatuses).toHaveBeenCalledTimes(1);
+
+    await useReferenceStore.getState().fetchAll();
+    expect(getTransactionTypes).toHaveBeenCalledTimes(1);
+  });
 });

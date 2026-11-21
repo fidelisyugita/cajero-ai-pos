@@ -7,8 +7,9 @@ import Logger from "../logger";
 import { SyncService } from "../SyncService";
 
 export const useSync = () => {
-  const { isLoggedIn } = useAuthStore();
-  const { setIsSyncing, setLastSyncTime } = useSyncStore();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const setIsSyncing = useSyncStore((state) => state.setIsSyncing);
+  const setLastSyncTime = useSyncStore((state) => state.setLastSyncTime);
 
   useEffect(() => {
     const sync = async () => {

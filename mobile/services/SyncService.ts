@@ -66,8 +66,10 @@ async function syncProductIngredients(
   ingredients: ProductIngredient[],
 ): Promise<void> {
   await tx.delete(productIngredients).where(eq(productIngredients.productId, productId));
-  for (const ing of ingredients) {
-    await tx.insert(productIngredients).values({
+  if (ingredients.length === 0) return;
+
+  await tx.insert(productIngredients).values(
+    ingredients.map((ing) => ({
       productId,
       ingredientId: ing.ingredientId,
       name: ing.name,
@@ -75,8 +77,8 @@ async function syncProductIngredients(
       measureUnitCode: ing.measureUnitCode,
       measureUnitName: ing.measureUnitName,
       quantityNeeded: ing.quantityNeeded,
-    });
-  }
+    })),
+  );
 }
 
 async function upsertSingleProduct(tx: DrizzleTx, p: ProductApiResponse): Promise<void> {
@@ -163,8 +165,10 @@ async function syncTransactionItems(
   items: TransactionProductResponse[],
 ): Promise<void> {
   await tx.delete(transactionItems).where(eq(transactionItems.transactionId, transactionId));
-  for (const item of items) {
-    await tx.insert(transactionItems).values({
+  if (items.length === 0) return;
+
+  await tx.insert(transactionItems).values(
+    items.map((item) => ({
       id: generateUUID(),
       transactionId,
       productId: item.productId,
@@ -177,8 +181,8 @@ async function syncTransactionItems(
       note: item.note ?? null,
       selectedVariants: JSON.stringify(item.selectedVariants),
       productName: item.name ?? item.productName ?? null,
-    });
-  }
+    })),
+  );
 }
 
 async function upsertSingleTransaction(tx: DrizzleTx, t: TransactionResponse): Promise<void> {
@@ -484,7 +488,10 @@ export const SyncService = {
 
   async getUnsyncedCount(): Promise<number> {
     try {
-      const unsynced = await db.select().from(transactions).where(eq(transactions.isSynced, false));
+      const unsynced = await db
+        .select({ id: transactions.id })
+        .from(transactions)
+        .where(eq(transactions.isSynced, false));
       return unsynced.length;
     } catch (e) {
       Logger.error("Failed to get unsynced count", e);
