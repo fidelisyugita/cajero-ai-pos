@@ -231,7 +231,7 @@ describe("AddItemModal", () => {
     await render(<AddItemModal />);
 
     // Product price = 35000, quantity = 1, maxDiscount = 20% -> max allowed = 7000
-    const discountInput = screen.getByPlaceholderText("Discount");
+    const discountInput = screen.getByPlaceholderText("0");
     await act(async () => {
       // Trying to set 10000 (> 7000)
       fireEvent.changeText(discountInput, "10000");

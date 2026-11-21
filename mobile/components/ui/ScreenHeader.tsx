@@ -54,7 +54,7 @@ const $ = StyleSheet.create((theme, rt) => ({
     alignItems: "center",
     justifyContent: "space-between",
     paddingLeft: vs(14),
-    paddingRight: theme.spacing.xl,
+    paddingRight: Math.max(theme.spacing.xl, rt.insets.right || 0) + vs(60),
   },
   backTitleWrapper: {
     flexDirection: "row",

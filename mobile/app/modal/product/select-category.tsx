@@ -128,12 +128,15 @@ const AddCategory = () => {
           maxLength={50}
           onChangeText={setNewCategoryName}
           size="lg"
+          testID="category-name-input"
         />
         <IconButton
+          accessibilityLabel="Add Category Button"
           disabled={!newCategoryName || isPending}
           Icon={IcPlus}
           onPress={handleAddCategory}
           size="lg"
+          testID="add-category-button"
           variant="primary"
         />
       </View>
