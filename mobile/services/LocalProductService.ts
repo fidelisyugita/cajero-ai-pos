@@ -3,27 +3,41 @@ import { db } from "@/db/drizzle";
 import { categories, products } from "@/db/schema";
 import { nowDate } from "@/utils/Date";
 
+// Select only the product columns consumed by MenuList, StockProducts, and StockVariants
+// to minimize Drizzle buildSelectQuery and SQLite row-mapping overhead.
 const PRODUCT_SELECT_FIELDS = {
   id: products.id,
   name: products.name,
-  description: products.description,
   sellingPrice: products.sellingPrice,
-  buyingPrice: products.buyingPrice,
   stock: products.stock,
-  categoryId: products.categoryId,
   imageUrl: products.imageUrl,
-  barcode: products.barcode,
   tax: products.tax,
   commission: products.commission,
-  discount: products.discount,
-  measureUnitCode: products.measureUnitCode,
-  measureUnitName: products.measureUnitName,
-  createdAt: products.createdAt,
-  updatedAt: products.updatedAt,
   deletedAt: products.deletedAt,
   categoryCode: products.categoryId,
   categoryName: categories.name,
 };
+
+const CATEGORY_JOIN_CONDITION = eq(products.categoryId, categories.id);
+const NOT_DELETED_CONDITION = isNull(products.deletedAt);
+
+function buildProductConditions(
+  search?: string,
+  categoryId?: string,
+  includeDeleted = false,
+): SQL | undefined {
+  if (!(search || categoryId || includeDeleted)) {
+    return NOT_DELETED_CONDITION;
+  }
+
+  const filters: SQL[] = [];
+  if (search) filters.push(like(products.name, `%${search}%`));
+  if (categoryId) filters.push(eq(products.categoryId, categoryId));
+  if (!includeDeleted) filters.push(NOT_DELETED_CONDITION);
+
+  if (filters.length === 0) return undefined;
+  return filters.length === 1 ? filters[0] : and(...filters);
+}
 
 export const LocalProductService = {
   async getProducts(
@@ -33,23 +47,12 @@ export const LocalProductService = {
     size = 100,
     includeDeleted = false,
   ) {
-    let conditions: SQL | undefined;
-
-    if (search) conditions = like(products.name, `%${search}%`);
-    if (categoryId) {
-      const catCondition = eq(products.categoryId, categoryId);
-      conditions = conditions ? and(conditions, catCondition) : catCondition;
-    }
-
-    if (!includeDeleted) {
-      const notDeletedCondition = isNull(products.deletedAt);
-      conditions = conditions ? and(conditions, notDeletedCondition) : notDeletedCondition;
-    }
+    const conditions = buildProductConditions(search, categoryId, includeDeleted);
 
     return await db
       .select(PRODUCT_SELECT_FIELDS)
       .from(products)
-      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(categories, CATEGORY_JOIN_CONDITION)
       .where(conditions)
       .limit(size)
       .offset(page * size);

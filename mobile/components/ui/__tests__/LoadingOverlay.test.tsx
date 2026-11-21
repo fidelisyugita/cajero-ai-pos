@@ -11,6 +11,7 @@ describe("LoadingOverlay component", () => {
     await render(<LoadingOverlay />);
 
     expect(screen.queryByTestId("loading-indicator")).toBeNull();
+    expect(screen.queryByTestId("loading-overlay-modal")).toBeNull();
   });
 
   it("becomes visible and renders ActivityIndicator when showLoading is called", async () => {
@@ -20,6 +21,9 @@ describe("LoadingOverlay component", () => {
       useLoadingStore.getState().showLoading();
     });
 
+    const overlay = await screen.findByTestId("loading-overlay-modal");
+    expect(overlay).toBeTruthy();
+    expect(overlay.props.pointerEvents).toBe("auto");
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
   });
 

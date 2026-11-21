@@ -1,4 +1,5 @@
-import { ActivityIndicator, Modal, View } from "react-native";
+import { memo } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useLoadingStore } from "../../store/useLoadingStore";
 
@@ -10,28 +11,22 @@ const LoadingOverlay = () => {
   }
 
   return (
-    <Modal
-      animationType="fade"
-      statusBarTranslucent
-      testID="loading-overlay-modal"
-      transparent
-      visible
-    >
-      <View style={$.overlay}>
-        <View style={$.container}>
-          <ActivityIndicator color="white" size="large" testID="loading-indicator" />
-        </View>
+    <View pointerEvents="auto" style={$.overlay} testID="loading-overlay-modal">
+      <View style={$.container}>
+        <ActivityIndicator color="white" size="large" testID="loading-indicator" />
       </View>
-    </Modal>
+    </View>
   );
 };
 
 const $ = StyleSheet.create((theme) => ({
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: theme.colors.transparentModal,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 99999,
+    elevation: 999,
   },
   container: {
     borderRadius: 12,
@@ -43,4 +38,4 @@ const $ = StyleSheet.create((theme) => ({
   },
 }));
 
-export default LoadingOverlay;
+export default memo(LoadingOverlay);

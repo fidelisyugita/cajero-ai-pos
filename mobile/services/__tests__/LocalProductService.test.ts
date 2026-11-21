@@ -47,10 +47,22 @@ describe("LocalProductService", () => {
       expect(db.select).toHaveBeenCalledWith(
         expect.objectContaining({
           id: products.id,
+          name: products.name,
+          sellingPrice: products.sellingPrice,
+          stock: products.stock,
+          imageUrl: products.imageUrl,
+          tax: products.tax,
+          commission: products.commission,
+          deletedAt: products.deletedAt,
           categoryCode: products.categoryId,
           categoryName: categories.name,
         }),
       );
+      const selectedArg = (db.select as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(selectedArg).toBeDefined();
+      expect(selectedArg).not.toHaveProperty("description");
+      expect(selectedArg).not.toHaveProperty("createdAt");
+      expect(selectedArg).not.toHaveProperty("updatedAt");
       expect(queryBuilder.from).toHaveBeenCalledWith(products);
       expect(queryBuilder.leftJoin).toHaveBeenCalledWith(categories, expect.anything());
       expect(queryBuilder.limit).toHaveBeenCalledWith(100);

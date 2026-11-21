@@ -7,7 +7,6 @@ import Button from "@/components/ui/Button";
 import { t } from "@/services/i18n";
 import { useDeleteCategoryMutation } from "@/services/mutations/useDeleteCategoryMutation";
 import { useProductCategoriesQuery } from "@/services/queries/useProductCategoriesQuery";
-import type { ProductCategory } from "@/services/types/ProductCategory";
 import { useCategoryStore } from "@/store/useMenuCategoryStore";
 import { vs } from "@/utils/Scale";
 
@@ -20,34 +19,27 @@ const CategoryFilter = ({ style, editable }: CategoryFilterProps) => {
   const { data } = useProductCategoriesQuery();
   const isHidden = useCategoryStore((s) => s.searchQuery.length >= 2);
 
-  const dataWithAll = useMemo(() => {
-    // Fixed "All" category
-    const allCategory: ProductCategory = {
-      code: "ALL",
-      name: t("all"),
-      description: "",
-      storeId: "",
-      createdBy: "",
-      updatedBy: "",
-      createdAt: "",
-      updatedAt: "",
-      deletedAt: null,
-    };
-    return [allCategory, ...(data || [])];
-  }, [data]);
+  const containerStyle = useMemo(() => (style ? [$.container, style] : $.container), [style]);
+
+  const categoryItems = useMemo(
+    () =>
+      data?.map((item) => (
+        <CategoryItem code={item.code} editable={editable} key={item.code} name={item.name} />
+      )),
+    [data, editable],
+  );
 
   if (isHidden) return null;
 
   return (
-    <Animated.View style={[$.container, style]}>
+    <Animated.View style={containerStyle}>
       <ScrollView
         contentContainerStyle={$.content}
         horizontal
         showsHorizontalScrollIndicator={false}
       >
-        {dataWithAll.map((item) => (
-          <CategoryItem editable={editable} item={item} key={item.code} />
-        ))}
+        <CategoryItem code="ALL" name={t("all")} />
+        {categoryItems}
       </ScrollView>
     </Animated.View>
   );
@@ -86,23 +78,22 @@ const DeleteCategoryButton = memo(({ code, name }: DeleteCategoryButtonProps) =>
 DeleteCategoryButton.displayName = "DeleteCategoryButton";
 
 interface CategoryItemProps {
-  item: ProductCategory;
+  code: string;
+  name: string;
   editable?: boolean;
 }
 
-const CategoryItem = memo(({ item, editable }: CategoryItemProps) => {
-  const active = useCategoryStore((state) => state.selectedCategory === item.code);
+const CategoryItem = memo(({ code, name, editable }: CategoryItemProps) => {
+  const active = useCategoryStore((state) => state.selectedCategory === code);
 
   const handleSelect = useCallback(() => {
-    useCategoryStore.getState().setSelectedCategory(item.code);
-  }, [item.code]);
+    useCategoryStore.getState().setSelectedCategory(code);
+  }, [code]);
 
+  const showDelete = Boolean(editable && code !== "ALL");
   const right = useMemo(
-    () =>
-      editable && item.code !== "ALL" ? (
-        <DeleteCategoryButton code={item.code} name={item.name} />
-      ) : undefined,
-    [editable, item.code, item.name],
+    () => (showDelete ? <DeleteCategoryButton code={code} name={name} /> : undefined),
+    [showDelete, code, name],
   );
 
   return (
@@ -110,7 +101,7 @@ const CategoryItem = memo(({ item, editable }: CategoryItemProps) => {
       onPress={handleSelect}
       right={right}
       size="md"
-      title={item.name}
+      title={name}
       variant={active ? "soft" : "neutral"}
     />
   );

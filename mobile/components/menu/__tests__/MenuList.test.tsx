@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { FlatList } from "react-native";
 import { mockRouter } from "@/jest.setup";
 import { useProductsQuery } from "@/services/queries/useProductsQuery";
 import type { Product } from "@/services/types/Product";
@@ -193,5 +194,30 @@ describe("MenuList component", () => {
     const secondCallParams = (useProductsQuery as jest.Mock).mock.calls[1][0];
 
     expect(secondCallParams).toBe(firstCallParams);
+  });
+
+  it("skips scrollToOffset on initial mount and scrolls to top when category or search changes", async () => {
+    const scrollSpy = jest
+      .spyOn(FlatList.prototype, "scrollToOffset")
+      .mockImplementation(jest.fn());
+
+    try {
+      await render(<MenuList />);
+      expect(scrollSpy).not.toHaveBeenCalled();
+
+      await act(async () => {
+        useCategoryStore.setState({ selectedCategory: "COFFEE" });
+      });
+      expect(scrollSpy).toHaveBeenCalledTimes(1);
+      expect(scrollSpy).toHaveBeenLastCalledWith({ offset: 0, animated: false });
+
+      await act(async () => {
+        useCategoryStore.setState({ searchQuery: "Latte" });
+      });
+      expect(scrollSpy).toHaveBeenCalledTimes(2);
+      expect(scrollSpy).toHaveBeenLastCalledWith({ offset: 0, animated: false });
+    } finally {
+      scrollSpy.mockRestore();
+    }
   });
 });

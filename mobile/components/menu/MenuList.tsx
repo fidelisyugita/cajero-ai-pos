@@ -59,8 +59,15 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   );
 
   const { data, isLoading } = useProductsQuery(queryParams);
+  const prevFilterRef = useRef({ categoryCode, searchKeyword });
 
+  // Skip initial mount: a freshly mounted FlashList already starts at offset 0.
   useEffect(() => {
+    const prev = prevFilterRef.current;
+    if (prev.categoryCode === categoryCode && prev.searchKeyword === searchKeyword) {
+      return;
+    }
+    prevFilterRef.current = { categoryCode, searchKeyword };
     if (listRef.current && "scrollToOffset" in listRef.current) {
       (
         listRef.current as {
@@ -68,9 +75,11 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
         }
       ).scrollToOffset({ offset: 0, animated: false });
     }
-  }, []);
+  }, [categoryCode, searchKeyword]);
 
-  const showLoader = isLoading || (isSyncing && (!data?.content || data.content.length === 0));
+  const products = data?.content ?? EMPTY_PRODUCTS;
+  const isEmpty = products.length === 0;
+  const showLoader = isLoading || (isSyncing && isEmpty);
 
   // Authorization check
   const canEditMenu = useAuthStore(
@@ -111,14 +120,17 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   );
 
   const emptyComponent = useMemo(
-    () => (
-      <EmptyState
-        title={isSearching ? t("empty_menu_search_title") : t("empty_menu_category_title")}
-        subtitle={isSearching ? t("empty_menu_search_subtitle") : t("empty_menu_category_subtitle")}
-        style={$.emptyState}
-      />
-    ),
-    [isSearching],
+    () =>
+      isEmpty ? (
+        <EmptyState
+          title={isSearching ? t("empty_menu_search_title") : t("empty_menu_category_title")}
+          subtitle={
+            isSearching ? t("empty_menu_search_subtitle") : t("empty_menu_category_subtitle")
+          }
+          style={$.emptyState}
+        />
+      ) : null,
+    [isEmpty, isSearching],
   );
 
   if (showLoader) {
@@ -130,7 +142,7 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
       <AnimatedFlashList
         ref={listRef}
         contentContainerStyle={$.content}
-        data={data?.content ?? EMPTY_PRODUCTS}
+        data={products}
         keyExtractor={productKeyExtractor}
         numColumns={NUM_COLUMNS}
         onScroll={scrollHandler}
