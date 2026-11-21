@@ -69,9 +69,11 @@ describe("PrinterService", () => {
     (printerService as any).serviceUUID = null;
     (printerService as any).characteristicUUID = null;
     (printerService as any).writeMethod = null;
+    (printerService as any).isScanning = false;
 
     usePrinterStore.setState({
       isConnected: false,
+      isScanning: false,
       connectedDevice: null,
     });
 
@@ -218,9 +220,30 @@ describe("PrinterService", () => {
       expect(onError).toHaveBeenCalledWith(scanError);
     });
 
-    it("stops scanning when stopScan is called", () => {
+    it("stops scanning when stopScan is called while a scan is active", async () => {
+      jest.spyOn(printerService, "requestPermissions").mockResolvedValueOnce(true);
+      mockBleManager.state.mockResolvedValueOnce("PoweredOn");
+
+      await printerService.scanDevices(jest.fn());
+      expect(usePrinterStore.getState().isScanning).toBe(true);
+
       printerService.stopScan();
-      expect(mockBleManager.stopDeviceScan).toHaveBeenCalled();
+      expect(mockBleManager.stopDeviceScan).toHaveBeenCalledTimes(1);
+      expect(usePrinterStore.getState().isScanning).toBe(false);
+    });
+
+    it("does not call stopDeviceScan when stopScan is called without an active scan", () => {
+      printerService.stopScan();
+      expect(mockBleManager.stopDeviceScan).not.toHaveBeenCalled();
+    });
+
+    it("does not instantiate BleManager when stopScan is called with no manager", () => {
+      (printerService as any).manager = null;
+      (printerService as any).isScanning = false;
+
+      printerService.stopScan();
+      expect((printerService as any).manager).toBeNull();
+      expect(mockBleManager.stopDeviceScan).not.toHaveBeenCalled();
     });
   });
 

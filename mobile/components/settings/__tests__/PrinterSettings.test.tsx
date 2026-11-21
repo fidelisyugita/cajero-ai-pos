@@ -98,4 +98,27 @@ describe("PrinterSettings component", () => {
 
     expect(printerService.disconnect).toHaveBeenCalled();
   });
+
+  it("defers mounting ReceiptPreviewModal until Test Printer is pressed", async () => {
+    usePrinterStore.setState({
+      connectedDevice: { id: "dev-bt-connected", name: "Epson TM-T82" },
+      isConnected: true,
+    });
+
+    await render(<PrinterSettings />);
+
+    expect(screen.queryByText("Print Preview")).toBeNull();
+
+    await act(async () => {
+      fireEvent.press(screen.getByText("Test Printer"));
+    });
+
+    expect(screen.getByText("Print Preview")).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(screen.getByText("Cancel"));
+    });
+
+    expect(screen.queryByText("Print Preview")).toBeNull();
+  });
 });

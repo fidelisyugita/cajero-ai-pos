@@ -20,6 +20,7 @@ class PrinterService {
   private serviceUUID: string | null = null;
   private characteristicUUID: string | null = null;
   private writeMethod: "withResponse" | "withoutResponse" | null = null;
+  private isScanning = false;
 
   // Debug getters
   public getServiceUUID() {
@@ -76,11 +77,13 @@ class PrinterService {
       throw new Error(`Bluetooth is not powered on. Current state: ${state}`);
     }
 
+    this.isScanning = true;
     usePrinterStore.getState().setIsScanning(true);
 
     manager.startDeviceScan(null, null, (error, device) => {
       if (error) {
         Logger.error("Scan error:", error);
+        this.isScanning = false;
         usePrinterStore.getState().setIsScanning(false);
         if (onError) onError(error);
         return;
@@ -92,7 +95,9 @@ class PrinterService {
   }
 
   stopScan() {
-    this.getManager().stopDeviceScan();
+    if (!(this.manager && this.isScanning)) return;
+    this.isScanning = false;
+    this.manager.stopDeviceScan();
     usePrinterStore.getState().setIsScanning(false);
   }
 

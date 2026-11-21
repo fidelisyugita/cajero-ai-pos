@@ -1,5 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Linking, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
@@ -13,6 +13,19 @@ import { printerService } from "@/services/PrinterService";
 import type { ReceiptData } from "@/services/types/Receipt";
 import { type PrinterDevice, usePrinterStore } from "@/store/PrinterStore";
 
+const TEST_PREVIEW_DATA: ReceiptData = {
+  title: "TEST PRINT",
+  items: [
+    { name: "Test Item 1", quantity: 1, price: "10.000" },
+    { name: "Test Item 2", quantity: 2, price: "20.000" },
+  ],
+  subtotal: "30.000",
+  total: "30.000",
+  footerMessage: "Printer Connection Verified!",
+};
+
+const deviceKeyExtractor = (item: PrinterDevice) => item.id;
+
 const renderScanningIcon = (_size: number, color: string) => (
   <ActivityIndicator size="small" color={color} />
 );
@@ -21,14 +34,55 @@ const renderSearchIcon = (size: number, color: string) => (
   <Feather name="search" size={size} color={color} />
 );
 
+interface PrinterDeviceRowProps {
+  item: PrinterDevice;
+  isConnectedItem: boolean;
+  isConnecting: boolean;
+  onConnect: (device: PrinterDevice) => void;
+}
+
+const PrinterDeviceRow = memo(
+  ({ item, isConnectedItem, isConnecting, onConnect }: PrinterDeviceRowProps) => {
+    const handlePress = useCallback(() => {
+      onConnect(item);
+    }, [item, onConnect]);
+
+    return (
+      <View style={isConnectedItem ? $.connectedPrinterCard : $.printerCard}>
+        <View style={$.printerInfo}>
+          <View style={$.iconContainer}>
+            <Feather name="printer" size={24} color={isConnectedItem ? "#179139" : "#555"} />
+          </View>
+          <View>
+            <Text style={$.printerName}>{item.name}</Text>
+            <Text style={$.printerType}>{item.id}</Text>
+          </View>
+        </View>
+        {isConnectedItem ? (
+          <Text style={$.connectedStatusText}>{t("connected")}</Text>
+        ) : (
+          <Button
+            title={t("connect")}
+            variant="secondary"
+            size="sm"
+            onPress={handlePress}
+            isLoading={isConnecting}
+          />
+        )}
+      </View>
+    );
+  },
+);
+
+PrinterDeviceRow.displayName = "PrinterDeviceRow";
+
 const PrinterSettings = () => {
-  const {
-    connectedDevice,
-    isConnected,
-    setConnectedDevice,
-    isAutoPrintEnabled,
-    setIsAutoPrintEnabled,
-  } = usePrinterStore();
+  const connectedDevice = usePrinterStore((state) => state.connectedDevice);
+  const isConnected = usePrinterStore((state) => state.isConnected);
+  const setConnectedDevice = usePrinterStore((state) => state.setConnectedDevice);
+  const isAutoPrintEnabled = usePrinterStore((state) => state.isAutoPrintEnabled);
+  const setIsAutoPrintEnabled = usePrinterStore((state) => state.setIsAutoPrintEnabled);
+
   const [devices, setDevices] = useState<PrinterDevice[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -44,7 +98,7 @@ const PrinterSettings = () => {
     };
   }, []);
 
-  const startScan = async () => {
+  const startScan = useCallback(async () => {
     setDevices([]);
     setIsScanning(true);
     try {
@@ -76,12 +130,12 @@ const PrinterSettings = () => {
       }
       setIsScanning(false);
     }
-  };
+  }, []);
 
-  const stopScan = () => {
+  const stopScan = useCallback(() => {
     printerService.stopScan();
     setIsScanning(false);
-  };
+  }, []);
 
   const handleConnect = useCallback(async (device: PrinterDevice) => {
     setIsConnecting(true);
@@ -97,57 +151,70 @@ const PrinterSettings = () => {
     }
   }, []);
 
-  const handleDisconnect = async () => {
+  const handleConnectSaved = useCallback(() => {
+    if (connectedDevice) {
+      handleConnect(connectedDevice);
+    }
+  }, [connectedDevice, handleConnect]);
+
+  const handleDisconnect = useCallback(async () => {
     try {
       await printerService.disconnect();
       setConnectedDevice(null);
     } catch (error: unknown) {
       Logger.error("Failed to disconnect printer", error);
     }
-  };
+  }, [setConnectedDevice]);
 
-  const handleTestPrint = async () => {
-    setPreviewData({
-      title: "TEST PRINT",
-      items: [
-        { name: "Test Item 1", quantity: 1, price: "10.000" },
-        { name: "Test Item 2", quantity: 2, price: "20.000" },
-      ],
-      subtotal: "30.000",
-      total: "30.000",
-      footerMessage: "Printer Connection Verified!",
-    });
+  const handleTestPrint = useCallback(() => {
+    setPreviewData(TEST_PREVIEW_DATA);
     setShowPreview(true);
-  };
+  }, []);
 
-  const renderItem = ({ item }: { item: PrinterDevice }) => {
-    const isConnectedItem = connectedDevice?.id === item.id;
+  const handleClosePreview = useCallback(() => {
+    setShowPreview(false);
+  }, []);
 
-    return (
-      <View style={[$.printerCard, isConnectedItem && $.connectedCard]}>
-        <View style={$.printerInfo}>
-          <View style={$.iconContainer}>
-            <Feather name="printer" size={24} color={isConnectedItem ? "#179139" : "#555"} />
-          </View>
-          <View>
-            <Text style={$.printerName}>{item.name}</Text>
-            <Text style={$.printerType}>{item.id}</Text>
-          </View>
-        </View>
-        {isConnectedItem ? (
-          <Text style={{ color: "#179139", fontWeight: "bold" }}>{t("connected")}</Text>
-        ) : (
-          <Button
-            title={t("connect")}
-            variant="secondary"
-            size="sm"
-            onPress={() => handleConnect(item)}
-            isLoading={isConnecting && connectedDevice === null}
-          />
-        )}
-      </View>
-    );
-  };
+  const handlePrintPreview = useCallback(async () => {
+    setIsPrinting(true);
+    try {
+      // Using testPrint/printReceipt tests the printer connection flow.
+      if (previewData) {
+        await printerService.printReceipt(previewData);
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      Alert.alert(t("print_error"), msg);
+    } finally {
+      setIsPrinting(false);
+      setShowPreview(false);
+    }
+  }, [previewData]);
+
+  const connectedDeviceId = connectedDevice?.id ?? null;
+  const isConnectingUnpaired = isConnecting && connectedDevice === null;
+
+  const renderItem = useCallback(
+    ({ item }: { item: PrinterDevice }) => (
+      <PrinterDeviceRow
+        item={item}
+        isConnectedItem={connectedDeviceId === item.id}
+        isConnecting={isConnectingUnpaired}
+        onConnect={handleConnect}
+      />
+    ),
+    [connectedDeviceId, isConnectingUnpaired, handleConnect],
+  );
+
+  const listEmptyComponent = useMemo(
+    () =>
+      isScanning ? (
+        <Text style={$.emptyText}>{t("scanning")}</Text>
+      ) : (
+        <EmptyState title={t("no_devices_found")} subtitle={t("scan_devices")} />
+      ),
+    [isScanning],
+  );
 
   // Auto-connect on mount if we have a saved device but not connected
   useEffect(() => {
@@ -157,7 +224,7 @@ const PrinterSettings = () => {
   }, [isConnected, handleConnect, connectedDevice]);
 
   return (
-    <FormSectionCard title={t("printer_setting")} style={{ flex: 1 }} contentStyle={$.container}>
+    <FormSectionCard title={t("printer_setting")} style={$.card} contentStyle={$.container}>
       {/* Auto Print Setting */}
       <View>
         <View style={$.rowBetween}>
@@ -175,7 +242,7 @@ const PrinterSettings = () => {
           <Text style={$.sectionTitle}>
             {isConnected ? t("connected_printer") : t("default_printer")}
           </Text>
-          <View style={[$.printerCard, isConnected ? $.connectedCard : null]}>
+          <View style={isConnected ? $.connectedPrinterCard : $.printerCard}>
             <View style={$.printerInfo}>
               <View style={$.iconContainer}>
                 <Feather name="printer" size={24} color={isConnected ? "#179139" : "#555"} />
@@ -184,13 +251,11 @@ const PrinterSettings = () => {
                 <Text style={$.printerName}>{connectedDevice.name}</Text>
                 <Text style={$.printerType}>{connectedDevice.id}</Text>
                 {!isConnected && (
-                  <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
-                    {t("not_connected") || "Not Connected"}
-                  </Text>
+                  <Text style={$.notConnectedText}>{t("not_connected") || "Not Connected"}</Text>
                 )}
               </View>
             </View>
-            <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={$.actionsRow}>
               {isConnected ? (
                 <>
                   <Button
@@ -212,7 +277,7 @@ const PrinterSettings = () => {
                   variant="primary"
                   size="sm"
                   isLoading={isConnecting}
-                  onPress={() => handleConnect(connectedDevice)}
+                  onPress={handleConnectSaved}
                 />
               )}
             </View>
@@ -235,7 +300,7 @@ const PrinterSettings = () => {
           ) : (
             <Button
               title={t("scan_devices")}
-              variant="primary" // Revert to primary as it's the main action in this section now
+              variant="primary"
               size="sm"
               leftIcon={renderSearchIcon}
               onPress={startScan}
@@ -246,124 +311,125 @@ const PrinterSettings = () => {
         <FlatList
           data={devices}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={[
-            $.listContainer,
-            devices.length === 0 && { flex: 1, justifyContent: "center" },
-          ]} // Center empty state
-          ListEmptyComponent={
-            isScanning ? (
-              <Text style={$.emptyText}>{t("scanning")}</Text>
-            ) : (
-              <EmptyState
-                title={t("no_devices_found")}
-                subtitle={t("scan_devices")} // Or a more descriptive subtitle if available
-              />
-            )
-          }
+          keyExtractor={deviceKeyExtractor}
+          contentContainerStyle={devices.length === 0 ? $.listContainerEmpty : $.listContainer}
+          ListEmptyComponent={listEmptyComponent}
         />
       </View>
 
-      {/* Test Print Preview Modal */}
-      <ReceiptPreviewModal
-        visible={showPreview}
-        onClose={() => setShowPreview(false)}
-        onPrint={async () => {
-          setIsPrinting(true);
-          try {
-            // We use the simpler testPrint method, or we could pass the full preview data to printReceipt
-            // Using testPrint ensures we test the basic ASCII flow first.
-            if (previewData) {
-              await printerService.printReceipt(previewData);
-            }
-          } catch (error: unknown) {
-            const msg = error instanceof Error ? error.message : String(error);
-            Alert.alert(t("print_error"), msg);
-          } finally {
-            setIsPrinting(false);
-            setShowPreview(false);
-          }
-        }}
-        data={previewData ?? { total: "0", items: [] }}
-        isPrinting={isPrinting}
-      />
+      {/* Test Print Preview Modal — mounted only when visible */}
+      {showPreview && previewData && (
+        <ReceiptPreviewModal
+          visible={showPreview}
+          onClose={handleClosePreview}
+          onPrint={handlePrintPreview}
+          data={previewData}
+          isPrinting={isPrinting}
+        />
+      )}
     </FormSectionCard>
   );
 };
 
-const $ = StyleSheet.create((theme) => ({
-  container: {
-    flex: 1,
-  },
-  pageTitle: {
-    ...theme.typography.heading4,
-    marginBottom: theme.spacing.xl,
-    color: theme.colors.neutral[700],
-  },
-  section: {
-    marginBottom: theme.spacing.xl,
-    flex: 1,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.md,
-  },
-  sectionTitle: {
-    ...theme.typography.labelLg,
-    color: theme.colors.neutral[700],
-    marginBottom: theme.spacing.sm, // Add margin bottom for spacing from content if header is missing
-  },
-  listContainer: {
-    gap: theme.spacing.md,
-  },
-  printerCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+const $ = StyleSheet.create((theme) => {
+  const printerCardBase = {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     backgroundColor: theme.colors.neutral[100],
     padding: theme.spacing.lg,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.neutral[200],
-  },
-  connectedCard: {
-    backgroundColor: theme.colors.positive[100],
-    borderColor: theme.colors.positive[300],
-  },
-  printerInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.md,
-  },
-  iconContainer: {
-    padding: theme.spacing.xs,
-  },
-  printerName: {
-    ...theme.typography.labelMd,
-    color: theme.colors.neutral[700],
-  },
-  printerType: {
-    ...theme.typography.bodySm,
-    color: theme.colors.neutral[500],
-  },
-  rowBetween: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.sm,
-  },
-  sectionSubtitle: {
-    ...theme.typography.bodySm,
-    color: theme.colors.neutral[500],
-  },
-  emptyText: {
-    textAlign: "center",
-    marginTop: theme.spacing.lg,
-    ...theme.typography.bodyMd,
-    color: theme.colors.neutral[500],
-  },
-}));
+  };
+
+  return {
+    card: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+    },
+    pageTitle: {
+      ...theme.typography.heading4,
+      marginBottom: theme.spacing.xl,
+      color: theme.colors.neutral[700],
+    },
+    section: {
+      marginBottom: theme.spacing.xl,
+      flex: 1,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.md,
+    },
+    sectionTitle: {
+      ...theme.typography.labelLg,
+      color: theme.colors.neutral[700],
+      marginBottom: theme.spacing.sm, // Add margin bottom for spacing from content if header is missing
+    },
+    listContainer: {
+      gap: theme.spacing.md,
+    },
+    listContainerEmpty: {
+      gap: theme.spacing.md,
+      flex: 1,
+      justifyContent: "center",
+    },
+    printerCard: printerCardBase,
+    connectedPrinterCard: {
+      ...printerCardBase,
+      backgroundColor: theme.colors.positive[100],
+      borderColor: theme.colors.positive[300],
+    },
+    printerInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.md,
+    },
+    iconContainer: {
+      padding: theme.spacing.xs,
+    },
+    printerName: {
+      ...theme.typography.labelMd,
+      color: theme.colors.neutral[700],
+    },
+    printerType: {
+      ...theme.typography.bodySm,
+      color: theme.colors.neutral[500],
+    },
+    connectedStatusText: {
+      color: "#179139",
+      fontWeight: "bold",
+    },
+    notConnectedText: {
+      fontSize: 12,
+      color: "#666",
+      marginTop: 2,
+    },
+    actionsRow: {
+      flexDirection: "row",
+      gap: 10,
+    },
+    rowBetween: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.spacing.sm,
+    },
+    sectionSubtitle: {
+      ...theme.typography.bodySm,
+      color: theme.colors.neutral[500],
+    },
+    emptyText: {
+      textAlign: "center",
+      marginTop: theme.spacing.lg,
+      ...theme.typography.bodyMd,
+      color: theme.colors.neutral[500],
+    },
+  };
+});
 
 export default PrinterSettings;

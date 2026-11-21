@@ -1,15 +1,16 @@
 import Feather from "@expo/vector-icons/Feather";
-import { useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
+  type ListRenderItemInfo,
   Platform,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 import { captureAnalyticsEvent } from "@/lib/posthog";
 import { postAIChat } from "@/services/endpoints/postAIChat";
@@ -22,57 +23,116 @@ interface Message {
   content: string;
 }
 
-const getMessageBubbleStyle = (role: Message["role"], styles: typeof $) => {
+const KEYBOARD_VERTICAL_OFFSET = Platform.OS === "ios" ? 100 : 80;
+const messageKeyExtractor = (item: Message) => item.id;
+
+const getMessageBubbleStyle = (role: Message["role"]) => {
   if (role === "user") {
-    return styles.userBubble;
+    return $.userBubble;
   }
   if (role === "system") {
-    return styles.systemBubble;
+    return $.systemBubble;
   }
-  return styles.aiBubble;
+  return $.aiBubble;
 };
 
-const getMessageTextStyle = (role: Message["role"], styles: typeof $) => {
+const getMessageTextStyle = (role: Message["role"]) => {
   if (role === "user") {
-    return styles.userText;
+    return $.userText;
   }
   if (role === "system") {
-    return styles.systemText;
+    return $.systemText;
   }
-  return styles.aiText;
+  return $.aiText;
 };
+
+const ChatMessageItem = memo(({ item }: { item: Message }) => (
+  <View style={getMessageBubbleStyle(item.role)}>
+    <Text style={getMessageTextStyle(item.role)}>{item.content}</Text>
+  </View>
+));
+
+ChatMessageItem.displayName = "ChatMessageItem";
+
+const renderMessageItem = ({ item }: ListRenderItemInfo<Message>) => (
+  <ChatMessageItem item={item} />
+);
+
+interface ChatInputBarProps {
+  isGenerating: boolean;
+  placeholder: string;
+  onSend: (text: string) => void;
+}
+
+const ChatInputBar = memo(({ isGenerating, placeholder, onSend }: ChatInputBarProps) => {
+  const [input, setInput] = useState("");
+  const trimmedInput = input.trim();
+  const isDisabled = !trimmedInput || isGenerating;
+
+  const handleSubmit = useCallback(() => {
+    if (!trimmedInput || isGenerating) return;
+    setInput("");
+    onSend(trimmedInput);
+  }, [trimmedInput, isGenerating, onSend]);
+
+  return (
+    <View style={$.inputContainer}>
+      <TextInput
+        style={$.input}
+        placeholder={placeholder}
+        value={input}
+        onChangeText={setInput}
+        editable={!isGenerating}
+        onSubmitEditing={handleSubmit}
+        returnKeyType="send"
+      />
+      <TouchableOpacity
+        style={isDisabled ? $.sendButtonDisabled : $.sendButton}
+        onPress={handleSubmit}
+        disabled={isDisabled}
+      >
+        {isGenerating ? (
+          <ActivityIndicator color="white" size="small" />
+        ) : (
+          <Feather name="send" size={20} color="white" />
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+});
+
+ChatInputBar.displayName = "ChatInputBar";
 
 const ChatInterface = () => {
-  const _language = useLanguageStore((state) => state.language); // Subscribe to language changes
-  const [messages, setMessages] = useState<Message[]>([
+  useLanguageStore((state) => state.language); // Subscribe to language changes
+  const [messages, setMessages] = useState<Message[]>(() => [
     { id: "1", role: "assistant", content: t("ai_welcome_message") },
   ]);
-  const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const isGeneratingRef = useRef(false);
 
-  const handleSend = async () => {
-    if (!input.trim() || isGenerating) return;
+  const handleSend = useCallback(async (userText: string) => {
+    if (!userText || isGeneratingRef.current) return;
 
-    const userText = input.trim();
     const userMessage: Message = { id: Date.now().toString(), role: "user", content: userText };
 
-    // Optimistic update
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    // Optimistic update + pending indicator in one state transition
+    isGeneratingRef.current = true;
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      { id: "pending", role: "assistant", content: "..." },
+    ]);
     setIsGenerating(true);
 
     captureAnalyticsEvent("ai_prompt_sent", {
       promptLength: userText.length,
     });
 
-    // Add pending indicator
-    setMessages((prev) => [...prev, { id: "pending", role: "assistant", content: "..." }]);
-
     try {
       const response = await postAIChat(userText);
 
       setMessages((prev) => {
-        // Remove pending and add response
         const filtered = prev.filter((m) => m.id !== "pending");
         return [
           ...filtered,
@@ -97,137 +157,129 @@ const ChatInterface = () => {
         ];
       });
     } finally {
+      isGeneratingRef.current = false;
       setIsGenerating(false);
     }
-  };
+  }, []);
 
   return (
     <KeyboardAvoidingView
       style={$.container}
       behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 80}
+      keyboardVerticalOffset={KEYBOARD_VERTICAL_OFFSET}
     >
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={[$.messageBubble, getMessageBubbleStyle(item.role, $)]}>
-            <Text style={[$.messageText, getMessageTextStyle(item.role, $)]}>{item.content}</Text>
-          </View>
-        )}
+        keyExtractor={messageKeyExtractor}
+        renderItem={renderMessageItem}
         contentContainerStyle={$.listContent}
+        initialNumToRender={12}
+        maxToRenderPerBatch={8}
+        windowSize={7}
       />
 
-      <View style={$.inputContainer}>
-        <TextInput
-          style={$.input}
-          placeholder={t("type_message_placeholder")}
-          value={input}
-          onChangeText={setInput}
-          editable={!isGenerating}
-          onSubmitEditing={handleSend}
-          returnKeyType="send"
-        />
-        <TouchableOpacity
-          style={[$.sendButton, (!input.trim() || isGenerating) && $.disabledButton]}
-          onPress={handleSend}
-          disabled={!input.trim() || isGenerating}
-        >
-          {isGenerating ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Feather name="send" size={20} color="white" />
-          )}
-        </TouchableOpacity>
-      </View>
+      <ChatInputBar
+        isGenerating={isGenerating}
+        placeholder={t("type_message_placeholder")}
+        onSend={handleSend}
+      />
     </KeyboardAvoidingView>
   );
 };
 
-const $ = StyleSheet.create((theme) => ({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[100],
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[300],
-    overflow: "hidden",
-  },
-  listContent: {
-    padding: theme.spacing.md,
-    gap: theme.spacing.md,
-    paddingBottom: theme.spacing.xl,
-  },
-  messageBubble: {
+const $ = StyleSheet.create((theme) => {
+  const messageBubbleBase = {
     padding: theme.spacing.md,
     borderRadius: theme.radius.lg,
-    maxWidth: "80%",
-  },
-  userBubble: {
-    backgroundColor: theme.colors.primary[500],
-    alignSelf: "flex-end",
-    borderBottomRightRadius: theme.radius.xs,
-  },
-  aiBubble: {
-    backgroundColor: theme.colors.primary[100],
-    alignSelf: "flex-start",
-    borderBottomLeftRadius: theme.radius.xs,
-    borderWidth: 1,
-    borderColor: theme.colors.primary[200],
-  },
-  systemBubble: {
-    backgroundColor: theme.colors.error[100],
-    alignSelf: "center",
-    maxWidth: "90%",
-    borderWidth: 1,
-    borderColor: theme.colors.error[200],
-  },
-  messageText: {
-    ...theme.typography.bodyMd,
-  },
-  userText: {
-    color: "#FFFFFF",
-  },
-  aiText: {
-    color: theme.colors.neutral[700],
-  },
-  systemText: {
-    color: theme.colors.error[600],
-    fontSize: 12,
-    textAlign: "center",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: theme.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.neutral[200],
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    gap: theme.spacing.sm,
-  },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    backgroundColor: theme.colors.neutral[100],
-    borderRadius: theme.radius.md,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    color: theme.colors.neutral[700],
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[300],
-    ...theme.typography.bodyMd,
-  },
-  sendButton: {
+    maxWidth: "80%" as const,
+  };
+
+  const sendButtonBase = {
     width: 44,
     height: 44,
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary[500],
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  disabledButton: {
-    backgroundColor: theme.colors.neutral[300],
-  },
-}));
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+  };
+
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.neutral[100],
+      borderRadius: theme.radius.lg,
+      borderWidth: 1,
+      borderColor: theme.colors.neutral[300],
+      overflow: "hidden",
+    },
+    listContent: {
+      padding: theme.spacing.md,
+      gap: theme.spacing.md,
+      paddingBottom: theme.spacing.xl,
+    },
+    userBubble: {
+      ...messageBubbleBase,
+      backgroundColor: theme.colors.primary[500],
+      alignSelf: "flex-end",
+      borderBottomRightRadius: theme.radius.xs,
+    },
+    aiBubble: {
+      ...messageBubbleBase,
+      backgroundColor: theme.colors.primary[100],
+      alignSelf: "flex-start",
+      borderBottomLeftRadius: theme.radius.xs,
+      borderWidth: 1,
+      borderColor: theme.colors.primary[200],
+    },
+    systemBubble: {
+      ...messageBubbleBase,
+      backgroundColor: theme.colors.error[100],
+      alignSelf: "center",
+      maxWidth: "90%",
+      borderWidth: 1,
+      borderColor: theme.colors.error[200],
+    },
+    userText: {
+      ...theme.typography.bodyMd,
+      color: "#FFFFFF",
+    },
+    aiText: {
+      ...theme.typography.bodyMd,
+      color: theme.colors.neutral[700],
+    },
+    systemText: {
+      ...theme.typography.bodyMd,
+      color: theme.colors.error[600],
+      fontSize: 12,
+      textAlign: "center",
+    },
+    inputContainer: {
+      flexDirection: "row",
+      padding: theme.spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.neutral[200],
+      backgroundColor: "#FFFFFF",
+      alignItems: "center",
+      gap: theme.spacing.sm,
+    },
+    input: {
+      flex: 1,
+      minHeight: 44,
+      backgroundColor: theme.colors.neutral[100],
+      borderRadius: theme.radius.md,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      color: theme.colors.neutral[700],
+      borderWidth: 1,
+      borderColor: theme.colors.neutral[300],
+      ...theme.typography.bodyMd,
+    },
+    sendButton: sendButtonBase,
+    sendButtonDisabled: {
+      ...sendButtonBase,
+      backgroundColor: theme.colors.neutral[300],
+    },
+  };
+});
 
 export default ChatInterface;
