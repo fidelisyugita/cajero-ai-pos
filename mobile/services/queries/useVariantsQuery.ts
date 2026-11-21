@@ -5,5 +5,6 @@ export const useVariantsQuery = () => {
   return useQuery({
     queryKey: ["variants"],
     queryFn: getVariants,
+    staleTime: 5 * 60_000,
   });
 };

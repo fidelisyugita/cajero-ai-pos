@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { TouchableOpacity } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { memo } from "react";
+import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { vs } from "@/utils/Scale";
 
@@ -10,19 +9,22 @@ interface RadioButtonProps {
   disabled?: boolean;
 }
 
-const RadioButton = ({ checked, onPress, disabled }: RadioButtonProps) => {
-  const scale = useSharedValue(checked ? 1 : 0);
+const RadioButton = memo(({ checked, onPress, disabled }: RadioButtonProps) => {
+  const outerStyle = [$.outer, checked && $.outerChecked, disabled && $.outerDisabled];
+  const inner = checked ? <View style={$.inner} /> : null;
 
-  useEffect(() => {
-    scale.value = withSpring(checked ? 1 : 0, { damping: 60 });
-  }, [checked, scale]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: scale.value,
-  }));
-
-  $.useVariants({ checked, disabled });
+  if (!onPress) {
+    return (
+      <View
+        accessible
+        accessibilityRole="radio"
+        accessibilityState={{ checked, disabled }}
+        style={outerStyle}
+      >
+        {inner}
+      </View>
+    );
+  }
 
   return (
     <TouchableOpacity
@@ -30,13 +32,13 @@ const RadioButton = ({ checked, onPress, disabled }: RadioButtonProps) => {
       accessibilityState={{ checked, disabled }}
       onPress={onPress}
       disabled={disabled}
-      style={$.outer}
+      style={outerStyle}
       activeOpacity={0.8}
     >
-      <Animated.View style={[$.inner, animatedStyle]} />
+      {inner}
     </TouchableOpacity>
   );
-};
+});
 
 const $ = StyleSheet.create((theme) => ({
   outer: {
@@ -48,26 +50,19 @@ const $ = StyleSheet.create((theme) => ({
     width: vs(24),
     height: vs(24),
     borderColor: theme.colors.neutral[400],
-    variants: {
-      checked: {
-        true: {
-          borderColor: theme.colors.primary[300],
-          backgroundColor: theme.colors.primary[100],
-        },
-      },
-      disabled: {
-        true: {
-          opacity: 0.5,
-        },
-      },
-    },
+  },
+  outerChecked: {
+    borderColor: theme.colors.primary[300],
+    backgroundColor: theme.colors.primary[100],
+  },
+  outerDisabled: {
+    opacity: 0.5,
   },
   inner: {
     borderRadius: theme.radius.full,
     backgroundColor: theme.colors.primary[400],
     width: vs(8),
     height: vs(8),
-    // variants for inner are not really needed as it's just a dot that scales
   },
 }));
 

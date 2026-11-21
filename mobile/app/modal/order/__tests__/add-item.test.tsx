@@ -240,4 +240,17 @@ describe("AddItemModal", () => {
     // Value should not be updated to 10000
     expect(screen.queryByDisplayValue("10000")).toBeNull();
   });
+
+  it("selects radio option when pressing the radio indicator directly", async () => {
+    await render(<AddItemModal />);
+
+    const radios = screen.getAllByRole("radio");
+    expect(radios).toHaveLength(2);
+
+    await act(async () => {
+      fireEvent.press(radios[1]);
+    });
+
+    expect(screen.getAllByRole("radio")[1].props.accessibilityState.checked).toBe(true);
+  });
 });

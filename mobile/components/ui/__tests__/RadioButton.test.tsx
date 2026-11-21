@@ -37,4 +37,12 @@ describe("RadioButton component", () => {
     fireEvent.press(radio);
     expect(handlePress).not.toHaveBeenCalled();
   });
+
+  it("renders a non-interactive view when onPress is omitted", async () => {
+    await render(<RadioButton checked={true} />);
+
+    const radio = screen.getByRole("radio");
+    expect(radio.props.accessibilityState.checked).toBe(true);
+    expect(radio.props.onPress).toBeUndefined();
+  });
 });

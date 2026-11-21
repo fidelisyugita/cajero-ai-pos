@@ -75,4 +75,27 @@ describe("useVariantsQuery", () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toEqual(mockError);
   });
+
+  it("reuses cached variants without refetching while fresh", async () => {
+    const mockVariants = [
+      {
+        id: "var-1",
+        name: "Size",
+        description: "Drink cup size",
+        options: [{ id: "opt-1", name: "Regular", priceAdjusment: 0 }],
+      },
+    ];
+    (getVariants as jest.Mock).mockResolvedValue(mockVariants);
+
+    const wrapper = createWrapper(queryClient);
+    const first = await renderHook(() => useVariantsQuery(), { wrapper });
+    await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+    first.unmount();
+
+    const second = await renderHook(() => useVariantsQuery(), { wrapper });
+    await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+
+    expect(getVariants).toHaveBeenCalledTimes(1);
+    expect(second.result.current.data).toEqual(mockVariants);
+  });
 });

@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcMinus from "@/assets/icons/minus.svg";
@@ -14,12 +14,134 @@ import ScreenModal from "@/components/ui/ScreenModal";
 import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useVariantsQuery } from "@/services/queries/useVariantsQuery";
+import type { Variant, VariantOption } from "@/services/types/Variant";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { useOrderStore } from "@/store/useOrderStore";
 import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
 
 type VariantItemSelection = { groupId: string; optionId: string };
+
+interface ProductSummary {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  tax: number;
+  commission: number;
+}
+
+const ProductHeader = memo(({ product }: { product: ProductSummary }) => (
+  <View style={$.productHeader}>
+    <Image source={product.imageUrl} style={$.productImage} contentFit="cover" />
+    <View style={$.productInfo}>
+      <Text style={$.productName}>{product.name}</Text>
+      <View style={$.priceRow}>
+        <Text style={$.priceLabel}>{t("basic_price")}</Text>
+        <Text style={$.priceValue}>{formatCurrency(product.price)}</Text>
+      </View>
+    </View>
+  </View>
+));
+
+interface VariantOptionRowProps {
+  variantId: string;
+  isMultiple: boolean;
+  option: VariantOption;
+  isSelected: boolean;
+  onToggle: (variantId: string, optionId: string, isMultiple: boolean) => void;
+}
+
+const VariantOptionRow = memo(
+  ({ variantId, isMultiple, option, isSelected, onToggle }: VariantOptionRowProps) => {
+    const handlePress = useCallback(() => {
+      onToggle(variantId, option.id, isMultiple);
+    }, [onToggle, variantId, option.id, isMultiple]);
+
+    return (
+      <TouchableOpacity style={$.optionRow} activeOpacity={0.7} onPress={handlePress}>
+        <View style={$.optionLeft}>
+          {!isMultiple ? (
+            <RadioButton checked={isSelected} />
+          ) : (
+            <Checkbox checked={isSelected} onPress={handlePress} />
+          )}
+          <Text style={$.optionName}>{option.name}</Text>
+        </View>
+        <Text style={$.optionPrice}>
+          {option.priceAdjusment === 0 ? "Rp 0" : formatCurrency(option.priceAdjusment)}
+        </Text>
+      </TouchableOpacity>
+    );
+  },
+);
+
+interface VariantGroupProps {
+  variant: Variant;
+  selection: string | string[] | undefined;
+  onToggle: (variantId: string, optionId: string, isMultiple: boolean) => void;
+}
+
+const VariantGroup = memo(({ variant, selection, onToggle }: VariantGroupProps) => (
+  <View style={$.variantGroup}>
+    <Text style={$.variantGroupTitle}>
+      {variant.name}
+      {variant.isRequired && " *"}
+    </Text>
+    <View style={$.optionsList}>
+      {variant.options.map((option) => {
+        const isSelected = !variant.isMultiple
+          ? selection === option.id
+          : Array.isArray(selection) && selection.includes(option.id);
+
+        return (
+          <VariantOptionRow
+            key={option.id}
+            variantId={variant.id}
+            isMultiple={variant.isMultiple}
+            option={option}
+            isSelected={isSelected}
+            onToggle={onToggle}
+          />
+        );
+      })}
+    </View>
+  </View>
+));
+
+function resolveSelectedVariants(
+  productVariants: Variant[],
+  selectedVariants: Record<string, string | string[]>,
+) {
+  const result: Array<{
+    groupId: string;
+    groupName: string;
+    optionId: string;
+    name: string;
+    price: number;
+  }> = [];
+
+  for (const variant of productVariants) {
+    const selection = selectedVariants[variant.id];
+    if (!selection) continue;
+
+    const optionIds = Array.isArray(selection) ? selection : [selection];
+    for (const optId of optionIds) {
+      const opt = variant.options.find((o) => o.id === optId);
+      if (opt) {
+        result.push({
+          groupId: variant.id,
+          groupName: variant.name,
+          optionId: opt.id,
+          name: opt.name,
+          price: opt.priceAdjusment, // backend typo: priceAdjusment
+        });
+      }
+    }
+  }
+
+  return result;
+}
 
 function parseInitialVariantSelection(
   rawVariants: unknown,
@@ -56,14 +178,17 @@ const AddItemModal = () => {
   const params = useLocalSearchParams();
   const orderItemId = params.orderItemId as string | undefined;
 
-  const product = {
-    id: params.id as string,
-    name: params.name as string,
-    price: Number(params.sellingPrice),
-    imageUrl: params.imageUrl as string,
-    tax: Number(params.tax) || 0,
-    commission: Number(params.commission) || 0,
-  };
+  const product = useMemo<ProductSummary>(
+    () => ({
+      id: params.id as string,
+      name: params.name as string,
+      price: Number(params.sellingPrice),
+      imageUrl: params.imageUrl as string,
+      tax: Number(params.tax) || 0,
+      commission: Number(params.commission) || 0,
+    }),
+    [params.id, params.name, params.sellingPrice, params.imageUrl, params.tax, params.commission],
+  );
 
   const { data: allVariants, isLoading } = useVariantsQuery();
 
@@ -97,68 +222,70 @@ const AddItemModal = () => {
     params.initialDiscount ? String(params.initialDiscount) : "",
   );
 
-  const handleQuantityChange = (delta: number) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
-  };
+  const handleDecrementQuantity = useCallback(() => {
+    setQuantity((prev) => Math.max(1, prev - 1));
+  }, []);
 
-  const handleVariantChange = (variantId: string, optionId: string, isMultiple: boolean) => {
-    if (!isMultiple) {
-      // Radio logic: single selection per variant group
-      setSelectedVariants((prev) => ({ ...prev, [variantId]: optionId }));
-    } else {
-      // Checkbox logic: multiple selection
-      setSelectedVariants((prev) => {
-        const val = prev[variantId];
-        const current = Array.isArray(val) ? val : [];
-        if (current.includes(optionId)) {
-          return {
-            ...prev,
-            [variantId]: current.filter((id: string) => id !== optionId),
-          };
-        }
-        // Note: Max limit logic removed as it's not supported by backend yet
-        return { ...prev, [variantId]: [...current, optionId] };
-      });
-    }
-  };
+  const handleIncrementQuantity = useCallback(() => {
+    setQuantity((prev) => prev + 1);
+  }, []);
+
+  const handleVariantChange = useCallback(
+    (variantId: string, optionId: string, isMultiple: boolean) => {
+      if (!isMultiple) {
+        // Radio logic: single selection per variant group
+        setSelectedVariants((prev) => {
+          if (prev[variantId] === optionId) {
+            return prev;
+          }
+          return { ...prev, [variantId]: optionId };
+        });
+      } else {
+        // Checkbox logic: multiple selection
+        setSelectedVariants((prev) => {
+          const val = prev[variantId];
+          const current = Array.isArray(val) ? val : [];
+          if (current.includes(optionId)) {
+            return {
+              ...prev,
+              [variantId]: current.filter((id: string) => id !== optionId),
+            };
+          }
+          // Note: Max limit logic removed as it's not supported by backend yet
+          return { ...prev, [variantId]: [...current, optionId] };
+        });
+      }
+    },
+    [],
+  );
+
+  const selectedVariantItems = useMemo(
+    () => resolveSelectedVariants(productVariants, selectedVariants),
+    [productVariants, selectedVariants],
+  );
+
+  const totalVariantPrice = useMemo(
+    () => selectedVariantItems.reduce((sum, v) => sum + v.price, 0),
+    [selectedVariantItems],
+  );
+
+  const handleDiscountChange = useCallback(
+    (text: string) => {
+      const maxPrice = (product.price + totalVariantPrice) * quantity;
+      const maxAllowedDiscount = maxPrice * (maxDiscountPercent / 100);
+
+      const numericValue = Number(text);
+      if (text === "" || (numericValue >= 0 && numericValue <= maxAllowedDiscount)) {
+        setDiscount(text);
+      }
+    },
+    [product.price, totalVariantPrice, quantity, maxDiscountPercent],
+  );
 
   const addItem = useOrderStore((state) => state.addItem);
   const updateItem = useOrderStore((state) => state.updateItem);
 
-  const handleAdd = () => {
-    const variants: Array<{
-      groupId: string;
-      groupName: string;
-      optionId: string;
-      name: string;
-      price: number;
-    }> = [];
-
-    productVariants.forEach((variant) => {
-      const selection = selectedVariants[variant.id];
-      if (!selection) return;
-
-      const processOption = (optId: string) => {
-        const opt = variant.options.find((o) => o.id === optId);
-        if (opt) {
-          variants.push({
-            groupId: variant.id,
-            groupName: variant.name,
-            optionId: opt.id,
-            name: opt.name,
-            price: opt.priceAdjusment, // backend typo: priceAdjusment
-          });
-        }
-      };
-
-      if (Array.isArray(selection)) {
-        selection.forEach(processOption);
-      } else {
-        processOption(selection);
-      }
-    });
-
-    const totalVariantPrice = variants.reduce((sum, v) => sum + v.price, 0);
+  const handleAdd = useCallback(() => {
     const unitPrice = product.price + totalVariantPrice;
     const totalPrice = unitPrice * quantity;
     const discountAmount = Number(discount) || 0;
@@ -175,7 +302,7 @@ const AddItemModal = () => {
       sellingPrice: product.price,
       imageUrl: product.imageUrl,
       quantity: quantity,
-      variants: variants,
+      variants: selectedVariantItems,
       note: note,
       discount: Number(discount) || 0,
       tax: product.tax,
@@ -189,7 +316,19 @@ const AddItemModal = () => {
     }
 
     router.dismiss();
-  };
+  }, [
+    selectedVariantItems,
+    product,
+    totalVariantPrice,
+    quantity,
+    discount,
+    maxDiscountPercent,
+    note,
+    orderItemId,
+    updateItem,
+    addItem,
+    router,
+  ]);
 
   return (
     <ScreenModal modalStyle={$.modal}>
@@ -198,16 +337,7 @@ const AddItemModal = () => {
         <View style={$.container}>
           <ScrollView contentContainerStyle={$.scrollContent} showsVerticalScrollIndicator={false}>
             {/* Product Header */}
-            <View style={$.productHeader}>
-              <Image source={product.imageUrl} style={$.productImage} contentFit="cover" />
-              <View style={$.productInfo}>
-                <Text style={$.productName}>{product.name}</Text>
-                <View style={$.priceRow}>
-                  <Text style={$.priceLabel}>{t("basic_price")}</Text>
-                  <Text style={$.priceValue}>{formatCurrency(product.price)}</Text>
-                </View>
-              </View>
-            </View>
+            <ProductHeader product={product} />
 
             {/* Quantity */}
             <View style={$.quantityContainer}>
@@ -216,7 +346,7 @@ const AddItemModal = () => {
                   Icon={IcMinus}
                   variant="neutral"
                   size="md"
-                  onPress={() => handleQuantityChange(-1)}
+                  onPress={handleDecrementQuantity}
                   disabled={quantity <= 1}
                 />
                 <View style={$.quantityDisplay}>
@@ -226,7 +356,7 @@ const AddItemModal = () => {
                   Icon={IcPlus}
                   variant="neutral"
                   size="md"
-                  onPress={() => handleQuantityChange(1)}
+                  onPress={handleIncrementQuantity}
                 />
               </View>
             </View>
@@ -234,59 +364,16 @@ const AddItemModal = () => {
             <Text style={$.sectionTitle}>{t("variant")}</Text>
 
             {isLoading ? (
-              <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 20 }} />
+              <ActivityIndicator size="large" color="#0000ff" style={$.loadingIndicator} />
             ) : (
               /* Variants List */
               productVariants.map((variant) => (
-                <View key={variant.id} style={$.variantGroup}>
-                  <Text style={$.variantGroupTitle}>
-                    {variant.name}
-                    {variant.isRequired && " *"}
-                    {/* Max limit text removed as not supported by backend schema */}
-                  </Text>
-                  <View style={$.optionsList}>
-                    {variant.options.map((option) => {
-                      const isSelected = !variant.isMultiple
-                        ? selectedVariants[variant.id] === option.id
-                        : selectedVariants[variant.id]?.includes(option.id);
-
-                      return (
-                        <TouchableOpacity
-                          key={option.id}
-                          style={$.optionRow}
-                          activeOpacity={0.7}
-                          onPress={() =>
-                            handleVariantChange(variant.id, option.id, variant.isMultiple)
-                          }
-                        >
-                          <View style={$.optionLeft}>
-                            {!variant.isMultiple ? (
-                              <RadioButton
-                                checked={isSelected}
-                                onPress={() =>
-                                  handleVariantChange(variant.id, option.id, variant.isMultiple)
-                                }
-                              />
-                            ) : (
-                              <Checkbox
-                                checked={isSelected}
-                                onPress={() =>
-                                  handleVariantChange(variant.id, option.id, variant.isMultiple)
-                                }
-                              />
-                            )}
-                            <Text style={$.optionName}>{option.name}</Text>
-                          </View>
-                          <Text style={$.optionPrice}>
-                            {option.priceAdjusment === 0
-                              ? "Rp 0"
-                              : formatCurrency(option.priceAdjusment)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
+                <VariantGroup
+                  key={variant.id}
+                  variant={variant}
+                  selection={selectedVariants[variant.id]}
+                  onToggle={handleVariantChange}
+                />
               ))
             )}
 
@@ -304,28 +391,7 @@ const AddItemModal = () => {
                 size="lg"
                 value={discount}
                 left={<Text style={$.currencyPrefix}>Rp</Text>}
-                onChangeText={(text) => {
-                  let totalVariantPrice = 0;
-
-                  productVariants.forEach((variant) => {
-                    const selection = selectedVariants[variant.id];
-                    if (!selection) return;
-                    const processOption = (optId: string) => {
-                      const opt = variant.options.find((o) => o.id === optId);
-                      if (opt) totalVariantPrice += opt.priceAdjusment;
-                    };
-                    if (Array.isArray(selection)) selection.forEach(processOption);
-                    else processOption(selection);
-                  });
-
-                  const maxPrice = (product.price + totalVariantPrice) * quantity;
-                  const maxAllowedDiscount = maxPrice * (maxDiscountPercent / 100);
-
-                  const numericValue = Number(text);
-                  if (text === "" || (numericValue >= 0 && numericValue <= maxAllowedDiscount)) {
-                    setDiscount(text);
-                  }
-                }}
+                onChangeText={handleDiscountChange}
                 placeholder="0"
                 keyboardType="numeric"
               />
@@ -417,6 +483,9 @@ const $ = StyleSheet.create((theme) => ({
     ...theme.typography.bodyMd,
     color: theme.colors.neutral[500],
     marginTop: theme.spacing.md,
+  },
+  loadingIndicator: {
+    marginTop: 20,
   },
   variantGroup: {
     gap: theme.spacing.md,
