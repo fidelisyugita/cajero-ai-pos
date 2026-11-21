@@ -1,14 +1,14 @@
 # 📱 Cajero Mobile POS
 
-[![Expo](https://img.shields.io/badge/Expo-~53.0.20-000020.svg?style=flat&logo=expo)](https://expo.dev)
-[![React Native](https://img.shields.io/badge/React_Native-0.79.5-61DAFB.svg?style=flat&logo=react)](https://reactnative.dev)
-[![React](https://img.shields.io/badge/React-19.0.0-61DAFB.svg?style=flat&logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-~5.8.3-3178C6.svg?style=flat&logo=typescript)](https://www.typescriptlang.org)
-[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-^0.44.4-C5F74F.svg?style=flat&logo=drizzle)](https://orm.drizzle.team)
-[![SQLite](https://img.shields.io/badge/SQLite-expo--sqlite_16-003B57.svg?style=flat&logo=sqlite)](https://docs.expo.dev/versions/latest/sdk/sqlite/)
-[![Unistyles](https://img.shields.io/badge/Unistyles-^3.0.7-FF4081.svg?style=flat)](https://github.com/jpudysz/react-native-unistyles)
-[![Biome](https://img.shields.io/badge/Biome-^2.1.4-60A5FA.svg?style=flat&logo=biome)](https://biomejs.dev)
-[![Jest](https://img.shields.io/badge/Jest-~29.7.0-C21325.svg?style=flat&logo=jest)](https://jestjs.io)
+[![Expo](https://img.shields.io/badge/Expo-000020.svg?style=flat&logo=expo)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React_Native-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://reactnative.dev)
+[![React](https://img.shields.io/badge/React-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-C5F74F.svg?style=flat&logo=drizzle&logoColor=black)](https://orm.drizzle.team)
+[![SQLite](https://img.shields.io/badge/SQLite-expo--sqlite-003B57.svg?style=flat&logo=sqlite)](https://docs.expo.dev/versions/latest/sdk/sqlite/)
+[![Unistyles](https://img.shields.io/badge/Unistyles-FF4081.svg?style=flat)](https://github.com/jpudysz/react-native-unistyles)
+[![Biome](https://img.shields.io/badge/Biome-60A5FA.svg?style=flat&logo=biome&logoColor=white)](https://biomejs.dev)
+[![Jest](https://img.shields.io/badge/Jest-C21325.svg?style=flat&logo=jest)](https://jestjs.io)
 
 > **Cajero Mobile POS** is a modern, landscape-first Point of Sale (POS) client built with **React Native (New Architecture)** and **Expo**. Engineered for speed and reliability in high-volume retail and dining environments, it features an **offline-first SQLite architecture with Drizzle ORM**, **Bluetooth ESC/POS thermal printing**, and **instant local state persistence**.
 
@@ -115,18 +115,20 @@ sequenceDiagram
 
 ## 🛠️ Tech Stack
 
+> See [`mobile/package.json`](./package.json) for pinned dependency versions.
+
 | Category | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Framework** | [Expo SDK 53](https://expo.dev) | Native development platform with New Architecture (`newArchEnabled: true`) |
-| **Runtime** | [React Native 0.79.5](https://reactnative.dev) / [React 19](https://react.dev) | Mobile application runtime |
-| **Routing** | [Expo Router v5](https://docs.expo.dev/router/introduction/) | Typed, file-based routing and modal navigation |
-| **Styling** | [react-native-unistyles v3](https://github.com/jpudysz/react-native-unistyles) | Cross-platform, performant styling with custom design tokens |
-| **Local Database** | [expo-sqlite v16](https://docs.expo.dev/versions/latest/sdk/sqlite/) + [Drizzle ORM](https://orm.drizzle.team) | Offline-first SQLite database and type-safe query builder |
-| **State Management** | [Zustand v5](https://github.com/pmndrs/zustand) + [TanStack Query v5](https://tanstack.com/query) | Client & server state management |
-| **Local Storage** | [react-native-mmkv v3](https://github.com/mrousavy/react-native-mmkv) | High-speed encrypted key-value store |
+| **Framework** | [Expo](https://expo.dev) | Native development platform with New Architecture (`newArchEnabled: true`) |
+| **Runtime** | [React Native](https://reactnative.dev) / [React](https://react.dev) | Mobile application runtime |
+| **Routing** | [Expo Router](https://docs.expo.dev/router/introduction/) | Typed, file-based routing and modal navigation |
+| **Styling** | [react-native-unistyles](https://github.com/jpudysz/react-native-unistyles) | Cross-platform, performant styling with custom design tokens |
+| **Local Database** | [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) + [Drizzle ORM](https://orm.drizzle.team) | Offline-first SQLite database and type-safe query builder |
+| **State Management** | [Zustand](https://github.com/pmndrs/zustand) + [TanStack Query](https://tanstack.com/query) | Client & server state management |
+| **Local Storage** | [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv) | High-speed encrypted key-value store |
 | **Hardware / BLE** | [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx) + [esc-pos-encoder](https://github.com/NielsLeenheer/EscPosEncoder) | Bluetooth Low Energy scanning and thermal receipt printing |
-| **Forms & Validation** | [React Hook Form](https://react-hook-form.com) + [Zod v4](https://zod.dev) / [Drizzle-Zod](https://orm.drizzle.team/docs/zod) | Form state management and schema validation |
-| **Code Tooling** | [Biome v2](https://biomejs.dev) | Fast linter and formatter |
+| **Forms & Validation** | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) / [Drizzle-Zod](https://orm.drizzle.team/docs/zod) | Form state management and schema validation |
+| **Code Tooling** | [Biome](https://biomejs.dev) | Fast linter and formatter |
 | **Testing** | [Jest](https://jestjs.io), [RNTL](https://callstack.github.io/react-native-testing-library/) | Unit, component, hook, and store testing |
 
 ---
