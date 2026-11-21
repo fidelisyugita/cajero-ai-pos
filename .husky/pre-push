@@ -15,6 +15,15 @@ done <<EOF
 $STDIN_DATA
 EOF
 
+# --- Root Scripts Tests ---
+echo "🧪 Running root script tests..."
+yarn test:scripts
+SCRIPTS_EXIT=$?
+if [ $SCRIPTS_EXIT -ne 0 ]; then
+  echo "❌ Root script tests failed. Fix errors before pushing."
+  exit 1
+fi
+
 # --- TypeScript Typecheck ---
 echo "🔷 Running TypeScript typecheck..."
 cd mobile && yarn typecheck
