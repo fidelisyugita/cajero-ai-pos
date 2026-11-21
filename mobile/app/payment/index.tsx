@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
@@ -24,6 +24,30 @@ import { useReferenceStore } from "@/store/useReferenceStore";
 import { nowDate } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
 
+const MemoScreenHeader = memo(ScreenHeader);
+
+interface DraftSectionProps {
+  onPrintBill: () => void;
+  onDraftBill: () => void;
+}
+
+const DraftSection = memo(({ onPrintBill, onDraftBill }: DraftSectionProps) => (
+  <View style={$.draftSection}>
+    <Button
+      title={t("print_bill")}
+      variant="secondary"
+      onPress={onPrintBill}
+      style={$.fullWidthButton}
+    />
+    <Button
+      title={t("draft_open_bill")}
+      variant="primary"
+      onPress={onDraftBill}
+      style={$.fullWidthButton}
+    />
+  </View>
+));
+
 const PaymentScreen = () => {
   const router = useRouter();
   const items = useOrderStore((state) => state.items);
@@ -47,9 +71,9 @@ const PaymentScreen = () => {
   const addDraft = useDraftStore((state) => state.addDraft);
 
   // Default to CASH if available, otherwise first one
-  const defaultMethod =
-    paymentMethods.find((p) => p.code === "CASH")?.code || paymentMethods[0]?.code || "CASH";
-  const [selectedMethod, setSelectedMethod] = useState<string>(defaultMethod);
+  const [selectedMethod, setSelectedMethod] = useState<string>(
+    () => paymentMethods.find((p) => p.code === "CASH")?.code || paymentMethods[0]?.code || "CASH",
+  );
   const [paidAmount, setPaidAmount] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [lastTransactionNumber, setLastTransactionNumber] = useState("");
@@ -80,7 +104,7 @@ const PaymentScreen = () => {
     };
   }, [items, globalDiscount]);
 
-  const handlePay = () => {
+  const handlePay = useCallback(() => {
     const transactionProducts: TransactionProductRequest[] = items.map((item) => ({
       productId: item.productId,
       selectedVariants: item.variants, // Assuming backend accepts this structure or needs transformation
@@ -176,23 +200,43 @@ const PaymentScreen = () => {
         },
       },
     );
-  };
+  }, [
+    connectedDevice,
+    createTransaction,
+    customerName,
+    finalSubtotal,
+    globalDiscount,
+    isAutoPrintEnabled,
+    isPrinterConnected,
+    items,
+    selectedMethod,
+    tableNumber,
+    total,
+    totalCommission,
+    totalItemDiscounts,
+    totalTax,
+    transactionTypes,
+  ]);
 
-  const handleNewTransaction = () => {
+  const handleNewTransaction = useCallback(() => {
     clearOrder();
     setIsSuccess(false);
     router.replace("/(dashboard)/menu");
-  };
+  }, [clearOrder, router]);
+
+  const handleExit = useCallback(() => {
+    router.back();
+  }, [router]);
 
   usePaymentBackGuard({
     isPending,
     isSuccess,
     hasActiveItems: items.length > 0,
     onNewTransaction: handleNewTransaction,
-    onExit: () => router.back(),
+    onExit: handleExit,
   });
 
-  const handlePrintBill = () => {
+  const handlePrintBill = useCallback(() => {
     setPreviewData({
       title: "BILL / TAGIHAN",
       subtotal: formatCurrency(finalSubtotal),
@@ -218,9 +262,9 @@ const PaymentScreen = () => {
       footerMessage: "Please pay at cashier",
     });
     setShowPreview(true);
-  };
+  }, [finalSubtotal, globalDiscount, items, total, totalTax]);
 
-  const handleDraftBill = () => {
+  const handleDraftBill = useCallback(() => {
     // Save as draft
     addDraft({
       items,
@@ -232,9 +276,9 @@ const PaymentScreen = () => {
     Alert.alert("Draft Bill", "Bill saved as draft. Ready for next customer.");
     // Clear order for next customer
     handleNewTransaction();
-  };
+  }, [addDraft, customerName, globalDiscount, handleNewTransaction, items, tableNumber]);
 
-  const handlePrintReceipt = () => {
+  const handlePrintReceipt = useCallback(() => {
     setPreviewData({
       title: "RECEIPT / STRUK",
       subtotal: formatCurrency(finalSubtotal),
@@ -263,7 +307,15 @@ const PaymentScreen = () => {
       transactionDate: nowDate(),
     });
     setShowPreview(true);
-  };
+  }, [
+    finalSubtotal,
+    globalDiscount,
+    items,
+    lastTransactionNumber,
+    selectedMethod,
+    total,
+    totalTax,
+  ]);
 
   const handleClosePreview = useCallback(() => setShowPreview(false), []);
 
@@ -294,27 +346,14 @@ const PaymentScreen = () => {
         />
       ) : (
         <>
-          <ScreenHeader title={t("transaction")} />
+          <MemoScreenHeader title={t("transaction")} />
 
           <View style={$.content}>
             <View style={$.leftColumn}>
               <PaymentMethods selectedMethod={selectedMethod} onSelect={setSelectedMethod} />
 
               {/* Draft / Open Bill feature */}
-              <View style={$.draftSection}>
-                <Button
-                  title={t("print_bill")}
-                  variant="secondary"
-                  onPress={handlePrintBill}
-                  style={{ width: "100%" }}
-                />
-                <Button
-                  title={t("draft_open_bill")}
-                  variant="primary"
-                  onPress={handleDraftBill}
-                  style={{ width: "100%" }}
-                />
-              </View>
+              <DraftSection onPrintBill={handlePrintBill} onDraftBill={handleDraftBill} />
             </View>
 
             {/* Right Column: Dynamic based on method */}
@@ -365,6 +404,9 @@ const $ = StyleSheet.create((theme, rt) => ({
   draftSection: {
     marginTop: "auto", // Push to bottom of left column
     gap: theme.spacing.md,
+  },
+  fullWidthButton: {
+    width: "100%",
   },
 }));
 

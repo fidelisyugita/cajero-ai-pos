@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useRef } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcBackspace from "@/assets/icons/backspace.svg";
@@ -14,6 +14,51 @@ interface CashPaymentProps {
   onPay: () => void;
   isProcessing?: boolean;
 }
+
+type NumpadValue = number | "C" | "X";
+
+const NUMPAD_KEYS: readonly NumpadValue[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, "C", 0, "X"];
+
+const MemoButton = memo(Button);
+
+interface QuickAmountButtonProps {
+  amount: number;
+  isExact: boolean;
+  onSelect: (amount: number) => void;
+}
+
+const QuickAmountButton = memo(({ amount, isExact, onSelect }: QuickAmountButtonProps) => {
+  const handlePress = useCallback(() => {
+    onSelect(amount);
+  }, [onSelect, amount]);
+
+  return (
+    <TouchableOpacity style={$.quickButton} onPress={handlePress}>
+      <Text style={$.quickButtonText}>{isExact ? "Exact" : formatCurrency(amount)}</Text>
+    </TouchableOpacity>
+  );
+});
+
+interface NumpadKeyProps {
+  value: NumpadValue;
+  onPress: (value: NumpadValue) => void;
+}
+
+const NumpadKey = memo(({ value, onPress }: NumpadKeyProps) => {
+  const handlePress = useCallback(() => {
+    onPress(value);
+  }, [onPress, value]);
+
+  return (
+    <TouchableOpacity style={$.key} onPress={handlePress} activeOpacity={0.7}>
+      {value === "X" ? (
+        <IcBackspace width={vs(32)} height={vs(32)} color={colors.error[500]} />
+      ) : (
+        <Text style={value === "C" ? $.clearKeyText : $.keyText}>{value}</Text>
+      )}
+    </TouchableOpacity>
+  );
+});
 
 const quickAmounts = (total: number) => {
   // Logic to suggest amounts: Exact, Next 50k, Next 100k, etc.
@@ -47,40 +92,54 @@ const CashPayment = ({
 }: CashPaymentProps) => {
   const change = Math.max(0, paidAmount - totalAmount);
   const suggestions = useMemo(() => quickAmounts(totalAmount), [totalAmount]);
+  const chargeText = useMemo(() => `Charge ${formatCurrency(totalAmount)}`, [totalAmount]);
+
+  // Ref keeps handleNumPad stable across keystrokes without changing the number prop API
+  const paidAmountRef = useRef(paidAmount);
+  paidAmountRef.current = paidAmount;
 
   const handleNumPad = useCallback(
-    (value: string | number) => {
+    (value: NumpadValue) => {
       if (value === "C") {
+        paidAmountRef.current = 0;
         onChangePaidAmount(0);
-      } else if (value === "X") {
-        const str = paidAmount.toString();
-        if (str.length > 1) {
-          onChangePaidAmount(Number(str.slice(0, -1)));
-        } else {
-          onChangePaidAmount(0);
-        }
-      } else {
-        const currentStr = paidAmount === 0 ? "" : paidAmount.toString();
-        const newStr = currentStr + value.toString();
-        if (newStr.length < 12) {
-          onChangePaidAmount(Number(newStr));
-        }
+        return;
+      }
+
+      const current = paidAmountRef.current;
+      if (value === "X") {
+        const str = current.toString();
+        const nextAmount = str.length > 1 ? Number(str.slice(0, -1)) : 0;
+        paidAmountRef.current = nextAmount;
+        onChangePaidAmount(nextAmount);
+        return;
+      }
+
+      const currentStr = current === 0 ? "" : current.toString();
+      const newStr = currentStr + value.toString();
+      if (newStr.length < 12) {
+        const nextAmount = Number(newStr);
+        paidAmountRef.current = nextAmount;
+        onChangePaidAmount(nextAmount);
       }
     },
-    [onChangePaidAmount, paidAmount],
+    [onChangePaidAmount],
   );
 
   return (
     <View style={$.container}>
       <View style={$.header}>
-        <Text style={$.chargeLabel}>Charge {formatCurrency(totalAmount)}</Text>
+        <Text style={$.chargeLabel}>{chargeText}</Text>
       </View>
 
       <View style={$.quickAmounts}>
         {suggestions.map((amt, index) => (
-          <TouchableOpacity key={amt} style={$.quickButton} onPress={() => onChangePaidAmount(amt)}>
-            <Text style={$.quickButtonText}>{index === 0 ? "Exact" : formatCurrency(amt)}</Text>
-          </TouchableOpacity>
+          <QuickAmountButton
+            key={amt}
+            amount={amt}
+            isExact={index === 0}
+            onSelect={onChangePaidAmount}
+          />
         ))}
       </View>
 
@@ -91,7 +150,7 @@ const CashPayment = ({
         </View>
 
         {change > 0 && (
-          <View style={[$.amountBlock, { alignItems: "flex-end" }]}>
+          <View style={$.changeBlock}>
             <Text style={$.changeLabel}>Change</Text>
             <Text style={$.changeValue}>{formatCurrency(change)}</Text>
           </View>
@@ -99,23 +158,12 @@ const CashPayment = ({
       </View>
 
       <View style={$.numpad}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, "C", 0, "X"].map((key) => (
-          <TouchableOpacity
-            key={key}
-            style={$.key}
-            onPress={() => handleNumPad(key)}
-            activeOpacity={0.7}
-          >
-            {key === "X" ? (
-              <IcBackspace width={vs(32)} height={vs(32)} color={colors.error[500]} />
-            ) : (
-              <Text style={[$.keyText, key === "C" ? $.clearKeyText : {}]}>{key}</Text>
-            )}
-          </TouchableOpacity>
+        {NUMPAD_KEYS.map((key) => (
+          <NumpadKey key={key} value={key} onPress={handleNumPad} />
         ))}
       </View>
 
-      <Button
+      <MemoButton
         title="Pay"
         size="lg"
         variant="primary"
@@ -177,6 +225,11 @@ const $ = StyleSheet.create((theme) => ({
     flex: 1,
     gap: 2,
   },
+  changeBlock: {
+    flex: 1,
+    gap: 2,
+    alignItems: "flex-end",
+  },
   amountLabel: {
     ...theme.typography.bodySm,
     color: theme.colors.neutral[500],
@@ -215,6 +268,7 @@ const $ = StyleSheet.create((theme) => ({
     color: theme.colors.neutral[700],
   },
   clearKeyText: {
+    ...theme.typography.heading3,
     color: theme.colors.sup.yellow, // Or warning color
   },
 }));

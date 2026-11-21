@@ -198,4 +198,19 @@ describe("CashPayment component", () => {
 
     expect(screen.getByText("Pay")).toBeTruthy();
   });
+
+  it("accumulates rapid consecutive numpad presses via ref before prop re-render", async () => {
+    const onChangeMock = jest.fn();
+    await render(
+      <CashPayment {...defaultProps} onChangePaidAmount={onChangeMock} paidAmount={0} />,
+    );
+
+    await fireEvent.press(screen.getByText("5"));
+    await fireEvent.press(screen.getByText("4"));
+    await fireEvent.press(screen.getByText("0"));
+
+    expect(onChangeMock).toHaveBeenNthCalledWith(1, 5);
+    expect(onChangeMock).toHaveBeenNthCalledWith(2, 54);
+    expect(onChangeMock).toHaveBeenNthCalledWith(3, 540);
+  });
 });

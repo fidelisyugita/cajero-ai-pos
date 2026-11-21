@@ -1,4 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { useState } from "react";
+import { Button } from "react-native";
+import * as i18n from "@/services/i18n";
 import { useReferenceStore } from "@/store/useReferenceStore";
 import PaymentMethods from "../PaymentMethods";
 
@@ -42,5 +45,33 @@ describe("PaymentMethods component", () => {
 
     expect(screen.getByText("Select Payment Method")).toBeTruthy();
     expect(screen.queryByText("Cash")).toBeNull();
+  });
+
+  it("skips re-rendering when parent state updates without changing props", async () => {
+    const tSpy = jest.spyOn(i18n, "t");
+    const Parent = () => {
+      const [count, setCount] = useState(0);
+      return (
+        <>
+          <PaymentMethods onSelect={mockOnSelect} selectedMethod="CASH" />
+          <Button title={`bump-${count}`} onPress={() => setCount((c) => c + 1)} />
+        </>
+      );
+    };
+
+    await render(<Parent />);
+    const callsAfterMount = tSpy.mock.calls.filter(([k]) => k === "select_payment_method").length;
+    expect(callsAfterMount).toBe(1);
+
+    await act(async () => {
+      fireEvent.press(screen.getByText("bump-0"));
+    });
+
+    expect(screen.getByText("bump-1")).toBeTruthy();
+    const callsAfterParentUpdate = tSpy.mock.calls.filter(
+      ([k]) => k === "select_payment_method",
+    ).length;
+    expect(callsAfterParentUpdate).toBe(1);
+    tSpy.mockRestore();
   });
 });
