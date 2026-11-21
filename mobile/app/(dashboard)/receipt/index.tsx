@@ -58,14 +58,18 @@ const ReceiptScreen = () => {
         )}
       </Header>
 
-      <DateRangeModal
-        visible={showPicker}
-        onClose={() => setShowPicker(false)}
-        onApply={(start, end) => setDateRange({ startDate: toDayjs(start), endDate: toDayjs(end) })}
-        initialStart={dateRange.startDate}
-        initialEnd={dateRange.endDate}
-        minDate={user?.createdAt}
-      />
+      {showPicker && (
+        <DateRangeModal
+          visible={showPicker}
+          onClose={() => setShowPicker(false)}
+          onApply={(start, end) =>
+            setDateRange({ startDate: toDayjs(start), endDate: toDayjs(end) })
+          }
+          initialStart={dateRange.startDate}
+          initialEnd={dateRange.endDate}
+          minDate={user?.createdAt}
+        />
+      )}
 
       <View style={$.content}>
         {activeTab === "Transactions" ? (

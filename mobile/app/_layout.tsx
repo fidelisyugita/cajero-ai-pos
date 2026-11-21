@@ -1,5 +1,5 @@
 import { Slot, SplashScreen, Stack, useRouter, useSegments } from "expo-router";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { useCustomFonts } from "@/config/useCustomFonts";
 import "react-native-reanimated";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -27,17 +27,10 @@ const SyncManager = () => {
   return null;
 };
 
-const InitialLayout = () => {
-  const { loaded } = useCustomFonts();
+const AuthRedirectGuard = memo(({ loaded }: { loaded: boolean }) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const segments = useSegments();
   const router = useRouter();
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -49,61 +42,76 @@ const InitialLayout = () => {
     } else if (!isLoggedIn && segments[0] !== "(auth)") {
       router.replace("/(auth)/sign-in");
     }
-  }, [isLoggedIn, segments, loaded, router.replace]);
+  }, [isLoggedIn, segments, loaded, router]);
+
+  return null;
+});
+
+const InitialLayout = memo(() => {
+  const { loaded } = useCustomFonts();
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
 
   if (!loaded) {
     return <Slot />;
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(dashboard)" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="+not-found" />
-      <Stack.Screen
-        name="modal/product/upload-image"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/product/select-category"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/product/select-ingredient"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/product/select-measure-unit"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/order/add-item"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/order/discount"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/business/update-store"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/business/add-employee"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/business/edit-profile"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-      <Stack.Screen
-        name="modal/product/edit-variant"
-        options={{ presentation: "transparentModal", animation: "fade" }}
-      />
-    </Stack>
+    <>
+      <AuthRedirectGuard loaded={loaded} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(dashboard)" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="+not-found" />
+        <Stack.Screen
+          name="modal/product/upload-image"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/product/select-category"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/product/select-ingredient"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/product/select-measure-unit"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/order/add-item"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/order/discount"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/business/update-store"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/business/add-employee"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/business/edit-profile"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="modal/product/edit-variant"
+          options={{ presentation: "transparentModal", animation: "fade" }}
+        />
+      </Stack>
+    </>
   );
-};
+});
 
 const RootLayout = () => {
   return (

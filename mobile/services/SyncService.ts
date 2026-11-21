@@ -12,6 +12,7 @@ import api from "@/lib/axios";
 import { useAuthStore } from "@/store/useAuthStore";
 import { nowDate, toDate } from "@/utils/Date";
 import { generateUUID } from "@/utils/Uuid";
+import { getProductCategory } from "./endpoints/getProductCategory";
 import Logger from "./logger";
 import type { ProductIngredient } from "./types/Product";
 import type { TransactionProductResponse, TransactionResponse } from "./types/Transaction";
@@ -23,7 +24,7 @@ interface CategoryResponse {
   description?: string;
   createdAt?: string;
   updatedAt?: string;
-  deletedAt?: string;
+  deletedAt?: string | null;
 }
 
 /** Backend API shape for a product (from /product endpoint) */
@@ -370,8 +371,7 @@ export const SyncService = {
 
     isSyncingCategories = true;
     try {
-      const response = await api.get("/product-category");
-      const backendCategories = response.data;
+      const backendCategories = await getProductCategory();
 
       await runInTransaction(async (tx) => {
         for (const c of backendCategories) {
