@@ -131,18 +131,6 @@ yarn test
 yarn test:coverage
 ```
 
-### End-to-End Testing (Maestro)
-Automated flows are located in `.maestro/`:
-```bash
-cd mobile
-
-# Run complete sign-in and checkout flows
-yarn maestro:test
-
-# Launch visual flow studio
-yarn maestro:studio
-```
-
 ---
 
 ## 🏷️ Version Bumping

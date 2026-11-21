@@ -34,11 +34,6 @@
     "build:eas:prod:apk": "eas build --platform android --profile production-apk --local --output ./builds/cajero-prod.apk",
     "eas:credentials": "eas credentials",
     "bundle:android": "cd android && ./gradlew bundleRelease",
-    "maestro:test": "maestro test --debug-output ./.maestro/output .maestro/tests/",
-    "maestro:sign-in": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in.yaml",
-    "maestro:validation": "maestro test --debug-output ./.maestro/output .maestro/tests/sign-in-validation.yaml",
-    "maestro:studio": "maestro studio",
-    "maestro:record": "maestro record .maestro/tests/sign-in.yaml",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -46,9 +41,7 @@
     "check:bundle": "node ./scripts/check-bundle-size.js",
     "check:images": "node ./scripts/check-image-cache-policy.js",
     "check:migrations": "node ./scripts/check-migrations.js",
-    "check:16kb": "node ./scripts/check-16kb-alignment.js",
-    "sonar:scan": "node ./scripts/sonar-scanner.js",
-    "sonar": "yarn test:coverage && yarn sonar:scan"
+    "check:16kb": "node ./scripts/check-16kb-alignment.js"
   },
   "dependencies": {
     "@config-plugins/react-native-ble-plx": "^7.0.0",
@@ -134,7 +127,6 @@
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "^19.2.8",
     "reactotron-react-native": "^5.3.1",
-    "sonarqube-scanner": "^5.0.0",
     "sql.js": "^1.15.1",
     "test-renderer": "^1.2.0",
     "typescript": "~6.0.3"
