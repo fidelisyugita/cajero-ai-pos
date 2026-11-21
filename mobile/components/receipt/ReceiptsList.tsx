@@ -1,6 +1,6 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { memo, type ReactElement } from "react";
+import { memo } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
@@ -11,11 +11,6 @@ import { useTransactionsQuery } from "@/services/queries/useTransactionsQuery";
 import type { TransactionResponse } from "@/services/types/Transaction";
 import { formatDayDateYear, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 const COLUMNS = [
   { label: "Time", flex: 1 },
@@ -101,7 +96,6 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
       <FlashList<TransactionResponse>
         contentContainerStyle={[$.listContent, transactions.length === 0 && { flex: 1 }]}
         data={transactions}
-        estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <TransactionRow item={item} />}
         ItemSeparatorComponent={ReceiptSeparator}

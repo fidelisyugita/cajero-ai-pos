@@ -5,11 +5,17 @@ import { openDatabaseSync } from "expo-sqlite";
 import migrations from "./migrations/migrations";
 
 export const expoDb = openDatabaseSync("cajero.db", {
-  enableChangeListener: true,
+  enableChangeListener: false,
 });
 
 try {
-  expoDb.execSync("PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;");
+  expoDb.execSync(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
+    PRAGMA cache_size = -2000;
+    PRAGMA temp_store = MEMORY;
+    PRAGMA busy_timeout = 5000;
+  `);
 } catch {
   // Graceful fallback if PRAGMA execution fails in specific test environments
 }

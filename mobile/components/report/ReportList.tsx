@@ -1,8 +1,7 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { memo, type ReactElement } from "react";
+import { memo } from "react";
 import { type NativeScrollEvent, type NativeSyntheticEvent, Text, View } from "react-native";
-import Animated from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
@@ -11,13 +10,6 @@ import { t } from "@/services/i18n";
 import type { DailyReport } from "@/services/types/Report";
 import { formatDate, formatDayName } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
-
-const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 interface ReportListProps {
   data: DailyReport[];
@@ -90,7 +82,6 @@ const ReportList = ({ data, isLoading, onScroll }: ReportListProps) => {
       <AnimatedFlashList
         contentContainerStyle={[$.listContent, (!data || data.length === 0) && { flex: 1 }]}
         data={data || []}
-        estimatedItemSize={60}
         keyExtractor={(item) => (item as DailyReport).date}
         renderItem={({ item }) => <ReportRow item={item as DailyReport} />}
         ItemSeparatorComponent={ReportSeparator}

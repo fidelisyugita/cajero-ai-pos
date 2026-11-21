@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
 import EscPosEncoder from "esc-pos-encoder";
 import { PermissionsAndroid, Platform } from "react-native";
-import { BleManager, type Device } from "react-native-ble-plx";
+import { BleManager, type Device, type Subscription } from "react-native-ble-plx";
 import { captureAnalyticsEvent } from "@/lib/posthog";
 import { usePrinterStore } from "@/store/PrinterStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
@@ -16,6 +16,7 @@ if (!global.structuredClone) {
 class PrinterService {
   private manager: BleManager | null = null;
   private connectedDevice: Device | null = null;
+  private disconnectSubscription: Subscription | null = null;
   private serviceUUID: string | null = null;
   private characteristicUUID: string | null = null;
   private writeMethod: "withResponse" | "withoutResponse" | null = null;
@@ -189,10 +190,16 @@ class PrinterService {
   }
 
   private setupDisconnectionListener(device: Device): void {
-    device.onDisconnected((_error, disconnectedDevice) => {
+    if (this.disconnectSubscription) {
+      this.disconnectSubscription.remove();
+      this.disconnectSubscription = null;
+    }
+
+    this.disconnectSubscription = device.onDisconnected((_error, disconnectedDevice) => {
       usePrinterStore.getState().setIsConnected(false);
       this.connectedDevice = null;
       this.writeMethod = null;
+      this.disconnectSubscription = null;
 
       captureAnalyticsEvent("printer_disconnected", {
         printerName: disconnectedDevice?.name || undefined,
@@ -243,6 +250,11 @@ class PrinterService {
   }
 
   async disconnect() {
+    if (this.disconnectSubscription) {
+      this.disconnectSubscription.remove();
+      this.disconnectSubscription = null;
+    }
+
     if (this.connectedDevice) {
       const printerName = this.connectedDevice.name || undefined;
       await this.connectedDevice.cancelConnection();

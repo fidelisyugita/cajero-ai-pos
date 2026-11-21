@@ -1,10 +1,7 @@
-import {
-  type FlashListProps,
-  AnimatedFlashList as ShopifyAnimatedFlashList,
-} from "@shopify/flash-list";
+import { AnimatedFlashList, type FlashListProps } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { memo, type ReactElement, type RefAttributes, useEffect, useRef } from "react";
+import { type ComponentRef, memo, useEffect, useRef } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -21,14 +18,7 @@ import { formatCurrency } from "@/utils/Format";
 import { vs } from "@/utils/Scale";
 import MenuListSkeleton from "./MenuListSkeleton";
 
-interface FlashListRef {
-  scrollToOffset: (params: { offset: number; animated?: boolean }) => void;
-}
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number } & RefAttributes<FlashListRef>,
-) => ReactElement;
+type AnimatedListRef = ComponentRef<typeof AnimatedFlashList>;
 
 interface MenuListProps {
   scrollHandler?: FlashListProps<Product>["onScroll"];
@@ -46,7 +36,7 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   const selectedCategory = useCategoryStore((s) => s.selectedCategory);
   const searchQuery = useCategoryStore((s) => s.searchQuery);
   const isSyncing = useSyncStore((s) => s.isSyncing);
-  const listRef = useRef<FlashListRef | null>(null);
+  const listRef = useRef<AnimatedListRef | null>(null);
 
   const isSearching = searchQuery.length >= 2;
   const categoryCode = isSearching || selectedCategory === "ALL" ? undefined : selectedCategory;
@@ -62,8 +52,12 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   });
 
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollToOffset({ offset: 0, animated: false });
+    if (listRef.current && "scrollToOffset" in listRef.current) {
+      (
+        listRef.current as {
+          scrollToOffset: (params: { offset: number; animated?: boolean }) => void;
+        }
+      ).scrollToOffset({ offset: 0, animated: false });
     }
   }, []);
 
@@ -90,7 +84,6 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         style={$.container}
-        estimatedItemSize={250}
         ListEmptyComponent={
           <EmptyState
             title={isSearching ? t("empty_menu_search_title") : t("empty_menu_category_title")}
@@ -159,7 +152,9 @@ const ProductCard = memo(({ item, editable }: ProductCardProps) => {
     >
       <View>
         <Image
+          cachePolicy="memory-disk"
           contentFit="cover"
+          recyclingKey={item.imageUrl || item.id}
           source={item.imageUrl}
           style={[$.productImage, isDeleted && $.productImageDeleted]}
         />

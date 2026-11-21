@@ -1,5 +1,5 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
-import { type ReactElement, useMemo, useState } from "react";
+import { FlashList } from "@shopify/flash-list";
+import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -16,11 +16,6 @@ import type { Variant, VariantOption } from "@/services/types/Variant";
 import SaveVariantOptionModal from "./SaveVariantOptionModal";
 import StockUpdateModal from "./StockUpdateModal";
 import StockVariantHistory from "./StockVariantHistory";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 const COLUMNS = [
   { label: "Product Name", flex: 2 },
@@ -234,7 +229,6 @@ const StockVariants = ({ searchQuery = "" }: StockVariantsProps) => {
       <FlashList<FlattenedVariant>
         contentContainerStyle={[$.listContent, flattenedVariants.length === 0 && { flex: 1 }]}
         data={flattenedVariants}
-        estimatedItemSize={60}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <VariantRow

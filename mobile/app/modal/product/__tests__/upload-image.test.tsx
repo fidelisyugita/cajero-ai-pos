@@ -43,6 +43,12 @@ describe("UploadImageModal integration", () => {
       fireEvent.press(chooseBtn);
     });
 
+    expect(ImagePicker.launchImageLibraryAsync).toHaveBeenCalledWith({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.7,
+    });
     expect(useImageSelectionStore.getState().imageUri).toBe("file:///mock/image.png");
 
     const saveBtn = screen.getByText("Save");

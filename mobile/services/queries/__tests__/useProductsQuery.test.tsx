@@ -80,4 +80,28 @@ describe("useProductsQuery", () => {
       number: 0,
     });
   });
+
+  it("respects page and size parameters passed in params", async () => {
+    (LocalProductService.getProducts as jest.Mock).mockResolvedValue([]);
+
+    const params = {
+      page: 1,
+      size: 20,
+      keyword: "Coffee",
+    };
+
+    const { result } = await renderHook(() => useProductsQuery(params), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(LocalProductService.getProducts).toHaveBeenCalledWith(
+      "Coffee",
+      undefined,
+      1,
+      20,
+      undefined,
+    );
+  });
 });

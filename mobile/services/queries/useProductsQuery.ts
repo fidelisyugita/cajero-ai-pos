@@ -6,12 +6,13 @@ export const useProductsQuery = (params: Partial<GetProductsParams> = {}) => {
   return useQuery({
     queryKey: ["products", params],
     queryFn: async () => {
-      // For non-infinite lists, we fetch a large chunk.
+      const page = params.page ?? 0;
+      const size = params.size ?? 1000;
       const products = await LocalProductService.getProducts(
         params.keyword,
         params.categoryCode,
-        0,
-        1000,
+        page,
+        size,
         params.includeDeleted,
       );
       // Adapter to match PageResponse structure expected by UI
@@ -20,7 +21,7 @@ export const useProductsQuery = (params: Partial<GetProductsParams> = {}) => {
         totalElements: products.length,
         totalPages: 1,
         size: products.length,
-        number: 0,
+        number: page,
       };
     },
   });

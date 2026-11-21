@@ -1,19 +1,10 @@
-import {
-  type FlashListProps,
-  AnimatedFlashList as ShopifyAnimatedFlashList,
-} from "@shopify/flash-list";
-import type React from "react";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useStockMovementsQuery } from "@/services/queries/useStockMovementsQuery";
 import type { Ingredient } from "@/services/types/Ingredient";
 import type { StockMovement } from "@/services/types/StockMovement";
 import { formatCustomDate } from "@/utils/Date";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const AnimatedFlashList = ShopifyAnimatedFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => React.ReactElement;
 
 interface StockIngredientHistoryProps {
   ingredient: Ingredient | null;
@@ -53,7 +44,6 @@ const StockIngredientHistory = ({ ingredient, onClose }: StockIngredientHistoryP
 
             <AnimatedFlashList
               data={movements}
-              estimatedItemSize={50}
               keyExtractor={(item: StockMovement) => item.id}
               onEndReached={() => {
                 if (hasNextPage) fetchNextPage();

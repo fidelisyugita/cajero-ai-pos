@@ -1,6 +1,6 @@
-import { type FlashListProps, FlashList as ShopifyFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { memo, type ReactElement } from "react";
+import { memo } from "react";
 import { Alert, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
@@ -10,11 +10,6 @@ import { type DraftOrder, useDraftStore } from "@/store/useDraftStore";
 import { useOrderStore } from "@/store/useOrderStore";
 import { formatDayDate, formatTime } from "@/utils/Date";
 import { formatCurrency } from "@/utils/Format";
-
-// Workaround for missing estimatedItemSize in FlashList props type definition
-const FlashList = ShopifyFlashList as unknown as <T>(
-  props: FlashListProps<T> & { estimatedItemSize: number },
-) => ReactElement;
 
 const COLUMNS = [
   { label: "Time", flex: 1 },
@@ -56,7 +51,6 @@ const DraftList = ({ searchQuery = "" }: DraftListProps) => {
       <FlashList
         contentContainerStyle={[$.listContent, filteredDrafts.length === 0 && { flex: 1 }]}
         data={filteredDrafts}
-        estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <DraftRow item={item} />}
         ItemSeparatorComponent={DraftSeparator}
