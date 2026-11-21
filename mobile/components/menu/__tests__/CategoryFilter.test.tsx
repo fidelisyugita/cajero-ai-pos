@@ -64,6 +64,7 @@ describe("CategoryFilter component", () => {
     expect(screen.getByText("All")).toBeTruthy();
     expect(screen.getByText("Coffee")).toBeTruthy();
     expect(screen.getByText("Snack & Bakery")).toBeTruthy();
+    expect(useDeleteCategoryMutation).not.toHaveBeenCalled();
   });
 
   it("updates selected category in useCategoryStore when a category button is pressed", async () => {

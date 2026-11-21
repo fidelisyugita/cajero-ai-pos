@@ -184,4 +184,14 @@ describe("MenuList component", () => {
     // In CASHIER mode, MenuActions is not rendered
     expect(screen.queryByText("Hidden")).toBeTruthy();
   });
+
+  it("memoizes query params passed to useProductsQuery across re-renders", async () => {
+    const { rerender } = await render(<MenuList scrollHandler={jest.fn()} />);
+    const firstCallParams = (useProductsQuery as jest.Mock).mock.calls[0][0];
+
+    await rerender(<MenuList scrollHandler={jest.fn()} />);
+    const secondCallParams = (useProductsQuery as jest.Mock).mock.calls[1][0];
+
+    expect(secondCallParams).toBe(firstCallParams);
+  });
 });

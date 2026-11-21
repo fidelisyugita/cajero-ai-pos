@@ -2,9 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { LocalProductService } from "../LocalProductService";
 import type { GetProductsParams, Product } from "../types/Product";
 
-export const useProductsQuery = (params: Partial<GetProductsParams> = {}) => {
+const EMPTY_PARAMS: Partial<GetProductsParams> = {};
+const PRODUCTS_STALE_TIME = 5 * 60_000;
+
+export const useProductsQuery = (params: Partial<GetProductsParams> = EMPTY_PARAMS) => {
   return useQuery({
     queryKey: ["products", params],
+    staleTime: PRODUCTS_STALE_TIME,
     queryFn: async () => {
       const page = params.page ?? 0;
       const size = params.size ?? 1000;

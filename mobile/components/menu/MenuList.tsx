@@ -32,27 +32,33 @@ interface ProductCardProps {
 }
 
 const NUM_COLUMNS = 4;
+const EMPTY_PRODUCTS: Product[] = [];
 const productKeyExtractor = (item: Product) => item.id.toString();
 
 const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   const router = useRouter();
   const selectedCategory = useCategoryStore((s) => s.selectedCategory);
-  const searchQuery = useCategoryStore((s) => s.searchQuery);
+  const searchKeyword = useCategoryStore((s) => (s.searchQuery.length >= 2 ? s.searchQuery : ""));
   const isSyncing = useSyncStore((s) => s.isSyncing);
   const listRef = useRef<AnimatedListRef | null>(null);
 
-  const isSearching = searchQuery.length >= 2;
+  const isSearching = searchKeyword.length >= 2;
   const categoryCode = isSearching || selectedCategory === "ALL" ? undefined : selectedCategory;
 
-  const { data, isLoading } = useProductsQuery({
-    page: 0,
-    size: 16,
-    sortBy: "name",
-    sortDir: "asc",
-    categoryCode,
-    keyword: isSearching ? searchQuery : undefined,
-    includeDeleted: editable,
-  });
+  const queryParams = useMemo(
+    () => ({
+      page: 0,
+      size: 16,
+      sortBy: "name",
+      sortDir: "asc",
+      categoryCode,
+      keyword: isSearching ? searchKeyword : undefined,
+      includeDeleted: editable,
+    }),
+    [categoryCode, isSearching, searchKeyword, editable],
+  );
+
+  const { data, isLoading } = useProductsQuery(queryParams);
 
   useEffect(() => {
     if (listRef.current && "scrollToOffset" in listRef.current) {
@@ -124,7 +130,7 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
       <AnimatedFlashList
         ref={listRef}
         contentContainerStyle={$.content}
-        data={data?.content || []}
+        data={data?.content ?? EMPTY_PRODUCTS}
         keyExtractor={productKeyExtractor}
         numColumns={NUM_COLUMNS}
         onScroll={scrollHandler}
@@ -141,23 +147,24 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
 
 const MenuActions = memo(() => {
   const router = useRouter();
+
+  const handleEditList = useCallback(() => {
+    router.push("/product/edit-list");
+  }, [router]);
+
+  const handleAddProduct = useCallback(() => {
+    router.push("/product/add");
+  }, [router]);
+
   return (
     <View style={$.actionsContainer}>
-      <IconButton
-        Icon={IcEdit}
-        onPress={() => router.push("/product/edit-list")}
-        size="lg"
-        variant="secondary"
-      />
-      <IconButton
-        Icon={IcPlus}
-        onPress={() => router.push("/product/add")}
-        size="lg"
-        variant="primary"
-      />
+      <IconButton Icon={IcEdit} onPress={handleEditList} size="lg" variant="secondary" />
+      <IconButton Icon={IcPlus} onPress={handleAddProduct} size="lg" variant="primary" />
     </View>
   );
 });
+
+MenuActions.displayName = "MenuActions";
 
 const ProductCard = memo(({ item, editable, onSelect }: ProductCardProps) => {
   const isDeleted = !!item.deletedAt;
@@ -170,7 +177,7 @@ const ProductCard = memo(({ item, editable, onSelect }: ProductCardProps) => {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={handlePress}
-      style={[$.productContainer, isDeleted && $.productDeleted]}
+      style={isDeleted ? $.productContainerDeleted : $.productContainer}
     >
       <View>
         <Image
@@ -178,7 +185,7 @@ const ProductCard = memo(({ item, editable, onSelect }: ProductCardProps) => {
           contentFit="cover"
           recyclingKey={item.imageUrl || item.id}
           source={item.imageUrl}
-          style={[$.productImage, isDeleted && $.productImageDeleted]}
+          style={isDeleted ? $.productImageDeleted : $.productImage}
         />
         {editable && (
           <View style={$.editIconOverlay}>
@@ -192,8 +199,8 @@ const ProductCard = memo(({ item, editable, onSelect }: ProductCardProps) => {
         )}
       </View>
       <View style={$.productInfoWrapper}>
-        <Text style={[$.productName, isDeleted && $.textDeleted]}>{item.name}</Text>
-        <Text style={[$.productPrice, isDeleted && $.textDeleted]}>
+        <Text style={isDeleted ? $.productNameDeleted : $.productName}>{item.name}</Text>
+        <Text style={isDeleted ? $.productPriceDeleted : $.productPrice}>
           {formatCurrency(item.sellingPrice)}
         </Text>
       </View>
@@ -203,17 +210,8 @@ const ProductCard = memo(({ item, editable, onSelect }: ProductCardProps) => {
 
 ProductCard.displayName = "ProductCard";
 
-const $ = StyleSheet.create((theme, rt) => ({
-  container: {
-    marginLeft: theme.spacing.xl,
-    marginRight: theme.spacing.xs,
-    gap: theme.spacing.xxl,
-    flex: 1,
-  },
-  content: {
-    paddingTop: vs(80),
-  },
-  productContainer: {
+const $ = StyleSheet.create((theme, rt) => {
+  const productContainerBase = {
     gap: theme.spacing.sm,
     backgroundColor: theme.colors.neutral[100],
     borderRadius: theme.radius.md,
@@ -223,66 +221,91 @@ const $ = StyleSheet.create((theme, rt) => ({
     flexGrow: 1,
     marginRight: vs(20),
     marginBottom: vs(20),
-  },
-  productImage: {
+  };
+
+  const productImageBase = {
     aspectRatio: 177 / 96,
     borderRadius: theme.radius.sm,
-  },
-  editIconOverlay: {
-    position: "absolute",
-    top: theme.spacing.xs,
-    right: theme.spacing.xs,
-    backgroundColor: theme.colors.primary[400],
-    padding: theme.spacing.xs,
-    borderRadius: theme.radius.xs,
-    zIndex: 20,
-  },
-  productInfoWrapper: {
-    gap: theme.spacing.xs,
-  },
-  productName: {
+  };
+
+  const productNameBase = {
     ...theme.typography.heading5,
     color: theme.colors.neutral[700],
-  },
-  productPrice: {
+  };
+
+  const productPriceBase = {
     ...theme.typography.labelMd,
     color: theme.colors.primary[400],
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    gap: vs(20),
-    position: "absolute",
-    bottom: rt.insets.bottom || theme.spacing.xl,
-    right: theme.spacing.xl,
-    zIndex: 10,
-  },
-  productDeleted: {
-    backgroundColor: theme.colors.neutral[100],
-    borderColor: theme.colors.neutral[200],
-  },
-  productImageDeleted: {
-    opacity: 0.5,
-  },
-  textDeleted: {
-    color: theme.colors.neutral[400],
-  },
-  deletedOverlay: {
-    position: "absolute",
-    top: theme.spacing.xs,
-    left: theme.spacing.xs,
-    backgroundColor: theme.colors.neutral[600],
-    paddingHorizontal: theme.spacing.xs,
-    paddingVertical: 2,
-    borderRadius: theme.radius.xs,
-    zIndex: 20,
-  },
-  deletedText: {
-    ...theme.typography.labelSm,
-    color: "white",
-  },
-  emptyState: {
-    marginTop: vs(100),
-  },
-}));
+  };
+
+  return {
+    container: {
+      marginLeft: theme.spacing.xl,
+      marginRight: theme.spacing.xs,
+      gap: theme.spacing.xxl,
+      flex: 1,
+    },
+    content: {
+      paddingTop: vs(80),
+    },
+    productContainer: productContainerBase,
+    productContainerDeleted: {
+      ...productContainerBase,
+      borderColor: theme.colors.neutral[200],
+    },
+    productImage: productImageBase,
+    productImageDeleted: {
+      ...productImageBase,
+      opacity: 0.5,
+    },
+    editIconOverlay: {
+      position: "absolute",
+      top: theme.spacing.xs,
+      right: theme.spacing.xs,
+      backgroundColor: theme.colors.primary[400],
+      padding: theme.spacing.xs,
+      borderRadius: theme.radius.xs,
+      zIndex: 20,
+    },
+    productInfoWrapper: {
+      gap: theme.spacing.xs,
+    },
+    productName: productNameBase,
+    productNameDeleted: {
+      ...productNameBase,
+      color: theme.colors.neutral[400],
+    },
+    productPrice: productPriceBase,
+    productPriceDeleted: {
+      ...productPriceBase,
+      color: theme.colors.neutral[400],
+    },
+    actionsContainer: {
+      flexDirection: "row",
+      gap: vs(20),
+      position: "absolute",
+      bottom: rt.insets.bottom || theme.spacing.xl,
+      right: theme.spacing.xl,
+      zIndex: 10,
+    },
+    deletedOverlay: {
+      position: "absolute",
+      top: theme.spacing.xs,
+      left: theme.spacing.xs,
+      backgroundColor: theme.colors.neutral[600],
+      paddingHorizontal: theme.spacing.xs,
+      paddingVertical: 2,
+      borderRadius: theme.radius.xs,
+      zIndex: 20,
+    },
+    deletedText: {
+      ...theme.typography.labelSm,
+      color: "white",
+    },
+    emptyState: {
+      marginTop: vs(100),
+    },
+  };
+});
 
 export default memo(MenuList);

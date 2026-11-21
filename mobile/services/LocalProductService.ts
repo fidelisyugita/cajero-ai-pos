@@ -3,6 +3,28 @@ import { db } from "@/db/drizzle";
 import { categories, products } from "@/db/schema";
 import { nowDate } from "@/utils/Date";
 
+const PRODUCT_SELECT_FIELDS = {
+  id: products.id,
+  name: products.name,
+  description: products.description,
+  sellingPrice: products.sellingPrice,
+  buyingPrice: products.buyingPrice,
+  stock: products.stock,
+  categoryId: products.categoryId,
+  imageUrl: products.imageUrl,
+  barcode: products.barcode,
+  tax: products.tax,
+  commission: products.commission,
+  discount: products.discount,
+  measureUnitCode: products.measureUnitCode,
+  measureUnitName: products.measureUnitName,
+  createdAt: products.createdAt,
+  updatedAt: products.updatedAt,
+  deletedAt: products.deletedAt,
+  categoryCode: products.categoryId,
+  categoryName: categories.name,
+};
+
 export const LocalProductService = {
   async getProducts(
     search?: string,
@@ -24,19 +46,13 @@ export const LocalProductService = {
       conditions = conditions ? and(conditions, notDeletedCondition) : notDeletedCondition;
     }
 
-    const rows = await db
-      .select()
+    return await db
+      .select(PRODUCT_SELECT_FIELDS)
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
       .where(conditions)
       .limit(size)
       .offset(page * size);
-
-    return rows.map((row) => ({
-      ...row.products,
-      categoryCode: row.products.categoryId,
-      categoryName: row.categories?.name,
-    }));
   },
 
   async getProductById(id: string) {

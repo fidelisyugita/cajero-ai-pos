@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Header from "@/components/dashboard/Header";
@@ -26,18 +26,21 @@ const MenuScreen = () => {
 
 const HEADER_HEIGHT = vs(80);
 
-const MenuContent = () => {
-  const selectedCategory = useCategoryStore((s) => s.selectedCategory);
-  const searchQuery = useCategoryStore((s) => s.searchQuery);
+const MenuContent = memo(() => {
   const { scrollHandler, headerAnimatedStyle, reset } = useCollapsibleHeader({
     headerHeight: HEADER_HEIGHT,
   });
 
   useEffect(() => {
-    if (selectedCategory || searchQuery !== undefined) {
-      reset();
-    }
-  }, [selectedCategory, searchQuery, reset]);
+    return useCategoryStore.subscribe((state, prevState) => {
+      if (
+        state.selectedCategory !== prevState.selectedCategory ||
+        state.searchQuery !== prevState.searchQuery
+      ) {
+        reset();
+      }
+    });
+  }, [reset]);
 
   return (
     <View style={$.content}>
@@ -45,7 +48,9 @@ const MenuContent = () => {
       <MenuList scrollHandler={scrollHandler} />
     </View>
   );
-};
+});
+
+MenuContent.displayName = "MenuContent";
 
 const $ = StyleSheet.create((theme, _rt) => ({
   container: {

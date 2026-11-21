@@ -29,17 +29,13 @@ describe("LocalProductService", () => {
     it("fetches products with category joined and default pagination", async () => {
       const mockRows = [
         {
-          products: {
-            id: "prod-1",
-            name: "Espresso",
-            categoryId: "cat-coffee",
-            sellingPrice: 20000,
-            deletedAt: null,
-          },
-          categories: {
-            id: "cat-coffee",
-            name: "Coffee",
-          },
+          id: "prod-1",
+          name: "Espresso",
+          categoryId: "cat-coffee",
+          categoryCode: "cat-coffee",
+          categoryName: "Coffee",
+          sellingPrice: 20000,
+          deletedAt: null,
         },
       ];
 
@@ -48,7 +44,13 @@ describe("LocalProductService", () => {
 
       const result = await LocalProductService.getProducts();
 
-      expect(db.select).toHaveBeenCalled();
+      expect(db.select).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: products.id,
+          categoryCode: products.categoryId,
+          categoryName: categories.name,
+        }),
+      );
       expect(queryBuilder.from).toHaveBeenCalledWith(products);
       expect(queryBuilder.leftJoin).toHaveBeenCalledWith(categories, expect.anything());
       expect(queryBuilder.limit).toHaveBeenCalledWith(100);
@@ -69,17 +71,13 @@ describe("LocalProductService", () => {
     it("applies search, categoryId, pagination, and includeDeleted filters", async () => {
       const mockRows = [
         {
-          products: {
-            id: "prod-1",
-            name: "Latte",
-            categoryId: "cat-coffee",
-            sellingPrice: 28000,
-            deletedAt: toDate("2026-01-01"),
-          },
-          categories: {
-            id: "cat-coffee",
-            name: "Coffee",
-          },
+          id: "prod-1",
+          name: "Latte",
+          categoryId: "cat-coffee",
+          categoryCode: "cat-coffee",
+          categoryName: "Coffee",
+          sellingPrice: 28000,
+          deletedAt: toDate("2026-01-01"),
         },
       ];
 
