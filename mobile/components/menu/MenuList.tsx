@@ -1,7 +1,7 @@
 import { AnimatedFlashList, type FlashListProps } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { type ComponentRef, memo, useEffect, useRef } from "react";
+import { type ComponentRef, memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcEdit from "@/assets/icons/edit.svg";
@@ -28,11 +28,14 @@ interface MenuListProps {
 interface ProductCardProps {
   item: Product;
   editable?: boolean;
+  onSelect: (item: Product) => void;
 }
 
 const NUM_COLUMNS = 4;
+const productKeyExtractor = (item: Product) => item.id.toString();
 
 const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
+  const router = useRouter();
   const selectedCategory = useCategoryStore((s) => s.selectedCategory);
   const searchQuery = useCategoryStore((s) => s.searchQuery);
   const isSyncing = useSyncStore((s) => s.isSyncing);
@@ -64,8 +67,53 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
   const showLoader = isLoading || (isSyncing && (!data?.content || data.content.length === 0));
 
   // Authorization check
-  const user = useAuthStore((state) => state.user);
-  const canEditMenu = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
+  const canEditMenu = useAuthStore(
+    (state) => state.user?.roleCode === "OWNER" || state.user?.roleCode === "MANAGER",
+  );
+
+  const handleSelectProduct = useCallback(
+    (item: Product) => {
+      if (editable) {
+        router.push({
+          pathname: "/product/add",
+          params: { id: item.id },
+        });
+        return;
+      }
+      if (item.deletedAt) return;
+
+      router.push({
+        pathname: "/modal/order/add-item",
+        params: {
+          id: item.id,
+          name: item.name,
+          sellingPrice: item.sellingPrice,
+          imageUrl: item.imageUrl,
+          tax: item.tax,
+          commission: item.commission,
+        },
+      });
+    },
+    [editable, router],
+  );
+
+  const renderProductCard = useCallback(
+    ({ item }: { item: Product }) => (
+      <ProductCard editable={editable} item={item} onSelect={handleSelectProduct} />
+    ),
+    [editable, handleSelectProduct],
+  );
+
+  const emptyComponent = useMemo(
+    () => (
+      <EmptyState
+        title={isSearching ? t("empty_menu_search_title") : t("empty_menu_category_title")}
+        subtitle={isSearching ? t("empty_menu_search_subtitle") : t("empty_menu_category_subtitle")}
+        style={$.emptyState}
+      />
+    ),
+    [isSearching],
+  );
 
   if (showLoader) {
     return <MenuListSkeleton />;
@@ -77,22 +125,14 @@ const MenuList = ({ scrollHandler, editable }: MenuListProps) => {
         ref={listRef}
         contentContainerStyle={$.content}
         data={data?.content || []}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={productKeyExtractor}
         numColumns={NUM_COLUMNS}
         onScroll={scrollHandler}
-        renderItem={({ item }) => <ProductCard editable={editable} item={item} />}
+        renderItem={renderProductCard}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         style={$.container}
-        ListEmptyComponent={
-          <EmptyState
-            title={isSearching ? t("empty_menu_search_title") : t("empty_menu_category_title")}
-            subtitle={
-              isSearching ? t("empty_menu_search_subtitle") : t("empty_menu_category_subtitle")
-            }
-            style={{ marginTop: vs(100) }}
-          />
-        }
+        ListEmptyComponent={emptyComponent}
       />
       {!editable && canEditMenu && <MenuActions />}
     </>
@@ -119,35 +159,17 @@ const MenuActions = memo(() => {
   );
 });
 
-const ProductCard = memo(({ item, editable }: ProductCardProps) => {
-  const router = useRouter();
+const ProductCard = memo(({ item, editable, onSelect }: ProductCardProps) => {
   const isDeleted = !!item.deletedAt;
+
+  const handlePress = useCallback(() => {
+    onSelect(item);
+  }, [onSelect, item]);
 
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={() => {
-        if (editable) {
-          router.push({
-            pathname: "/product/add",
-            params: { id: item.id },
-          });
-        } else {
-          if (isDeleted) return;
-
-          router.push({
-            pathname: "/modal/order/add-item",
-            params: {
-              id: item.id,
-              name: item.name,
-              sellingPrice: item.sellingPrice,
-              imageUrl: item.imageUrl,
-              tax: item.tax,
-              commission: item.commission,
-            },
-          });
-        }
-      }}
+      onPress={handlePress}
       style={[$.productContainer, isDeleted && $.productDeleted]}
     >
       <View>
@@ -258,6 +280,9 @@ const $ = StyleSheet.create((theme, rt) => ({
     ...theme.typography.labelSm,
     color: "white",
   },
+  emptyState: {
+    marginTop: vs(100),
+  },
 }));
 
-export default MenuList;
+export default memo(MenuList);

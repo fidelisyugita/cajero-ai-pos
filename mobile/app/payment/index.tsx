@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { useShallow } from "zustand/react/shallow";
 import CashPayment from "@/components/payment/CashPayment";
 import PaymentMethods from "@/components/payment/PaymentMethods";
 import SuccessView from "@/components/payment/SuccessView";
@@ -30,11 +31,13 @@ const PaymentScreen = () => {
   const tableNumber = useOrderStore((state) => state.tableNumber);
   const globalDiscount = useOrderStore((state) => state.discount);
   const clearOrder = useOrderStore((state) => state.clearOrder);
-  const {
-    isAutoPrintEnabled,
-    connectedDevice,
-    isConnected: isPrinterConnected,
-  } = usePrinterStore();
+  const { isAutoPrintEnabled, connectedDevice, isPrinterConnected } = usePrinterStore(
+    useShallow((state) => ({
+      isAutoPrintEnabled: state.isAutoPrintEnabled,
+      connectedDevice: state.connectedDevice,
+      isPrinterConnected: state.isConnected,
+    })),
+  );
 
   const { mutate: createTransaction, isPending } = useCreateTransactionMutation();
 
@@ -56,17 +59,26 @@ const PaymentScreen = () => {
   const [previewData, setPreviewData] = useState<ReceiptData | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
-  // Calculate totals - Should probably share this logic or use store selectors more robustly
-  const subtotal = selectSubtotal(items);
-  const totalItemDiscounts = items.reduce((sum, item) => sum + (item.discount || 0), 0);
-  const totalTax = items.reduce((sum, item) => sum + (item.tax || 0) * item.quantity, 0);
-  const totalCommission = items.reduce(
-    (sum, item) => sum + (item.commission || 0) * item.quantity,
-    0,
-  );
-
-  const finalSubtotal = subtotal - totalItemDiscounts;
-  const total = finalSubtotal - globalDiscount + totalTax;
+  // Aggregate order totals once per items/discount change instead of every keystroke
+  const { totalItemDiscounts, totalTax, totalCommission, finalSubtotal, total } = useMemo(() => {
+    const sub = selectSubtotal(items);
+    let discounts = 0;
+    let tax = 0;
+    let commission = 0;
+    for (const item of items) {
+      discounts += item.discount || 0;
+      tax += (item.tax || 0) * item.quantity;
+      commission += (item.commission || 0) * item.quantity;
+    }
+    const netSubtotal = sub - discounts;
+    return {
+      totalItemDiscounts: discounts,
+      totalTax: tax,
+      totalCommission: commission,
+      finalSubtotal: netSubtotal,
+      total: netSubtotal - globalDiscount + tax,
+    };
+  }, [items, globalDiscount]);
 
   const handlePay = () => {
     const transactionProducts: TransactionProductRequest[] = items.map((item) => ({
@@ -253,6 +265,22 @@ const PaymentScreen = () => {
     setShowPreview(true);
   };
 
+  const handleClosePreview = useCallback(() => setShowPreview(false), []);
+
+  const handleConfirmPrint = useCallback(async () => {
+    setIsPrinting(true);
+    if (previewData) {
+      try {
+        await printerService.printReceipt(previewData);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        Alert.alert(t("print_error"), msg);
+      }
+    }
+    setIsPrinting(false);
+    setShowPreview(false);
+  }, [previewData]);
+
   return (
     <View style={$.container}>
       {isSuccess ? (
@@ -301,31 +329,16 @@ const PaymentScreen = () => {
         </>
       )}
 
-      {/* Receipt Preview Modal */}
-      <ReceiptPreviewModal
-        visible={showPreview}
-        onClose={() => setShowPreview(false)}
-        onPrint={async () => {
-          setIsPrinting(true);
-          // Decide if printing Bill or Receipt based on context.
-          // For "Print Bill" button, it sets preview data for BILL.
-          // For SuccessView "Print Receipt", it sets data for RECEIPT.
-          // We can store a print action or data in state.
-
-          if (previewData) {
-            try {
-              await printerService.printReceipt(previewData);
-            } catch (error: unknown) {
-              const msg = error instanceof Error ? error.message : String(error);
-              Alert.alert(t("print_error"), msg);
-            }
-          }
-          setIsPrinting(false);
-          setShowPreview(false);
-        }}
-        data={previewData ?? { total: "0", items: [] }}
-        isPrinting={isPrinting}
-      />
+      {/* Receipt Preview Modal — mount only when opened to keep keystroke renders light */}
+      {showPreview && previewData && (
+        <ReceiptPreviewModal
+          visible={showPreview}
+          onClose={handleClosePreview}
+          onPrint={handleConfirmPrint}
+          data={previewData}
+          isPrinting={isPrinting}
+        />
+      )}
     </View>
   );
 };

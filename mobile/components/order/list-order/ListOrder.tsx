@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
@@ -18,6 +18,8 @@ import OrderItem from "./OrderItem";
 interface CurvedShapeProps {
   rotate?: number;
 }
+
+const orderItemKeyExtractor = (item: OrderItemType) => item.id;
 
 const ListOrder = () => {
   const router = useRouter();
@@ -84,7 +86,7 @@ const ListOrder = () => {
         contentContainerStyle={$.content}
         data={items}
         extraData={expandedId}
-        keyExtractor={(item) => item.id}
+        keyExtractor={orderItemKeyExtractor}
         renderItem={renderOrderItem}
         showsVerticalScrollIndicator={false}
       />
@@ -93,38 +95,40 @@ const ListOrder = () => {
   );
 };
 
-const Footer = () => {
+const renderSummaryItem = (label: string, value: string) => (
+  <View style={$.summaryItem}>
+    <Text adjustsFontSizeToFit style={$.summaryLabel}>
+      {label}
+    </Text>
+    <Text style={$.summaryValue} numberOfLines={1} adjustsFontSizeToFit>
+      {value}
+    </Text>
+  </View>
+);
+
+const Footer = memo(() => {
   const router = useRouter();
   const items = useOrderStore((state) => state.items);
-  // Basic calculation
-  const subtotal = selectSubtotal(items);
-  // Mock tax for global tax (if any)
-  const globalTax = useOrderStore((_state) => 0);
   const globalDiscount = useOrderStore((state) => state.discount) || 0;
 
-  const totalItemDiscounts = items.reduce((sum, item) => sum + (item.discount || 0), 0);
+  const { subtotal, totalItemDiscounts, totalItemTax } = useMemo(() => {
+    const sub = selectSubtotal(items);
+    let discounts = 0;
+    let tax = 0;
+    for (const item of items) {
+      discounts += item.discount || 0;
+      tax += item.tax || 0;
+    }
+    return { subtotal: sub, totalItemDiscounts: discounts, totalItemTax: tax };
+  }, [items]);
 
-  const totalItemTax = items.reduce((sum, item) => sum + (item.tax || 0), 0);
-
-  // Aggregated Totals
   const finalDiscount = globalDiscount + totalItemDiscounts;
-  const finalTax = globalTax + totalItemTax;
-
-  // Total Calculation: Subtotal (Gross) - Total Discounts + Total Taxes
+  const finalTax = totalItemTax;
   const total = subtotal - finalDiscount + finalTax;
 
-  const renderItem = (label: string, value: string) => {
-    return (
-      <View style={$.summaryItem}>
-        <Text adjustsFontSizeToFit style={$.summaryLabel}>
-          {label}
-        </Text>
-        <Text style={$.summaryValue} numberOfLines={1} adjustsFontSizeToFit>
-          {value}
-        </Text>
-      </View>
-    );
-  };
+  const handleOpenDiscount = useCallback(() => {
+    router.push("/modal/order/discount");
+  }, [router]);
 
   return (
     <View style={$.footer}>
@@ -132,7 +136,7 @@ const Footer = () => {
         size="sm"
         title={t("add_discount")}
         variant="secondary"
-        onPress={() => router.push("/modal/order/discount")}
+        onPress={handleOpenDiscount}
         disabled={items.length === 0}
       />
 
@@ -140,9 +144,10 @@ const Footer = () => {
         <Text style={$.title}>{t("order_summary")}</Text>
         <View style={$.summaryCard}>
           <View style={$.summaryTop}>
-            {renderItem(t("subtotal"), formatCurrency(subtotal))}
-            {finalDiscount > 0 && renderItem(t("discount"), `- ${formatCurrency(finalDiscount)}`)}
-            {finalTax > 0 && renderItem(t("tax"), formatCurrency(finalTax))}
+            {renderSummaryItem(t("subtotal"), formatCurrency(subtotal))}
+            {finalDiscount > 0 &&
+              renderSummaryItem(t("discount"), `- ${formatCurrency(finalDiscount)}`)}
+            {finalTax > 0 && renderSummaryItem(t("tax"), formatCurrency(finalTax))}
           </View>
 
           {/* Only show separator if we have details */}
@@ -164,7 +169,7 @@ const Footer = () => {
       </View>
     </View>
   );
-};
+});
 
 const CurvedShape = ({ rotate = 0 }: CurvedShapeProps) => {
   const shapeColor = UnistylesRuntime.getTheme().colors.neutral[100];

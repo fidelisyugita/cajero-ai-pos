@@ -5,13 +5,17 @@ import { useLoadingStore } from "../../store/useLoadingStore";
 const LoadingOverlay = () => {
   const isLoading = useLoadingStore((state) => state.isLoading);
 
+  if (!isLoading) {
+    return null;
+  }
+
   return (
     <Modal
       animationType="fade"
       statusBarTranslucent
       testID="loading-overlay-modal"
       transparent
-      visible={isLoading}
+      visible
     >
       <View style={$.overlay}>
         <View style={$.container}>

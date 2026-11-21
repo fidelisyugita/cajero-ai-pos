@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import IcBackspace from "@/assets/icons/backspace.svg";
@@ -45,28 +46,29 @@ const CashPayment = ({
   isProcessing,
 }: CashPaymentProps) => {
   const change = Math.max(0, paidAmount - totalAmount);
-  const suggestions = quickAmounts(totalAmount);
+  const suggestions = useMemo(() => quickAmounts(totalAmount), [totalAmount]);
 
-  const handleNumPad = (value: string | number) => {
-    if (value === "C") {
-      onChangePaidAmount(0);
-    } else if (value === "X") {
-      const str = paidAmount.toString();
-      if (str.length > 1) {
-        onChangePaidAmount(Number(str.slice(0, -1)));
-      } else {
+  const handleNumPad = useCallback(
+    (value: string | number) => {
+      if (value === "C") {
         onChangePaidAmount(0);
+      } else if (value === "X") {
+        const str = paidAmount.toString();
+        if (str.length > 1) {
+          onChangePaidAmount(Number(str.slice(0, -1)));
+        } else {
+          onChangePaidAmount(0);
+        }
+      } else {
+        const currentStr = paidAmount === 0 ? "" : paidAmount.toString();
+        const newStr = currentStr + value.toString();
+        if (newStr.length < 12) {
+          onChangePaidAmount(Number(newStr));
+        }
       }
-    } else {
-      // Append number
-      const currentStr = paidAmount === 0 ? "" : paidAmount.toString();
-      const newStr = currentStr + value.toString();
-      // Prevent insane numbers
-      if (newStr.length < 12) {
-        onChangePaidAmount(Number(newStr));
-      }
-    }
-  };
+    },
+    [onChangePaidAmount, paidAmount],
+  );
 
   return (
     <View style={$.container}>
@@ -217,4 +219,4 @@ const $ = StyleSheet.create((theme) => ({
   },
 }));
 
-export default CashPayment;
+export default memo(CashPayment);

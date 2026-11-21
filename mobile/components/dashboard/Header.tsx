@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { t } from "@/services/i18n";
@@ -14,13 +14,13 @@ interface HeaderProps {
 
 const Header = ({ children }: HeaderProps) => {
   const fetchAll = useReferenceStore((state) => state.fetchAll);
-  const transactionTypes = useReferenceStore((state) => state.transactionTypes);
+  const hasTransactionTypes = useReferenceStore((state) => state.transactionTypes.length > 0);
 
   useEffect(() => {
-    if (transactionTypes.length === 0) {
+    if (!hasTransactionTypes) {
       fetchAll();
     }
-  }, [transactionTypes.length, fetchAll]);
+  }, [hasTransactionTypes, fetchAll]);
 
   return (
     <View style={$.container}>
@@ -30,7 +30,7 @@ const Header = ({ children }: HeaderProps) => {
   );
 };
 
-const Profile = () => {
+const Profile = memo(() => {
   const user = useAuthStore((state) => state.user);
 
   return (
@@ -50,7 +50,7 @@ const Profile = () => {
       </View>
     </View>
   );
-};
+});
 
 const $ = StyleSheet.create((theme, rt) => ({
   container: {

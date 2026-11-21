@@ -1,4 +1,5 @@
 import { type Href, usePathname, useRouter } from "expo-router";
+import { memo, useCallback, useMemo } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import IcSignOut from "@/assets/icons/sign-out.svg";
@@ -17,10 +18,33 @@ const UniIcSignOut = withUnistyles(IcSignOut, (theme) => ({
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const business = useBusinessStore((state) => state.business);
-  const user = useAuthStore((state) => state.user);
+  const isUltraSubscription = useBusinessStore(
+    (state) => state.business?.subscriptionStatus === "ultra",
+  );
+  const roleCode = useAuthStore((state) => state.user?.roleCode);
 
-  const isHighOrderRole = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
+  const isHighOrderRole = roleCode === "OWNER" || roleCode === "MANAGER";
+
+  const visibleTabs = useMemo(
+    () =>
+      LIST_SIDEBAR_ITEMS.filter((tab) => {
+        if (tab.label === "Assistant") return isUltraSubscription && isHighOrderRole;
+        if (tab.label === "Report") return isHighOrderRole;
+        return true;
+      }),
+    [isUltraSubscription, isHighOrderRole],
+  );
+
+  const handleNavigate = useCallback(
+    (path?: string) => {
+      if (path) router.replace(path as Href);
+    },
+    [router],
+  );
+
+  const handleSignOut = useCallback(() => {
+    LogoutService.performSafeLogout();
+  }, []);
 
   return (
     <View style={$.container}>
@@ -31,13 +55,7 @@ const Sidebar = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={$.sidebarItems}>
-          {LIST_SIDEBAR_ITEMS.filter((tab) => {
-            if (tab.label === "Assistant")
-              return business?.subscriptionStatus === "ultra" && isHighOrderRole;
-            if (tab.label === "Report") return isHighOrderRole;
-
-            return true;
-          }).map(({ Icon, ...tab }) => {
+          {visibleTabs.map(({ Icon, ...tab }) => {
             const comparedPath = tab.path.replace("/(dashboard)", "");
             const isActive = pathname === comparedPath || (comparedPath === "" && pathname === "/");
 
@@ -47,18 +65,14 @@ const Sidebar = () => {
                 isActive={isActive}
                 key={tab.label}
                 label={tab.label}
-                onPress={() => router.replace(tab.path as Href)}
+                onPress={handleNavigate}
+                path={tab.path}
               />
             );
           })}
         </View>
       </ScrollView>
-      <TouchableOpacity
-        style={$.signOutButton}
-        onPress={() => {
-          LogoutService.performSafeLogout();
-        }}
-      >
+      <TouchableOpacity style={$.signOutButton} onPress={handleSignOut}>
         <UniIcSignOut height={vs(26)} width={vs(26)} />
         <Text adjustsFontSizeToFit numberOfLines={1} style={$.signOut}>
           Sign Out
@@ -109,4 +123,4 @@ const $ = StyleSheet.create((theme, rt) => ({
   },
 }));
 
-export default Sidebar;
+export default memo(Sidebar);

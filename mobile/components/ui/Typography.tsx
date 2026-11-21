@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Text as NativeText, type TextProps } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -59,7 +60,12 @@ const Text = ({ variant = "bodyMd", color, weight, align, style, ...props }: Typ
     align,
   });
 
-  return <NativeText style={[stylesheet.text, color ? { color } : undefined, style]} {...props} />;
+  const resolvedStyle = useMemo(() => {
+    if (!(color || style)) return stylesheet.text;
+    return [stylesheet.text, color ? { color } : undefined, style];
+  }, [color, style]);
+
+  return <NativeText style={resolvedStyle} {...props} />;
 };
 
-export default Text;
+export default memo(Text);

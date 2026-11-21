@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { type FC, memo, useCallback } from "react";
 import { Text, TouchableOpacity } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { StyleSheet } from "react-native-unistyles";
@@ -9,15 +9,20 @@ interface SidebarItemProps {
   Icons: FC<SvgProps>[];
   isActive: boolean;
   label: string;
-  onPress: () => void;
+  path?: string;
+  onPress: (path?: string) => void;
 }
 
-const SidebarItem = ({ Icons, isActive, label, onPress }: SidebarItemProps) => {
+const SidebarItem = ({ Icons, isActive, label, path, onPress }: SidebarItemProps) => {
   const Icon = isActive ? Icons[1] : Icons[0];
   styles.useVariants({ isActive });
 
+  const handlePress = useCallback(() => {
+    onPress(path);
+  }, [onPress, path]);
+
   return (
-    <TouchableOpacity disabled={isActive} onPress={onPress} style={styles.container}>
+    <TouchableOpacity disabled={isActive} onPress={handlePress} style={styles.container}>
       <Icon color={colors.primary[400]} height={vs(36)} width={vs(36)} />
       <Text style={styles.label} adjustsFontSizeToFit numberOfLines={1}>
         {label}
@@ -51,4 +56,4 @@ const styles = StyleSheet.create((theme) => ({
   },
 }));
 
-export default SidebarItem;
+export default memo(SidebarItem);

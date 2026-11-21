@@ -1,12 +1,5 @@
-import { useEffect } from "react";
-import type { DimensionValue, StyleProp, ViewStyle } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import { memo, useEffect, useMemo } from "react";
+import { Animated, type DimensionValue, type StyleProp, type ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface SkeletonProps {
@@ -17,6 +10,41 @@ interface SkeletonProps {
   testID?: string;
 }
 
+// Share one native-driver pulse across all mounted skeletons to avoid per-cell animation overhead.
+const sharedPulse = new Animated.Value(0.3);
+let activeSkeletonCount = 0;
+let pulseLoop: Animated.CompositeAnimation | null = null;
+
+function retainPulse() {
+  activeSkeletonCount += 1;
+  if (activeSkeletonCount === 1) {
+    sharedPulse.setValue(0.3);
+    pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(sharedPulse, {
+          toValue: 0.7,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sharedPulse, {
+          toValue: 0.3,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulseLoop.start();
+  }
+}
+
+function releasePulse() {
+  activeSkeletonCount = Math.max(0, activeSkeletonCount - 1);
+  if (activeSkeletonCount === 0 && pulseLoop) {
+    pulseLoop.stop();
+    pulseLoop = null;
+  }
+}
+
 const Skeleton = ({
   width = "100%",
   height = 20,
@@ -24,26 +52,19 @@ const Skeleton = ({
   style,
   testID,
 }: SkeletonProps) => {
-  const opacity = useSharedValue(0.3);
-
   useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(withTiming(0.7, { duration: 1000 }), withTiming(0.3, { duration: 1000 })),
-      -1,
-      true,
-    );
-  }, [opacity]);
+    retainPulse();
+    return () => {
+      releasePulse();
+    };
+  }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
-
-  return (
-    <Animated.View
-      style={[$.skeleton, { width, height, borderRadius }, animatedStyle, style]}
-      testID={testID}
-    />
+  const baseStyle = useMemo(
+    () => ({ width, height, borderRadius, opacity: sharedPulse }),
+    [width, height, borderRadius],
   );
+
+  return <Animated.View style={[$.skeleton, baseStyle, style]} testID={testID} />;
 };
 
 const $ = StyleSheet.create((theme) => ({
@@ -52,4 +73,4 @@ const $ = StyleSheet.create((theme) => ({
   },
 }));
 
-export default Skeleton;
+export default memo(Skeleton);

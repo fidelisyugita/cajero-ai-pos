@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 import Skeleton from "../Skeleton";
 
 describe("Skeleton component", () => {
@@ -14,14 +15,12 @@ describe("Skeleton component", () => {
 
     const skeleton = screen.getByTestId("skeleton-custom");
     expect(skeleton).toBeTruthy();
-    expect(skeleton.props.style).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          borderRadius: 8,
-          height: 50,
-          width: 200,
-        }),
-      ]),
+    expect(StyleSheet.flatten(skeleton.props.style)).toEqual(
+      expect.objectContaining({
+        borderRadius: 8,
+        height: 50,
+        width: 200,
+      }),
     );
   });
 });
