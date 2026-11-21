@@ -1,5 +1,5 @@
-import { memo, useEffect, useMemo } from "react";
-import { Animated, type DimensionValue, type StyleProp, type ViewStyle } from "react-native";
+import { createContext, memo, type ReactNode, useContext, useEffect, useMemo } from "react";
+import { Animated, type DimensionValue, type StyleProp, View, type ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface SkeletonProps {
@@ -10,8 +10,22 @@ interface SkeletonProps {
   testID?: string;
 }
 
+interface SkeletonGroupProps {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
+}
+
+export const SkeletonGroupContext = createContext(false);
+
 // Share one native-driver pulse across all mounted skeletons to avoid per-cell animation overhead.
 const sharedPulse = new Animated.Value(0.3);
+const PULSE_STYLE = { opacity: sharedPulse };
+const DEFAULT_BASE_STYLE: ViewStyle = {
+  width: "100%",
+  height: 20,
+  borderRadius: 4,
+};
 let activeSkeletonCount = 0;
 let pulseLoop: Animated.CompositeAnimation | null = null;
 let startFrameId: number | null = null;
@@ -57,13 +71,7 @@ function releasePulse() {
   }
 }
 
-const Skeleton = ({
-  width = "100%",
-  height = 20,
-  borderRadius = 4,
-  style,
-  testID,
-}: SkeletonProps) => {
+export const SkeletonGroup = memo(({ children, style, testID }: SkeletonGroupProps) => {
   useEffect(() => {
     retainPulse();
     return () => {
@@ -71,12 +79,55 @@ const Skeleton = ({
     };
   }, []);
 
-  const baseStyle = useMemo(
-    () => ({ width, height, borderRadius, opacity: sharedPulse }),
-    [width, height, borderRadius],
+  return (
+    <SkeletonGroupContext.Provider value={true}>
+      <Animated.View style={[PULSE_STYLE, style]} testID={testID}>
+        {children}
+      </Animated.View>
+    </SkeletonGroupContext.Provider>
   );
+});
 
-  return <Animated.View style={[$.skeleton, baseStyle, style]} testID={testID} />;
+const StandaloneSkeleton = ({
+  baseStyle,
+  style,
+  testID,
+}: {
+  baseStyle: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
+}) => {
+  useEffect(() => {
+    retainPulse();
+    return () => {
+      releasePulse();
+    };
+  }, []);
+
+  return <Animated.View style={[$.skeleton, baseStyle, PULSE_STYLE, style]} testID={testID} />;
+};
+
+const Skeleton = ({
+  width = "100%",
+  height = 20,
+  borderRadius = 4,
+  style,
+  testID,
+}: SkeletonProps) => {
+  const isGrouped = useContext(SkeletonGroupContext);
+
+  const baseStyle = useMemo(() => {
+    if (width === "100%" && height === 20 && borderRadius === 4) {
+      return DEFAULT_BASE_STYLE;
+    }
+    return { width, height, borderRadius };
+  }, [width, height, borderRadius]);
+
+  if (isGrouped) {
+    return <View style={[$.skeleton, baseStyle, style]} testID={testID} />;
+  }
+
+  return <StandaloneSkeleton baseStyle={baseStyle} style={style} testID={testID} />;
 };
 
 const $ = StyleSheet.create((theme) => ({

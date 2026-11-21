@@ -7,7 +7,7 @@ import IcEdit from "@/assets/icons/edit.svg";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
-import Skeleton from "@/components/ui/Skeleton";
+import Skeleton, { SkeletonGroup } from "@/components/ui/Skeleton";
 import { t } from "@/services/i18n";
 import Logger from "@/services/logger";
 import { useUpdateIngredientMutation } from "@/services/mutations/useUpdateIngredientMutation";
@@ -24,6 +24,45 @@ const COLUMNS = [
   { label: "Status", flex: 1 },
   { label: "Action", flex: 1 },
 ];
+
+const SKELETON_ROWS = [
+  "sk-1",
+  "sk-2",
+  "sk-3",
+  "sk-4",
+  "sk-5",
+  "sk-6",
+  "sk-7",
+  "sk-8",
+  "sk-9",
+  "sk-10",
+];
+const SKELETON_CELL_STYLES = COLUMNS.map((col) => ({ flex: col.flex, marginRight: 10 }));
+
+const StockIngredientsSkeleton = memo(() => (
+  <View style={$.container}>
+    <View style={$.header}>
+      <SkeletonGroup style={$.skeletonHeader}>
+        {COLUMNS.map((col, index) => (
+          <Skeleton key={col.label} style={SKELETON_CELL_STYLES[index]} height={20} />
+        ))}
+      </SkeletonGroup>
+    </View>
+    <SkeletonGroup style={$.listContent}>
+      {SKELETON_ROWS.map((rowKey) => (
+        <View key={rowKey} style={$.row}>
+          {COLUMNS.map((col, index) => (
+            <Skeleton
+              key={`${rowKey}-${col.label}`}
+              style={SKELETON_CELL_STYLES[index]}
+              height={20}
+            />
+          ))}
+        </View>
+      ))}
+    </SkeletonGroup>
+  </View>
+));
 
 interface StockIngredientsProps {
   onIngredientPress: (ingredient: Ingredient) => void;
@@ -85,44 +124,8 @@ const StockIngredients = ({ onIngredientPress, searchQuery = "" }: StockIngredie
     );
   };
 
-  const SKELETON_ROWS = [
-    "sk-1",
-    "sk-2",
-    "sk-3",
-    "sk-4",
-    "sk-5",
-    "sk-6",
-    "sk-7",
-    "sk-8",
-    "sk-9",
-    "sk-10",
-  ];
-
-  const renderSkeleton = () => (
-    <View style={$.container}>
-      <View style={$.header}>
-        {COLUMNS.map((col) => (
-          <Skeleton key={col.label} style={{ flex: col.flex, marginRight: 10 }} height={20} />
-        ))}
-      </View>
-      <View style={$.listContent}>
-        {SKELETON_ROWS.map((rowKey) => (
-          <View key={rowKey} style={$.row}>
-            {COLUMNS.map((col) => (
-              <Skeleton
-                key={`${rowKey}-${col.label}`}
-                style={{ flex: col.flex, marginRight: 10 }}
-                height={20}
-              />
-            ))}
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-
   if (isLoading) {
-    return renderSkeleton();
+    return <StockIngredientsSkeleton />;
   }
 
   return (
@@ -266,6 +269,11 @@ const $ = StyleSheet.create((theme) => ({
     paddingVertical: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.neutral[300],
+  },
+  skeletonHeader: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerText: {
     ...theme.typography.labelMd,
