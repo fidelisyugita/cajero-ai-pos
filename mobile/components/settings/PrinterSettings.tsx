@@ -1,5 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, type ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Linking, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ReceiptPreviewModal from "@/components/printer/ReceiptPreviewModal";
@@ -76,7 +76,164 @@ const PrinterDeviceRow = memo(
 
 PrinterDeviceRow.displayName = "PrinterDeviceRow";
 
-const PrinterSettings = () => {
+interface AutoPrintSectionProps {
+  isAutoPrintEnabled: boolean;
+  onValueChange: (value: boolean) => void;
+}
+
+const AutoPrintSection = memo(({ isAutoPrintEnabled, onValueChange }: AutoPrintSectionProps) => (
+  <View>
+    <View style={$.rowBetween}>
+      <View>
+        <Text style={$.sectionTitle}>{t("auto_print")}</Text>
+        <Text style={$.sectionSubtitle}>{t("auto_print_desc")}</Text>
+      </View>
+      <Switch value={isAutoPrintEnabled} onValueChange={onValueChange} />
+    </View>
+  </View>
+));
+
+AutoPrintSection.displayName = "AutoPrintSection";
+
+interface SavedPrinterSectionProps {
+  connectedDevice: PrinterDevice;
+  isConnected: boolean;
+  isConnecting: boolean;
+  onTestPrint: () => void;
+  onDisconnect: () => void;
+  onConnectSaved: () => void;
+}
+
+const SavedPrinterSection = memo(
+  ({
+    connectedDevice,
+    isConnected,
+    isConnecting,
+    onTestPrint,
+    onDisconnect,
+    onConnectSaved,
+  }: SavedPrinterSectionProps) => (
+    <View style={$.section}>
+      <Text style={$.sectionTitle}>
+        {isConnected ? t("connected_printer") : t("default_printer")}
+      </Text>
+      <View style={isConnected ? $.connectedPrinterCard : $.printerCard}>
+        <View style={$.printerInfo}>
+          <View style={$.iconContainer}>
+            <Feather name="printer" size={24} color={isConnected ? "#179139" : "#555"} />
+          </View>
+          <View>
+            <Text style={$.printerName}>{connectedDevice.name}</Text>
+            <Text style={$.printerType}>{connectedDevice.id}</Text>
+            {!isConnected && (
+              <Text style={$.notConnectedText}>{t("not_connected") || "Not Connected"}</Text>
+            )}
+          </View>
+        </View>
+        <View style={$.actionsRow}>
+          {isConnected ? (
+            <>
+              <Button
+                title={t("test_printer")}
+                variant="secondary"
+                size="sm"
+                onPress={onTestPrint}
+              />
+              <Button
+                title={t("disconnect")}
+                variant="secondary"
+                size="sm"
+                onPress={onDisconnect}
+              />
+            </>
+          ) : (
+            <Button
+              title={t("connect")}
+              variant="primary"
+              size="sm"
+              isLoading={isConnecting}
+              onPress={onConnectSaved}
+            />
+          )}
+        </View>
+      </View>
+    </View>
+  ),
+);
+
+SavedPrinterSection.displayName = "SavedPrinterSection";
+
+interface ScanControlsHeaderProps {
+  isScanning: boolean;
+  onStartScan: () => void;
+  onStopScan: () => void;
+}
+
+const ScanControlsHeader = memo(
+  ({ isScanning, onStartScan, onStopScan }: ScanControlsHeaderProps) => (
+    <View style={$.sectionHeader}>
+      <Text style={$.sectionTitle}>{t("available_devices")}</Text>
+      {isScanning ? (
+        <Button
+          title={t("stop_scan")}
+          variant="secondary"
+          size="sm"
+          leftIcon={renderScanningIcon}
+          onPress={onStopScan}
+        />
+      ) : (
+        <Button
+          title={t("scan_devices")}
+          variant="primary"
+          size="sm"
+          leftIcon={renderSearchIcon}
+          onPress={onStartScan}
+        />
+      )}
+    </View>
+  ),
+);
+
+ScanControlsHeader.displayName = "ScanControlsHeader";
+
+interface AvailableDevicesSectionProps {
+  devices: PrinterDevice[];
+  isScanning: boolean;
+  renderItem: ({ item }: { item: PrinterDevice }) => ReactElement;
+  listEmptyComponent: ReactElement;
+  onStartScan: () => void;
+  onStopScan: () => void;
+}
+
+const AvailableDevicesSection = memo(
+  ({
+    devices,
+    isScanning,
+    renderItem,
+    listEmptyComponent,
+    onStartScan,
+    onStopScan,
+  }: AvailableDevicesSectionProps) => (
+    <View style={$.section}>
+      <ScanControlsHeader
+        isScanning={isScanning}
+        onStartScan={onStartScan}
+        onStopScan={onStopScan}
+      />
+      <FlatList
+        data={devices}
+        renderItem={renderItem}
+        keyExtractor={deviceKeyExtractor}
+        contentContainerStyle={devices.length === 0 ? $.listContainerEmpty : $.listContainer}
+        ListEmptyComponent={listEmptyComponent}
+      />
+    </View>
+  ),
+);
+
+AvailableDevicesSection.displayName = "AvailableDevicesSection";
+
+const PrinterSettings = memo(() => {
   const connectedDevice = usePrinterStore((state) => state.connectedDevice);
   const isConnected = usePrinterStore((state) => state.isConnected);
   const setConnectedDevice = usePrinterStore((state) => state.setConnectedDevice);
@@ -226,96 +383,32 @@ const PrinterSettings = () => {
   return (
     <FormSectionCard title={t("printer_setting")} style={$.card} contentStyle={$.container}>
       {/* Auto Print Setting */}
-      <View>
-        <View style={$.rowBetween}>
-          <View>
-            <Text style={$.sectionTitle}>{t("auto_print")}</Text>
-            <Text style={$.sectionSubtitle}>{t("auto_print_desc")}</Text>
-          </View>
-          <Switch value={isAutoPrintEnabled} onValueChange={setIsAutoPrintEnabled} />
-        </View>
-      </View>
+      <AutoPrintSection
+        isAutoPrintEnabled={isAutoPrintEnabled}
+        onValueChange={setIsAutoPrintEnabled}
+      />
 
       {/* Saved / Connected Printer Section */}
       {connectedDevice && (
-        <View style={$.section}>
-          <Text style={$.sectionTitle}>
-            {isConnected ? t("connected_printer") : t("default_printer")}
-          </Text>
-          <View style={isConnected ? $.connectedPrinterCard : $.printerCard}>
-            <View style={$.printerInfo}>
-              <View style={$.iconContainer}>
-                <Feather name="printer" size={24} color={isConnected ? "#179139" : "#555"} />
-              </View>
-              <View>
-                <Text style={$.printerName}>{connectedDevice.name}</Text>
-                <Text style={$.printerType}>{connectedDevice.id}</Text>
-                {!isConnected && (
-                  <Text style={$.notConnectedText}>{t("not_connected") || "Not Connected"}</Text>
-                )}
-              </View>
-            </View>
-            <View style={$.actionsRow}>
-              {isConnected ? (
-                <>
-                  <Button
-                    title={t("test_printer")}
-                    variant="secondary"
-                    size="sm"
-                    onPress={handleTestPrint}
-                  />
-                  <Button
-                    title={t("disconnect")}
-                    variant="secondary"
-                    size="sm"
-                    onPress={handleDisconnect}
-                  />
-                </>
-              ) : (
-                <Button
-                  title={t("connect")}
-                  variant="primary"
-                  size="sm"
-                  isLoading={isConnecting}
-                  onPress={handleConnectSaved}
-                />
-              )}
-            </View>
-          </View>
-        </View>
+        <SavedPrinterSection
+          connectedDevice={connectedDevice}
+          isConnected={isConnected}
+          isConnecting={isConnecting}
+          onTestPrint={handleTestPrint}
+          onDisconnect={handleDisconnect}
+          onConnectSaved={handleConnectSaved}
+        />
       )}
 
       {/* Scan Controls */}
-      <View style={$.section}>
-        <View style={$.sectionHeader}>
-          <Text style={$.sectionTitle}>{t("available_devices")}</Text>
-          {isScanning ? (
-            <Button
-              title={t("stop_scan")}
-              variant="secondary"
-              size="sm"
-              leftIcon={renderScanningIcon}
-              onPress={stopScan}
-            />
-          ) : (
-            <Button
-              title={t("scan_devices")}
-              variant="primary"
-              size="sm"
-              leftIcon={renderSearchIcon}
-              onPress={startScan}
-            />
-          )}
-        </View>
-
-        <FlatList
-          data={devices}
-          renderItem={renderItem}
-          keyExtractor={deviceKeyExtractor}
-          contentContainerStyle={devices.length === 0 ? $.listContainerEmpty : $.listContainer}
-          ListEmptyComponent={listEmptyComponent}
-        />
-      </View>
+      <AvailableDevicesSection
+        devices={devices}
+        isScanning={isScanning}
+        renderItem={renderItem}
+        listEmptyComponent={listEmptyComponent}
+        onStartScan={startScan}
+        onStopScan={stopScan}
+      />
 
       {/* Test Print Preview Modal — mounted only when visible */}
       {showPreview && previewData && (
@@ -329,7 +422,9 @@ const PrinterSettings = () => {
       )}
     </FormSectionCard>
   );
-};
+});
+
+PrinterSettings.displayName = "PrinterSettings";
 
 const $ = StyleSheet.create((theme) => {
   const printerCardBase = {

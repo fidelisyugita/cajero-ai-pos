@@ -1,10 +1,9 @@
 import Feather from "@expo/vector-icons/Feather";
-import { memo, useCallback, useRef, useState } from "react";
+import { FlashList, type FlashListRef, type ListRenderItemInfo } from "@shopify/flash-list";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   KeyboardAvoidingView,
-  type ListRenderItemInfo,
   Platform,
   Text,
   TextInput,
@@ -25,6 +24,7 @@ interface Message {
 
 const KEYBOARD_VERTICAL_OFFSET = Platform.OS === "ios" ? 100 : 80;
 const messageKeyExtractor = (item: Message) => item.id;
+const getMessageItemType = (item: Message) => item.role;
 
 const getMessageBubbleStyle = (role: Message["role"]) => {
   if (role === "user") {
@@ -53,6 +53,8 @@ const ChatMessageItem = memo(({ item }: { item: Message }) => (
 ));
 
 ChatMessageItem.displayName = "ChatMessageItem";
+
+const MessageSeparator = () => <View style={$.separator} />;
 
 const renderMessageItem = ({ item }: ListRenderItemInfo<Message>) => (
   <ChatMessageItem item={item} />
@@ -103,13 +105,20 @@ const ChatInputBar = memo(({ isGenerating, placeholder, onSend }: ChatInputBarPr
 
 ChatInputBar.displayName = "ChatInputBar";
 
-const ChatInterface = () => {
+const ChatInterface = memo(() => {
   useLanguageStore((state) => state.language); // Subscribe to language changes
   const [messages, setMessages] = useState<Message[]>(() => [
     { id: "1", role: "assistant", content: t("ai_welcome_message") },
   ]);
   const [isGenerating, setIsGenerating] = useState(false);
   const isGeneratingRef = useRef(false);
+  const listRef = useRef<FlashListRef<Message>>(null);
+
+  useEffect(() => {
+    if (messages.length > 1) {
+      listRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
 
   const handleSend = useCallback(async (userText: string) => {
     if (!userText || isGeneratingRef.current) return;
@@ -168,14 +177,14 @@ const ChatInterface = () => {
       behavior="padding"
       keyboardVerticalOffset={KEYBOARD_VERTICAL_OFFSET}
     >
-      <FlatList
+      <FlashList<Message>
+        ref={listRef}
         data={messages}
         keyExtractor={messageKeyExtractor}
+        getItemType={getMessageItemType}
         renderItem={renderMessageItem}
+        ItemSeparatorComponent={MessageSeparator}
         contentContainerStyle={$.listContent}
-        initialNumToRender={12}
-        maxToRenderPerBatch={8}
-        windowSize={7}
       />
 
       <ChatInputBar
@@ -185,7 +194,9 @@ const ChatInterface = () => {
       />
     </KeyboardAvoidingView>
   );
-};
+});
+
+ChatInterface.displayName = "ChatInterface";
 
 const $ = StyleSheet.create((theme) => {
   const messageBubbleBase = {
@@ -214,8 +225,10 @@ const $ = StyleSheet.create((theme) => {
     },
     listContent: {
       padding: theme.spacing.md,
-      gap: theme.spacing.md,
       paddingBottom: theme.spacing.xl,
+    },
+    separator: {
+      height: theme.spacing.md,
     },
     userBubble: {
       ...messageBubbleBase,

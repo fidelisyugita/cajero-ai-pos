@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { memo, useCallback, useMemo } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import BusinessProfileCard from "@/components/business/BusinessProfileCard";
@@ -45,22 +46,22 @@ function mapUsersToEmployees(
     }));
 }
 
-const BusinessScreen = () => {
+const BusinessScreen = memo(() => {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const { data: store, isLoading: isStoreLoading } = useStoreQuery();
   const { data: users, isLoading: isUsersLoading } = useUsersQuery();
 
   const isLoading = isStoreLoading || isUsersLoading;
   const currentUser = user;
   const canManage = user?.roleCode === "OWNER" || user?.roleCode === "MANAGER";
-  const employees = mapUsersToEmployees(users, user?.id);
+  const employees = useMemo(() => mapUsersToEmployees(users, user?.id), [users, user?.id]);
 
-  const handleAddEmployee = () => {
+  const handleAddEmployee = useCallback(() => {
     router.push("/modal/business/add-employee");
-  };
+  }, [router]);
 
-  const handleEditStore = () => {
+  const handleEditStore = useCallback(() => {
     const targetStoreId = store?.id || user?.storeId;
 
     if (!targetStoreId) {
@@ -74,12 +75,12 @@ const BusinessScreen = () => {
       pathname: "/modal/business/update-store",
       params: { storeData },
     });
-  };
+  }, [store, user?.storeId, router]);
 
-  const handleEditProfile = () => {
+  const handleEditProfile = useCallback(() => {
     if (!currentUser) return;
     router.push("/modal/business/edit-profile");
-  };
+  }, [currentUser, router]);
 
   return (
     <View style={$.container}>
@@ -122,7 +123,9 @@ const BusinessScreen = () => {
       </ScrollView>
     </View>
   );
-};
+});
+
+BusinessScreen.displayName = "BusinessScreen";
 
 const $ = StyleSheet.create((theme) => ({
   container: {
