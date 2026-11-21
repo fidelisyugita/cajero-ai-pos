@@ -1,15 +1,23 @@
 import Feather from "@expo/vector-icons/Feather";
+import { memo } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { ReportSummary as ReportSummaryType } from "@/services/types/Report";
 import { formatCurrency } from "@/utils/Format";
+
+const REPEAT_ICON = <Feather name="repeat" size={24} color="#A05E5E" />;
+const PACKAGE_ICON = <Feather name="package" size={24} color="#A05E5E" />;
+const DOLLAR_SIGN_ICON = <Feather name="dollar-sign" size={24} color="#A05E5E" />;
+const REFRESH_CCW_ICON = <Feather name="refresh-ccw" size={24} color="#A05E5E" />;
+const SHOPPING_CART_ICON = <Feather name="shopping-cart" size={24} color="#A05E5E" />;
+const PIE_CHART_ICON = <Feather name="pie-chart" size={24} color="#A05E5E" />;
 
 interface ReportSummaryProps {
   summary: ReportSummaryType;
   includeCogs?: boolean;
 }
 
-const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => {
+const ReportSummary = memo(({ summary, includeCogs = false }: ReportSummaryProps) => {
   // Calculate adjusted net revenue when COGS is included
   const adjustedNetRevenue = includeCogs
     ? summary.totalNetRevenue - (summary.totalCogs || 0)
@@ -22,28 +30,28 @@ const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => 
         <SummaryCard
           label="Total Transaction"
           value={summary.totalTransaction.toString()}
-          icon={<Feather name="repeat" size={24} color="#A05E5E" />}
+          icon={REPEAT_ICON}
         />
 
         {/* Total Item Sold */}
         <SummaryCard
           label="Total Item Sold"
           value={summary.totalProductSold.toString()}
-          icon={<Feather name="package" size={24} color="#A05E5E" />}
+          icon={PACKAGE_ICON}
         />
 
         {/* Total Revenue */}
         <SummaryCard
           label="Total Revenue"
           value={formatCurrency(summary.totalRevenue)}
-          icon={<Feather name="dollar-sign" size={24} color="#A05E5E" />}
+          icon={DOLLAR_SIGN_ICON}
         />
 
         {/* Total Refund */}
         <SummaryCard
           label="Total Refund"
           value={formatCurrency(summary.totalRefund)}
-          icon={<Feather name="refresh-ccw" size={24} color="#A05E5E" />}
+          icon={REFRESH_CCW_ICON}
         />
 
         {/* Total COGS - Only show when data is available */}
@@ -51,7 +59,7 @@ const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => 
           <SummaryCard
             label="Total COGS"
             value={formatCurrency(summary.totalCogs)}
-            icon={<Feather name="shopping-cart" size={24} color="#A05E5E" />}
+            icon={SHOPPING_CART_ICON}
           />
         )}
 
@@ -59,34 +67,28 @@ const ReportSummary = ({ summary, includeCogs = false }: ReportSummaryProps) => 
         <SummaryCard
           label={includeCogs ? "Net Revenue (w/ COGS)" : "Total Net Revenue"}
           value={formatCurrency(adjustedNetRevenue)}
-          icon={<Feather name="pie-chart" size={24} color="#A05E5E" />}
+          icon={PIE_CHART_ICON}
         />
       </View>
     </View>
   );
-};
+});
 
-export const SummaryCard = ({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}) => {
-  return (
-    <View style={$.card}>
-      <View style={$.cardHeader}>
-        {icon}
-        <Text style={$.cardLabel}>{label}</Text>
+export const SummaryCard = memo(
+  ({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) => {
+    return (
+      <View style={$.card}>
+        <View style={$.cardHeader}>
+          {icon}
+          <Text style={$.cardLabel}>{label}</Text>
+        </View>
+        <Text style={$.cardValue}>{value}</Text>
+        {/* Decorative circle/shape can be added here if needed to match exact design */}
+        <View style={$.decorativeCircle} />
       </View>
-      <Text style={$.cardValue}>{value}</Text>
-      {/* Decorative circle/shape can be added here if needed to match exact design */}
-      <View style={$.decorativeCircle} />
-    </View>
-  );
-};
+    );
+  },
+);
 
 const $ = StyleSheet.create((theme) => ({
   container: {

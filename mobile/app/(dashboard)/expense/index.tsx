@@ -1,6 +1,6 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Header from "@/components/dashboard/Header";
@@ -19,55 +19,77 @@ const renderPlusIcon = (size: number, color: string) => (
   <Feather name="plus" size={size} color={color} />
 );
 
-const ExpenseScreen = () => {
+const ExpenseScreen = memo(() => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
 
   // Default to last 7 days
-  const [dateRange, setDateRange] = useState<{ startDate: Dayjs; endDate: Dayjs }>({
+  const [dateRange, setDateRange] = useState<{ startDate: Dayjs; endDate: Dayjs }>(() => ({
     startDate: toDayjs().subtract(6, "day"),
     endDate: toDayjs(),
-  });
+  }));
 
   const [showPicker, setShowPicker] = useState(false);
 
-  return (
-    <View style={$.container}>
-      <Header>
+  const dateRangeTitle = useMemo(
+    () => formatDateRange(dateRange.startDate, dateRange.endDate),
+    [dateRange.startDate, dateRange.endDate],
+  );
+  const startDateApi = useMemo(() => formatApiDate(dateRange.startDate), [dateRange.startDate]);
+  const endDateApi = useMemo(() => formatApiDate(dateRange.endDate), [dateRange.endDate]);
+
+  const handleOpenPicker = useCallback(() => setShowPicker(true), []);
+  const handleClosePicker = useCallback(() => setShowPicker(false), []);
+  const handleApplyDateRange = useCallback((start: Date, end: Date) => {
+    setDateRange({ startDate: toDayjs(start), endDate: toDayjs(end) });
+  }, []);
+  const handleAddExpense = useCallback(() => {
+    router.push("/expense/add");
+  }, [router]);
+
+  const headerChildren = useMemo(
+    () => (
+      <>
         <Button
           variant="secondary"
-          title={formatDateRange(dateRange.startDate, dateRange.endDate)}
+          title={dateRangeTitle}
           rightIcon={renderCalendarIcon}
-          onPress={() => setShowPicker(true)}
+          onPress={handleOpenPicker}
           size="sm"
         />
         <Button
-          onPress={() => router.push("/expense/add")}
+          onPress={handleAddExpense}
           size="sm"
           title={t("add_expense_title")}
           variant="primary"
           leftIcon={renderPlusIcon}
         />
-      </Header>
+      </>
+    ),
+    [dateRangeTitle, handleOpenPicker, handleAddExpense],
+  );
 
-      <DateRangeModal
-        visible={showPicker}
-        onClose={() => setShowPicker(false)}
-        onApply={(start, end) => setDateRange({ startDate: toDayjs(start), endDate: toDayjs(end) })}
-        initialStart={dateRange.startDate}
-        initialEnd={dateRange.endDate}
-        minDate={user?.createdAt}
-      />
+  return (
+    <View style={$.container}>
+      <Header>{headerChildren}</Header>
+
+      {showPicker && (
+        <DateRangeModal
+          visible={showPicker}
+          onClose={handleClosePicker}
+          onApply={handleApplyDateRange}
+          initialStart={dateRange.startDate}
+          initialEnd={dateRange.endDate}
+          minDate={user?.createdAt}
+        />
+      )}
 
       <View style={$.content}>
-        <ExpenseList
-          startDate={formatApiDate(dateRange.startDate)}
-          endDate={formatApiDate(dateRange.endDate)}
-        />
+        <ExpenseList startDate={startDateApi} endDate={endDateApi} />
       </View>
     </View>
   );
-};
+});
 
 const $ = StyleSheet.create((theme) => ({
   container: {

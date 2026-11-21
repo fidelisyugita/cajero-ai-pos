@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Button from "@/components/ui/Button";
@@ -36,6 +36,9 @@ const SKELETON_ROWS = [
   "sk-10",
 ];
 const SKELETON_CELL_STYLES = COLUMNS.map((col) => ({ flex: col.flex, marginRight: 10 }));
+const COL_FLEX_STYLES = COLUMNS.map((col) => ({ flex: col.flex }));
+const EMPTY_TRANSACTIONS: TransactionResponse[] = [];
+const keyExtractor = (item: TransactionResponse) => item.id;
 
 const ReceiptsListSkeleton = memo(() => (
   <View style={$.container}>
@@ -68,7 +71,21 @@ interface ReceiptsListProps {
   searchQuery?: string;
 }
 
-const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) => {
+const ReceiptEmptyState = memo(() => (
+  <EmptyState
+    title={t("empty_transactions_title")}
+    subtitle={t("empty_transactions_date_subtitle")}
+  />
+));
+
+const ReceiptFooter = memo(() => (
+  <View style={$.footerLoading}>
+    <Text>Loading more...</Text>
+  </View>
+));
+
+const ReceiptsList = memo(({ startDate, endDate, searchQuery }: ReceiptsListProps) => {
+  const router = useRouter();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useTransactionsQuery({
     size: 20,
     sortDir: "desc",
@@ -79,7 +96,31 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
   });
 
   // Flatten pages
-  const transactions = data?.pages.flatMap((page) => page.content) || [];
+  const transactions = useMemo(
+    () => data?.pages.flatMap((page) => page.content) || EMPTY_TRANSACTIONS,
+    [data],
+  );
+
+  const handlePressDetail = useCallback(
+    (item: TransactionResponse) => {
+      router.push({
+        pathname: "/receipt/detail",
+        params: { transaction: JSON.stringify(item) },
+      });
+    },
+    [router],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: TransactionResponse }) => (
+      <TransactionRow item={item} onPressDetail={handlePressDetail} />
+    ),
+    [handlePressDetail],
+  );
+
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage) fetchNextPage();
+  }, [hasNextPage, fetchNextPage]);
 
   if (isLoading) {
     return <ReceiptsListSkeleton />;
@@ -89,108 +130,96 @@ const ReceiptsList = ({ startDate, endDate, searchQuery }: ReceiptsListProps) =>
     <View style={$.container}>
       {transactions.length > 0 && (
         <View style={$.header}>
-          {COLUMNS.map((col) => (
-            <Text key={col.label} style={[$.headerText, { flex: col.flex }]}>
+          {COLUMNS.map((col, index) => (
+            <Text key={col.label} style={HEADER_CELL_STYLES[index]}>
               {col.label}
             </Text>
           ))}
         </View>
       )}
       <FlashList<TransactionResponse>
-        contentContainerStyle={[$.listContent, transactions.length === 0 && { flex: 1 }]}
+        contentContainerStyle={
+          transactions.length === 0 ? EMPTY_LIST_CONTAINER_STYLE : $.listContent
+        }
         data={transactions}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TransactionRow item={item} />}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         ItemSeparatorComponent={ReceiptSeparator}
-        ListEmptyComponent={
-          <EmptyState
-            title={t("empty_transactions_title")}
-            subtitle={t("empty_transactions_date_subtitle")}
-          />
-        }
-        onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
-        }}
+        ListEmptyComponent={ReceiptEmptyState}
+        onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View style={{ padding: 10, alignItems: "center" }}>
-              <Text>Loading more...</Text>
-            </View>
-          ) : null
-        }
+        ListFooterComponent={isFetchingNextPage ? ReceiptFooter : null}
       />
-    </View>
-  );
-};
-
-const ReceiptSeparator = () => <View style={$.separator} />;
-
-const TransactionRow = memo(({ item }: { item: TransactionResponse }) => {
-  const router = useRouter();
-  return (
-    <View style={$.row}>
-      {/* Time */}
-      <View style={{ flex: COLUMNS[0].flex }}>
-        <Text style={$.timeText}>{formatTime(item.createdAt)}</Text>
-        <Text style={$.dateText}>{formatDayDateYear(item.createdAt)}</Text>
-      </View>
-
-      {/* Transaction Number/ID */}
-      <View style={{ flex: COLUMNS[1].flex }}>
-        <Text style={$.cellText} numberOfLines={1}>
-          {item.id.substring(0, 8)}...
-        </Text>
-      </View>
-
-      {/* Customer */}
-      <View style={{ flex: COLUMNS[2].flex }}>
-        <Text style={$.cellText} numberOfLines={1}>
-          {item.description ? item.description.split(" - ")[0].replace("Order for ", "") : "-"}
-        </Text>
-      </View>
-
-      {/* Payment Method */}
-      <View style={{ flex: COLUMNS[3].flex }}>
-        <Text style={$.cellText}>{item.paymentMethodCode}</Text>
-      </View>
-
-      {/* Total Order */}
-      <View style={{ flex: COLUMNS[4].flex }}>
-        <Text style={$.cellText}>
-          {item.transactionProduct?.reduce((acc, curr) => acc + (curr.quantity || 1), 0) || 0}
-        </Text>
-      </View>
-
-      {/* Total Amount */}
-      <View style={{ flex: COLUMNS[5].flex }}>
-        <Text style={$.cellText}>{formatCurrency(item.totalPrice)}</Text>
-      </View>
-
-      {/* Status */}
-      <View style={{ flex: COLUMNS[6].flex }}>
-        <StatusBadge status={item.statusCode} />
-      </View>
-
-      {/* Action */}
-      <View style={{ flex: COLUMNS[7].flex }}>
-        <Button
-          size="sm"
-          title={t("detail")}
-          variant="neutral"
-          onPress={() =>
-            router.push({
-              pathname: `/receipt/detail`,
-              params: { transaction: JSON.stringify(item) },
-            })
-          }
-        />
-      </View>
     </View>
   );
 });
 
-const StatusBadge = ({ status }: { status: string }) => {
+const ReceiptSeparator = memo(() => <View style={$.separator} />);
+
+const TransactionRow = memo(
+  ({
+    item,
+    onPressDetail,
+  }: {
+    item: TransactionResponse;
+    onPressDetail: (item: TransactionResponse) => void;
+  }) => {
+    const handlePress = useCallback(() => onPressDetail(item), [onPressDetail, item]);
+
+    return (
+      <View style={$.row}>
+        {/* Time */}
+        <View style={COL_FLEX_STYLES[0]}>
+          <Text style={$.timeText}>{formatTime(item.createdAt)}</Text>
+          <Text style={$.dateText}>{formatDayDateYear(item.createdAt)}</Text>
+        </View>
+
+        {/* Transaction Number/ID */}
+        <View style={COL_FLEX_STYLES[1]}>
+          <Text style={$.cellText} numberOfLines={1}>
+            {item.id.substring(0, 8)}...
+          </Text>
+        </View>
+
+        {/* Customer */}
+        <View style={COL_FLEX_STYLES[2]}>
+          <Text style={$.cellText} numberOfLines={1}>
+            {item.description ? item.description.split(" - ")[0].replace("Order for ", "") : "-"}
+          </Text>
+        </View>
+
+        {/* Payment Method */}
+        <View style={COL_FLEX_STYLES[3]}>
+          <Text style={$.cellText}>{item.paymentMethodCode}</Text>
+        </View>
+
+        {/* Total Order */}
+        <View style={COL_FLEX_STYLES[4]}>
+          <Text style={$.cellText}>
+            {item.transactionProduct?.reduce((acc, curr) => acc + (curr.quantity || 1), 0) || 0}
+          </Text>
+        </View>
+
+        {/* Total Amount */}
+        <View style={COL_FLEX_STYLES[5]}>
+          <Text style={$.cellText}>{formatCurrency(item.totalPrice)}</Text>
+        </View>
+
+        {/* Status */}
+        <View style={COL_FLEX_STYLES[6]}>
+          <StatusBadge status={item.statusCode} />
+        </View>
+
+        {/* Action */}
+        <View style={COL_FLEX_STYLES[7]}>
+          <Button size="sm" title={t("detail")} variant="neutral" onPress={handlePress} />
+        </View>
+      </View>
+    );
+  },
+);
+
+const StatusBadge = memo(({ status }: { status: string }) => {
   const isCompleted = status === "COMPLETED";
   $.useVariants({ status: isCompleted ? "completed" : "refund" });
 
@@ -199,7 +228,7 @@ const StatusBadge = ({ status }: { status: string }) => {
       <Text style={$.badgeText}>{status}</Text>
     </View>
   );
-};
+});
 
 const $ = StyleSheet.create((theme) => ({
   container: {
@@ -230,6 +259,13 @@ const $ = StyleSheet.create((theme) => ({
   },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
+  },
+  emptyListContent: {
+    flex: 1,
+  },
+  footerLoading: {
+    padding: 10,
+    alignItems: "center",
   },
   separator: {
     height: 1,
@@ -295,5 +331,8 @@ const $ = StyleSheet.create((theme) => ({
     color: theme.colors.neutral[500],
   },
 }));
+
+const HEADER_CELL_STYLES = COLUMNS.map((col) => [$.headerText, { flex: col.flex }]);
+const EMPTY_LIST_CONTAINER_STYLE = [$.listContent, $.emptyListContent];
 
 export default ReceiptsList;

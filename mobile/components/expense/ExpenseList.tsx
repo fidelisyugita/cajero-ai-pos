@@ -1,5 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import ExpenseDetailModal from "@/components/expense/ExpenseDetailModal";
@@ -33,6 +33,9 @@ const SKELETON_ROWS = [
   "sk-10",
 ];
 const SKELETON_CELL_STYLES = COLUMNS.map((col) => ({ flex: col.flex, marginRight: 10 }));
+const COL_FLEX_STYLES = COLUMNS.map((col) => ({ flex: col.flex }));
+const EMPTY_EXPENSES: PettyCash[] = [];
+const keyExtractor = (item: PettyCash) => item.id;
 
 const ExpenseListSkeleton = memo(() => (
   <View style={$.container}>
@@ -65,7 +68,11 @@ interface ExpenseListProps {
   searchQuery?: string;
 }
 
-const ExpenseList = ({ startDate, endDate, searchQuery }: ExpenseListProps) => {
+const ExpenseEmptyState = memo(() => (
+  <EmptyState title={t("empty_expenses_title")} subtitle={t("empty_expenses_date_subtitle")} />
+));
+
+const ExpenseList = memo(({ startDate, endDate, searchQuery }: ExpenseListProps) => {
   const { data, isLoading } = usePettyCashQuery({
     startDate,
     endDate,
@@ -79,107 +86,102 @@ const ExpenseList = ({ startDate, endDate, searchQuery }: ExpenseListProps) => {
   const [selectedExpense, setSelectedExpense] = useState<PettyCash | null>(null);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
 
-  const handlePressItem = (item: PettyCash) => {
+  const handlePressItem = useCallback((item: PettyCash) => {
     setSelectedExpense(item);
     setIsDetailVisible(true);
-  };
+  }, []);
 
-  const handleCloseDetail = () => {
+  const handleCloseDetail = useCallback(() => {
     setIsDetailVisible(false);
     setSelectedExpense(null);
-  };
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: PettyCash }) => <ExpenseRow item={item} onPress={handlePressItem} />,
+    [handlePressItem],
+  );
 
   if (isLoading) {
     return <ExpenseListSkeleton />;
   }
 
+  const expenses = data?.content || EMPTY_EXPENSES;
+
   return (
     <View style={$.container}>
-      {data?.content && data.content.length > 0 && (
+      {expenses.length > 0 && (
         <View style={$.header}>
-          {COLUMNS.map((col) => (
-            <Text key={col.label} style={[$.headerText, { flex: col.flex }]}>
+          {COLUMNS.map((col, index) => (
+            <Text key={col.label} style={HEADER_CELL_STYLES[index]}>
               {col.label}
             </Text>
           ))}
         </View>
       )}
       <FlashList<PettyCash>
-        contentContainerStyle={[
-          $.listContent,
-          (!data?.content || data.content.length === 0) && { flex: 1 },
-        ]}
-        data={data?.content || []}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpenseRow item={item} onPress={() => handlePressItem(item)} />}
+        contentContainerStyle={expenses.length === 0 ? EMPTY_LIST_CONTAINER_STYLE : $.listContent}
+        data={expenses}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         ItemSeparatorComponent={ExpenseSeparator}
-        ListEmptyComponent={
-          <EmptyState
-            title={t("empty_expenses_title")}
-            subtitle={t("empty_expenses_date_subtitle")}
-          />
-        }
+        ListEmptyComponent={ExpenseEmptyState}
       />
 
-      <ExpenseDetailModal
-        visible={isDetailVisible}
-        onClose={handleCloseDetail}
-        expense={selectedExpense}
-      />
-    </View>
-  );
-};
-
-const ExpenseSeparator = () => <View style={$.separator} />;
-
-const ExpenseRow = memo(({ item, onPress }: { item: PettyCash; onPress: () => void }) => {
-  // Import TouchableOpacity if not present, but I can use View with onStartShouldSetResponder which is messier.
-  // Better to use Pressable or TouchableOpacity.
-  // I need to import TouchableOpacity at top.
-  return (
-    <View style={$.row}>
-      {/* Time */}
-      <View style={{ flex: COLUMNS[0].flex }}>
-        <Text style={$.timeText}>{formatTime(item.createdAt)}</Text>
-        <Text style={$.dateText}>{formatDayDate(item.createdAt)}</Text>
-      </View>
-
-      {/* Description */}
-      <View style={{ flex: COLUMNS[1].flex }}>
-        <Text style={$.cellText} numberOfLines={2}>
-          {item.description}
-        </Text>
-      </View>
-
-      {/* Type */}
-      <View style={{ flex: COLUMNS[2].flex }}>
-        <TypeBadge isIncome={item.isIncome} />
-      </View>
-
-      {/* Amount */}
-      <View style={{ flex: COLUMNS[3].flex }}>
-        <Text
-          style={[
-            $.cellText,
-            {
-              color: item.isIncome ? "green" : "red",
-            },
-          ]}
-        >
-          {item.isIncome ? "+ " : "- "}
-          {formatCurrency(item.amount)}
-        </Text>
-      </View>
-
-      {/* Action */}
-      <View style={{ flex: COLUMNS[4].flex }}>
-        <Button size="sm" title="Detail" variant="neutral" onPress={onPress} />
-      </View>
+      {!!selectedExpense && (
+        <ExpenseDetailModal
+          visible={isDetailVisible}
+          onClose={handleCloseDetail}
+          expense={selectedExpense}
+        />
+      )}
     </View>
   );
 });
 
-const TypeBadge = ({ isIncome }: { isIncome: boolean }) => {
+const ExpenseSeparator = memo(() => <View style={$.separator} />);
+
+const ExpenseRow = memo(
+  ({ item, onPress }: { item: PettyCash; onPress: (item: PettyCash) => void }) => {
+    const handlePress = useCallback(() => onPress(item), [onPress, item]);
+
+    return (
+      <View style={$.row}>
+        {/* Time */}
+        <View style={COL_FLEX_STYLES[0]}>
+          <Text style={$.timeText}>{formatTime(item.createdAt)}</Text>
+          <Text style={$.dateText}>{formatDayDate(item.createdAt)}</Text>
+        </View>
+
+        {/* Description */}
+        <View style={COL_FLEX_STYLES[1]}>
+          <Text style={$.cellText} numberOfLines={2}>
+            {item.description}
+          </Text>
+        </View>
+
+        {/* Type */}
+        <View style={COL_FLEX_STYLES[2]}>
+          <TypeBadge isIncome={item.isIncome} />
+        </View>
+
+        {/* Amount */}
+        <View style={COL_FLEX_STYLES[3]}>
+          <Text style={item.isIncome ? INCOME_AMOUNT_STYLE : EXPENSE_AMOUNT_STYLE}>
+            {item.isIncome ? "+ " : "- "}
+            {formatCurrency(item.amount)}
+          </Text>
+        </View>
+
+        {/* Action */}
+        <View style={COL_FLEX_STYLES[4]}>
+          <Button size="sm" title="Detail" variant="neutral" onPress={handlePress} />
+        </View>
+      </View>
+    );
+  },
+);
+
+const TypeBadge = memo(({ isIncome }: { isIncome: boolean }) => {
   $.useVariants({ type: isIncome ? "income" : "expense" });
 
   return (
@@ -187,7 +189,7 @@ const TypeBadge = ({ isIncome }: { isIncome: boolean }) => {
       <Text style={$.badgeText}>{isIncome ? "Income" : "Expense"}</Text>
     </View>
   );
-};
+});
 
 const $ = StyleSheet.create((theme) => ({
   container: {
@@ -218,6 +220,9 @@ const $ = StyleSheet.create((theme) => ({
   },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
+  },
+  emptyListContent: {
+    flex: 1,
   },
   separator: {
     height: 1,
@@ -283,5 +288,10 @@ const $ = StyleSheet.create((theme) => ({
     color: theme.colors.neutral[500],
   },
 }));
+
+const HEADER_CELL_STYLES = COLUMNS.map((col) => [$.headerText, { flex: col.flex }]);
+const EMPTY_LIST_CONTAINER_STYLE = [$.listContent, $.emptyListContent];
+const INCOME_AMOUNT_STYLE = [$.cellText, { color: "green" } as const];
+const EXPENSE_AMOUNT_STYLE = [$.cellText, { color: "red" } as const];
 
 export default ExpenseList;
