@@ -1,4 +1,4 @@
-import Entypo from "@expo/vector-icons/Entypo";
+import Feather from "@expo/vector-icons/Feather";
 import { memo, useCallback } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -56,7 +56,11 @@ const OrderItem = ({ item, isExpanded, onToggle, onRemove, onEdit }: OrderItemPr
     <View style={[$.container, isExpanded && $.expandedContainer]}>
       <TouchableOpacity style={$.header} onPress={handleToggle} activeOpacity={0.7}>
         <View style={$.left}>
-          <Entypo name={isExpanded ? "chevron-down" : "chevron-right"} size={vs(20)} color="#666" />
+          <Feather
+            name={isExpanded ? "chevron-down" : "chevron-right"}
+            size={vs(20)}
+            color="#666"
+          />
           <Text style={$.quantity} adjustsFontSizeToFit numberOfLines={1}>
             {item.quantity}
           </Text>

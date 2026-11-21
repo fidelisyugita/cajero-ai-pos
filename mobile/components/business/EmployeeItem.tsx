@@ -1,4 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -58,7 +58,7 @@ const EmployeeItem = ({ employee, onPressDetails }: EmployeeItemProps) => {
             <Text variant="caption" color="#4B5563">
               Details
             </Text>
-            <Ionicons name="arrow-forward" size={12} color="#4B5563" />
+            <Feather name="arrow-right" size={12} color="#4B5563" />
           </TouchableOpacity>
         </View>
       </View>

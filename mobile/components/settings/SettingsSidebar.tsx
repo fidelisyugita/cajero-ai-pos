@@ -1,5 +1,4 @@
 import Feather from "@expo/vector-icons/Feather";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { t } from "@/services/i18n";
@@ -14,30 +13,21 @@ interface SettingsSidebarProps {
   onTabChange: (tab: SettingsTab) => void;
 }
 
-type MenuItem =
-  | {
-      id: SettingsTab;
-      labelKey: Parameters<typeof t>[0];
-      icon: typeof Feather;
-      iconName: keyof typeof Feather.glyphMap;
-    }
-  | {
-      id: SettingsTab;
-      labelKey: Parameters<typeof t>[0];
-      icon: typeof MaterialIcons;
-      iconName: keyof typeof MaterialIcons.glyphMap;
-    };
+type MenuItem = {
+  id: SettingsTab;
+  labelKey: Parameters<typeof t>[0];
+  iconName: keyof typeof Feather.glyphMap;
+};
 
 const MENU_ITEMS: MenuItem[] = [
-  { id: "printers", labelKey: "printers", icon: Feather, iconName: "printer" },
-  { id: "language", labelKey: "language", icon: MaterialIcons, iconName: "language" },
-  // { id: "ai", labelKey: "ai_settings", icon: Feather, iconName: "cpu" },   // disabled for now
+  { id: "printers", labelKey: "printers", iconName: "printer" },
+  { id: "language", labelKey: "language", iconName: "globe" },
+  // { id: "ai", labelKey: "ai_settings", iconName: "cpu" },   // disabled for now
   ...(__DEV__
     ? ([
         {
           id: "developer",
           labelKey: "developer",
-          icon: Feather,
           iconName: "code",
         },
       ] as MenuItem[])
@@ -59,19 +49,7 @@ const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {
               style={[$.menuItem, isActive && $.menuItemActive]}
               onPress={() => onTabChange(item.id)}
             >
-              {item.icon === Feather ? (
-                <Feather
-                  name={item.iconName as keyof typeof Feather.glyphMap}
-                  size={20}
-                  color={isActive ? "#000" : "#555"}
-                />
-              ) : (
-                <MaterialIcons
-                  name={item.iconName as keyof typeof MaterialIcons.glyphMap}
-                  size={20}
-                  color={isActive ? "#000" : "#555"}
-                />
-              )}
+              <Feather name={item.iconName} size={20} color={isActive ? "#000" : "#555"} />
               <Text style={[$.menuLabel, isActive && $.menuLabelActive]}>{t(item.labelKey)}</Text>
             </TouchableOpacity>
           );
