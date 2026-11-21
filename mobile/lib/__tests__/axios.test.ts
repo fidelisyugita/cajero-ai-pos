@@ -1,4 +1,5 @@
 import axios from "axios";
+import Logger from "@/services/logger";
 import type { SignInResponse } from "@/services/types/Auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import api from "../axios";
@@ -18,12 +19,19 @@ const mockUser: SignInResponse = {
 };
 
 describe("axios api instance and interceptors", () => {
+  let loggerErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
+    loggerErrorSpy = jest.spyOn(Logger, "error").mockImplementation(() => {});
     useAuthStore.setState({
       user: undefined,
       isLoggedIn: false,
     });
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    loggerErrorSpy.mockRestore();
   });
 
   describe("request interceptor", () => {
