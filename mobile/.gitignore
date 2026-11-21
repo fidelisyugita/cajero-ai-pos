@@ -17,10 +17,6 @@ node_modules/
 coverage/
 *.lcov
 .nyc_output/
-.scannerwork/
-.maestro/output
-.maestro/recordings
-.maestro/*.mp4
 
 # Expo & Web
 .expo/
@@ -55,9 +51,6 @@ builds/
 .env.test
 .env.production
 !.env.example
-.maestro/.env
-.maestro/.env*.local
-!.maestro/.env.example
 credentials.json
 .eas/
 *.keystore

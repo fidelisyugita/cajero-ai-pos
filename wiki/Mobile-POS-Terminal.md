@@ -1,6 +1,6 @@
 # 📱 Mobile POS Terminal
 
-The **Cajero Mobile POS** application is a landscape-first, touch-optimized Point of Sale client built with **React Native (New Architecture)** and **Expo SDK 53**. Designed for fast-paced retail and dining environments, it guarantees zero-latency cashier operations through a local-first SQLite database and Bluetooth ESC/POS thermal printing.
+The **Cajero Mobile POS** application is a landscape-first, touch-optimized Point of Sale client built with **React Native (New Architecture)** and **Expo**. Designed for fast-paced retail and dining environments, it guarantees zero-latency cashier operations through a local-first SQLite database and Bluetooth ESC/POS thermal printing.
 
 ---
 
@@ -73,14 +73,14 @@ graph LR
     DrizzleSQLite <--> TanStackQuery
 ```
 
-1. **`react-native-mmkv` (v3)**: High-speed, synchronous key-value storage used for persistent authentication tokens, active cashier sessions, selected printer UUIDs, and UI preferences.
-2. **`zustand` (v5)**: Reactive state management stores:
+1. **`react-native-mmkv`**: High-speed, synchronous key-value storage used for persistent authentication tokens, active cashier sessions, selected printer UUIDs, and UI preferences.
+2. **`zustand`**: Reactive state management stores:
    - `useOrderStore`: Current cart items, dynamic discount calculations, tax/service fees.
    - `useAuthStore`: Active employee profile and session tokens.
    - `usePrinterStore`: Connected BLE printer device, paper width (58mm vs. 80mm), and auto-cut settings.
    - `useAIStore`: AI assistant chat sessions and prompt context.
-3. **`drizzle-orm` (v0.44.4) + `expo-sqlite` (v16)**: Strongly-typed relational database with schema auto-migrations in `db/migrations/`.
-4. **`@tanstack/react-query` (v5)**: Server state management for remote catalog synchronization and analytics queries.
+3. **`drizzle-orm` + `expo-sqlite`**: Strongly-typed relational database with schema auto-migrations in `db/migrations/`.
+4. **`@tanstack/react-query`**: Server state management for remote catalog synchronization and analytics queries.
 
 ---
 
@@ -129,18 +129,6 @@ Tokens are centralized in `tokens/`:
 cd mobile
 yarn test
 yarn test:coverage
-```
-
-### End-to-End Testing (Maestro)
-Automated flows are located in `.maestro/`:
-```bash
-cd mobile
-
-# Run complete sign-in and checkout flows
-yarn maestro:test
-
-# Launch visual flow studio
-yarn maestro:studio
 ```
 
 ---

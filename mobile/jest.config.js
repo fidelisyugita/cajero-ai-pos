@@ -9,5 +9,5 @@ module.exports = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.maestro/"],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
 };

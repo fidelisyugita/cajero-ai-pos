@@ -1,4 +1,5 @@
 import "react-native-unistyles/mocks";
+import { notifyManager } from "@tanstack/react-query";
 import { cleanup } from "@testing-library/react-native";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -24,6 +25,10 @@ dayjs.extend(timezone);
 
 afterEach(async () => {
   await cleanup();
+});
+
+notifyManager.setScheduler((callback) => {
+  callback();
 });
 
 const React = require("react");

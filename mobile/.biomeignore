@@ -5,7 +5,6 @@ build
 dist
 .expo
 .yarn
-.maestro/output
 db/migrations
 *.tsbuildinfo
 *.lock
