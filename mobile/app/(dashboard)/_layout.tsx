@@ -1,11 +1,12 @@
 import { Redirect, Slot } from "expo-router";
+import { memo } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import Sidebar from "@/components/dashboard/Sidebar";
 import SyncIndicator from "@/components/ui/SyncIndicator";
 import { useAuthStore } from "@/store/useAuthStore";
 
-const DashboardLayout = () => {
+const DashboardLayout = memo(() => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   if (!isLoggedIn) {
@@ -21,7 +22,7 @@ const DashboardLayout = () => {
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create((_theme) => ({
   container: {

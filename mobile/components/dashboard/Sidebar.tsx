@@ -1,6 +1,7 @@
 import { type Href, usePathname, useRouter } from "expo-router";
-import { memo, useCallback, useMemo } from "react";
+import { type FC, memo, useCallback, useMemo } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import type { SvgProps } from "react-native-svg";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import IcSignOut from "@/assets/icons/sign-out.svg";
 import Logo from "@/assets/images/logo.svg";
@@ -11,13 +12,47 @@ import { vs } from "@/utils/Scale";
 import { LIST_SIDEBAR_ITEMS } from "./Sidebar.cons";
 import SidebarItem from "./SidebarItem";
 
+const LOGO_SIZE = vs(80);
+const SIGN_OUT_ICON_SIZE = vs(26);
+
 const UniIcSignOut = withUnistyles(IcSignOut, (theme) => ({
   color: theme.colors.error[400],
 }));
 
-const Sidebar = () => {
-  const router = useRouter();
+const SidebarLogo = memo(() => <Logo height={LOGO_SIZE} width={LOGO_SIZE} />);
+
+const handleSignOut = () => {
+  LogoutService.performSafeLogout();
+};
+
+const SidebarSignOutButton = memo(() => (
+  <TouchableOpacity style={$.signOutButton} onPress={handleSignOut}>
+    <UniIcSignOut height={SIGN_OUT_ICON_SIZE} width={SIGN_OUT_ICON_SIZE} />
+    <Text adjustsFontSizeToFit numberOfLines={1} style={$.signOut}>
+      Sign Out
+    </Text>
+  </TouchableOpacity>
+));
+
+interface ConnectedSidebarItemProps {
+  Icons: FC<SvgProps>[];
+  label: string;
+  path: string;
+  onPress: (path?: string) => void;
+}
+
+const ConnectedSidebarItem = memo(({ Icons, label, path, onPress }: ConnectedSidebarItemProps) => {
   const pathname = usePathname();
+  const comparedPath = useMemo(() => path.replace("/(dashboard)", ""), [path]);
+  const isActive = pathname === comparedPath || (comparedPath === "" && pathname === "/");
+
+  return (
+    <SidebarItem Icons={Icons} isActive={isActive} label={label} onPress={onPress} path={path} />
+  );
+});
+
+const Sidebar = memo(() => {
+  const router = useRouter();
   const isUltraSubscription = useBusinessStore(
     (state) => state.business?.subscriptionStatus === "ultra",
   );
@@ -42,45 +77,30 @@ const Sidebar = () => {
     [router],
   );
 
-  const handleSignOut = useCallback(() => {
-    LogoutService.performSafeLogout();
-  }, []);
-
   return (
     <View style={$.container}>
-      <Logo height={vs(80)} width={vs(80)} />
+      <SidebarLogo />
       <ScrollView
         bounces={false}
         contentContainerStyle={$.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={$.sidebarItems}>
-          {visibleTabs.map(({ Icon, ...tab }) => {
-            const comparedPath = tab.path.replace("/(dashboard)", "");
-            const isActive = pathname === comparedPath || (comparedPath === "" && pathname === "/");
-
-            return (
-              <SidebarItem
-                Icons={Icon}
-                isActive={isActive}
-                key={tab.label}
-                label={tab.label}
-                onPress={handleNavigate}
-                path={tab.path}
-              />
-            );
-          })}
+          {visibleTabs.map((tab) => (
+            <ConnectedSidebarItem
+              Icons={tab.Icon}
+              key={tab.label}
+              label={tab.label}
+              onPress={handleNavigate}
+              path={tab.path}
+            />
+          ))}
         </View>
       </ScrollView>
-      <TouchableOpacity style={$.signOutButton} onPress={handleSignOut}>
-        <UniIcSignOut height={vs(26)} width={vs(26)} />
-        <Text adjustsFontSizeToFit numberOfLines={1} style={$.signOut}>
-          Sign Out
-        </Text>
-      </TouchableOpacity>
+      <SidebarSignOutButton />
     </View>
   );
-};
+});
 
 const $ = StyleSheet.create((theme, rt) => ({
   container: {
@@ -123,4 +143,4 @@ const $ = StyleSheet.create((theme, rt) => ({
   },
 }));
 
-export default memo(Sidebar);
+export default Sidebar;

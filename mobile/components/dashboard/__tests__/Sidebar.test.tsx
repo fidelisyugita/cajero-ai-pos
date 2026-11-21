@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { usePathname, useRouter } from "expo-router";
+import { useSyncExternalStore } from "react";
 import { LogoutService } from "@/services/LogoutService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
@@ -61,5 +62,35 @@ describe("Sidebar component", () => {
     fireEvent.press(signOutBtn);
 
     expect(LogoutService.performSafeLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it("updates active tab on pathname change", async () => {
+    let currentPath = "/menu";
+    const listeners = new Set<() => void>();
+    (usePathname as jest.Mock).mockImplementation(() =>
+      useSyncExternalStore(
+        (listener) => {
+          listeners.add(listener);
+          return () => listeners.delete(listener);
+        },
+        () => currentPath,
+      ),
+    );
+
+    await render(<Sidebar />);
+
+    fireEvent.press(screen.getByText("Menu"));
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    await act(async () => {
+      currentPath = "/stock";
+      for (const listener of listeners) listener();
+    });
+
+    fireEvent.press(screen.getByText("Stock"));
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByText("Menu"));
+    expect(mockReplace).toHaveBeenCalledWith("/(dashboard)/menu");
   });
 });

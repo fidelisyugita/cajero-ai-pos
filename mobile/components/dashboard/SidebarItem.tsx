@@ -13,23 +13,28 @@ interface SidebarItemProps {
   onPress: (path?: string) => void;
 }
 
-const SidebarItem = ({ Icons, isActive, label, path, onPress }: SidebarItemProps) => {
+const ICON_SIZE = vs(36);
+
+const SidebarItem = memo(({ Icons, isActive, label, path, onPress }: SidebarItemProps) => {
   const Icon = isActive ? Icons[1] : Icons[0];
-  styles.useVariants({ isActive });
 
   const handlePress = useCallback(() => {
     onPress(path);
   }, [onPress, path]);
 
   return (
-    <TouchableOpacity disabled={isActive} onPress={handlePress} style={styles.container}>
-      <Icon color={colors.primary[400]} height={vs(36)} width={vs(36)} />
+    <TouchableOpacity
+      disabled={isActive}
+      onPress={handlePress}
+      style={isActive ? [styles.container, styles.containerActive] : styles.container}
+    >
+      <Icon color={colors.primary[400]} height={ICON_SIZE} width={ICON_SIZE} />
       <Text style={styles.label} adjustsFontSizeToFit numberOfLines={1}>
         {label}
       </Text>
     </TouchableOpacity>
   );
-};
+});
 
 const styles = StyleSheet.create((theme) => ({
   container: {
@@ -39,15 +44,10 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     gap: theme.spacing.xs / 2,
     justifyContent: "center",
-    variants: {
-      isActive: {
-        true: {
-          borderWidth: vs(1),
-          borderColor: theme.colors.primary[400],
-          borderRadius: theme.radius.lg,
-        },
-      },
-    },
+  },
+  containerActive: {
+    borderWidth: vs(1),
+    borderColor: theme.colors.primary[400],
   },
   label: {
     ...theme.typography.labelXs,
@@ -56,4 +56,4 @@ const styles = StyleSheet.create((theme) => ({
   },
 }));
 
-export default memo(SidebarItem);
+export default SidebarItem;

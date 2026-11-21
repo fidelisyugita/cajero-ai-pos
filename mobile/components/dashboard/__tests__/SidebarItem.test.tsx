@@ -39,4 +39,23 @@ describe("SidebarItem component", () => {
     expect(screen.getByText("Stock")).toBeTruthy();
     expect(screen.getByTestId("icon-active")).toBeTruthy();
   });
+
+  it("does not re-render icon when props are unchanged", async () => {
+    const mockOnPress = jest.fn();
+    const IconInactive = jest.fn(() => <View testID="icon-inactive" />);
+    const IconActive = jest.fn(() => <View testID="icon-active" />);
+    const icons = [IconInactive, IconActive];
+
+    const { rerender } = await render(
+      <SidebarItem Icons={icons as any} isActive={false} label="Menu" onPress={mockOnPress} />,
+    );
+
+    expect(IconInactive).toHaveBeenCalledTimes(1);
+
+    await rerender(
+      <SidebarItem Icons={icons as any} isActive={false} label="Menu" onPress={mockOnPress} />,
+    );
+
+    expect(IconInactive).toHaveBeenCalledTimes(1);
+  });
 });
